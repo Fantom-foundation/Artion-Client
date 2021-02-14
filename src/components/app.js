@@ -1,13 +1,12 @@
-import React, { useRef, useEffect } from "react";
-import { observer, inject } from "mobx-react";
-import { BrowserRouter } from "react-router-dom";
+import React, { useRef, useEffect } from 'react';
+import { observer, inject } from 'mobx-react';
+import { BrowserRouter } from 'react-router-dom';
 
-import Layout from "./layout";
-import Toolbar from "./toolbar";
-import NiftyHeader from "./header";
-import { Container, Canvas } from "./style";
-import { isMobile } from "utils/userAgent";
-import { faPray } from "@fortawesome/free-solid-svg-icons";
+import Layout from './layout';
+import Toolbar from './toolbar';
+import NiftyHeader from './header';
+import { Container, Canvas } from './style';
+import { isMobile } from 'utils/userAgent';
 
 const App = ({ paintStore, fullScreen }) => {
   const canvasRef = useRef(null);
@@ -40,4 +39,4 @@ const App = ({ paintStore, fullScreen }) => {
   );
 };
 
-export default inject("paintStore")(observer(App));
+export default inject('paintStore')(observer(App));

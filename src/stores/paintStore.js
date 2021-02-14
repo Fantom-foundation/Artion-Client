@@ -134,7 +134,7 @@ class PaintStore {
             step.clientX,
             step.clientY,
             step.color,
-            step.size
+            step.size,
           ])
         ),
       []
@@ -157,7 +157,9 @@ class PaintStore {
       this.reset();
       this.strokeHistory.push(parsed);
       this.redraw();
-    } catch (e) {}
+    } catch (e) {
+      console.log('removed');
+    }
   };
 }
 

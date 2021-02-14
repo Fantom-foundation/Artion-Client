@@ -1,5 +1,5 @@
-# Paint
+# Fantom Powered FNifty
 
-[Check It Out](https://youngmanalive.github.io/paint/)
+# Author
 
-![Paint](mobilepaint.gif)
+Tommy.C

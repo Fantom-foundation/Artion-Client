@@ -11,7 +11,7 @@ export const Container = styled.div`
   border-radius: 6px;
   display: flex;
   flex-direction: column;
-  box-shadow: -6px 0px 33px -8px rgba(207,207,207,1);
+  box-shadow: -6px 0px 33px -8px rgba(207, 207, 207, 1);
   background: white;
   z-index: 10;
   cursor: pointer;

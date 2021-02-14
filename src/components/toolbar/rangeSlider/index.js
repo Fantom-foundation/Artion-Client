@@ -14,7 +14,7 @@ const Track = ({ props, children }) => (
       padding: '20px 0',
       display: 'flex',
       justifyContent: 'center',
-      height: '150px'
+      height: '150px',
     }}
   >
     <div
@@ -23,7 +23,7 @@ const Track = ({ props, children }) => (
         width: '5px',
         height: '100%',
         borderRadius: '4px',
-        background: 'grey'
+        background: 'grey',
       }}
     >
       {children}
@@ -33,12 +33,12 @@ const Track = ({ props, children }) => (
 
 const Thumb = ({ isDragged }) => (
   <div
-    key='thumb'
+    key="thumb"
     style={{
       height: '14px',
       width: '24px',
       borderRadius: '5px',
-      backgroundColor: isDragged ? '#548BF4' : '#CCC'
+      backgroundColor: isDragged ? '#548BF4' : '#CCC',
     }}
   />
 );

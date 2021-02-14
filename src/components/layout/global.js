@@ -1,4 +1,4 @@
-import { css } from "@emotion/core";
+import { css } from '@emotion/core';
 
 export default css`
   html {
@@ -13,14 +13,19 @@ export default css`
   *::after {
     box-sizing: inherit;
   }
-  [tabindex="-1"]:focus {
+  [tabindex='-1']:focus {
     outline: none !important;
   }
   div {
     margin: 0;
     padding: 0;
   }
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     margin: 0;
   }
   p {
@@ -48,7 +53,7 @@ export default css`
     margin-bottom: 0;
   }
   dd {
-    margin-bottom: .5rem;
+    margin-bottom: 0.5rem;
     margin-left: 0;
   }
   blockquote {
@@ -78,13 +83,13 @@ export default css`
     max-width: 100%;
     vertical-align: middle;
   }
-  [role="button"] {
+  [role='button'] {
     cursor: pointer;
   }
   a,
   area,
   button,
-  [role="button"],
+  [role='button'],
   input,
   label,
   select,
@@ -118,16 +123,16 @@ export default css`
     font-family: inherit;
     font-size: inherit;
   }
-  input[type="radio"],
-  input[type="checkbox"] {
+  input[type='radio'],
+  input[type='checkbox'] {
     &:disabled {
       cursor: not-allowed;
     }
   }
-  input[type="date"],
-  input[type="time"],
-  input[type="datetime-local"],
-  input[type="month"] {
+  input[type='date'],
+  input[type='time'],
+  input[type='datetime-local'],
+  input[type='month'] {
     -webkit-appearance: listbox;
   }
   textarea {
@@ -143,7 +148,7 @@ export default css`
     display: block;
     width: 100%;
     padding: 0;
-    margin-bottom: .5rem;
+    margin-bottom: 0.5rem;
     font-size: 1.5rem;
     line-height: inherit;
   }
@@ -178,7 +183,7 @@ export default css`
     &:hover,
     &:focus,
     &:visited {
-      opacity: .6;
+      opacity: 0.6;
       transition: 350ms;
     }
   }

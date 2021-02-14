@@ -8,7 +8,7 @@ import {
   PaletteIcon,
   SaveIcon,
   LoadIcon,
-  TrashIcon
+  TrashIcon,
 } from 'components/icons';
 import Button from './button';
 import RangeSlider from './rangeSlider';
@@ -26,37 +26,37 @@ const Toolbar = ({ paintStore }) => {
       {!!currentPanel && <Backdrop onClick={() => setPanel(null)} />}
       <Container>
         <Button
-          id='undo'
+          id="undo"
           icon={UndoIcon}
           onClick={paintStore.undo}
-          keys='command+z'
+          keys="command+z"
         />
         <Button
-          id='redo'
+          id="redo"
           icon={RedoIcon}
           onClick={paintStore.redo}
-          keys='command+shift+z'
+          keys="command+shift+z"
         />
         <Button
-          id='reset'
+          id="reset"
           icon={TrashIcon}
           onClick={paintStore.reset}
-          keys='command+shift+t'
+          keys="command+shift+t"
         />
         <Button
-          id='save'
+          id="save"
           icon={SaveIcon}
           onClick={paintStore.save}
-          keys='command+s'
+          keys="command+s"
         />
         <Button
-          id='load'
+          id="load"
           icon={LoadIcon}
           onClick={paintStore.load}
-          keys='command+l'
+          keys="command+l"
         />
         <Button
-          id='colors'
+          id="colors"
           icon={PaletteIcon}
           onClick={onPanelClick}
           isOpen={currentPanel === 'colors'}
@@ -67,7 +67,7 @@ const Toolbar = ({ paintStore }) => {
           />
         </Button>
         <Button
-          id='brush'
+          id="brush"
           icon={<BrushLine size={paintStore.size} />}
           onClick={onPanelClick}
           isOpen={currentPanel === 'brush'}

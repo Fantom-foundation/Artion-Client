@@ -2172,7 +2172,7 @@
     "esutils" "^2.0.2"
     "js-tokens" "^3.0.2"
 
-"babel-eslint@10.0.2", "babel-eslint@10.x":
+"babel-eslint@^10.0.2", "babel-eslint@10.x":
   "integrity" "sha512-UdsurWPtgiPgpJ06ryUnuaSXC2s0WoSZnQmEpbAH65XZSdwowgN5MvyP7e88nW07FYXv72erVtpBkxyDVKhH1Q=="
   "resolved" "https://registry.npmjs.org/babel-eslint/-/babel-eslint-10.0.2.tgz"
   "version" "10.0.2"
@@ -4148,6 +4148,11 @@
     "has" "^1.0.3"
     "jsx-ast-utils" "^2.2.1"
 
+"eslint-plugin-mobx@^0.0.0":
+  "integrity" "sha512-MIObGBi/EOn5r/odDoUmk65Yc7cileb8D43+tW39LFoERdAbaG6Icq16pkiwFQTp0g03GBLNgqRWJQ2YKJVxYg=="
+  "resolved" "https://registry.npmjs.org/eslint-plugin-mobx/-/eslint-plugin-mobx-0.0.0.tgz"
+  "version" "0.0.0"
+
 "eslint-plugin-prettier@^3.3.1":
   "integrity" "sha512-Rq3jkcFY8RYeQLgk2cCwuc0P7SEFwDravPhsJZOQ5N4YI4DSg50NyqJ/9gdZHzQlHf8MvafSesbNJCcP/FF6pQ=="
   "resolved" "https://registry.npmjs.org/eslint-plugin-prettier/-/eslint-plugin-prettier-3.3.1.tgz"
@@ -4211,7 +4216,7 @@
   "resolved" "https://registry.npmjs.org/eslint-visitor-keys/-/eslint-visitor-keys-1.1.0.tgz"
   "version" "1.1.0"
 
-"eslint@*", "eslint@^3 || ^4 || ^5 || ^6", "eslint@^3.0.0 || ^4.0.0 || ^5.0.0 || ^6.0.0", "eslint@^5.0.0", "eslint@^6.7.2", "eslint@>= 4.12.1", "eslint@>=1.6.0 <7.0.0", "eslint@>=5.0.0", "eslint@>=7.0.0", "eslint@2.x - 6.x", "eslint@6.x":
+"eslint@*", "eslint@^3 || ^4 || ^5 || ^6", "eslint@^3.0.0 || ^4.0.0 || ^5.0.0 || ^6.0.0", "eslint@^4.0.0 | ^5.0.0 | ^6.0.0", "eslint@^5.0.0", "eslint@^6.7.2", "eslint@>= 4.12.1", "eslint@>=1.6.0 <7.0.0", "eslint@>=5.0.0", "eslint@>=7.0.0", "eslint@2.x - 6.x", "eslint@6.x":
   "integrity" "sha512-qMlSWJaCSxDFr8fBPvJM9kJwbazrhNcBU3+DszDW1OlEwKBBRWsJc7NJFelvwQpanHCR14cOLD41x8Eqvo3Nng=="
   "resolved" "https://registry.npmjs.org/eslint/-/eslint-6.7.2.tgz"
   "version" "6.7.2"

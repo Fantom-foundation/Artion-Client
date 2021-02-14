@@ -6,7 +6,7 @@ import App from 'components/app';
 import PaintStore from './stores/paintStore';
 
 const stores = {
-  paintStore: new PaintStore()
+  paintStore: new PaintStore(),
 };
 
 ReactDOM.render(

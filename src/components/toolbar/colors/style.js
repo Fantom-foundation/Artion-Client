@@ -16,13 +16,17 @@ export const Color = styled.div`
     opacity: 0.5;
   }
 
-  ${({ color }) => color && css`
-    background-color: ${color};
-  `}
+  ${({ color }) =>
+    color &&
+    css`
+      background-color: ${color};
+    `}
 
-  ${({ active }) => active && css`
-    width: 28px;
-    height: 28px;
-    border-width: 2px;
-  `}
+  ${({ active }) =>
+    active &&
+    css`
+      width: 28px;
+      height: 28px;
+      border-width: 2px;
+    `}
 `;

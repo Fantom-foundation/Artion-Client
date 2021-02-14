@@ -1,6 +1,13 @@
 import React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUndoAlt, faRedoAlt, faPalette, faSave, faUpload, faTrash } from '@fortawesome/free-solid-svg-icons';
+import {
+  faUndoAlt,
+  faRedoAlt,
+  faPalette,
+  faSave,
+  faUpload,
+  faTrash,
+} from '@fortawesome/free-solid-svg-icons';
 
 export const UndoIcon = <FontAwesomeIcon icon={faUndoAlt} />;
 export const RedoIcon = <FontAwesomeIcon icon={faRedoAlt} />;

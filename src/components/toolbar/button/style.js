@@ -5,21 +5,23 @@ export const Wrapper = styled.div`
   position: relative;
   z-index: 10;
 
-  ${({ isActive }) => isActive && css`
-    &:after {
-      content: '';
-      display: block;
-      width: 0;
-      height: 0;
-      position: absolute;
-      border-top: 8px solid transparent;
-      border-bottom: 8px solid transparent;
-      border-left: 8px solid white;
-      left: -15px;
-      top: 12px;
-      z-index: 10;
-    }
-  `}
+  ${({ isActive }) =>
+    isActive &&
+    css`
+      &:after {
+        content: '';
+        display: block;
+        width: 0;
+        height: 0;
+        position: absolute;
+        border-top: 8px solid transparent;
+        border-bottom: 8px solid transparent;
+        border-left: 8px solid white;
+        left: -15px;
+        top: 12px;
+        z-index: 10;
+      }
+    `}
 `;
 
 export const Container = styled.div`
@@ -38,10 +40,12 @@ export const Container = styled.div`
     padding: 6px;
   }
 
-  ${({ isActive }) => isActive && css`
-    transform: scale(1.1);
-    background: #f5f5f5;
-  `}
+  ${({ isActive }) =>
+    isActive &&
+    css`
+      transform: scale(1.1);
+      background: #f5f5f5;
+    `}
 
   &:hover {
     transform: scale(1.1);
@@ -59,13 +63,14 @@ export const ActionPanel = styled.div`
   z-index: 10;
   border-radius: 6px;
   opacity: 0;
-  box-shadow: -6px 0px 33px -8px rgba(207,207,207,1);
+  box-shadow: -6px 0px 33px -8px rgba(207, 207, 207, 1);
   transition: max-height 250ms ease, opacity 200ms ease;
 
-
-  ${({ isOpen }) => isOpen && css`
-    max-height: 240px;
-    overflow-y: scroll;
-    opacity: 1;
-  `}
+  ${({ isOpen }) =>
+    isOpen &&
+    css`
+      max-height: 240px;
+      overflow-y: scroll;
+      opacity: 1;
+    `}
 `;
