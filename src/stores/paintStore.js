@@ -20,11 +20,21 @@ class PaintStore {
   color = 'black';
 
   @observable
+  backgroundColor = 'white';
+
+  @observable
   size = 6;
 
   @action
   setColor = color => {
     this.color = color;
+  };
+
+  @action
+  setBackgroundColor = color => {
+    this.backgroundColor = color;
+    this.ctx.fillStyle = this.backgroundColor;
+    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
   };
 
   @action
@@ -41,6 +51,8 @@ class PaintStore {
       this.ctx = canvas.getContext('2d');
       this.ctx.lineJoin = 'round';
       this.ctx.lineCap = 'round';
+      this.ctx.fillStyle = this.backgroundColor;
+      this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
       this.isInitialized = true;
     }
   };
@@ -80,6 +92,7 @@ class PaintStore {
 
   redraw = (stack = this.strokeHistory) => {
     this.clear();
+    console.log(stack);
     stack.forEach(entry => {
       entry.forEach(this.stroke);
     });
@@ -115,6 +128,13 @@ class PaintStore {
 
   clear = () => {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    this.ctx.fillStyle = this.backgroundColor;
+    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+  };
+
+  setBackground = () => {
+    this.ctx.fillStyle = this.backgroundColor;
+    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
   };
 
   reset = () => {

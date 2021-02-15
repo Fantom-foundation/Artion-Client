@@ -9,6 +9,7 @@ import {
   SaveIcon,
   LoadIcon,
   TrashIcon,
+  BGIcon,
 } from 'components/icons';
 import Button from './button';
 import RangeSlider from './rangeSlider';
@@ -64,6 +65,17 @@ const Toolbar = ({ paintStore }) => {
           <Colors
             currentColor={paintStore.color}
             setColor={paintStore.setColor}
+          />
+        </Button>
+        <Button
+          id="colors"
+          icon={BGIcon}
+          onClick={onPanelClick}
+          isOpen={currentPanel === 'colors'}
+        >
+          <Colors
+            currentColor={paintStore.backgroundColor}
+            setColor={paintStore.setBackgroundColor}
           />
         </Button>
         <Button

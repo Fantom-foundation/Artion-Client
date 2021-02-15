@@ -5,10 +5,11 @@ import { BrowserRouter } from 'react-router-dom';
 import Layout from './layout';
 import Toolbar from './toolbar';
 import NiftyHeader from './header';
+import NiftyFooter from './footer';
 import { Container, Canvas } from './style';
 import { isMobile } from 'utils/userAgent';
 
-const App = ({ paintStore, fullScreen }) => {
+const App = ({ paintStore /*fullScreen*/ }) => {
   const canvasRef = useRef(null);
   const { start, draw, stop } = paintStore;
 
@@ -19,7 +20,7 @@ const App = ({ paintStore, fullScreen }) => {
       <NiftyHeader></NiftyHeader>
       <BrowserRouter>
         <Layout>
-          <Container full={fullScreen} isMobile={isMobile}>
+          <Container /*full={fullScreen}*/ isMobile={isMobile}>
             <Canvas
               ref={canvasRef}
               onMouseDown={start}
@@ -35,6 +36,7 @@ const App = ({ paintStore, fullScreen }) => {
           </Container>
         </Layout>
       </BrowserRouter>
+      <NiftyFooter></NiftyFooter>
     </div>
   );
 };

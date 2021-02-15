@@ -15,8 +15,13 @@ const setDimensions = (full, isMobile) => {
       `;
     default:
       return css`
-        height: 100%;
-        width: 100%;
+        height: 640px;
+        width: 640px;
+        transform: translate(-50%, -50%);
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        border: 1px solid black;
       `;
   }
 };

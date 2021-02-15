@@ -17,7 +17,10 @@ import MoreIcon from '@material-ui/icons/MoreVert';
 
 const useStyles = makeStyles(theme => ({
   grow: {
-    flexGrow: 1,
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
   },
   menuButton: {
     marginRight: theme.spacing(2),
@@ -79,7 +82,7 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-export default function NiftyHeader() {
+export default function NiftyFooter() {
   const classes = useStyles();
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = React.useState(null);
@@ -174,7 +177,7 @@ export default function NiftyHeader() {
             <MenuIcon />
           </IconButton>
           <Typography className={classes.title} variant="h6" noWrap>
-            Fantom Sea
+            fNifty
           </Typography>
           <div className={classes.search}>
             <div className={classes.searchIcon}>

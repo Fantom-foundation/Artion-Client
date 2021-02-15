@@ -15,6 +15,7 @@ export const Container = styled.div`
   background: white;
   z-index: 10;
   cursor: pointer;
+  transform: translate(60px, 30px);
 `;
 
 export const Backdrop = styled.div`
