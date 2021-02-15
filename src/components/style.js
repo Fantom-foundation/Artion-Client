@@ -21,7 +21,8 @@ const setDimensions = (full, isMobile) => {
         position: fixed;
         top: 50%;
         left: 50%;
-        border: 1px solid black;
+        // border: 1px solid black;
+        box-shadow: 3px 3px 5px 6px #ccc;
       `;
   }
 };
