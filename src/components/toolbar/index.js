@@ -10,12 +10,23 @@ import {
   LoadIcon,
   TrashIcon,
   BGIcon,
+  EraserIcon,
+  fileUploadIcon,
 } from 'components/icons';
+import { makeStyles } from '@material-ui/core/styles';
 import Button from './button';
 import RangeSlider from './rangeSlider';
 import Colors from './colors';
+import BackgroundColors from './backgroundcolors';
+
+const useStyles = makeStyles(() => ({
+  brush: {
+    backgroundColor: '#007bff',
+  },
+}));
 
 const Toolbar = ({ paintStore }) => {
+  const classes = useStyles();
   const [currentPanel, setPanel] = useState(null);
 
   const onPanelClick = ({ currentTarget: { id } }) => {
@@ -57,6 +68,18 @@ const Toolbar = ({ paintStore }) => {
           keys="command+l"
         />
         <Button
+          id="fileupload"
+          icon={fileUploadIcon}
+          onClick={paintStore.setBackgroundImage}
+          keys="command+o"
+        />
+        <Button
+          id="eraser"
+          icon={EraserIcon}
+          onClick={paintStore.setEraseColor}
+          keys="command+d"
+        />
+        <Button
           id="colors"
           icon={PaletteIcon}
           onClick={onPanelClick}
@@ -67,13 +90,14 @@ const Toolbar = ({ paintStore }) => {
             setColor={paintStore.setColor}
           />
         </Button>
+
         <Button
-          id="colors"
+          id="backgroundcolors"
           icon={BGIcon}
           onClick={onPanelClick}
-          isOpen={currentPanel === 'colors'}
+          isOpen={currentPanel === 'backgroundcolors'}
         >
-          <Colors
+          <BackgroundColors
             currentColor={paintStore.backgroundColor}
             setColor={paintStore.setBackgroundColor}
           />
@@ -83,6 +107,7 @@ const Toolbar = ({ paintStore }) => {
           icon={<BrushLine size={paintStore.size} />}
           onClick={onPanelClick}
           isOpen={currentPanel === 'brush'}
+          className={classes.brush}
         >
           <RangeSlider value={paintStore.size} setValue={paintStore.setSize} />
         </Button>

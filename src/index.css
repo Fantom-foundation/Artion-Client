@@ -1,0 +1,26 @@
+.MuiAppBar-colorPrimary {
+  color: #fff;
+  background-color: #007bff !important;
+}
+
+.css-gr2aqs {
+  background-color: #007bff !important;
+}
+
+.inkMetadataInput {
+  background-color: white !important;
+  background: transparent !important;
+}
+
+.MuiAvatar-colorDefault {
+  color: #fafafa !important;
+  background-color: transparent !important;
+}
+
+#inkmetadatanameinput {
+  background-color: white !important;
+}
+
+#inkmetadatalimitinput {
+  background-color: white !important;
+}

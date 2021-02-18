@@ -36,7 +36,7 @@ export const BrushLine = styled.div`
   transform: translate(-50%, -50%) rotate(-45deg);
   width: 75%;
   border-radius: 6px;
-  background-color: black;
+  background-color: #007bff;
 
   ${({ size }) => css`
     height: ${size}px;

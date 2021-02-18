@@ -12,6 +12,8 @@ class PaintStore {
   strokeHistory = [];
   session = [];
   redos = [];
+  fileUploader;
+  backgroundImage;
 
   @observable
   isDrawing = false;
@@ -31,10 +33,22 @@ class PaintStore {
   };
 
   @action
+  setEraseColor = () => {
+    this.color = this.backgroundColor;
+  };
+
+  @action
   setBackgroundColor = color => {
     this.backgroundColor = color;
     this.ctx.fillStyle = this.backgroundColor;
     this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+  };
+
+  @action
+  setBackgroundImage = () => {
+    let result = this.fileUploader.click();
+    console.log(result);
+    console.log(this.fileUploader);
   };
 
   @action
@@ -53,6 +67,13 @@ class PaintStore {
       this.ctx.lineCap = 'round';
       this.ctx.fillStyle = this.backgroundColor;
       this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+      const fileSelector = document.createElement('input');
+      fileSelector.setAttribute('type', 'file');
+      fileSelector.addEventListener('change', () => {
+        let file = fileSelector.files[0];
+        console.log('file selected is ', file);
+      });
+      this.fileUploader = fileSelector;
       this.isInitialized = true;
     }
   };
@@ -128,11 +149,6 @@ class PaintStore {
 
   clear = () => {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    this.ctx.fillStyle = this.backgroundColor;
-    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-  };
-
-  setBackground = () => {
     this.ctx.fillStyle = this.backgroundColor;
     this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
   };
