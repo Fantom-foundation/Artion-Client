@@ -46,9 +46,7 @@ class PaintStore {
 
   @action
   setBackgroundImage = () => {
-    let result = this.fileUploader.click();
-    console.log(result);
-    console.log(this.fileUploader);
+    this.fileUploader.click();
   };
 
   @action
@@ -69,9 +67,29 @@ class PaintStore {
       this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
       const fileSelector = document.createElement('input');
       fileSelector.setAttribute('type', 'file');
+      fileSelector.setAttribute('accept', '.png');
       fileSelector.addEventListener('change', () => {
-        let file = fileSelector.files[0];
-        console.log('file selected is ', file);
+        try {
+          let selected = fileSelector.files[0];
+          let reader = new FileReader();
+          reader.readAsDataURL(selected);
+          reader.onloadend = () => {
+            let background = new Image();
+            background.src = reader.result;
+            background.onload = () => {
+              this.ctx.drawImage(
+                background,
+                0,
+                0,
+                this.canvas.width,
+                this.canvas.height
+              );
+              localStorage.setItem('background', reader.result);
+            };
+          };
+        } catch (error) {
+          console.log('file selection cancelled');
+        }
       });
       this.fileUploader = fileSelector;
       this.isInitialized = true;
@@ -114,9 +132,28 @@ class PaintStore {
   redraw = (stack = this.strokeHistory) => {
     this.clear();
     console.log(stack);
-    stack.forEach(entry => {
-      entry.forEach(this.stroke);
-    });
+    let filename = localStorage.getItem('background');
+    if (filename) {
+      let background = new Image();
+      background.src = filename;
+      background.onload = () => {
+        this.ctx.drawImage(
+          background,
+          0,
+          0,
+          this.canvas.width,
+          this.canvas.height
+        );
+        localStorage.setItem('background', filename);
+        stack.forEach(entry => {
+          entry.forEach(this.stroke);
+        });
+      };
+    } else {
+      stack.forEach(entry => {
+        entry.forEach(this.stroke);
+      });
+    }
   };
 
   start = event => {
