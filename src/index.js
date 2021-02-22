@@ -1,9 +1,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'mobx-react';
+import { Provider as ReduxProvider } from 'react-redux';
 import './index.css';
 
 import App from 'components/app';
+import { reduxStore } from '../src/stores/reduxStore';
 import PaintStore from './stores/paintStore';
 
 const stores = {
@@ -11,8 +13,10 @@ const stores = {
 };
 
 ReactDOM.render(
-  <Provider {...stores}>
-    <App fullScreen />
-  </Provider>,
+  <ReduxProvider store={reduxStore}>
+    <Provider {...stores}>
+      <App fullScreen />
+    </Provider>
+  </ReduxProvider>,
   document.getElementById('root')
 );

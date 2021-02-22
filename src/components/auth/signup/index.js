@@ -15,7 +15,16 @@ import VisibilityOffTwoToneIcon from '@material-ui/icons/VisibilityOffTwoTone';
 import CloseIcon from '@material-ui/icons/Close';
 import FantomLogo from '../../../assets/svgs/fantom_logo_white_new.svg';
 
+import { useHistory } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import EmailValidator from 'email-deep-validator';
+import AuthManager from '../authmanager';
+import AuthActions from '../../../actions/auth.actions';
+
 const SignUp = ({ classes }) => {
+  const history = useHistory();
+  const dispatch = useDispatch();
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [passwordConfirm, setPasswordConfirm] = useState('');
@@ -59,24 +68,54 @@ const SignUp = ({ classes }) => {
     setHidePassword(!hidePassword);
   };
 
-  const isValid = () => {
-    if (email === '') {
+  const isValidPassword = () => {
+    if (password === '') {
       return false;
     }
     return true;
   };
-  const submitSignUp = e => {
+
+  const isValidEmail = async () => {
+    let emailValidator = new EmailValidator();
+    let {
+      wellFormed /*, validDomain, validMailbox*/,
+    } = await emailValidator.verify(email);
+    // return wellFormed && validDomain && validMailbox;
+    return wellFormed;
+  };
+
+  const isFullyValid = async () => {
+    let _isValidEmail = await isValidEmail();
+    return isValidPassword() && _isValidEmail;
+  };
+
+  const isValid = () => {
+    return password != '' && email != '';
+  };
+  const submitSignUp = async e => {
     e.preventDefault();
+    let _isFullyValid = await isFullyValid();
+    if (!_isFullyValid) {
+      console.log('not fully valid');
+      return;
+    }
     if (!passwordMatch()) {
       setErrorOpen(true);
       setError("Passwords don't match");
     }
-    const newUserCredentials = {
-      email: email,
-      password: password,
-      passwordConfirm: passwordConfirm,
-    };
-    console.log('  props.newUserCredentials', newUserCredentials);
+    try {
+      let isSignedUp = await AuthManager.signUp(email, password);
+      if (isSignedUp) {
+        history.push('/signin');
+        dispatch(AuthActions.signupSuccess());
+      } else {
+        dispatch(AuthActions.signupFailed());
+        console.log('signup failed');
+      }
+    } catch (error) {
+      dispatch(AuthActions.signupFailed());
+      console.log(error);
+    }
   };
 
   return (

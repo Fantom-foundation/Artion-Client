@@ -10,9 +10,12 @@ import AccountCircle from '@material-ui/icons/AccountCircle';
 import MailIcon from '@material-ui/icons/Mail';
 import NotificationsIcon from '@material-ui/icons/Notifications';
 import MoreIcon from '@material-ui/icons/MoreVert';
-// import Typography from '@material-ui/core/Typography';
 
+import { useHistory } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 import FantomLogo from '../../assets/svgs/fantom_logo_white_new.svg';
+import AuthManager from '../../components/auth/authmanager';
+import AuthActions from '../auth/authmanager';
 
 const useStyles = makeStyles(theme => ({
   grow: {
@@ -83,6 +86,9 @@ const useStyles = makeStyles(theme => ({
 }));
 
 export default function NiftyHeader() {
+  const history = useHistory();
+  const dispatch = useDispatch();
+
   const classes = useStyles();
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = React.useState(null);
@@ -107,6 +113,21 @@ export default function NiftyHeader() {
     setMobileMoreAnchorEl(event.currentTarget);
   };
 
+  const signout = async () => {
+    handleMenuClose();
+    try {
+      let _ifSignedout = AuthManager.signOut();
+      if (_ifSignedout) {
+        history.push('/signin');
+        dispatch(AuthActions.signOut());
+      } else {
+        console.log('signout failed');
+      }
+    } catch (error) {
+      console.log('signout failed try catch');
+    }
+  };
+
   const menuId = 'primary-search-account-menu';
   const renderMenu = (
     <Menu
@@ -118,8 +139,8 @@ export default function NiftyHeader() {
       open={isMenuOpen}
       onClose={handleMenuClose}
     >
-      <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
-      <MenuItem onClick={handleMenuClose}>My account</MenuItem>
+      <MenuItem onClick={handleMenuClose}>Account</MenuItem>
+      <MenuItem onClick={signout}>Sign Out</MenuItem>
     </Menu>
   );
 

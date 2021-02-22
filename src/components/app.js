@@ -12,7 +12,7 @@ import SignUp from '../components/auth/signup';
 import { Container, Canvas } from './style';
 import { isMobile } from 'utils/userAgent';
 
-const App = ({ paintStore /*fullScreen*/ }) => {
+const App = ({ paintStore }) => {
   const canvasRef = useRef(null);
   const { start, draw, stop } = paintStore;
 
@@ -22,7 +22,7 @@ const App = ({ paintStore /*fullScreen*/ }) => {
     return (
       <>
         <Layout>
-          <Container /*full={fullScreen}*/ isMobile={isMobile}>
+          <Container isMobile={isMobile}>
             <Canvas
               ref={canvasRef}
               onMouseDown={start}
