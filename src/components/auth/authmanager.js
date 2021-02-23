@@ -55,7 +55,7 @@ const fetchUserByEmail = async email => {
 
 const createUser = async (email, password) => {
   try {
-    let user = await axios.post('localhost:5000/auth/addUser', {
+    let user = await axios.post('http://18.207.251.49:4011/auth/addUser', {
       email: email,
       password: password,
     });
