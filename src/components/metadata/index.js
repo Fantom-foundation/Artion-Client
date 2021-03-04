@@ -2,6 +2,7 @@ import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
+import { saveAs } from 'file-saver';
 
 const useStyles = makeStyles(() => ({
   container: {
@@ -41,6 +42,13 @@ const useStyles = makeStyles(() => ({
 
 const Metadata = () => {
   const classes = useStyles();
+
+  const saveToFile = () => {
+    let canvas = document.getElementById('drawingboard');
+    canvas.toBlob(blob => {
+      saveAs(blob, 'newArt.png');
+    });
+  };
   return (
     <div className={classes.container}>
       <div className={classes.inkContainer}>
@@ -69,6 +77,7 @@ const Metadata = () => {
             variant="contained"
             color="primary"
             className={classes.inkButton}
+            onClick={saveToFile}
           >
             Ink
           </Button>

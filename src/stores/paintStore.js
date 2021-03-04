@@ -1,6 +1,6 @@
 import { observable, action } from 'mobx';
-
 import { compress, decompress } from 'utils/stringPress';
+import { saveAs } from 'file-saver';
 
 class PaintStore {
   canvas;
@@ -233,6 +233,12 @@ class PaintStore {
     } catch (e) {
       console.log('removed');
     }
+  };
+
+  saveToFile = () => {
+    this.canvas.toBlob(blob => {
+      saveAs(blob, 'newArt.png');
+    });
   };
 }
 

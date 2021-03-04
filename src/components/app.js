@@ -24,6 +24,7 @@ const App = ({ paintStore }) => {
         <Layout>
           <Container isMobile={isMobile}>
             <Canvas
+              id="drawingboard"
               ref={canvasRef}
               onMouseDown={start}
               onMouseMove={draw}
