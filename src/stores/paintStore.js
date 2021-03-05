@@ -214,7 +214,6 @@ class PaintStore {
     );
 
     const compressed = compress(JSON.stringify(history));
-
     localStorage.setItem('saved', compressed);
   };
 
