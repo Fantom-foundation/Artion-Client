@@ -1,6 +1,6 @@
 import { observable, action } from 'mobx';
-
 import { compress, decompress } from 'utils/stringPress';
+import { saveAs } from 'file-saver';
 
 class PaintStore {
   canvas;
@@ -214,7 +214,6 @@ class PaintStore {
     );
 
     const compressed = compress(JSON.stringify(history));
-
     localStorage.setItem('saved', compressed);
   };
 
@@ -233,6 +232,12 @@ class PaintStore {
     } catch (e) {
       console.log('removed');
     }
+  };
+
+  saveToFile = () => {
+    this.canvas.toBlob(blob => {
+      saveAs(blob, 'newArt.png');
+    });
   };
 }
 

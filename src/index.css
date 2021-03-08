@@ -24,3 +24,8 @@
 #inkmetadatalimitinput {
   background-color: white !important;
 }
+
+body {
+  margin: 0 !important;
+  overflow: auto;
+}

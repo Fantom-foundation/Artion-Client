@@ -11,8 +11,9 @@ import SignIn from '../components/auth/signin';
 import SignUp from '../components/auth/signup';
 import { Container, Canvas } from './style';
 import { isMobile } from 'utils/userAgent';
+import LandingPage from '../pages/landingpage';
 
-const App = ({ paintStore /*fullScreen*/ }) => {
+const App = ({ paintStore }) => {
   const canvasRef = useRef(null);
   const { start, draw, stop } = paintStore;
 
@@ -22,8 +23,9 @@ const App = ({ paintStore /*fullScreen*/ }) => {
     return (
       <>
         <Layout>
-          <Container /*full={fullScreen}*/ isMobile={isMobile}>
+          <Container isMobile={isMobile}>
             <Canvas
+              id="drawingboard"
               ref={canvasRef}
               onMouseDown={start}
               onMouseMove={draw}
@@ -47,7 +49,7 @@ const App = ({ paintStore /*fullScreen*/ }) => {
       <NiftyHeader></NiftyHeader>
       <Router>
         <Switch>
-          <Route exact path="/" component={SignIn}></Route>
+          <Route exact path="/" component={LandingPage}></Route>
           <Route exact path="/signin" component={SignIn}></Route>
           <Route exact path="/signup" component={SignUp}></Route>
           <Route exact path="/create" component={PaintBoard}></Route>

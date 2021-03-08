@@ -12,6 +12,7 @@ import {
   BGIcon,
   EraserIcon,
   fileUploadIcon,
+  DownloadIcon,
 } from 'components/icons';
 import { makeStyles } from '@material-ui/core/styles';
 import Button from './button';
@@ -60,6 +61,12 @@ const Toolbar = ({ paintStore }) => {
           icon={SaveIcon}
           onClick={paintStore.save}
           keys="command+s"
+        />
+        <Button
+          id="download"
+          icon={DownloadIcon}
+          onClick={paintStore.saveToFile}
+          keys="command+d"
         />
         <Button
           id="load"

@@ -4,7 +4,8 @@ import FantomLogo from '../../assets/svgs/fantom_logo_white_new.svg';
 
 const useStyles = makeStyles(() => ({
   grow: {
-    position: 'absolute',
+    position: 'fixed',
+    width: '100%',
     bottom: 0,
     left: 0,
     right: 0,
