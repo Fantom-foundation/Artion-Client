@@ -46,13 +46,21 @@ const useStyles = makeStyles(() => ({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  inkDescriptionContainer: {
+    marginTop: '40px',
+    marginBottom: '40px',
+    justifyContent: 'center',
+    display: 'flex',
+    flexDirection: 'column',
+  },
 }));
 
 const Metadata = () => {
   const classes = useStyles();
 
-  const [name, setName] = useState('');
+  const [name, setName] = useState('New NFT');
   const [limit, setLimit] = useState(1);
+  const [description, setDescription] = useState('');
   // const [address, setAddress] = useState('');
 
   const createNotification = type => {
@@ -98,6 +106,11 @@ const Metadata = () => {
           setLimit(value);
         }
         break;
+      case 'description':
+        {
+          setDescription(value);
+        }
+        break;
       default: {
         console.log('default');
       }
@@ -126,6 +139,7 @@ const Metadata = () => {
     formData.append('name', name);
     formData.append('limit', limit);
     formData.append('address', address);
+    formData.append('description', description);
     try {
       let result = await axios({
         method: 'post',
@@ -133,6 +147,12 @@ const Metadata = () => {
         data: formData,
         headers: { 'Content-Type': 'multipart/form-data' },
       });
+
+      const fileHash = result.data.fileHash;
+      const jsonHash = result.data.jsonHash;
+
+      console.log('file hash is ', fileHash, ' json hash is ', jsonHash);
+
       let status = result.data.status;
       switch (status) {
         case 'success':
@@ -183,6 +203,20 @@ const Metadata = () => {
               inputProps: {
                 min: 1,
               },
+            }}
+          />
+        </div>
+        <div className={classes.inkDescriptionContainer}>
+          <TextField
+            label="description(Optional)"
+            style={{ textAlign: 'left' }}
+            hinttext="Message Field"
+            defaultValue={description}
+            floatinglabeltext="MultiLine and FloatingLabel"
+            multiline
+            rows={2}
+            onChange={e => {
+              handleInputChange(e.target.value, 'description');
             }}
           />
         </div>

@@ -11,6 +11,7 @@ import SignIn from '../components/auth/signin';
 import SignUp from '../components/auth/signup';
 import { Container, Canvas } from './style';
 import { isMobile } from 'utils/userAgent';
+import LandingPage from '../pages/landingpage';
 
 const App = ({ paintStore }) => {
   const canvasRef = useRef(null);
@@ -48,7 +49,7 @@ const App = ({ paintStore }) => {
       <NiftyHeader></NiftyHeader>
       <Router>
         <Switch>
-          <Route exact path="/" component={SignIn}></Route>
+          <Route exact path="/" component={LandingPage}></Route>
           <Route exact path="/signin" component={SignIn}></Route>
           <Route exact path="/signup" component={SignUp}></Route>
           <Route exact path="/create" component={PaintBoard}></Route>

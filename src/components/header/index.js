@@ -10,17 +10,25 @@ import AccountCircle from '@material-ui/icons/AccountCircle';
 import MailIcon from '@material-ui/icons/Mail';
 import NotificationsIcon from '@material-ui/icons/Notifications';
 import MoreIcon from '@material-ui/icons/MoreVert';
+import InputBase from '@material-ui/core/InputBase';
+import SearchIcon from '@material-ui/icons/Search';
 
-import { useHistory } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
+// import { useHistory } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 import FantomLogo from '../../assets/svgs/fantom_logo_white_new.svg';
-import AuthManager from '../../components/auth/authmanager';
-import AuthActions from '../auth/authmanager';
+// import AuthManager from '../../components/auth/authmanager';
+// import AuthActions from '../auth/authmanager';
+import { ethers } from 'ethers';
+import WalletConnectActions from '../../actions/walletconnect.actions';
 
 const useStyles = makeStyles(theme => ({
   grow: {
     flexGrow: 1,
     background: '#007bff',
+    position: 'fixed',
+    width: '100%',
+    top: 0,
+    left: 0,
   },
   menuButton: {
     marginRight: theme.spacing(2),
@@ -45,7 +53,7 @@ const useStyles = makeStyles(theme => ({
     marginLeft: 0,
     width: '100%',
     [theme.breakpoints.up('sm')]: {
-      marginLeft: theme.spacing(3),
+      marginLeft: theme.spacing(12),
       width: 'auto',
     },
   },
@@ -68,11 +76,12 @@ const useStyles = makeStyles(theme => ({
     transition: theme.transitions.create('width'),
     width: '100%',
     [theme.breakpoints.up('md')]: {
-      width: '20ch',
+      width: '48ch',
     },
   },
   sectionDesktop: {
     display: 'none',
+    marginLeft: 'auto',
     [theme.breakpoints.up('md')]: {
       display: 'flex',
     },
@@ -86,7 +95,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 export default function NiftyHeader() {
-  const history = useHistory();
+  // const history = useHistory();
   const dispatch = useDispatch();
 
   const classes = useStyles();
@@ -95,6 +104,10 @@ export default function NiftyHeader() {
 
   const isMenuOpen = Boolean(anchorEl);
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
+
+  const isWalletConnected = useSelector(
+    state => state.ConnectWallet.isConnected
+  );
 
   const handleProfileMenuOpen = event => {
     setAnchorEl(event.currentTarget);
@@ -113,19 +126,57 @@ export default function NiftyHeader() {
     setMobileMoreAnchorEl(event.currentTarget);
   };
 
-  const signout = async () => {
-    handleMenuClose();
-    try {
-      let _ifSignedout = AuthManager.signOut();
-      if (_ifSignedout) {
-        history.push('/signin');
-        dispatch(AuthActions.signOut());
-      } else {
-        console.log('signout failed');
+  // const signout = async () => {
+  //   handleMenuClose();
+  //   try {
+  //     let _ifSignedout = AuthManager.signOut();
+  //     if (_ifSignedout) {
+  //       history.push('/signin');
+  //       dispatch(AuthActions.signOut());
+  //     } else {
+  //       console.log('signout failed');
+  //     }
+  //   } catch (error) {
+  //     console.log('signout failed try catch');
+  //   }
+  // };
+  const connectWallet = async () => {
+    await window.ethereum.enable();
+
+    window.ethereum.on('chainChanged', _chainId => {
+      dispatch(WalletConnectActions.changeChainId(_chainId));
+      console.log('chainid is changed to ', _chainId);
+    });
+    window.ethereum.on('disconnect', error => {
+      dispatch(WalletConnectActions.disconnectWallet());
+      console.log('handler for disconnection', error);
+    });
+    window.ethereum.on('accountsChanged', accounts => {
+      if (accounts.length == 0) {
+        dispatch(WalletConnectActions.disconnectWallet());
       }
-    } catch (error) {
-      console.log('signout failed try catch');
+    });
+
+    let provider = new ethers.providers.Web3Provider(window.ethereum);
+    let chainId = (await provider.getNetwork()).chainId;
+    let signer = provider.getSigner();
+    console.log(signer);
+    let accounts = await provider.listAccounts();
+    let connectedAddress = accounts[0];
+    return { connectedAddress, chainId };
+  };
+
+  const handleConnectWallet = async () => {
+    if (isWalletConnected) {
+      dispatch(WalletConnectActions.disconnectWallet());
+    } else {
+      let { connectedAddress, chainId } = await connectWallet();
+      if (connectedAddress) {
+        console.log('connected');
+        dispatch(WalletConnectActions.connectWallet(chainId));
+      }
     }
+    handleMenuClose();
   };
 
   const menuId = 'primary-search-account-menu';
@@ -140,7 +191,9 @@ export default function NiftyHeader() {
       onClose={handleMenuClose}
     >
       <MenuItem onClick={handleMenuClose}>Account</MenuItem>
-      <MenuItem onClick={signout}>Sign Out</MenuItem>
+      <MenuItem onClick={handleConnectWallet}>
+        {isWalletConnected ? 'Sign Out' : 'Sign In'}
+      </MenuItem>
     </Menu>
   );
 
@@ -191,6 +244,19 @@ export default function NiftyHeader() {
         <Toolbar>
           <div>
             <img className={classes.logoImg} src={FantomLogo}></img>
+          </div>
+          <div className={classes.search}>
+            <div className={classes.searchIcon}>
+              <SearchIcon />
+            </div>
+            <InputBase
+              placeholder="Search items ..."
+              classes={{
+                root: classes.inputRoot,
+                input: classes.inputInput,
+              }}
+              inputProps={{ 'aria-label': 'search' }}
+            />
           </div>
           <div className={classes.grow} />
           <div className={classes.sectionDesktop}>
