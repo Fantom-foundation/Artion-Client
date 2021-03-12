@@ -84,6 +84,20 @@ const AdsCarousel = () => {
             description={description}
           ></AdsCard>
         </div>
+        <div>
+          <AdsCard
+            ipfsUrl={demoUrl3}
+            name={name}
+            description={description}
+          ></AdsCard>
+        </div>
+        <div>
+          <AdsCard
+            ipfsUrl={demoUrl4}
+            name={name}
+            description={description}
+          ></AdsCard>
+        </div>
       </Slider>
     </div>
   );

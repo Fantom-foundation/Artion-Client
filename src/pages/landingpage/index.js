@@ -6,6 +6,7 @@ import Image from 'material-ui-image';
 
 import AdsCarousel from '../../components/AdsCarousel';
 import NFTCarousel from '../../components/NFTCarousel';
+import FInfiniteLoader from '../../components/InfiniteLoader';
 
 import BackgroundSeaImage from '../../assets/imgs/sea-background.jpeg';
 
@@ -23,6 +24,7 @@ const LandingPage = ({ classes }) => {
       </Paper>
       <AdsCarousel className={classes.carouselContainer}></AdsCarousel>
       <NFTCarousel></NFTCarousel>
+      <FInfiniteLoader></FInfiniteLoader>
     </div>
   );
 };

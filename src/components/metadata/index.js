@@ -3,6 +3,7 @@ import axios from 'axios';
 import { makeStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
+import Autocomplete from '@material-ui/lab/Autocomplete';
 
 import 'react-notifications/lib/notifications.css';
 import {
@@ -53,14 +54,22 @@ const useStyles = makeStyles(() => ({
     display: 'flex',
     flexDirection: 'column',
   },
+  autocomplete: {
+    width: '200px',
+    backgroundColor: '#ffffff !important',
+    background: 'transparent !important',
+  },
 }));
+
+const assetCategories = ['1', '2', '3'];
 
 const Metadata = () => {
   const classes = useStyles();
 
-  const [name, setName] = useState('New NFT');
+  const [name, setName] = useState('fAsset');
   const [limit, setLimit] = useState(1);
   const [description, setDescription] = useState('');
+  const [category, setCategory] = useState('1');
   // const [address, setAddress] = useState('');
 
   const createNotification = type => {
@@ -111,6 +120,11 @@ const Metadata = () => {
           setDescription(value);
         }
         break;
+      case 'category':
+        {
+          setCategory(value);
+        }
+        break;
       default: {
         console.log('default');
       }
@@ -118,7 +132,7 @@ const Metadata = () => {
   };
 
   const validateMetadata = address => {
-    return name != '' && (limit >= 1) & (address != '');
+    return name != '' && limit >= 1 && (category != '') & (address != '');
   };
 
   const connectWallet = async () => {
@@ -140,6 +154,7 @@ const Metadata = () => {
     formData.append('limit', limit);
     formData.append('address', address);
     formData.append('description', description);
+    formData.append('category', category);
     try {
       let result = await axios({
         method: 'post',
@@ -182,7 +197,6 @@ const Metadata = () => {
           <TextField
             className={classes.inkMetadataInput}
             label="Name"
-            variant="filled"
             id="inkmetadatanameinput"
             defaultValue={name}
             onChange={e => {
@@ -192,7 +206,6 @@ const Metadata = () => {
           <TextField
             className={classes.inkMetadataInput}
             label="Limit"
-            variant="filled"
             type="number"
             id="inkmetadatalimitinput"
             defaultValue={limit}
@@ -204,6 +217,24 @@ const Metadata = () => {
                 min: 1,
               },
             }}
+          />
+          <Autocomplete
+            id="category-combo-box"
+            options={assetCategories}
+            getOptionLabel={option => option}
+            className={classes.autocomplete}
+            renderInput={params => (
+              <TextField
+                {...params}
+                className={classes.inkMetadataInput}
+                label="Categories"
+                id="inkmetadatacategoryinput"
+                defaultValue={category}
+                onChange={e => {
+                  handleInputChange(e.target.value, 'category');
+                }}
+              />
+            )}
           />
         </div>
         <div className={classes.inkDescriptionContainer}>
