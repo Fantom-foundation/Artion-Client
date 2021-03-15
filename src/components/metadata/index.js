@@ -61,7 +61,16 @@ const useStyles = makeStyles(() => ({
   },
 }));
 
-const assetCategories = ['1', '2', '3'];
+const assetCategories = [
+  'New',
+  'Art',
+  'Domain Names',
+  'Virtual Words',
+  'Trading Cards',
+  'Collectibles',
+  'Sports',
+  'Utility',
+];
 
 const Metadata = () => {
   const classes = useStyles();
@@ -69,7 +78,7 @@ const Metadata = () => {
   const [name, setName] = useState('fAsset');
   const [limit, setLimit] = useState(1);
   const [description, setDescription] = useState('');
-  const [category, setCategory] = useState('1');
+  const [category, setCategory] = useState('New');
   // const [address, setAddress] = useState('');
 
   const createNotification = type => {

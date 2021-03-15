@@ -1,6 +1,8 @@
 import React, { useEffect } from 'react';
 import mousetrap from 'mousetrap';
 
+import Tooltip from '@material-ui/core/Tooltip';
+
 import { Wrapper, Container, ActionPanel } from './style';
 
 const preventDefault = event => {
@@ -8,7 +10,7 @@ const preventDefault = event => {
   event.stopPropagation();
 };
 
-const Button = ({ id, icon, onClick, isOpen, children, keys }) => {
+const Button = ({ id, icon, onClick, isOpen, children, keys, tip }) => {
   useEffect(() => {
     if (keys) {
       mousetrap.bind(keys, onClick);
@@ -17,16 +19,18 @@ const Button = ({ id, icon, onClick, isOpen, children, keys }) => {
   }, [keys, onClick]);
 
   return (
-    <Wrapper isActive={isOpen}>
-      <Container id={id} onClick={onClick} isActive={isOpen}>
-        {icon && icon}
-      </Container>
-      {children && (
-        <ActionPanel onClick={preventDefault} isOpen={isOpen}>
-          {children}
-        </ActionPanel>
-      )}
-    </Wrapper>
+    <Tooltip title={tip}>
+      <Wrapper isActive={isOpen}>
+        <Container id={id} onClick={onClick} isActive={isOpen}>
+          {icon && icon}
+        </Container>
+        {children && (
+          <ActionPanel onClick={preventDefault} isOpen={isOpen}>
+            {children}
+          </ActionPanel>
+        )}
+      </Wrapper>
+    </Tooltip>
   );
 };
 
