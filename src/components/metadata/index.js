@@ -170,6 +170,7 @@ const Metadata = () => {
     formData.append('address', address);
     formData.append('description', description);
     formData.append('category', category);
+    formData.append('symbol', symbol);
     try {
       let result = await axios({
         method: 'post',
