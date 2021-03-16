@@ -76,6 +76,7 @@ const Metadata = () => {
   const classes = useStyles();
 
   const [name, setName] = useState('fAsset');
+  const [symbol, setSymbol] = useState('newnft');
   const [limit, setLimit] = useState(1);
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('New');
@@ -132,6 +133,11 @@ const Metadata = () => {
       case 'category':
         {
           setCategory(value);
+        }
+        break;
+      case 'symbol':
+        {
+          setSymbol(value);
         }
         break;
       default: {
@@ -207,9 +213,18 @@ const Metadata = () => {
             className={classes.inkMetadataInput}
             label="Name"
             id="inkmetadatanameinput"
-            defaultValue={name}
+            value={name}
             onChange={e => {
               handleInputChange(e.target.value, 'name');
+            }}
+          />
+          <TextField
+            className={classes.inkMetadataInput}
+            label="Symbol"
+            id="inkmetadatasymbolinput"
+            value={symbol}
+            onChange={e => {
+              handleInputChange(e.target.value, 'symbol');
             }}
           />
           <TextField
@@ -217,7 +232,7 @@ const Metadata = () => {
             label="Limit"
             type="number"
             id="inkmetadatalimitinput"
-            defaultValue={limit}
+            value={limit}
             onChange={e => {
               handleInputChange(e.target.value, 'limit');
             }}
@@ -238,7 +253,7 @@ const Metadata = () => {
                 className={classes.inkMetadataInput}
                 label="Categories"
                 id="inkmetadatacategoryinput"
-                defaultValue={category}
+                value={category}
                 onChange={e => {
                   handleInputChange(e.target.value, 'category');
                 }}

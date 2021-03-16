@@ -10,6 +10,7 @@ import Card from '../Card';
 const useStyles = makeStyles({
   container: {
     position: 'relative',
+    zIndex: 1,
   },
 });
 

@@ -1,20 +1,19 @@
 export const register = () => ({
   main: {
     width: '100vw',
-    position: 'absolute',
+    position: 'relative',
     bottom: '48px',
     top: '64px',
   },
   paper: {
-    // position: 'relative',
-    // height: '100%',
     width: '100vw',
-    position: 'fixed',
+    position: 'relative',
     bottom: '48px',
-    top: '64px',
-    '&:hover': {
-      boxShadow: '0px 24px 36px rgba(131,153,167,0.99)',
-    },
+    top: '0px',
+    boxShadow: 'none !important',
+    // '&:hover': {
+    //   boxShadow: '0px 24px 36px rgba(131,153,167,0.99)',
+    // },
   },
   image: {
     backgroundColor: 'rgb(255, 255, 255)',
@@ -30,18 +29,35 @@ export const register = () => ({
     zIndex: 100,
     left: '50%',
     transform: 'translateX(-50%)',
-    top: '60px',
-    position: 'absolute',
+    top: '36px',
+    position: 'relative',
   },
   largeFont: {
     fontFamily: 'cursive',
     fontSize: 'xxx-large',
+    position: 'relative',
   },
   smallFont: {
-    fontFmily: 'cursive',
+    fontFamily: 'cursive',
     fontSize: 'unset',
   },
   carouselContainer: {
     marginTop: '120px',
+    position: 'relative',
+  },
+  buttonsContainer: {
+    alignItems: 'center',
+    display: 'flex',
+    justifyContent: 'center',
+    position: 'relative',
+    marginTop: '90px',
+  },
+  landingPageButton: {
+    width: '160px',
+    height: '48px',
+    marginLeft: '40px',
+    marginRight: '40px',
+    fontSize: 'x-large',
+    backgroundColor: '#007bff',
   },
 });
