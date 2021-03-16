@@ -12,6 +12,7 @@ import SignUp from '../components/auth/signup';
 import { Container, Canvas } from './style';
 import { isMobile } from 'utils/userAgent';
 import LandingPage from '../pages/landingpage';
+import ExploreAllPage from '../pages/explorepage';
 
 const App = ({ paintStore }) => {
   const canvasRef = useRef(null);
@@ -47,16 +48,17 @@ const App = ({ paintStore }) => {
 
   return (
     <div>
-      <NiftyHeader></NiftyHeader>
       <Router>
+        <NiftyHeader></NiftyHeader>
         <Switch>
           <Route exact path="/" component={LandingPage}></Route>
+          <Route exact path="/exploreall" component={ExploreAllPage}></Route>
           <Route exact path="/signin" component={SignIn}></Route>
           <Route exact path="/signup" component={SignUp}></Route>
           <Route exact path="/create" component={PaintBoard}></Route>
         </Switch>
+        <NiftyFooter></NiftyFooter>
       </Router>
-      <NiftyFooter></NiftyFooter>
     </div>
   );
 };

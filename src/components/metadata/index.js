@@ -147,7 +147,12 @@ const Metadata = () => {
   };
 
   const validateMetadata = address => {
-    return name != '' && limit >= 1 && (category != '') & (address != '');
+    return (
+      name != '' &&
+      symbol != '' &&
+      limit >= 1 &&
+      (category != '') & (address != '')
+    );
   };
 
   const connectWallet = async () => {

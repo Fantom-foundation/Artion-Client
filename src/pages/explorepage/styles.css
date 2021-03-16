@@ -1,0 +1,66 @@
+.exploreAllPageContainer {
+    padding-top: 64px;
+    padding-bottom: 48px;
+    height: 100vh;
+    box-sizing: border-box;
+    display: flex;
+}
+
+.exploreSideBar {
+    width: 18%;
+    /* border-right: 2px dotted #007bff; */
+    border-right: 1px solid rgb(156, 146, 146);
+}
+
+.exploreWithHeader {
+    display: flex;
+    flex-direction: column;
+    width: 82%;
+}
+
+.exploreHeader {
+    height: 8%;
+    display: flex;
+    justify-content: center;
+    box-shadow: 0px 0px 8px 0px rgb(156, 146, 146);
+
+}
+.exploreAllPannel {
+    height: 92%;
+    overflow-y: auto;
+}
+
+.sidebarHeader {
+    height: 8%;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    box-shadow: 0px 0px 8px 0px rgb(156, 146, 146);
+}
+.sidebarBody {
+    height: 92%;
+    padding-top: 6px;
+    box-sizing: border-box;
+}
+
+.MuiCheckbox-colorSecondary.Mui-checked {
+    color: #007bff !important;
+}
+
+.MuiAccordionSummary-root {
+    box-shadow: 0px 0px 8px 0px rgb(156, 146, 146);
+}
+
+
+
+.exploreBodyFilterHeader {
+    display: flex;
+    justify-content: space-between;
+    height: 10%;
+    padding-top: 12px;
+    box-sizing: border-box;
+}
+
+.exploreBodyInfiniteLoaderContainer {
+    height: 90%;
+}

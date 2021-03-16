@@ -1,0 +1,29 @@
+.filterHeaderRoot {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.filterResultLabel {
+    margin-left : 24px;
+}
+
+.filterSelectGroup {
+    margin-right: 24px;
+}
+
+.MuiSelect-outlined.MuiSelect-outlined {
+    padding-right: 32px;
+    height: 10px !important;
+}
+
+.filterHeaderFormControl {
+    margin-right: 18px !important;
+    width: 180px;
+    top : unset !important;
+}
+
+.MuiMenu-paper {
+    top: 200px !important;
+}

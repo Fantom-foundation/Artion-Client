@@ -1,4 +1,5 @@
 import React from 'react';
+import { useHistory, withRouter } from 'react-router-dom';
 import { fade, makeStyles } from '@material-ui/core/styles';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
@@ -36,6 +37,9 @@ const useStyles = makeStyles(theme => ({
   },
   logoImg: {
     height: '36px',
+    '&:hover': {
+      cursor: 'pointer',
+    },
   },
   title: {
     display: 'none',
@@ -95,8 +99,8 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-export default function NiftyHeader() {
-  // const history = useHistory();
+const NiftyHeader = () => {
+  const history = useHistory();
   const dispatch = useDispatch();
 
   const classes = useStyles();
@@ -105,6 +109,10 @@ export default function NiftyHeader() {
 
   const isMenuOpen = Boolean(anchorEl);
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
+
+  const goToHomepage = () => {
+    history.push('/');
+  };
 
   const isWalletConnected = useSelector(
     state => state.ConnectWallet.isConnected
@@ -244,7 +252,11 @@ export default function NiftyHeader() {
       <AppBar position="static">
         <Toolbar>
           <div>
-            <img className={classes.logoImg} src={FantomLogo}></img>
+            <img
+              className={classes.logoImg}
+              src={FantomLogo}
+              onClick={goToHomepage}
+            ></img>
           </div>
           <div className={classes.search}>
             <div className={classes.searchIcon}>
@@ -299,4 +311,6 @@ export default function NiftyHeader() {
       {renderMenu}
     </div>
   );
-}
+};
+
+export default withRouter(NiftyHeader);

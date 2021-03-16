@@ -18,7 +18,9 @@ const LandingPage = ({ classes }) => {
   const goToCreate = () => {
     history.push('/create');
   };
-  const goToExplore = () => {};
+  const goToExploreAll = () => {
+    history.push('/exploreall');
+  };
   return (
     <div className={classes.main}>
       <Paper className={classes.paper}>
@@ -39,7 +41,7 @@ const LandingPage = ({ classes }) => {
           color="primary"
           component="span"
           className={classes.landingPageButton}
-          onClick={goToExplore}
+          onClick={goToExploreAll}
         >
           Explore
         </Button>
