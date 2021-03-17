@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+// import { useSelector } from 'react-redux';
 import axios from 'axios';
 import { makeStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
@@ -12,6 +13,10 @@ import {
 } from 'react-notifications';
 
 import { ethers } from 'ethers';
+
+import { FantomNFTConstants } from '../../constants/smartcontracts/fnft.constants';
+import SCHandlers from '../../utils/sc.interaction';
+import IPFSConstants from '../../constants/ipfs.constants';
 
 const useStyles = makeStyles(() => ({
   container: {
@@ -80,7 +85,9 @@ const Metadata = () => {
   const [limit, setLimit] = useState(1);
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('New');
-  // const [address, setAddress] = useState('');
+
+  // let address = useSelector(state => state.ConnectWallet.address);
+  // let isWalletConnected = useSelector(state => state.ConnectWallet.isConnected);
 
   const createNotification = type => {
     switch (type) {
@@ -159,7 +166,6 @@ const Metadata = () => {
     await window.ethereum.enable();
     let provider = new ethers.providers.Web3Provider(window.ethereum);
     let accounts = await provider.listAccounts();
-    // setAddress(accounts[0]);
     return accounts[0];
   };
 
@@ -190,20 +196,44 @@ const Metadata = () => {
       console.log('file hash is ', fileHash, ' json hash is ', jsonHash);
 
       let status = result.data.status;
-      switch (status) {
-        case 'success':
+
+      console.log('status is ', status);
+
+      console.log('address is ', address);
+      let fnft_sc = await SCHandlers.loadContract(
+        FantomNFTConstants.TESTNETADDRESS,
+        FantomNFTConstants.ABI
+      );
+
+      console.log('fnft sc is ', fnft_sc);
+
+      try {
+        let tokenId = await fnft_sc.mint(
+          address,
+          IPFSConstants.HashURI + jsonHash + '/',
           {
-            createNotification('info');
+            gasLimit: 3000000,
+            from: address,
           }
-          break;
-        case 'failed':
-          {
-            createNotification('error');
+        );
+        console.log('new nft has been created, token id is ', tokenId);
+        switch (status) {
+          case 'success':
+            {
+              createNotification('info');
+            }
+            break;
+          case 'failed':
+            {
+              createNotification('error');
+            }
+            break;
+          default: {
+            console.log('default status');
           }
-          break;
-        default: {
-          console.log('default status');
         }
+      } catch (error) {
+        console.log(error);
       }
     } catch (error) {
       createNotification('error');

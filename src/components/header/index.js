@@ -135,20 +135,6 @@ const NiftyHeader = () => {
     setMobileMoreAnchorEl(event.currentTarget);
   };
 
-  // const signout = async () => {
-  //   handleMenuClose();
-  //   try {
-  //     let _ifSignedout = AuthManager.signOut();
-  //     if (_ifSignedout) {
-  //       history.push('/signin');
-  //       dispatch(AuthActions.signOut());
-  //     } else {
-  //       console.log('signout failed');
-  //     }
-  //   } catch (error) {
-  //     console.log('signout failed try catch');
-  //   }
-  // };
   const connectWallet = async () => {
     await window.ethereum.enable();
 
@@ -182,7 +168,7 @@ const NiftyHeader = () => {
       let { connectedAddress, chainId } = await connectWallet();
       if (connectedAddress) {
         console.log('connected');
-        dispatch(WalletConnectActions.connectWallet(chainId));
+        dispatch(WalletConnectActions.connectWallet(chainId, connectedAddress));
       }
     }
     handleMenuClose();

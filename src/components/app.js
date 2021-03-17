@@ -24,7 +24,6 @@ const App = ({ paintStore }) => {
     return (
       <>
         <Layout>
-          <label>test</label>
           <Container isMobile={isMobile}>
             <Canvas
               id="drawingboard"

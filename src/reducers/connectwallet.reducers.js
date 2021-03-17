@@ -1,7 +1,7 @@
 import { WalletConnectConstants } from '../constants/walletconnect.constants';
 
 export function ConnectWallet(
-  state = { isConnected: false, chainId: 0 },
+  state = { isConnected: false, chainId: 0, address: '' },
   action
 ) {
   switch (action.type) {
@@ -10,6 +10,7 @@ export function ConnectWallet(
         ...state,
         isConnected: true,
         chainId: action.chainId,
+        address: action.address,
       };
     }
     case WalletConnectConstants.WALLETDISCONNECTED: {
@@ -17,6 +18,7 @@ export function ConnectWallet(
         ...state,
         isConnected: false,
         chainId: 0,
+        address: '',
       };
     }
     case WalletConnectConstants.CHAINIDCHANGED: {

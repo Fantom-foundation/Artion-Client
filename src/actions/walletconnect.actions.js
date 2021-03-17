@@ -6,16 +6,17 @@ const WalletConnectActions = {
   changeChainId,
 };
 
-function connectWallet(chainId) {
+function connectWallet(chainId, address) {
   return dispatch => {
-    dispatch(_connectWallet(chainId));
+    dispatch(_connectWallet(chainId, address));
   };
 }
 
-const _connectWallet = chainId => {
+const _connectWallet = (chainId, address) => {
   return {
     type: WalletConnectConstants.WALLETCONNECTED,
     chainId: chainId,
+    address: address,
   };
 };
 
