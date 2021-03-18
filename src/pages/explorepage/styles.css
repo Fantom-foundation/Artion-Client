@@ -60,6 +60,7 @@
     height: 10%;
     padding-top: 12px;
     box-sizing: border-box;
+    border-bottom: 2px dotted rgb(156, 146, 146);
 }
 
 .exploreBodyInfiniteLoaderContainer {
