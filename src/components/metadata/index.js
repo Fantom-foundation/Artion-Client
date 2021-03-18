@@ -5,6 +5,11 @@ import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 
+import Stepper from '@material-ui/core/Stepper';
+import Step from '@material-ui/core/Step';
+import StepLabel from '@material-ui/core/StepLabel';
+import { ClipLoader } from 'react-spinners';
+
 import 'react-notifications/lib/notifications.css';
 import {
   NotificationContainer,
@@ -12,11 +17,12 @@ import {
 } from 'react-notifications';
 
 import './styles.css';
-import { ethers } from 'ethers';
+import { BigNumber, ethers } from 'ethers';
 
 import { FantomNFTConstants } from '../../constants/smartcontracts/fnft.constants';
 import SCHandlers from '../../utils/sc.interaction';
 import IPFSConstants from '../../constants/ipfs.constants';
+import { useSelector } from 'react-redux';
 
 const useStyles = makeStyles(() => ({
   container: {
@@ -42,6 +48,7 @@ const useStyles = makeStyles(() => ({
     fontSize: 'x-large',
     backgroundColor: '#007bff !important',
     margin: '0 0 24px 0',
+    height: '50px',
   },
   inkInputContainer: {
     display: 'flex',
@@ -64,6 +71,23 @@ const useStyles = makeStyles(() => ({
     backgroundColor: '#ffffff !important',
     background: 'transparent !important',
   },
+
+  mintStatusContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    fontSize: 'x-large',
+    marginTop: '60px',
+  },
+  nftIDLabel: {
+    marginTop: '20px',
+  },
+  tnxAnchor: {
+    textDecoration: 'unset',
+    marginTop: '18px',
+    color: '#007bff',
+  },
 }));
 
 const assetCategories = [
@@ -77,6 +101,12 @@ const assetCategories = [
   'New',
 ];
 
+const mintSteps = [
+  'Uploading to IPFS',
+  'Create your NFT',
+  'Confirming the Transaction',
+];
+
 const Metadata = () => {
   const classes = useStyles();
 
@@ -85,6 +115,15 @@ const Metadata = () => {
   const [royalty, setRoyalty] = useState(0);
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('Art');
+
+  const [currentMintingStep, setCurrentMintingStep] = useState(0);
+  const [isMinting, setIsMinting] = useState(false);
+
+  const [lastMintedTkId, setLastMintedTkId] = useState(0);
+  const [lastMintedTnxId, setLastMintedTnxId] = useState('');
+
+  let isWalletConnected = useSelector(state => state.ConnectWallet.isConnected);
+  // let connectedChainId = useSelector(state => state.ConnectWallet.chainId);
 
   const createNotification = type => {
     switch (type) {
@@ -104,13 +143,20 @@ const Metadata = () => {
           3000
         );
         break;
+      case 'walletconnect':
+        NotificationManager.warning(
+          'You are disconnected from your account',
+          'Connect your wallet!',
+          3000
+        );
+        break;
       case 'error':
         NotificationManager.error(
           'Failed in creating your asset',
           'Error',
           5000,
           () => {
-            alert('callback');
+            console.log('callback');
           }
         );
         break;
@@ -166,10 +212,27 @@ const Metadata = () => {
     return accounts[0];
   };
 
+  const resetMintingStatus = () => {
+    setTimeout(() => {
+      setIsMinting(false);
+      setCurrentMintingStep(0);
+    }, 1000);
+  };
+
   const mintNFT = async () => {
+    if (!isWalletConnected) {
+      createNotification('walletconnect');
+      return;
+    }
+    setLastMintedTkId(0);
+    setLastMintedTnxId('');
+    // show stepper
+    setIsMinting(true);
+
     let address = await connectWallet();
     console.log('created from ', address);
     if (!validateMetadata(address)) {
+      resetMintingStatus();
       return;
     }
     let canvas = document.getElementById('drawingboard');
@@ -189,51 +252,62 @@ const Metadata = () => {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 
-      const fileHash = result.data.fileHash;
       const jsonHash = result.data.jsonHash;
-
-      console.log('file hash is ', fileHash, ' json hash is ', jsonHash);
 
       let status = result.data.status;
 
-      console.log('status is ', status);
-
-      console.log('address is ', address);
       let fnft_sc = await SCHandlers.loadContract(
         FantomNFTConstants.TESTNETADDRESS,
         FantomNFTConstants.ABI
       );
 
-      console.log('fnft sc is ', fnft_sc);
+      const provider = fnft_sc[1];
+      fnft_sc = fnft_sc[0];
 
       try {
-        let tokenId = await fnft_sc.mint(
+        let tx = await fnft_sc.mint(
           address,
           IPFSConstants.HashURI + jsonHash + '/',
           {
             gasLimit: 3000000,
           }
         );
-        console.log('new nft has been created, token id is ', tokenId);
+        setCurrentMintingStep(1);
+        console.log('tnx is ', tx);
+        setLastMintedTnxId(tx.hash);
+
+        setCurrentMintingStep(2);
+        const confirmedTnx = await provider.waitForTransaction(tx.hash);
+        setCurrentMintingStep(3);
+        console.log('confirmed tnx is ', confirmedTnx);
+        let evtCaught = confirmedTnx.logs[0].topics;
+
+        let mintedTkId = BigNumber.from(evtCaught[3]);
+        setLastMintedTkId(mintedTkId.toNumber());
         switch (status) {
           case 'success':
             {
+              resetMintingStatus();
               createNotification('info');
             }
             break;
           case 'failed':
             {
+              resetMintingStatus();
               createNotification('error');
             }
             break;
           default: {
+            resetMintingStatus();
             console.log('default status');
           }
         }
       } catch (error) {
+        resetMintingStatus();
         console.log(error);
       }
     } catch (error) {
+      resetMintingStatus();
       createNotification('error');
     }
   };
@@ -309,16 +383,54 @@ const Metadata = () => {
             }}
           />
         </div>
+
+        {isMinting && (
+          <div>
+            <Stepper activeStep={currentMintingStep} alternativeLabel>
+              {mintSteps.map(label => (
+                <Step key={label}>
+                  <StepLabel>{label}</StepLabel>
+                </Step>
+              ))}
+            </Stepper>
+          </div>
+        )}
         <div className={classes.inkButtonContainer}>
           <Button
             variant="contained"
             color="primary"
             className={classes.inkButton}
             onClick={mintNFT}
+            disabled={isMinting}
           >
-            Mint
+            {isMinting ? (
+              <ClipLoader size="16" color="white"></ClipLoader>
+            ) : (
+              'MINT'
+            )}
           </Button>
         </div>
+      </div>
+      <div className={classes.mintStatusContainer}>
+        {lastMintedTkId != 0 && (
+          <label className={classes.nftIDLabel}>
+            You have created an NFT with ID of {lastMintedTkId}
+          </label>
+        )}
+
+        {lastMintedTnxId != '' && (
+          <a
+            className={classes.tnxAnchor}
+            target="_blank"
+            rel="noreferrer"
+            href={
+              'https://explorer.testnet.fantom.network/transactions/' +
+              lastMintedTnxId
+            }
+          >
+            You can track the last transaction here ...
+          </a>
+        )}
       </div>
     </div>
   );
