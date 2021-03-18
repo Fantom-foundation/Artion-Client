@@ -123,9 +123,9 @@ const Metadata = () => {
   const [lastMintedTnxId, setLastMintedTnxId] = useState('');
 
   let isWalletConnected = useSelector(state => state.ConnectWallet.isConnected);
-  // let connectedChainId = useSelector(state => state.ConnectWallet.chainId);
+  let connectedChainId = useSelector(state => state.ConnectWallet.chainId);
 
-  const createNotification = type => {
+  const createNotification = (type, msgContent) => {
     switch (type) {
       case 'info':
         NotificationManager.info('Your asset has been successfully created');
@@ -143,16 +143,12 @@ const Metadata = () => {
           3000
         );
         break;
-      case 'walletconnect':
-        NotificationManager.warning(
-          'You are disconnected from your account',
-          'Connect your wallet!',
-          3000
-        );
+      case 'custom':
+        NotificationManager.info(msgContent);
         break;
       case 'error':
         NotificationManager.error(
-          'Failed in creating your asset',
+          'Failed to create your asset',
           'Error',
           5000,
           () => {
@@ -221,7 +217,11 @@ const Metadata = () => {
 
   const mintNFT = async () => {
     if (!isWalletConnected) {
-      createNotification('walletconnect');
+      createNotification('custom', 'Connect your wallet first');
+      return;
+    }
+    if (connectedChainId != 4002) {
+      createNotification('custom', 'You are not connected to Opera Testnet');
       return;
     }
     setLastMintedTkId(0);
@@ -304,7 +304,7 @@ const Metadata = () => {
         }
       } catch (error) {
         resetMintingStatus();
-        console.log(error);
+        createNotification('error');
       }
     } catch (error) {
       resetMintingStatus();
