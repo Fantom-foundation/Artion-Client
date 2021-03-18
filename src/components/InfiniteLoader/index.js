@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import faker from 'faker';
-import { FixedSizeList as List } from 'react-window';
+// import { FixedSizeList as List } from 'react-window';
+import { FixedSizeGrid as Grid } from 'react-window';
+
 import InfiniteLoader from 'react-window-infinite-loader';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import { makeStyles } from '@material-ui/core/styles';
@@ -10,7 +12,6 @@ import Card from '../Card';
 const useStyles = makeStyles({
   container: {
     position: 'relative',
-    zIndex: 1,
   },
 });
 
@@ -20,7 +21,7 @@ const ListContainer = props => {
 };
 
 const FInfiniteLoader = () => {
-  const [data, setData] = React.useState([]);
+  const [data, setData] = useState([]);
 
   if (data.length === 0) {
     setData(Array.from({ length: 500 }).map(() => null));
@@ -40,6 +41,16 @@ const FInfiniteLoader = () => {
     });
   };
 
+  if (ListContainer) console.log();
+
+  const resizeLoaderOnScreenChange = width => {
+    if (width >= 1200) return 5;
+    else if (width >= 1000 && width < 1200) return 4;
+    else if (width >= 600 && width < 1000) return 3;
+    else if (width > 480 && width < 600) return 2;
+    else return 1;
+  };
+
   return (
     <AutoSizer>
       {({ height, width }) => (
@@ -49,19 +60,20 @@ const FInfiniteLoader = () => {
           loadMoreItems={loadMoreItems}
         >
           {({ onItemsRendered, ref }) => (
-            <List
-              className="List"
+            <Grid
+              className="Grid"
+              columnCount={resizeLoaderOnScreenChange(width)}
+              columnWidth={(width - 17) / resizeLoaderOnScreenChange(width)}
               height={height}
+              rowCount={1000}
+              rowHeight={240}
               width={width}
-              itemCount={data.length}
-              itemSize={230}
               itemData={data}
-              innerElementType={ListContainer}
               onItemsRendered={onItemsRendered}
               ref={ref}
             >
               {Card}
-            </List>
+            </Grid>
           )}
         </InfiniteLoader>
       )}

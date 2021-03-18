@@ -4,6 +4,7 @@ import ExploreCollections from './Sidebar/Collections';
 import ExploreOnSaleIn from './Sidebar/OnSaleIn';
 import ExploreHeader from './Header';
 import ExploreFilterHeader from './Body/FilterHeader';
+import ExploreAllNFTs from './Body/ExploreBody';
 
 import './styles.css';
 
@@ -26,7 +27,9 @@ const ExploreAllPage = () => {
           <div className="exploreBodyFilterHeader">
             <ExploreFilterHeader></ExploreFilterHeader>
           </div>
-          <div className="exploreBodyInfiniteLoaderContainer">2</div>
+          <div className="exploreBodyInfiniteLoaderContainer">
+            <ExploreAllNFTs></ExploreAllNFTs>
+          </div>
         </div>
       </div>
     </div>

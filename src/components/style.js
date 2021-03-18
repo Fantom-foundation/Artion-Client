@@ -30,7 +30,7 @@ const setDimensions = (full, isMobile) => {
 
 export const Container = styled.div`
   position: fixed;
-  font-family: sans-serif;
+  // font-family: sans-serif;
 
   ${({ full, isMobile }) => setDimensions(full, isMobile)}
 `;

@@ -120,7 +120,7 @@ export default css`
   select,
   textarea {
     line-height: inherit;
-    font-family: inherit;
+    // font-family: inherit;
     font-size: inherit;
   }
   input[type='radio'],
@@ -161,7 +161,6 @@ export default css`
   body {
     -moz-osx-font-smoothing: grayscale;
     -webkit-font-smoothing: antialiased;
-    font-family: sans-serif;
     margin: 0;
     transition-timing-function: ease-in-out;
   }

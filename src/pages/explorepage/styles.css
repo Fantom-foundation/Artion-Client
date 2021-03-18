@@ -8,7 +8,8 @@
 
 .exploreSideBar {
     width: 18%;
-    /* border-right: 2px dotted #007bff; */
+    font-family: proxima-nova;
+    font-size: x-large;
     border-right: 1px solid rgb(156, 146, 146);
 }
 
