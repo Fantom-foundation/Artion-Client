@@ -82,7 +82,7 @@ const Metadata = () => {
 
   const [name, setName] = useState('fAsset');
   const [symbol, setSymbol] = useState('newnft');
-  const [limit, setLimit] = useState(1);
+  const [royalty, setRoyalty] = useState(0);
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('Art');
 
@@ -124,9 +124,9 @@ const Metadata = () => {
           setName(value);
         }
         break;
-      case 'limit':
+      case 'royalty':
         {
-          setLimit(value);
+          setRoyalty(value);
         }
         break;
       case 'description':
@@ -154,7 +154,7 @@ const Metadata = () => {
     return (
       name != '' &&
       symbol != '' &&
-      limit >= 1 &&
+      royalty < 30 &&
       (category != '') & (address != '')
     );
   };
@@ -176,7 +176,7 @@ const Metadata = () => {
     let formData = new FormData();
     formData.append('image', canvas.toDataURL());
     formData.append('name', name);
-    formData.append('limit', limit);
+    formData.append('royalty', royalty);
     formData.append('address', address);
     formData.append('description', description);
     formData.append('category', category);
@@ -263,12 +263,12 @@ const Metadata = () => {
           />
           <TextField
             className={classes.inkMetadataInput}
-            label="Limit"
+            label="Royalties (%)"
             type="number"
             id="inkmetadatalimitinput"
-            value={limit}
+            value={royalty}
             onChange={e => {
-              handleInputChange(e.target.value, 'limit');
+              handleInputChange(e.target.value, 'royalty');
             }}
             InputProps={{
               inputProps: {
@@ -283,6 +283,7 @@ const Metadata = () => {
               handleInputChange(option, 'category');
               return option;
             }}
+            value={category}
             className={classes.autocomplete}
             renderInput={params => (
               <TextField
@@ -315,7 +316,7 @@ const Metadata = () => {
             className={classes.inkButton}
             onClick={mintNFT}
           >
-            Ink
+            Mint
           </Button>
         </div>
       </div>
