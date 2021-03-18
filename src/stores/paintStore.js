@@ -77,13 +77,27 @@ class PaintStore {
             let background = new Image();
             background.src = reader.result;
             background.onload = () => {
-              this.ctx.drawImage(
-                background,
-                0,
-                0,
-                this.canvas.width,
-                this.canvas.height
-              );
+              if (background.width == background.height)
+                this.ctx.drawImage(
+                  background,
+                  0,
+                  0,
+                  this.canvas.width,
+                  this.canvas.height
+                );
+              else {
+                let imgW = background.width;
+                let imgH = background.height;
+                let max = imgW > imgH ? imgW : imgH;
+                let ratioToCanvas = parseFloat(this.canvas.height / max);
+                console.log(this.canvas.height, max, ratioToCanvas);
+                imgW *= ratioToCanvas;
+                imgH *= ratioToCanvas;
+                const x = (this.canvas.width - imgW) / 2;
+                const y = (this.canvas.height - imgH) / 2;
+                this.ctx.drawImage(background, x, y, imgW, imgH);
+              }
+              fileSelector.value = null;
               localStorage.setItem('background', reader.result);
             };
           };

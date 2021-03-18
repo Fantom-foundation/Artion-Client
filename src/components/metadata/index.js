@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-// import { useSelector } from 'react-redux';
 import axios from 'axios';
 import { makeStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
@@ -12,6 +11,7 @@ import {
   NotificationManager,
 } from 'react-notifications';
 
+import './styles.css';
 import { ethers } from 'ethers';
 
 import { FantomNFTConstants } from '../../constants/smartcontracts/fnft.constants';
@@ -67,7 +67,6 @@ const useStyles = makeStyles(() => ({
 }));
 
 const assetCategories = [
-  'New',
   'Art',
   'Domain Names',
   'Virtual Words',
@@ -75,6 +74,7 @@ const assetCategories = [
   'Collectibles',
   'Sports',
   'Utility',
+  'New',
 ];
 
 const Metadata = () => {
@@ -84,10 +84,7 @@ const Metadata = () => {
   const [symbol, setSymbol] = useState('newnft');
   const [limit, setLimit] = useState(1);
   const [description, setDescription] = useState('');
-  const [category, setCategory] = useState('New');
-
-  // let address = useSelector(state => state.ConnectWallet.address);
-  // let isWalletConnected = useSelector(state => state.ConnectWallet.isConnected);
+  const [category, setCategory] = useState('Art');
 
   const createNotification = type => {
     switch (type) {
@@ -169,10 +166,12 @@ const Metadata = () => {
     return accounts[0];
   };
 
-  const saveToFile = async () => {
+  const mintNFT = async () => {
     let address = await connectWallet();
     console.log('created from ', address);
-    if (!validateMetadata(address)) return;
+    if (!validateMetadata(address)) {
+      return;
+    }
     let canvas = document.getElementById('drawingboard');
     let formData = new FormData();
     formData.append('image', canvas.toDataURL());
@@ -213,7 +212,6 @@ const Metadata = () => {
           IPFSConstants.HashURI + jsonHash + '/',
           {
             gasLimit: 3000000,
-            from: address,
           }
         );
         console.log('new nft has been created, token id is ', tokenId);
@@ -281,7 +279,10 @@ const Metadata = () => {
           <Autocomplete
             id="category-combo-box"
             options={assetCategories}
-            getOptionLabel={option => option}
+            getOptionLabel={option => {
+              handleInputChange(option, 'category');
+              return option;
+            }}
             className={classes.autocomplete}
             renderInput={params => (
               <TextField
@@ -289,10 +290,6 @@ const Metadata = () => {
                 className={classes.inkMetadataInput}
                 label="Categories"
                 id="inkmetadatacategoryinput"
-                value={category}
-                onChange={e => {
-                  handleInputChange(e.target.value, 'category');
-                }}
               />
             )}
           />
@@ -316,7 +313,7 @@ const Metadata = () => {
             variant="contained"
             color="primary"
             className={classes.inkButton}
-            onClick={saveToFile}
+            onClick={mintNFT}
           >
             Ink
           </Button>

@@ -24,6 +24,11 @@ const ExploreFilterHeader = () => {
             value={GroupFilters[0]}
             //   onChange={handleChange}
             label="Group"
+            MenuProps={{
+              classes: {
+                paper: 'menuPropsPaper',
+              },
+            }}
           >
             {GroupFilters.map((filter, idx) => {
               return (
@@ -44,6 +49,11 @@ const ExploreFilterHeader = () => {
             value={SortByOptionsGlobal[0]}
             //   onChange={handleChange}
             label="Sort By"
+            MenuProps={{
+              classes: {
+                paper: 'menuPropsPaper',
+              },
+            }}
           >
             {SortByOptionsGlobal.map((option, idx) => {
               return (
