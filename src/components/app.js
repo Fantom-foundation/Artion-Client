@@ -18,9 +18,8 @@ const App = ({ paintStore }) => {
   const canvasRef = useRef(null);
   const { start, draw, stop } = paintStore;
 
-  useEffect(() => paintStore.initialize(canvasRef.current), [paintStore]);
-
   const PaintBoard = () => {
+    useEffect(() => paintStore.initialize(canvasRef.current), [paintStore]);
     return (
       <>
         <Layout>

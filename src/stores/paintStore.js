@@ -107,6 +107,10 @@ class PaintStore {
       });
       this.fileUploader = fileSelector;
       this.isInitialized = true;
+
+      console.log('is initialized ', this.isInitialized);
+    } else {
+      console.log('the canvas was initialized already');
     }
   };
 
