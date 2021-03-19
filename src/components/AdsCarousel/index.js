@@ -6,7 +6,7 @@ import 'slick-carousel/slick/slick-theme.css';
 
 import AdsCard from '../AdsCard';
 
-import './styles.scss';
+import './styles.css';
 
 const AdsCarousel = () => {
   let settings = {
