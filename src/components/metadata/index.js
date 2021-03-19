@@ -247,7 +247,7 @@ const Metadata = () => {
     try {
       let result = await axios({
         method: 'post',
-        url: 'http://localhost:5000/ipfs/uploadImage2Server',
+        url: 'http://54.174.183.104:4101/ipfs/uploadImage2Server',
         data: formData,
         headers: { 'Content-Type': 'multipart/form-data' },
       });

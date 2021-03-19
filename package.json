@@ -117,7 +117,7 @@
     "start": "react-app-rewired start",
     "build": "react-app-rewired build"
   },
-  "proxy": "http://localhost:5000",
+  "proxy": "http://54.174.183.104:4101",
   "eslintConfig": {
     "extends": "react-app"
   },
