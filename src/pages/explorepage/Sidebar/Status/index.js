@@ -3,11 +3,12 @@ import { makeStyles } from '@material-ui/core/styles';
 import Accordion from '@material-ui/core/Accordion';
 import AccordionDetails from '@material-ui/core/AccordionDetails';
 import AccordionSummary from '@material-ui/core/AccordionSummary';
-import Typography from '@material-ui/core/Typography';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import FormGroup from '@material-ui/core/FormGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
+
+import StarIcon from '@material-ui/icons/Star';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -16,7 +17,7 @@ const useStyles = makeStyles(theme => ({
   },
   heading: {
     fontSize: theme.typography.pxToRem(15),
-    flexBasis: '33.33%',
+    paddingLeft: 20,
     flexShrink: 0,
   },
   statusFormGroup: {
@@ -29,6 +30,10 @@ const useStyles = makeStyles(theme => ({
     flexDirection: 'column',
   },
   formControl: {},
+  statusSvgDiv: {
+    display: 'flex',
+    alignItems: 'center',
+  },
 }));
 
 const ExploreStatus = () => {
@@ -83,7 +88,10 @@ const ExploreStatus = () => {
           aria-controls="panel1bh-content"
           id="panel1bh-header"
         >
-          <Typography className={classes.heading}>Status</Typography>
+          <div className={classes.statusSvgDiv}>
+            <StarIcon></StarIcon>
+            <span className={classes.heading}>Status</span>
+          </div>
         </AccordionSummary>
         <AccordionDetails>
           <FormGroup className={classes.statusFormGroup}>

@@ -3,21 +3,42 @@ import { makeStyles } from '@material-ui/core/styles';
 import Accordion from '@material-ui/core/Accordion';
 import AccordionDetails from '@material-ui/core/AccordionDetails';
 import AccordionSummary from '@material-ui/core/AccordionSummary';
-import Typography from '@material-ui/core/Typography';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 
+import InputBase from '@material-ui/core/InputBase';
+import IconButton from '@material-ui/core/IconButton';
+
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import LoyaltyIcon from '@material-ui/icons/Loyalty';
+import SearchIcon from '@material-ui/icons/Search';
 const useStyles = makeStyles(theme => ({
   root: {
     width: '100%',
   },
   heading: {
     fontSize: theme.typography.pxToRem(15),
-    flexBasis: '33.33%',
     flexShrink: 0,
+    paddingLeft: 20,
   },
   secondaryHeading: {
     fontSize: theme.typography.pxToRem(15),
     color: theme.palette.text.secondary,
+  },
+  onsaleinSvgDiv: {
+    display: 'flex',
+    alignItems: 'center',
+  },
+  collectionExpandDiv: {
+    border: '1px solid gray',
+    borderRadius: '8px',
+    width: '100%',
+  },
+  input: {
+    marginLeft: theme.spacing(1),
+    flex: 1,
+    width: '80%',
+  },
+  iconButton: {
+    padding: 10,
   },
 }));
 
@@ -40,9 +61,27 @@ const ExploreOnSaleIn = () => {
           aria-controls="panel1bh-content"
           id="panel1bh-header"
         >
-          <Typography className={classes.heading}>On Sale In</Typography>
+          <div className={classes.onsaleinSvgDiv}>
+            <LoyaltyIcon></LoyaltyIcon>
+            <span className={classes.heading}>On Sale In</span>
+          </div>
         </AccordionSummary>
-        <AccordionDetails></AccordionDetails>
+        <AccordionDetails>
+          <div className={classes.collectionExpandDiv}>
+            <InputBase
+              className={classes.input}
+              placeholder="Filter"
+              inputProps={{ 'aria-label': 'search google maps' }}
+            />
+            <IconButton
+              type="submit"
+              className={classes.iconButton}
+              aria-label="search"
+            >
+              <SearchIcon />
+            </IconButton>
+          </div>
+        </AccordionDetails>
       </Accordion>
     </div>
   );

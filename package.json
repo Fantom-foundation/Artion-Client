@@ -31,6 +31,7 @@
     "dotenv": "6.2.0",
     "dotenv-expand": "4.2.0",
     "email-deep-validator": "^3.3.0",
+    "erc721": "^5.2.0",
     "eslint": "^6.7.2",
     "eslint-config-prettier": "^7.2.0",
     "eslint-config-react-app": "^5.0.0",
@@ -117,7 +118,7 @@
     "start": "react-app-rewired start",
     "build": "react-app-rewired build"
   },
-  "proxy": "https://nifty.fantom.network/api",
+  "proxy": "http://localhost:5001",
   "eslintConfig": {
     "extends": "react-app"
   },

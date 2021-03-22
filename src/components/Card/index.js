@@ -9,6 +9,11 @@ import CardMedia from '@material-ui/core/CardMedia';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 
+import SCHandlers from 'utils/sc.interaction';
+import ERC721Module from 'utils/erc721';
+import IPFSHandler from 'utils/ipfs';
+import { FantomNFTConstants } from '../../constants/smartcontracts/fnft.constants';
+
 const useStyles = makeStyles({
   root: {
     maxWidth: 345,
@@ -21,6 +26,18 @@ const useStyles = makeStyles({
 
 const BaseCard = ({ style }) => {
   const classes = useStyles();
+
+  const handleDetails = async () => {
+    let fnft_sc = await SCHandlers.loadContract(
+      FantomNFTConstants.TESTNETADDRESS,
+      FantomNFTConstants.ABI
+    );
+    fnft_sc = fnft_sc[0];
+    console.log(fnft_sc);
+    let uri = await ERC721Module.getTokenURI(33, fnft_sc);
+    let content = await IPFSHandler.readMetadataFromIPFS(uri);
+    console.log(content);
+  };
 
   return (
     <Box style={style} className={classes.root}>
@@ -41,7 +58,7 @@ const BaseCard = ({ style }) => {
           </CardContent>
         </CardActionArea>
         <CardActions>
-          <Button size="small" color="primary">
+          <Button size="small" color="primary" onClick={handleDetails}>
             Details
           </Button>
         </CardActions>

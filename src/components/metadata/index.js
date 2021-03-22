@@ -247,7 +247,8 @@ const Metadata = () => {
     try {
       let result = await axios({
         method: 'post',
-        url: 'https://nifty.fantom.network/api/ipfs/uploadImage2Server',
+        // url: 'https://nifty.fantom.network/api/ipfs/uploadImage2Server',
+        url: 'http://localhost:5001/ipfs/uploadImage2Server',
         data: formData,
         headers: { 'Content-Type': 'multipart/form-data' },
       });
