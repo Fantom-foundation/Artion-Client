@@ -1,14 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { makeStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import Autocomplete from '@material-ui/lab/Autocomplete';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogActions from '@material-ui/core/DialogActions';
+import Dialog from '@material-ui/core/Dialog';
 
 import Stepper from '@material-ui/core/Stepper';
 import Step from '@material-ui/core/Step';
 import StepLabel from '@material-ui/core/StepLabel';
 import { ClipLoader } from 'react-spinners';
+
+import ImageIcon from '@material-ui/icons/Image';
 
 import 'react-notifications/lib/notifications.css';
 import {
@@ -88,6 +94,56 @@ const useStyles = makeStyles(() => ({
     marginTop: '18px',
     color: '#007bff',
   },
+  createCollectionDiv: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    fontSize: 'x-large',
+  },
+  createCollectionContainer: {
+    width: '24%',
+  },
+  createCollectionBtn: {
+    marginTop: '30px',
+    width: '30%',
+    letterSpacing: '11px',
+    fontFamily: 'monospace',
+    fontSize: 'x-large',
+    backgroundColor: '#007bff !important',
+    margin: '0 0 24px 0',
+    height: '50px',
+  },
+  createCollectionImgContainer: {
+    height: '240px',
+    marginBottom: '36px',
+  },
+  createCollectionImageBox: {
+    width: '240px',
+    height: '100%',
+    border: '3px dotted gray',
+  },
+  createCollectionDlgTitle: {
+    textAlign: 'center',
+  },
+  createCollectionLogo: {
+    marginBottom: '36px',
+  },
+  createCollectionNameInputDiv: {
+    marginBottom: '36px',
+  },
+  createCollectionNameInput: {
+    width: '100%',
+    textAlign: 'left',
+  },
+  creteCollectionImageIcon: {
+    width: 'unset !important',
+    height: 'unset !important',
+  },
+  collectionLogoImage: {
+    height: '100%',
+    width: '100%',
+    objectFit: 'contain',
+  },
 }));
 
 const assetCategories = [
@@ -121,6 +177,43 @@ const Metadata = () => {
 
   const [lastMintedTkId, setLastMintedTkId] = useState(0);
   const [lastMintedTnxId, setLastMintedTnxId] = useState('');
+
+  const [collectionName, setCollectionName] = useState('');
+  const [collectionDescription, setCollectionDescription] = useState('');
+  const [isCollectionLogoUploaded, setIsCollectionLogoUploaded] = useState(
+    false
+  );
+  const [collectionLogoUrl, setCollectioLogoUrl] = useState('');
+  const [isCreateCollectionShown, setIsCreateCollectionShown] = useState(false);
+
+  const [fileSelector, setFileSelector] = useState();
+
+  useEffect(() => {
+    let _fileSelector = document.createElement('input');
+    _fileSelector.setAttribute('type', 'file');
+    _fileSelector.setAttribute('accept', '.png');
+    _fileSelector.addEventListener('change', () => {
+      try {
+        let selected = _fileSelector.files[0];
+        let url = URL.createObjectURL(selected);
+        setCollectioLogoUrl(url);
+        console.log('created url is ', url);
+        let reader = new FileReader();
+        reader.readAsDataURL(selected);
+        reader.onloadend = () => {
+          let background = new Image();
+          background.src = reader.result;
+          background.onload = () => {
+            setIsCollectionLogoUploaded(true);
+            _fileSelector.value = null;
+          };
+        };
+      } catch (error) {
+        console.log('file selection cancelled');
+      }
+    });
+    setFileSelector(_fileSelector);
+  }, []);
 
   let isWalletConnected = useSelector(state => state.ConnectWallet.isConnected);
   let connectedChainId = useSelector(state => state.ConnectWallet.chainId);
@@ -186,6 +279,16 @@ const Metadata = () => {
           setSymbol(value);
         }
         break;
+      case 'collectionName':
+        {
+          setCollectionName(value);
+        }
+        break;
+      case 'collectionDescription':
+        {
+          setCollectionDescription(value);
+        }
+        break;
       default: {
         console.log('default');
       }
@@ -247,8 +350,7 @@ const Metadata = () => {
     try {
       let result = await axios({
         method: 'post',
-        // url: 'https://nifty.fantom.network/api/ipfs/uploadImage2Server',
-        url: 'http://localhost:5001/ipfs/uploadImage2Server',
+        url: 'https://nifty.fantom.network/api/ipfs/uploadImage2Server',
         data: formData,
         headers: { 'Content-Type': 'multipart/form-data' },
       });
@@ -311,6 +413,10 @@ const Metadata = () => {
       resetMintingStatus();
       createNotification('error');
     }
+  };
+
+  const uploadImageForCollection = () => {
+    fileSelector.click();
   };
 
   return (
@@ -433,6 +539,116 @@ const Metadata = () => {
           </a>
         )}
       </div>
+      <div className={classes.createCollectionDiv}>
+        <div>
+          By creating a collection, you can group a set of NFTs and sell with a
+          single tap.
+        </div>
+        <Button
+          variant="contained"
+          color="primary"
+          className={classes.createCollectionBtn}
+          onClick={() => {
+            if (!isCreateCollectionShown) setIsCreateCollectionShown(true);
+          }}
+          disabled={isMinting}
+        >
+          {isMinting ? (
+            <ClipLoader size="16" color="white"></ClipLoader>
+          ) : (
+            'Create'
+          )}
+        </Button>
+      </div>
+      {isCreateCollectionShown && (
+        <div>
+          <Dialog
+            disableBackdropClick
+            disableEscapeKeyDown
+            // maxWidth="xs"
+            classes={{
+              paper: classes.createCollectionContainer,
+            }}
+            onEntering={() => {}}
+            aria-labelledby="confirmation-dialog-title"
+            open={true}
+          >
+            <DialogTitle id="confirmation-dialog-title">
+              <div className={classes.createCollectionDlgTitle}>
+                Create your collection
+              </div>
+            </DialogTitle>
+            <DialogContent dividers>
+              <div>
+                <div className={classes.createCollectionLogo}>
+                  <p>Logo</p>
+                  <p>(350 x 350 recommended)</p>
+                </div>
+                <div className={classes.createCollectionImgContainer}>
+                  <div
+                    className={classes.createCollectionImageBox}
+                    onClick={uploadImageForCollection}
+                  >
+                    {isCollectionLogoUploaded ? (
+                      <img
+                        src={collectionLogoUrl}
+                        alt="icon"
+                        className={classes.collectionLogoImage}
+                      ></img>
+                    ) : (
+                      <ImageIcon
+                        viewBox="-10 -10 44 44"
+                        className={classes.creteCollectionImageIcon}
+                      ></ImageIcon>
+                    )}
+                  </div>
+                </div>
+              </div>
+              <div className={classes.createCollectionNameInput}>
+                <TextField
+                  label="Name"
+                  id="inkmetadatasymbolinput"
+                  className={classes.createCollectionNameInput}
+                  placeholder="e.g.FMT Gems"
+                  value={collectionName}
+                  onChange={e => {
+                    handleInputChange(e.target.value, 'collectionName');
+                  }}
+                />
+              </div>
+              <div>
+                <TextField
+                  label="description(Optional)"
+                  hinttext="Message Field"
+                  value={collectionDescription}
+                  placeholder="Provide a description for your collection."
+                  floatinglabeltext="MultiLine and FloatingLabel"
+                  className={classes.createCollectionNameInput}
+                  multiline
+                  rows={2}
+                  onChange={e => {
+                    handleInputChange(e.target.value, 'collectionDescription');
+                  }}
+                />
+              </div>
+            </DialogContent>
+            <DialogActions>
+              <Button
+                autoFocus
+                onClick={() => {
+                  setIsCreateCollectionShown(false);
+                }}
+                color="primary"
+              >
+                Cancel
+              </Button>
+              <Button onClick={() => {}} color="primary">
+                Create
+              </Button>
+            </DialogActions>
+          </Dialog>
+        </div>
+      )}
     </div>
   );
 };

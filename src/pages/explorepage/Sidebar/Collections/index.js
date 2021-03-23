@@ -42,10 +42,6 @@ const useStyles = makeStyles(theme => ({
   iconButton: {
     padding: 10,
   },
-  divider: {
-    height: 28,
-    margin: 4,
-  },
 }));
 
 const ExploreCollections = () => {
@@ -77,7 +73,7 @@ const ExploreCollections = () => {
             <InputBase
               className={classes.input}
               placeholder="Filter"
-              inputProps={{ 'aria-label': 'search google maps' }}
+              inputProps={{ 'aria-label': 'Filter' }}
             />
             <IconButton
               type="submit"

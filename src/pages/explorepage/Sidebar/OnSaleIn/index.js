@@ -71,7 +71,7 @@ const ExploreOnSaleIn = () => {
             <InputBase
               className={classes.input}
               placeholder="Filter"
-              inputProps={{ 'aria-label': 'search google maps' }}
+              inputProps={{ 'aria-label': 'Filter' }}
             />
             <IconButton
               type="submit"

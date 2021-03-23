@@ -118,7 +118,7 @@
     "start": "react-app-rewired start",
     "build": "react-app-rewired build"
   },
-  "proxy": "http://localhost:5001",
+  "proxy": "https://nifty.fantom.network/api",
   "eslintConfig": {
     "extends": "react-app"
   },
