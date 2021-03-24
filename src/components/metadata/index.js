@@ -99,6 +99,8 @@ const useStyles = makeStyles(() => ({
     flexDirection: 'column',
     alignItems: 'center',
     fontSize: 'x-large',
+    // borderTop: '1px dotted #007bff',
+    marginTop: '20px',
   },
   createCollectionContainer: {
     width: '24%',
