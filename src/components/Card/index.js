@@ -50,10 +50,10 @@ const BaseCard = ({ style }) => {
           />
           <CardContent>
             <Typography gutterBottom variant="h5" component="h2">
-              Cute
+              Sample
             </Typography>
             <Typography variant="body2" color="textSecondary" component="p">
-              This is a cute girl based NFT
+              Sample NFT Explorer
             </Typography>
           </CardContent>
         </CardActionArea>

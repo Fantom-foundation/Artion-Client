@@ -36,7 +36,7 @@ const AdsCarousel = () => {
     'https://images.unsplash.com/photo-1603993097397-89c963e325c7?ixid=MXwxMjA3fDF8MHxlZGl0b3JpYWwtZmVlZHw4NXx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60';
   let demoUrl5 =
     'https://images.unsplash.com/photo-1485217988980-11786ced9454?ixid=MXwxMjA3fDF8MHxlZGl0b3JpYWwtZmVlZHwxMzN8fHxlbnwwfHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60';
-  let name = "Tommy's Test";
+  let name = 'Sample';
   let description = 'This is the NFT Items powered on Fantom';
 
   return (
