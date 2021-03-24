@@ -45,7 +45,7 @@ const BaseCard = ({ style }) => {
         <CardActionArea>
           <CardMedia
             className={classes.media}
-            image="https://gateway.pinata.cloud/ipfs/QmfKZXhGzPVYLu7YN5GrZnNitpgL8p3ADojuy1rPpLc5TX"
+            image="https://lh3.googleusercontent.com/wBTNC-eFVW2ewUTXXx-2RBvnew8_gu-xw0pIQQ2u4YDaZ9KiUJQ3JxksfHCecxPknv23pnXvdcldqypqsUmyIspZQD4n4MsKBzTXJg=s992"
             title="Contemplative Reptile"
           />
           <CardContent>

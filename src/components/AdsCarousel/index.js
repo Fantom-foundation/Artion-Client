@@ -25,17 +25,30 @@ const AdsCarousel = () => {
   };
 
   let demoUrl =
-    'https://gateway.pinata.cloud/ipfs/QmX5H8gghPgNgejpWhqPQeHbETo4AFj5x2TivcV18KhkNQ';
+    'https://lh3.googleusercontent.com/z0IUzmnJ5aL5aHTh5lVBflJVGcRud6O0AGQFYyK2mKf81ejp_dgOOUzzeXcfMqKnZdz1qX2V_IMKmmbuDOJKS54CJbVQHO11eBkAYw=s992';
   let demoUrl1 =
-    'https://images.unsplash.com/photo-1593642532009-6ba71e22f468?ixid=MXwxMjA3fDF8MHxlZGl0b3JpYWwtZmVlZHwxfHx8ZW58MHx8fA%3D%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60';
+    'https://lh3.googleusercontent.com/HDdx4boLtWWAus1Q5Z_2kbEBYmuSXc6I87An64u628-F8IK8lZ-VZN3O3p6r2nREapCaHYrsEN3iawXCZM5QwXdZFH78pu9LjhL4yA=s992';
   let demoUrl2 =
-    'https://images.unsplash.com/photo-1614896777839-cdec1a580b0a?ixid=MXwxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHw0M3x8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60';
+    'https://lh3.googleusercontent.com/y-5FEVInvwNmKT6pcXYqQilLMPDrezlNkxqe1cEAjY7PIbKbGvwzvpZtLQ3Gh8NKZsiz1X-BE0NLad76P4Ic7XgfZXNrPEAI1UdWsQ=s992';
   let demoUrl3 =
-    'https://images.unsplash.com/photo-1615164280089-0f403961df96?ixid=MXwxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHwzOXx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60';
+    'https://lh3.googleusercontent.com/zq6XbLmRM9hZIG3kNDRfxbpQIKh_CQJLwckAZWUK3_qbalr-oLfdfcl3p-DW3JLHTURfA81hD1vEfvZWJR4AzWkEWnBsoX5b_51gng=s992';
   let demoUrl4 =
-    'https://images.unsplash.com/photo-1603993097397-89c963e325c7?ixid=MXwxMjA3fDF8MHxlZGl0b3JpYWwtZmVlZHw4NXx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60';
+    'https://lh3.googleusercontent.com/aQzrnteZrcwm5FR9zg03FXH66DMsNm0g-4eiJmabO3WTgAb_8yjSVLZ5i0u9oxj1gLM9iOdogKKb3J_f6Atr71Ti91fW-j8Ojz05s-U=s992';
   let demoUrl5 =
-    'https://images.unsplash.com/photo-1485217988980-11786ced9454?ixid=MXwxMjA3fDF8MHxlZGl0b3JpYWwtZmVlZHwxMzN8fHxlbnwwfHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60';
+    'https://lh3.googleusercontent.com/Lc6QkUUhtkbGXLRSwvwQdGSovPfDIeBsyfjLmAoL28CY41h8h465yR-Jy1XS9UFASWPtg7hGou_grtkfrUNt-NQaGlDfi7ZafhTC2Ck=s992';
+
+  let demoUrl6 =
+    'https://lh3.googleusercontent.com/17vU_UNWeMOVi4XOAwo4nvAXpeg1dnKPBk8VnAhJcFHOFZ9UBBvSL5Spj0ytvyfII3rdp4gHMY0mMvbnSzjdOZ0=s992';
+
+  let demoUrl7 =
+    'https://lh3.googleusercontent.com/p9w7XABQskc1QLOiTaAsCmiealmr4LZZbTSL3MqwyDT6annJjL3YQZwcALfsLHAd1qEWBANza6A0U-fINRhf3uexmevTbJCHGIR2LQ=s992';
+
+  let demoUrl8 =
+    'https://lh3.googleusercontent.com/VR-avzd2YeD-W1wquFCsPpLmvkqRaP23qXBRJLt3eJtBK7srZC0aAW7qBzNE70t_s9J1C0ZHyYiA0zjRP0pWKrmwnnA8ll6_UJFo=s992';
+
+  let demoUrl9 =
+    'https://lh3.googleusercontent.com/t0WfHQil3DfcP0gY9vs-1W2TDxRSHz4LPxXC3cDs899othEGV2EA-VajZFgaHe6WWPWRO4JohFG5UXT5NL4zgZSOEf92fCcw0frd=s992';
+
   let name = 'Sample';
   let description = 'This is the NFT Items powered on Fantom';
 
@@ -86,14 +99,28 @@ const AdsCarousel = () => {
         </div>
         <div>
           <AdsCard
-            ipfsUrl={demoUrl3}
+            ipfsUrl={demoUrl6}
             name={name}
             description={description}
           ></AdsCard>
         </div>
         <div>
           <AdsCard
-            ipfsUrl={demoUrl4}
+            ipfsUrl={demoUrl7}
+            name={name}
+            description={description}
+          ></AdsCard>
+        </div>
+        <div>
+          <AdsCard
+            ipfsUrl={demoUrl8}
+            name={name}
+            description={description}
+          ></AdsCard>
+        </div>
+        <div>
+          <AdsCard
+            ipfsUrl={demoUrl9}
             name={name}
             description={description}
           ></AdsCard>
