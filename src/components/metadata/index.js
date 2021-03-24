@@ -23,7 +23,7 @@ import {
 } from 'react-notifications';
 
 import './styles.css';
-import { BigNumber, ethers } from 'ethers';
+import { BigNumber } from 'ethers';
 
 import { FantomNFTConstants } from '../../constants/smartcontracts/fnft.constants';
 import SCHandlers from '../../utils/sc.interaction';
@@ -186,6 +186,8 @@ const Metadata = () => {
   const [collectionLogoUrl, setCollectioLogoUrl] = useState('');
   const [isCreateCollectionShown, setIsCreateCollectionShown] = useState(false);
 
+  const [collectionImgData, setCollectionImgData] = useState(null);
+
   const [fileSelector, setFileSelector] = useState();
 
   useEffect(() => {
@@ -204,6 +206,8 @@ const Metadata = () => {
           let background = new Image();
           background.src = reader.result;
           background.onload = () => {
+            setCollectionImgData(background.src);
+            console.log(background.src);
             setIsCollectionLogoUploaded(true);
             _fileSelector.value = null;
           };
@@ -217,6 +221,7 @@ const Metadata = () => {
 
   let isWalletConnected = useSelector(state => state.ConnectWallet.isConnected);
   let connectedChainId = useSelector(state => state.ConnectWallet.chainId);
+  const address = useSelector(state => state.ConnectWallet.address); //connected address
 
   const createNotification = (type, msgContent) => {
     switch (type) {
@@ -295,20 +300,13 @@ const Metadata = () => {
     }
   };
 
-  const validateMetadata = address => {
+  const validateMetadata = () => {
     return (
       name != '' &&
       symbol != '' &&
       royalty < 30 &&
       (category != '') & (address != '')
     );
-  };
-
-  const connectWallet = async () => {
-    await window.ethereum.enable();
-    let provider = new ethers.providers.Web3Provider(window.ethereum);
-    let accounts = await provider.listAccounts();
-    return accounts[0];
   };
 
   const resetMintingStatus = () => {
@@ -331,10 +329,8 @@ const Metadata = () => {
     setLastMintedTnxId('');
     // show stepper
     setIsMinting(true);
-
-    let address = await connectWallet();
     console.log('created from ', address);
-    if (!validateMetadata(address)) {
+    if (!validateMetadata()) {
       resetMintingStatus();
       return;
     }
@@ -417,6 +413,51 @@ const Metadata = () => {
 
   const uploadImageForCollection = () => {
     fileSelector.click();
+  };
+
+  const toggleCreateCollectionDlg = async () => {
+    console.log('clicked');
+    let balance = await SCHandlers.getAccountBalance(address);
+    console.log(`total balance of ${address} is ${balance}`);
+    if (!isWalletConnected) {
+      createNotification('custom', 'Connect your wallet first');
+      return;
+    }
+    if (connectedChainId != 4002) {
+      createNotification('custom', 'You are not connected to Opera Testnet');
+      return;
+    }
+    setIsCreateCollectionShown(true);
+  };
+
+  const handleCreateCollection = async () => {
+    if (collectionLogoUrl == '') {
+      createNotification('custom', 'You need to upload the collection logo');
+      return;
+    }
+    let formData = new FormData();
+    formData.append('name', collectionName);
+    formData.append('description', collectionDescription);
+    formData.append('address', address);
+    formData.append('imgData', collectionImgData);
+    try {
+      let result = await axios({
+        method: 'post',
+        url:
+          'https://nifty.fantom.network/api/ipfs/uploadCollectionImage2Server',
+        data: formData,
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      console.log(result);
+    } catch (error) {
+      console.log('failed to upload to the server');
+    }
+    setCollectionName('');
+    setCollectionDescription('');
+    setIsCollectionLogoUploaded(false);
+    setCollectioLogoUrl('');
+    setIsCreateCollectionShown(false);
+    setCollectionImgData(null);
   };
 
   return (
@@ -508,7 +549,7 @@ const Metadata = () => {
             color="primary"
             className={classes.inkButton}
             onClick={mintNFT}
-            disabled={isMinting}
+            disabled={isMinting || !isWalletConnected}
           >
             {isMinting ? (
               <ClipLoader size="16" color="white"></ClipLoader>
@@ -548,16 +589,12 @@ const Metadata = () => {
           variant="contained"
           color="primary"
           className={classes.createCollectionBtn}
-          onClick={() => {
-            if (!isCreateCollectionShown) setIsCreateCollectionShown(true);
+          onClick={async () => {
+            await toggleCreateCollectionDlg();
           }}
-          disabled={isMinting}
+          disabled={!isWalletConnected}
         >
-          {isMinting ? (
-            <ClipLoader size="16" color="white"></ClipLoader>
-          ) : (
-            'Create'
-          )}
+          Create
         </Button>
       </div>
       {isCreateCollectionShown && (
@@ -642,7 +679,7 @@ const Metadata = () => {
               >
                 Cancel
               </Button>
-              <Button onClick={() => {}} color="primary">
+              <Button onClick={handleCreateCollection} color="primary">
                 Create
               </Button>
             </DialogActions>

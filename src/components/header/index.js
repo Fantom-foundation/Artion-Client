@@ -13,12 +13,8 @@ import NotificationsIcon from '@material-ui/icons/Notifications';
 import MoreIcon from '@material-ui/icons/MoreVert';
 import InputBase from '@material-ui/core/InputBase';
 import SearchIcon from '@material-ui/icons/Search';
-
-// import { useHistory } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import FantomLogo from '../../assets/svgs/fantom_logo_white_new.svg';
-// import AuthManager from '../../components/auth/authmanager';
-// import AuthActions from '../auth/authmanager';
 import { ethers } from 'ethers';
 import WalletConnectActions from '../../actions/walletconnect.actions';
 

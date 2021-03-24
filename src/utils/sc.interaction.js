@@ -2,7 +2,6 @@ import { ethers } from 'ethers';
 import { FantomNFTConstants } from '../constants/smartcontracts/fnft.constants';
 
 const loadSignedContract = async (address, abi) => {
-  await window.ethereum.enable();
   const provider = new ethers.providers.JsonRpcProvider(
     FantomNFTConstants.TESTNETRPC,
     FantomNFTConstants.TESTNETCHAINID
@@ -15,16 +14,18 @@ const loadSignedContract = async (address, abi) => {
 };
 
 const loadContract = async (address, abi) => {
-  await window.ethereum.enable();
-  //   const provider = new ethers.providers.JsonRpcProvider(
-  //     FantomNFTConstants.TESTNETRPC,
-  //     FantomNFTConstants.TESTNETCHAINID
-  //   );
   const provider = new ethers.providers.Web3Provider(window.ethereum);
   const signer = provider.getSigner();
   return [new ethers.Contract(address, abi, signer), provider];
 };
 
-const SCHandlers = { loadSignedContract, loadContract };
+const getAccountBalance = async address => {
+  const provider = new ethers.providers.Web3Provider(window.ethereum);
+  let balance = await provider.getBalance(address);
+  balance = ethers.utils.formatEther(balance);
+  return balance;
+};
+
+const SCHandlers = { loadSignedContract, loadContract, getAccountBalance };
 
 export default SCHandlers;
