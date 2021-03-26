@@ -17,6 +17,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import FantomLogo from '../../assets/svgs/fantom_logo_white_new.svg';
 import { ethers } from 'ethers';
 import WalletConnectActions from '../../actions/walletconnect.actions';
+import { abbrAddress } from '../../utils';
 
 const useStyles = makeStyles(theme => ({
   grow: {
@@ -93,6 +94,12 @@ const useStyles = makeStyles(theme => ({
       display: 'none',
     },
   },
+  address: {
+    paddingTop: 2,
+    marginRight: 10,
+    display: 'flex',
+    alignItems: 'center',
+  },
 }));
 
 const NiftyHeader = () => {
@@ -113,6 +120,7 @@ const NiftyHeader = () => {
   const isWalletConnected = useSelector(
     state => state.ConnectWallet.isConnected
   );
+  const address = useSelector(state => state.ConnectWallet.address);
 
   const handleProfileMenuOpen = event => {
     setAnchorEl(event.currentTarget);
@@ -255,6 +263,7 @@ const NiftyHeader = () => {
           </div>
           <div className={classes.grow} />
           <div className={classes.sectionDesktop}>
+            <div className={classes.address}>{abbrAddress(address)}</div>
             <IconButton aria-label="show 4 new mails" color="inherit">
               <Badge badgeContent={0} color="secondary">
                 <MailIcon />
