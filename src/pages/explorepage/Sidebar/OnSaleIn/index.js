@@ -31,11 +31,13 @@ const useStyles = makeStyles(theme => ({
     border: '1px solid gray',
     borderRadius: '8px',
     width: '100%',
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   input: {
     marginLeft: theme.spacing(1),
-    flex: 1,
-    width: '80%',
+    flexGrow: 1,
   },
   iconButton: {
     padding: 10,
