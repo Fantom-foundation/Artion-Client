@@ -432,7 +432,7 @@ const Metadata = () => {
     setIsCreateCollectionShown(true);
   };
 
-  const handleCreateCollection = async () => {
+  const handleCreateBundle = async () => {
     if (collectionLogoUrl == '') {
       createNotification('custom', 'You need to upload the collection logo');
       return;
@@ -445,8 +445,7 @@ const Metadata = () => {
     try {
       let result = await axios({
         method: 'post',
-        url:
-          'https://nifty.fantom.network/api/ipfs/uploadCollectionImage2Server',
+        url: 'https://nifty.fantom.network/api/ipfs/uploadBundleImage2Server',
         data: formData,
         headers: { 'Content-Type': 'multipart/form-data' },
       });
@@ -584,7 +583,7 @@ const Metadata = () => {
       </div>
       <div className={classes.createCollectionDiv}>
         <div>
-          By creating a collection, you can group a set of NFTs and sell with a
+          By creating a bundle, you can group a set of NFTs and sell with a
           single tap.
         </div>
         <Button
@@ -614,7 +613,7 @@ const Metadata = () => {
           >
             <DialogTitle id="confirmation-dialog-title">
               <div className={classes.createCollectionDlgTitle}>
-                Create your collection
+                Create your bundle
               </div>
             </DialogTitle>
             <DialogContent dividers>
@@ -681,7 +680,7 @@ const Metadata = () => {
               >
                 Cancel
               </Button>
-              <Button onClick={handleCreateCollection} color="primary">
+              <Button onClick={handleCreateBundle} color="primary">
                 Create
               </Button>
             </DialogActions>
