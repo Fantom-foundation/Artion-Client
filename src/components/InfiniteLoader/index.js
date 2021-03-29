@@ -66,7 +66,7 @@ const FInfiniteLoader = () => {
               columnWidth={(width - 17) / resizeLoaderOnScreenChange(width)}
               height={height}
               rowCount={1000}
-              rowHeight={240}
+              rowHeight={300}
               width={width}
               itemData={data}
               onItemsRendered={onItemsRendered}
