@@ -18,6 +18,7 @@ import FantomLogo from '../../assets/svgs/fantom_logo_white_new.svg';
 import { ethers } from 'ethers';
 import WalletConnectActions from '../../actions/walletconnect.actions';
 import { abbrAddress } from '../../utils';
+import HeaderActions from '../../actions/header.actions';
 
 const useStyles = makeStyles(theme => ({
   grow: {
@@ -114,12 +115,14 @@ const NiftyHeader = () => {
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
 
   const goToHomepage = () => {
+    dispatch(HeaderActions.toggleSearchbar(false));
     history.push('/');
   };
 
   const isWalletConnected = useSelector(
     state => state.ConnectWallet.isConnected
   );
+  let isSearchbarShown = useSelector(state => state.HeaderOptions.isShown);
   const address = useSelector(state => state.ConnectWallet.address);
 
   const handleProfileMenuOpen = event => {
@@ -248,19 +251,21 @@ const NiftyHeader = () => {
               onClick={goToHomepage}
             ></img>
           </div>
-          <div className={classes.search}>
-            <div className={classes.searchIcon}>
-              <SearchIcon />
+          {isSearchbarShown && (
+            <div className={classes.search}>
+              <div className={classes.searchIcon}>
+                <SearchIcon />
+              </div>
+              <InputBase
+                placeholder="Search items ..."
+                classes={{
+                  root: classes.inputRoot,
+                  input: classes.inputInput,
+                }}
+                inputProps={{ 'aria-label': 'search' }}
+              />
             </div>
-            <InputBase
-              placeholder="Search items ..."
-              classes={{
-                root: classes.inputRoot,
-                input: classes.inputInput,
-              }}
-              inputProps={{ 'aria-label': 'search' }}
-            />
-          </div>
+          )}
           <div className={classes.grow} />
           <div className={classes.sectionDesktop}>
             <div className={classes.address}>{abbrAddress(address)}</div>

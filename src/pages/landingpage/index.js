@@ -6,13 +6,19 @@ import Button from '@material-ui/core/Button';
 import { useHistory } from 'react-router-dom';
 import AdsCarousel from '../../components/AdsCarousel';
 
+import HeaderActions from '../../actions/header.actions';
+import { useDispatch } from 'react-redux';
+
 const LandingPage = ({ classes }) => {
   const history = useHistory();
+  const dispatch = useDispatch();
 
   const goToCreate = () => {
+    dispatch(HeaderActions.toggleSearchbar(false));
     history.push('/create');
   };
   const goToExploreAll = () => {
+    dispatch(HeaderActions.toggleSearchbar(true));
     history.push('/exploreall');
   };
   return (
