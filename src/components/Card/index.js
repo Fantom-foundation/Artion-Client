@@ -29,6 +29,11 @@ const useStyles = makeStyles({
       transform: 'translateY(-2px)',
     },
   },
+  label: {
+    fontSize: 14,
+    margin: 0,
+    color: '#999',
+  },
   name: {
     fontSize: 16,
     margin: 0,
@@ -53,6 +58,16 @@ const useStyles = makeStyles({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
+  alignLeft: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+  },
+  alignRight: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'flex-end',
+  },
 });
 
 const BaseCard = ({ style }) => {
@@ -67,12 +82,22 @@ const BaseCard = ({ style }) => {
           title="Contemplative Reptile"
         />
         <CardContent className={classes.content}>
-          <Typography gutterBottom component="h4" className={classes.name}>
-            Sample
-          </Typography>
-          <Typography gutterBottom component="h4" className={classes.price}>
-            Ξ 1.1
-          </Typography>
+          <div className={classes.alignLeft}>
+            <Typography component="h4" className={classes.label}>
+              Category
+            </Typography>
+            <Typography component="h4" className={classes.name}>
+              Sample
+            </Typography>
+          </div>
+          <div className={classes.alignRight}>
+            <Typography component="h4" className={classes.label}>
+              Price
+            </Typography>
+            <Typography component="h4" className={classes.price}>
+              Ξ 1.111
+            </Typography>
+          </div>
         </CardContent>
       </Card>
     </Box>
