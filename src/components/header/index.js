@@ -192,7 +192,8 @@ const NiftyHeader = () => {
       open={isMenuOpen}
       onClose={handleMenuClose}
     >
-      <MenuItem onClick={handleMenuClose}>Account</MenuItem>
+      <MenuItem onClick={handleMenuClose}>My Profile</MenuItem>
+      <MenuItem onClick={handleMenuClose}>Account Settings</MenuItem>
       <MenuItem onClick={handleConnectWallet}>
         {isWalletConnected ? 'Sign Out' : 'Sign In'}
       </MenuItem>
