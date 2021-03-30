@@ -17,6 +17,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import FantomLogo from '../../assets/svgs/fantom_logo_white_new.svg';
 import { ethers } from 'ethers';
 import WalletConnectActions from '../../actions/walletconnect.actions';
+import ModalActions from '../../actions/modal.actions';
 import { abbrAddress } from '../../utils';
 import HeaderActions from '../../actions/header.actions';
 
@@ -28,7 +29,7 @@ const useStyles = makeStyles(theme => ({
     width: '100%',
     top: 0,
     left: 0,
-    zIndex: 10000,
+    zIndex: 1,
   },
   menuButton: {
     marginRight: theme.spacing(2),
@@ -168,6 +169,11 @@ const NiftyHeader = () => {
     return { connectedAddress, chainId };
   };
 
+  const openAccountSettings = () => {
+    dispatch(ModalActions.showAccountModal());
+    handleMenuClose();
+  };
+
   const handleConnectWallet = async () => {
     if (isWalletConnected) {
       dispatch(WalletConnectActions.disconnectWallet());
@@ -193,7 +199,7 @@ const NiftyHeader = () => {
       onClose={handleMenuClose}
     >
       <MenuItem onClick={handleMenuClose}>My Profile</MenuItem>
-      <MenuItem onClick={handleMenuClose}>Account Settings</MenuItem>
+      <MenuItem onClick={openAccountSettings}>Account Settings</MenuItem>
       <MenuItem onClick={handleConnectWallet}>
         {isWalletConnected ? 'Sign Out' : 'Sign In'}
       </MenuItem>

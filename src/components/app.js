@@ -9,6 +9,7 @@ import NiftyFooter from './footer';
 import Metadata from './metadata';
 import SignIn from '../components/auth/signin';
 import SignUp from '../components/auth/signup';
+import AccountModal from './AccountModal';
 import { Container, Canvas } from './style';
 import { isMobile } from 'utils/userAgent';
 import LandingPage from '../pages/landingpage';
@@ -56,6 +57,7 @@ const App = ({ paintStore }) => {
           <Route exact path="/create" component={PaintBoard}></Route>
         </Switch>
         <NiftyFooter></NiftyFooter>
+        <AccountModal />
       </Router>
     </div>
   );
