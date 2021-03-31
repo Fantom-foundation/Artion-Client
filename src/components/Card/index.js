@@ -1,4 +1,5 @@
 import React from 'react';
+import { useHistory } from 'react-router';
 import { makeStyles } from '@material-ui/core/styles';
 import Box from '@material-ui/core/Box';
 import Card from '@material-ui/core/Card';
@@ -72,13 +73,18 @@ const useStyles = makeStyles({
 
 const BaseCard = ({ style }) => {
   const classes = useStyles();
+  const history = useHistory();
+
+  const viewNFTDetails = () => {
+    history.push('/explore/0x123/1');
+  };
 
   return (
-    <Box style={style} className={classes.root}>
+    <Box style={style} className={classes.root} onClick={viewNFTDetails}>
       <Card className={classes.card}>
         <CardMedia
           className={classes.media}
-          image="https://lh3.googleusercontent.com/wBTNC-eFVW2ewUTXXx-2RBvnew8_gu-xw0pIQQ2u4YDaZ9KiUJQ3JxksfHCecxPknv23pnXvdcldqypqsUmyIspZQD4n4MsKBzTXJg=s992"
+          image="https://lh3.googleusercontent.com/c2Y0zp4LpzETIMO6FL4unRHXrGuxt9_ifWmqzbzQ_oqvh4LCZhMrswzWiBttEr3J-kQ5d9AVoq7VTfY2UxPhwynY=s992"
           title="Contemplative Reptile"
         />
         <CardContent className={classes.content}>
