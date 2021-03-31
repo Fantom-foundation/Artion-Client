@@ -9,10 +9,12 @@ import NiftyFooter from './footer';
 import Metadata from './metadata';
 import SignIn from '../components/auth/signin';
 import SignUp from '../components/auth/signup';
+import AccountModal from './AccountModal';
 import { Container, Canvas } from './style';
 import { isMobile } from 'utils/userAgent';
 import LandingPage from '../pages/landingpage';
 import ExploreAllPage from '../pages/explorepage';
+import NFTItem from '../pages/NFTItem';
 
 const App = ({ paintStore }) => {
   const canvasRef = useRef(null);
@@ -54,8 +56,10 @@ const App = ({ paintStore }) => {
           <Route exact path="/signin" component={SignIn}></Route>
           <Route exact path="/signup" component={SignUp}></Route>
           <Route exact path="/create" component={PaintBoard}></Route>
+          <Route path="/explore/:addr/:id" component={NFTItem}></Route>
         </Switch>
         <NiftyFooter></NiftyFooter>
+        <AccountModal />
       </Router>
     </div>
   );

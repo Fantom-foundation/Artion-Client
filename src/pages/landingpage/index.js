@@ -4,7 +4,7 @@ import { register } from './styles';
 import Paper from '@material-ui/core/Paper';
 import Button from '@material-ui/core/Button';
 import { useHistory } from 'react-router-dom';
-import AdsCarousel from '../../components/AdsCarousel';
+// import AdsCarousel from '../../components/AdsCarousel';
 
 import HeaderActions from '../../actions/header.actions';
 import { useDispatch } from 'react-redux';
@@ -33,7 +33,7 @@ const LandingPage = ({ classes }) => {
           </span>
         </div>
       </Paper>
-      <AdsCarousel className={classes.carouselContainer}></AdsCarousel>
+      {/* <AdsCarousel className={classes.carouselContainer}></AdsCarousel> */}
       <div className={classes.buttonsContainer}>
         <Button
           variant="contained"
