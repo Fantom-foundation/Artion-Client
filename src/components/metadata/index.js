@@ -226,6 +226,7 @@ const Metadata = () => {
 
   let isWalletConnected = useSelector(state => state.ConnectWallet.isConnected);
   let connectedChainId = useSelector(state => state.ConnectWallet.chainId);
+  let authToken = useSelector(state => state.ConnectWallet.authToken);
   const address = useSelector(state => state.ConnectWallet.address); //connected address
 
   const createNotification = (type, msgContent) => {
@@ -364,7 +365,10 @@ const Metadata = () => {
         method: 'post',
         url: 'https://nifty.fantom.network/api/ipfs/uploadImage2Server',
         data: formData,
-        headers: { 'Content-Type': 'multipart/form-data' },
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          Authorization: 'Bearer ' + authToken,
+        },
       });
 
       const jsonHash = result.data.jsonHash;
@@ -413,8 +417,11 @@ const Metadata = () => {
           let saveNewTKResult = await axios({
             method: 'post',
             url: 'https://nifty.fantom.network/api/erc721token/savenewtoken',
-            data: formData,
-            headers: { 'Content-Type': 'multipart/form-data' },
+            data: erc721tk,
+            headers: {
+              'Content-Type': 'multipart/form-data',
+              Authorization: 'Bearer ' + authToken,
+            },
           });
           let status = saveNewTKResult.status;
           switch (status) {
