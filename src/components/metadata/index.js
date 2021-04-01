@@ -28,7 +28,10 @@ import { BigNumber } from 'ethers';
 import { FantomNFTConstants } from '../../constants/smartcontracts/fnft.constants';
 import SCHandlers from '../../utils/sc.interaction';
 import IPFSConstants from '../../constants/ipfs.constants';
+import SystemConstants from '../../constants/system.constants';
 import { useSelector } from 'react-redux';
+
+import WalletUtils from '../../utils/wallet';
 
 const useStyles = makeStyles(() => ({
   container: {
@@ -327,6 +330,17 @@ const Metadata = () => {
       createNotification('custom', 'You are not connected to Opera Testnet');
       return;
     }
+    // only when the user has more than 1k ftms on the wallet
+    let balance = await WalletUtils.checkBalance(address);
+
+    if (balance < SystemConstants.FMT_BALANCE_LIMIT) {
+      createNotification(
+        'custom',
+        `Your balance should be at least ${SystemConstants.FMT_BALANCE_LIMIT} ftm to mint an NFT`
+      );
+      return;
+    }
+
     setLastMintedTkId(0);
     setLastMintedTnxId('');
     // show stepper
@@ -354,8 +368,9 @@ const Metadata = () => {
       });
 
       const jsonHash = result.data.jsonHash;
+      const fileHash = result.data.fileHash;
 
-      let status = result.data.status;
+      // let status = result.data.status;
 
       let fnft_sc = await SCHandlers.loadContract(
         FantomNFTConstants.TESTNETADDRESS,
@@ -374,34 +389,55 @@ const Metadata = () => {
           }
         );
         setCurrentMintingStep(1);
-        console.log('tnx is ', tx);
+        // console.log('tnx is ', tx);
         setLastMintedTnxId(tx.hash);
 
         setCurrentMintingStep(2);
         const confirmedTnx = await provider.waitForTransaction(tx.hash);
         setCurrentMintingStep(3);
-        console.log('confirmed tnx is ', confirmedTnx);
+        // console.log('confirmed tnx is ', confirmedTnx);
         let evtCaught = confirmedTnx.logs[0].topics;
-
+        let minterAddress = confirmedTnx.to;
         let mintedTkId = BigNumber.from(evtCaught[3]);
         setLastMintedTkId(mintedTkId.toNumber());
-        switch (status) {
-          case 'success':
-            {
+        let erc721tk = new FormData();
+        erc721tk.append('contractAddress', minterAddress);
+        erc721tk.append('tokenID', mintedTkId);
+        erc721tk.append('symbol', symbol);
+        erc721tk.append('royalty', royalty);
+        erc721tk.append('category', category);
+        erc721tk.append('imageHash', fileHash);
+        erc721tk.append('jsonHash', jsonHash);
+
+        try {
+          let saveNewTKResult = await axios({
+            method: 'post',
+            url: 'https://nifty.fantom.network/api/erc721token/savenewtoken',
+            data: formData,
+            headers: { 'Content-Type': 'multipart/form-data' },
+          });
+          let status = saveNewTKResult.status;
+          switch (status) {
+            case 'success':
+              {
+                resetMintingStatus();
+                createNotification('info');
+              }
+              break;
+            case 'failed':
+              {
+                resetMintingStatus();
+                createNotification('error');
+              }
+              break;
+            default: {
               resetMintingStatus();
-              createNotification('info');
+              console.log('default status');
             }
-            break;
-          case 'failed':
-            {
-              resetMintingStatus();
-              createNotification('error');
-            }
-            break;
-          default: {
-            resetMintingStatus();
-            console.log('default status');
           }
+        } catch (error) {
+          resetMintingStatus();
+          createNotification('error');
         }
       } catch (error) {
         resetMintingStatus();

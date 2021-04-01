@@ -67,7 +67,7 @@ class PaintStore {
       this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
       const fileSelector = document.createElement('input');
       fileSelector.setAttribute('type', 'file');
-      fileSelector.setAttribute('accept', '.png');
+      fileSelector.setAttribute('accept', 'image/*');
       fileSelector.addEventListener('change', () => {
         try {
           let selected = fileSelector.files[0];

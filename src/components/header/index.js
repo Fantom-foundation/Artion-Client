@@ -20,6 +20,7 @@ import WalletConnectActions from '../../actions/walletconnect.actions';
 import ModalActions from '../../actions/modal.actions';
 import { abbrAddress } from '../../utils';
 import HeaderActions from '../../actions/header.actions';
+import General from '../../utils/general';
 
 const useStyles = makeStyles(theme => ({
   grow: {
@@ -166,7 +167,11 @@ const NiftyHeader = () => {
     console.log(signer);
     let accounts = await provider.listAccounts();
     let connectedAddress = accounts[0];
-    return { connectedAddress, chainId };
+    // get auth token here & store
+
+    let token = await General.getAuthToken(connectedAddress);
+    console.log(token);
+    return { connectedAddress, chainId, token };
   };
 
   const openAccountSettings = () => {
@@ -178,10 +183,12 @@ const NiftyHeader = () => {
     if (isWalletConnected) {
       dispatch(WalletConnectActions.disconnectWallet());
     } else {
-      let { connectedAddress, chainId } = await connectWallet();
+      let { connectedAddress, chainId, token } = await connectWallet();
       if (connectedAddress) {
         console.log('connected');
-        dispatch(WalletConnectActions.connectWallet(chainId, connectedAddress));
+        dispatch(
+          WalletConnectActions.connectWallet(chainId, connectedAddress, token)
+        );
       }
     }
     handleMenuClose();

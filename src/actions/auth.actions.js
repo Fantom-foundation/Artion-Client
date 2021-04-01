@@ -21,15 +21,16 @@ const _signin = () => {
   };
 };
 
-function signinSuccess() {
+function signinSuccess(authToken) {
   return dispatch => {
-    dispatch(_signinSuccess());
+    dispatch(_signinSuccess(authToken));
   };
 }
 
-const _signinSuccess = () => {
+const _signinSuccess = authToken => {
   return {
     type: AuthConstants.SIGNINSUCCESS,
+    token: authToken,
   };
 };
 
@@ -77,7 +78,7 @@ function signout() {
 
 const _signout = () => {
   return {
-    type: AuthConstants.SIGNUPREQUEST,
+    type: AuthConstants.SIGNOUT,
   };
 };
 
