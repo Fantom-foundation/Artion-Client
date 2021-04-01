@@ -34,7 +34,6 @@ const NFTItem = () => {
     secondary: Math.floor(Math.random() * 30),
     radius: undefined,
   }));
-  console.log('====>', data);
 
   return (
     <div className={styles.container}>
