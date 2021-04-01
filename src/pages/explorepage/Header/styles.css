@@ -9,7 +9,8 @@
     margin-right: 8px;
     color: unset !important;
     box-shadow: unset !important;
-    background-color: unset !important; 
+    background-color: unset !important;
+    white-space: nowrap;
 }
 .exploreBodyButton:hover {
     background-color: #e0e0e0 !important;

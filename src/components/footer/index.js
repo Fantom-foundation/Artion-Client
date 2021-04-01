@@ -15,6 +15,7 @@ const useStyles = makeStyles(() => ({
     height: '48px',
     background: '#007bff',
     color: 'white',
+    zIndex: 2,
   },
   fantomlogo: {
     height: '20px',

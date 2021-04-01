@@ -1,7 +1,6 @@
 import React from 'react';
 import ExploreStatus from './Sidebar/Status';
 import ExploreCollections from './Sidebar/Collections';
-import ExploreOnSaleIn from './Sidebar/OnSaleIn';
 import ExploreHeader from './Header';
 import ExploreFilterHeader from './Body/FilterHeader';
 import ExploreAllNFTs from './Body/ExploreBody';
@@ -16,7 +15,6 @@ const ExploreAllPage = () => {
         <div className="sidebarBody">
           <ExploreStatus></ExploreStatus>
           <ExploreCollections></ExploreCollections>
-          <ExploreOnSaleIn></ExploreOnSaleIn>
         </div>
       </div>
       <div className="exploreWithHeader">
