@@ -1,6 +1,6 @@
 import React from 'react';
-import ExploreStatus from './Sidebar/Status';
-import ExploreCollections from './Sidebar/Collections';
+import StatusFilter from '../../components/StatusFilter';
+import CollectionsFilter from '../../components/CollectionsFilter';
 import ExploreHeader from './Header';
 import ExploreFilterHeader from './Body/FilterHeader';
 import NFTsGrid from '../../components/NFTsGrid';
@@ -13,8 +13,8 @@ const ExploreAllPage = () => {
       <div className="exploreSideBar">
         <div className="sidebarHeader">NFT MarketPlace</div>
         <div className="sidebarBody">
-          <ExploreStatus />
-          <ExploreCollections />
+          <StatusFilter />
+          <CollectionsFilter />
         </div>
       </div>
       <div className="exploreWithHeader">

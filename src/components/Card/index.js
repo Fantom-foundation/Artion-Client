@@ -10,7 +10,6 @@ import Typography from '@material-ui/core/Typography';
 
 const useStyles = makeStyles({
   root: {
-    maxWidth: 345,
     boxSizing: 'border-box',
     display: 'flex',
     flexDirection: 'column',
@@ -80,8 +79,8 @@ const BaseCard = ({ style }) => {
   };
 
   return (
-    <Box style={style} className={classes.root} onClick={viewNFTDetails}>
-      <Card className={classes.card}>
+    <Box style={style} className={classes.root}>
+      <Card className={classes.card} onClick={viewNFTDetails}>
         <CardMedia
           className={classes.media}
           image="https://lh3.googleusercontent.com/c2Y0zp4LpzETIMO6FL4unRHXrGuxt9_ifWmqzbzQ_oqvh4LCZhMrswzWiBttEr3J-kQ5d9AVoq7VTfY2UxPhwynY=s992"
