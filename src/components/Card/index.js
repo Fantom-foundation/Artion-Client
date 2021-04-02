@@ -48,7 +48,7 @@ const useStyles = makeStyles({
   },
   media: {
     width: '100%',
-    flexGrow: 1,
+    height: 200,
     backgroundSize: 'contain',
   },
   content: {

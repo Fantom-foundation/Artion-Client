@@ -3,7 +3,7 @@ import ExploreStatus from './Sidebar/Status';
 import ExploreCollections from './Sidebar/Collections';
 import ExploreHeader from './Header';
 import ExploreFilterHeader from './Body/FilterHeader';
-import ExploreAllNFTs from './Body/ExploreBody';
+import NFTsGrid from '../../components/NFTsGrid';
 
 import './styles.css';
 
@@ -26,7 +26,7 @@ const ExploreAllPage = () => {
             <ExploreFilterHeader></ExploreFilterHeader>
           </div>
           <div className="exploreBodyInfiniteLoaderContainer">
-            <ExploreAllNFTs></ExploreAllNFTs>
+            <NFTsGrid items={new Array(100).fill(0)} />
           </div>
         </div>
       </div>

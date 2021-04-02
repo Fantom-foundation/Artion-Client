@@ -61,13 +61,13 @@
 
 .exploreBodyFilterHeader {
     display: flex;
+    align-items: center;
     justify-content: space-between;
-    height: 10%;
-    padding-top: 12px;
+    height: 72px;
     box-sizing: border-box;
     border-bottom: 2px dotted rgb(156, 146, 146);
 }
 
 .exploreBodyInfiniteLoaderContainer {
-    height: 90%;
+    height: calc(100% - 72px);
 }
