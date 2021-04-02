@@ -13,8 +13,8 @@ const ExploreAllPage = () => {
       <div className="exploreSideBar">
         <div className="sidebarHeader">NFT MarketPlace</div>
         <div className="sidebarBody">
-          <ExploreStatus></ExploreStatus>
-          <ExploreCollections></ExploreCollections>
+          <ExploreStatus />
+          <ExploreCollections />
         </div>
       </div>
       <div className="exploreWithHeader">
