@@ -93,18 +93,18 @@ const useStyles = makeStyles(() => ({
 
 const ExploreCollections = () => {
   const classes = useStyles();
-  const [expanded, setExpanded] = React.useState(false);
+  const [expanded, setExpanded] = React.useState(true);
 
-  const handleChange = panel => (event, isExpanded) => {
-    setExpanded(isExpanded ? panel : false);
+  const handleChange = (_, isExpanded) => {
+    setExpanded(isExpanded);
   };
 
   return (
     <div className={classes.root}>
       <Accordion
         className={classes.wrapper}
-        expanded={expanded === 'panel1'}
-        onChange={handleChange('panel1')}
+        expanded={expanded}
+        onChange={handleChange}
       >
         <AccordionSummary
           expandIcon={<ExpandMoreIcon className={classes.icon} />}
