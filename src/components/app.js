@@ -15,6 +15,7 @@ import { isMobile } from 'utils/userAgent';
 import LandingPage from '../pages/landingpage';
 import ExploreAllPage from '../pages/explorepage';
 import NFTItem from '../pages/NFTItem';
+import AccountDetails from '../pages/AccountDetails';
 
 const App = ({ paintStore }) => {
   const canvasRef = useRef(null);
@@ -57,6 +58,7 @@ const App = ({ paintStore }) => {
           <Route exact path="/signup" component={SignUp}></Route>
           <Route exact path="/create" component={PaintBoard}></Route>
           <Route path="/explore/:addr/:id" component={NFTItem}></Route>
+          <Route path="/account/:uid" component={AccountDetails}></Route>
         </Switch>
         <NiftyFooter></NiftyFooter>
         <AccountModal />
