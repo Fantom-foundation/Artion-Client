@@ -35,6 +35,9 @@ const useStyles = makeStyles(theme => ({
   menuButton: {
     marginRight: theme.spacing(2),
   },
+  menu: {
+    top: '72px !important',
+  },
   logoImg: {
     height: '36px',
     '&:hover': {
@@ -179,6 +182,11 @@ const NiftyHeader = () => {
     handleMenuClose();
   };
 
+  const handleCreateCollection = () => {
+    history.push('/collection/create');
+    handleMenuClose();
+  };
+
   const handleConnectWallet = async () => {
     if (isWalletConnected) {
       dispatch(WalletConnectActions.disconnectWallet());
@@ -204,9 +212,13 @@ const NiftyHeader = () => {
       transformOrigin={{ vertical: 'top', horizontal: 'right' }}
       open={isMenuOpen}
       onClose={handleMenuClose}
+      classes={{
+        paper: classes.menu,
+      }}
     >
       <MenuItem onClick={handleMenuClose}>My Profile</MenuItem>
       <MenuItem onClick={openAccountSettings}>Account Settings</MenuItem>
+      <MenuItem onClick={handleCreateCollection}>Create Collection</MenuItem>
       <MenuItem onClick={handleConnectWallet}>
         {isWalletConnected ? 'Sign Out' : 'Sign In'}
       </MenuItem>

@@ -61,10 +61,6 @@ body {
   /* letter-spacing: 0.01071em; */
 }
 
-.MuiMenu-paper {
-  top: 72px !important;
-}
-
 body * {
   font-family: proxima-nova !important;
 }

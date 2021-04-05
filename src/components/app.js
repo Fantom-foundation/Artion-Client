@@ -16,6 +16,7 @@ import LandingPage from '../pages/landingpage';
 import ExploreAllPage from '../pages/explorepage';
 import NFTItem from '../pages/NFTItem';
 import AccountDetails from '../pages/AccountDetails';
+import CollectionCreate from '../pages/Collection/Create';
 
 const App = ({ paintStore }) => {
   const canvasRef = useRef(null);
@@ -52,13 +53,14 @@ const App = ({ paintStore }) => {
       <Router>
         <NiftyHeader></NiftyHeader>
         <Switch>
-          <Route exact path="/" component={LandingPage}></Route>
-          <Route exact path="/exploreall" component={ExploreAllPage}></Route>
-          <Route exact path="/signin" component={SignIn}></Route>
-          <Route exact path="/signup" component={SignUp}></Route>
-          <Route exact path="/create" component={PaintBoard}></Route>
-          <Route path="/explore/:addr/:id" component={NFTItem}></Route>
-          <Route path="/account/:uid" component={AccountDetails}></Route>
+          <Route exact path="/" component={LandingPage} />
+          <Route exact path="/exploreall" component={ExploreAllPage} />
+          <Route exact path="/signin" component={SignIn} />
+          <Route exact path="/signup" component={SignUp} />
+          <Route exact path="/create" component={PaintBoard} />
+          <Route path="/explore/:addr/:id" component={NFTItem} />
+          <Route path="/account/:uid" component={AccountDetails} />
+          <Route path="/collection/create" component={CollectionCreate} />
         </Switch>
         <NiftyFooter></NiftyFooter>
         <AccountModal />
