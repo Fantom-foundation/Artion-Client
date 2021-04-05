@@ -19,6 +19,7 @@ import Telegram from '@material-ui/icons/Telegram';
 
 import discordIcon from '../../../assets/svgs/discord.svg';
 import mediumIcon from '../../../assets/svgs/medium.svg';
+import nftIcon from '../../../assets/svgs/nft.svg';
 
 import styles from './styles.module.scss';
 
@@ -208,6 +209,15 @@ const CollectionCreate = () => {
           <div className={styles.inputTitle}>Links</div>
           <div className={styles.inputWrapper}>
             <div className={styles.linksWrapper}>
+              <div className={styles.linkItem}>
+                <div className={styles.linkIconWrapper}>
+                  <img src={nftIcon} className={styles.linkIcon} />
+                </div>
+                <div className={styles.inputPrefix}>
+                  https://ftmscan.com/address/
+                </div>
+                <input className={styles.linkInput} placeholder="0x..." />
+              </div>
               <div className={styles.linkItem}>
                 <div className={styles.linkIconWrapper}>
                   <Web className={styles.linkIcon} />
