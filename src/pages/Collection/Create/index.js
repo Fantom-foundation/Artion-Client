@@ -1,7 +1,6 @@
 import React, { useRef, useState } from 'react';
 import cx from 'classnames';
-import Menu from '@material-ui/core/Menu';
-import MenuItem from '@material-ui/core/MenuItem';
+import { Menu, MenuItem, Button } from '@material-ui/core';
 import PublishIcon from '@material-ui/icons/Publish';
 import ImageIcon from '@material-ui/icons/Image';
 import DnsIcon from '@material-ui/icons/Dns';
@@ -109,6 +108,8 @@ const CollectionCreate = () => {
   const deselectCategory = catId => {
     setSelected(selected.filter(id => id !== catId));
   };
+
+  const handleSave = () => {};
 
   const menuId = 'select-category-menu';
   const renderMenu = (
@@ -271,6 +272,17 @@ const CollectionCreate = () => {
               </div>
             </div>
           </div>
+        </div>
+
+        <div className={styles.buttonsWrapper}>
+          <Button
+            variant="contained"
+            color="primary"
+            component="span"
+            onSave={handleSave}
+          >
+            Save
+          </Button>
         </div>
       </div>
       {renderMenu}
