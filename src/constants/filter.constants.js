@@ -11,6 +11,7 @@ export const SortByOptionsForAccount = [
   'Most Viewed',
   'Oldest',
 ];
+
 export const SortByOptionsGlobal = [
   'Recently Listed',
   'Recently Created',

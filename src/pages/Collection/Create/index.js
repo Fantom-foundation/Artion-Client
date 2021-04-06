@@ -71,6 +71,8 @@ const CollectionCreate = () => {
   const [logo, setLogo] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
   const [selected, setSelected] = useState([]);
+  const [name, setName] = useState('');
+  const [nameError, setNameError] = useState(null);
 
   const isMenuOpen = Boolean(anchorEl);
 
@@ -90,6 +92,14 @@ const CollectionCreate = () => {
       };
 
       reader.readAsDataURL(file);
+    }
+  };
+
+  const validateName = () => {
+    if (name.length === 0) {
+      setNameError("This field can't be blank");
+    } else {
+      setNameError(null);
     }
   };
 
@@ -171,7 +181,13 @@ const CollectionCreate = () => {
         <div className={styles.inputGroup}>
           <div className={styles.inputTitle}>Name</div>
           <div className={styles.inputWrapper}>
-            <input className={styles.input} />
+            <input
+              className={cx(styles.input, nameError && styles.hasError)}
+              value={name}
+              onChange={e => setName(e.target.value)}
+              onBlur={validateName}
+            />
+            {nameError && <div className={styles.error}>{nameError}</div>}
           </div>
         </div>
 
