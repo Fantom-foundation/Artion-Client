@@ -5,6 +5,7 @@ import { ConnectWallet } from './connectwallet.reducers';
 import { HeaderOptions } from './header.reducers';
 import { Modal } from './modal.reducers';
 import { Filter } from './filter.reducers';
+import { Collections } from './collections.reducers';
 
 const rootReducer = combineReducers({
   Auth,
@@ -12,6 +13,7 @@ const rootReducer = combineReducers({
   HeaderOptions,
   Modal,
   Filter,
+  Collections,
 });
 
 export default rootReducer;
