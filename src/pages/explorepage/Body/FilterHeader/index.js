@@ -1,4 +1,5 @@
 import React from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 import FormControl from '@material-ui/core/FormControl';
@@ -6,12 +7,27 @@ import Select from '@material-ui/core/Select';
 
 import {
   GroupFilters,
-  SortByOptionsGlobal,
+  SortByOptions,
 } from '../../../../constants/filter.constants';
+import FilterActions from '../../../../actions/filter.actions';
 
 import './styles.css';
 
 const ExploreFilterHeader = () => {
+  const dispatch = useDispatch();
+
+  const { groupType, sortBy } = useSelector(state => state.Filter);
+
+  const handleGroupTypeChange = e => {
+    const newGroupType = e.target.value;
+    dispatch(FilterActions.updateGroupTypeFilter(newGroupType));
+  };
+
+  const handleSortByChange = e => {
+    const newSortBy = e.target.value;
+    dispatch(FilterActions.updateSortByFilter(newSortBy));
+  };
+
   return (
     <div className="filterHeaderRoot">
       <label className="filterResultLabel">0 results</label>
@@ -21,8 +37,8 @@ const ExploreFilterHeader = () => {
           <Select
             labelId="demo-simple-select-outlined-label"
             id="demo-simple-select-outlined"
-            value={GroupFilters[0]}
-            //   onChange={handleChange}
+            value={groupType}
+            onChange={handleGroupTypeChange}
             label="Group"
             MenuProps={{
               classes: {
@@ -32,7 +48,7 @@ const ExploreFilterHeader = () => {
           >
             {GroupFilters.map((filter, idx) => {
               return (
-                <MenuItem value={filter} key={idx}>
+                <MenuItem value={idx} key={idx}>
                   {filter}
                 </MenuItem>
               );
@@ -46,8 +62,8 @@ const ExploreFilterHeader = () => {
           <Select
             labelId="demo-simple-select-outlined-label"
             id="demo-simple-select-outlined"
-            value={SortByOptionsGlobal[0]}
-            //   onChange={handleChange}
+            value={sortBy}
+            onChange={handleSortByChange}
             label="Sort By"
             MenuProps={{
               classes: {
@@ -55,10 +71,10 @@ const ExploreFilterHeader = () => {
               },
             }}
           >
-            {SortByOptionsGlobal.map((option, idx) => {
+            {SortByOptions.map((option, idx) => {
               return (
-                <MenuItem value={option} key={idx}>
-                  {option}
+                <MenuItem value={option.id} key={idx}>
+                  {option.label}
                 </MenuItem>
               );
             })}
