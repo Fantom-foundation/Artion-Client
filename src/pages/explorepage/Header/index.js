@@ -1,83 +1,43 @@
 import React from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import cx from 'classnames';
 import Button from '@material-ui/core/Button';
-import ImageIcon from '@material-ui/icons/Image';
-import DnsIcon from '@material-ui/icons/Dns';
-import PublicIcon from '@material-ui/icons/Public';
-import CardGiftcardIcon from '@material-ui/icons/CardGiftcard';
-import CollectionsIcon from '@material-ui/icons/Collections';
-import SportsTennisIcon from '@material-ui/icons/SportsTennis';
-import BuildIcon from '@material-ui/icons/Build';
-import FiberNewIcon from '@material-ui/icons/FiberNew';
 
-import './styles.css';
+import { Categories } from '../../../constants/filter.constants';
+import FilterActions from '../../../actions/filter.actions';
+
+import styles from './styles.module.scss';
 
 const ExploreHeader = () => {
+  const dispatch = useDispatch();
+
+  const { category } = useSelector(state => state.Filter);
+
+  const handleSelectCategory = categoryId => {
+    dispatch(
+      FilterActions.updateCategoryFilter(
+        category === categoryId ? null : categoryId
+      )
+    );
+  };
+
   return (
-    <div className="exploreBodyRoot">
-      <Button
-        variant="contained"
-        color="default"
-        className="exploreBodyButton"
-        startIcon={<ImageIcon />}
-      >
-        Art
-      </Button>
-      <Button
-        variant="contained"
-        color="default"
-        className="exploreBodyButton"
-        startIcon={<DnsIcon />}
-      >
-        Domain Names
-      </Button>
-      <Button
-        variant="contained"
-        color="default"
-        className="exploreBodyButton"
-        startIcon={<PublicIcon />}
-      >
-        Virtual Worlds
-      </Button>
-      <Button
-        variant="contained"
-        color="default"
-        className="exploreBodyButton"
-        startIcon={<CardGiftcardIcon />}
-      >
-        Trading Cards
-      </Button>
-      <Button
-        variant="contained"
-        color="default"
-        className="exploreBodyButton"
-        startIcon={<CollectionsIcon />}
-      >
-        Collectibles
-      </Button>
-      <Button
-        variant="contained"
-        color="default"
-        className="exploreBodyButton"
-        startIcon={<SportsTennisIcon />}
-      >
-        Sports
-      </Button>
-      <Button
-        variant="contained"
-        color="default"
-        className="exploreBodyButton"
-        startIcon={<BuildIcon />}
-      >
-        Utility
-      </Button>
-      <Button
-        variant="contained"
-        color="default"
-        className="exploreBodyButton"
-        startIcon={<FiberNewIcon />}
-      >
-        New
-      </Button>
+    <div className={styles.root}>
+      {Categories.map(cat => (
+        <Button
+          key={cat.id}
+          variant="contained"
+          color="default"
+          className={cx(
+            styles.button,
+            cat.id === category ? styles.selected : null
+          )}
+          startIcon={<cat.icon />}
+          onClick={() => handleSelectCategory(cat.id)}
+        >
+          {cat.label}
+        </Button>
+      ))}
     </div>
   );
 };

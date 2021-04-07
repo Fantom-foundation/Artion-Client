@@ -2,14 +2,6 @@ import React, { useRef, useState } from 'react';
 import cx from 'classnames';
 import { Menu, MenuItem, Button } from '@material-ui/core';
 import PublishIcon from '@material-ui/icons/Publish';
-import ImageIcon from '@material-ui/icons/Image';
-import DnsIcon from '@material-ui/icons/Dns';
-import PublicIcon from '@material-ui/icons/Public';
-import CardGiftcardIcon from '@material-ui/icons/CardGiftcard';
-import CollectionsIcon from '@material-ui/icons/Collections';
-import SportsTennisIcon from '@material-ui/icons/SportsTennis';
-import BuildIcon from '@material-ui/icons/Build';
-import FiberNewIcon from '@material-ui/icons/FiberNew';
 import CloseIcon from '@material-ui/icons/Close';
 import Web from '@material-ui/icons/Web';
 import Twitter from '@material-ui/icons/Twitter';
@@ -19,51 +11,9 @@ import Telegram from '@material-ui/icons/Telegram';
 import discordIcon from '../../../assets/svgs/discord.svg';
 import mediumIcon from '../../../assets/svgs/medium.svg';
 import nftIcon from '../../../assets/svgs/nft.svg';
+import { Categories } from '../../../constants/filter.constants';
 
 import styles from './styles.module.scss';
-
-const categories = [
-  {
-    id: 0,
-    icon: ImageIcon,
-    label: 'Art',
-  },
-  {
-    id: 1,
-    icon: DnsIcon,
-    label: 'Domain Names',
-  },
-  {
-    id: 2,
-    icon: PublicIcon,
-    label: 'Virtual Worlds',
-  },
-  {
-    id: 3,
-    icon: CardGiftcardIcon,
-    label: 'Trading Cards',
-  },
-  {
-    id: 4,
-    icon: CollectionsIcon,
-    label: 'Collectibles',
-  },
-  {
-    id: 5,
-    icon: SportsTennisIcon,
-    label: 'Sports',
-  },
-  {
-    id: 6,
-    icon: BuildIcon,
-    label: 'Utility',
-  },
-  {
-    id: 7,
-    icon: FiberNewIcon,
-    label: 'New',
-  },
-];
 
 const CollectionCreate = () => {
   const inputRef = useRef(null);
@@ -76,8 +26,8 @@ const CollectionCreate = () => {
 
   const isMenuOpen = Boolean(anchorEl);
 
-  const options = categories.filter(cat => selected.indexOf(cat.id) === -1);
-  const selectedCategories = categories.filter(
+  const options = Categories.filter(cat => selected.indexOf(cat.id) === -1);
+  const selectedCategories = Categories.filter(
     cat => selected.indexOf(cat.id) > -1
   );
 

@@ -1,32 +1,77 @@
-import ModalConstants from '../constants/modal.constants';
+import FilterConstants from '../constants/filter.constants';
 
-const ModalActions = {
-  showAccountModal,
-  hideAccountModal,
+const FilterActions = {
+  updateStatusFilter,
+  updateCollectionsFilter,
+  updateCategoryFilter,
+  updateGroupTypeFilter,
+  updateSortByFilter,
 };
 
-function showAccountModal() {
+function updateStatusFilter(field, selected) {
   return dispatch => {
-    dispatch(_showAccountModal());
+    dispatch(_updateStatusFilter(field, selected));
   };
 }
 
-const _showAccountModal = () => {
+const _updateStatusFilter = (field, selected) => {
   return {
-    type: ModalConstants.SHOW_ACCOUNT_MODAL,
+    type: FilterConstants.UPDATE_STATUS_FILTER,
+    field,
+    selected,
   };
 };
 
-function hideAccountModal() {
+function updateCollectionsFilter(collections) {
   return dispatch => {
-    dispatch(_hideAccountModal());
+    dispatch(_updateCollectionsFilter(collections));
   };
 }
 
-const _hideAccountModal = () => {
+const _updateCollectionsFilter = collections => {
   return {
-    type: ModalConstants.HIDE_ACCOUNT_MODAL,
+    type: FilterConstants.UPDATE_COLLECTIONS_FILTER,
+    collections,
   };
 };
 
-export default ModalActions;
+function updateCategoryFilter(category) {
+  return dispatch => {
+    dispatch(_updateCategoryFilter(category));
+  };
+}
+
+const _updateCategoryFilter = category => {
+  return {
+    type: FilterConstants.UPDATE_CATEGORIES_FILTER,
+    category,
+  };
+};
+
+function updateGroupTypeFilter(groupType) {
+  return dispatch => {
+    dispatch(_updateGroupTypeFilter(groupType));
+  };
+}
+
+const _updateGroupTypeFilter = groupType => {
+  return {
+    type: FilterConstants.UPDATE_GROUP_TYPE_FILTER,
+    groupType,
+  };
+};
+
+function updateSortByFilter(sortBy) {
+  return dispatch => {
+    dispatch(_updateSortByFilter(sortBy));
+  };
+}
+
+const _updateSortByFilter = sortBy => {
+  return {
+    type: FilterConstants.UPDATE_SORT_BY_FILTER,
+    sortBy,
+  };
+};
+
+export default FilterActions;

@@ -1,0 +1,22 @@
+.root {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.button {
+  margin-left: 8px;
+  margin-right: 8px;
+  color: #555 !important;
+  box-shadow: unset !important;
+  background-color: unset !important;
+  white-space: nowrap;
+
+  &:hover {
+    background-color: #e0e0e0 !important;
+  }
+}
+
+.selected {
+  color: #007bff !important;
+}

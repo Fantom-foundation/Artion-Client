@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import cx from 'classnames';
+import { useDispatch, useSelector } from 'react-redux';
 import { makeStyles } from '@material-ui/core/styles';
 import Accordion from '@material-ui/core/Accordion';
 import AccordionDetails from '@material-ui/core/AccordionDetails';
@@ -9,6 +10,8 @@ import FormGroup from '@material-ui/core/FormGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
 import StarIcon from '@material-ui/icons/Star';
+
+import FilterActions from '../../actions/filter.actions';
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -58,12 +61,20 @@ const useStyles = makeStyles(() => ({
 }));
 
 const ExploreStatus = () => {
+  const dispatch = useDispatch();
   const classes = useStyles();
   const [expanded, setExpanded] = useState(false);
-  const [buyNow, setBuyNow] = useState(false);
-  const [onAuction, setOnAuction] = useState(false);
-  const [statusNew, setStatusNew] = useState(false);
-  const [hasOffers, setHasOffers] = useState(false);
+
+  const {
+    statusNew,
+    statusBuyNow,
+    statusHasOffers,
+    statusOnAuction,
+  } = useSelector(state => state.Filter);
+
+  const handleStatusChange = (field, selected) => {
+    dispatch(FilterActions.updateStatusFilter(field, selected));
+  };
 
   const handleAccordionColElapse = panel => (event, isExpanded) => {
     setExpanded(isExpanded ? panel : false);
@@ -73,24 +84,16 @@ const ExploreStatus = () => {
     let name = event.target.name;
     switch (name) {
       case 'buynow':
-        {
-          setBuyNow(!buyNow);
-        }
+        handleStatusChange('statusBuyNow', !statusBuyNow);
         break;
       case 'new':
-        {
-          setStatusNew(!statusNew);
-        }
-        break;
-      case 'onauction':
-        {
-          setOnAuction(!onAuction);
-        }
+        handleStatusChange('statusNew', !statusNew);
         break;
       case 'hasOffers':
-        {
-          setHasOffers(!hasOffers);
-        }
+        handleStatusChange('statusHasOffers', !statusHasOffers);
+        break;
+      case 'onAuction':
+        handleStatusChange('statusOnAuction', !statusOnAuction);
         break;
       default: {
         console.log('nothing to change');
@@ -133,11 +136,11 @@ const ExploreStatus = () => {
             <FormControlLabel
               className={cx(
                 classes.formControl,
-                buyNow ? classes.selected : null
+                statusBuyNow ? classes.selected : null
               )}
               control={
                 <Checkbox
-                  checked={buyNow}
+                  checked={statusBuyNow}
                   onChange={handleCheckgroupChanges}
                   name="buynow"
                 />
@@ -147,16 +150,30 @@ const ExploreStatus = () => {
             <FormControlLabel
               className={cx(
                 classes.formControl,
-                hasOffers ? classes.selected : null
+                statusHasOffers ? classes.selected : null
               )}
               control={
                 <Checkbox
-                  checked={hasOffers}
+                  checked={statusHasOffers}
                   onChange={handleCheckgroupChanges}
                   name="hasOffers"
                 />
               }
               label="Has Offers"
+            />
+            <FormControlLabel
+              className={cx(
+                classes.formControl,
+                statusOnAuction ? classes.selected : null
+              )}
+              control={
+                <Checkbox
+                  checked={statusOnAuction}
+                  onChange={handleCheckgroupChanges}
+                  name="onAuction"
+                />
+              }
+              label="On Auction"
             />
           </FormGroup>
         </AccordionDetails>
