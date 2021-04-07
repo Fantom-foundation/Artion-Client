@@ -1,4 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import cx from 'classnames';
 import { makeStyles } from '@material-ui/core/styles';
 import Accordion from '@material-ui/core/Accordion';
 import AccordionDetails from '@material-ui/core/AccordionDetails';
@@ -10,6 +12,10 @@ import IconButton from '@material-ui/core/IconButton';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import PlaylistPlayIcon from '@material-ui/icons/PlaylistPlay';
 import SearchIcon from '@material-ui/icons/Search';
+
+import FilterActions from '../../actions/filter.actions';
+import nftIcon from '../../assets/svgs/nft.svg';
+import nftActiveIcon from '../../assets/svgs/nft_active.svg';
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -65,7 +71,7 @@ const useStyles = makeStyles(() => ({
     padding: 10,
   },
   collectionsList: {
-    maxHeight: 200,
+    maxHeight: 400,
     overflowY: 'auto',
     marginTop: 20,
     flexGrow: 1,
@@ -80,10 +86,12 @@ const useStyles = makeStyles(() => ({
     alignItems: 'center',
     cursor: 'pointer',
   },
+  selected: {
+    color: '#007bff',
+  },
   logo: {
-    width: 32,
-    height: 32,
-    borderRadius: 32,
+    width: 24,
+    height: 24,
     marginRight: 8,
   },
   name: {
@@ -92,11 +100,36 @@ const useStyles = makeStyles(() => ({
 }));
 
 const ExploreCollections = () => {
+  const dispatch = useDispatch();
+
   const classes = useStyles();
-  const [expanded, setExpanded] = React.useState(true);
+  const [expanded, setExpanded] = useState(true);
+  const [filter, setFilter] = useState('');
+
+  const collectionItems = useSelector(state => state.Collections);
+  const { collections } = useSelector(state => state.Filter);
 
   const handleChange = (_, isExpanded) => {
     setExpanded(isExpanded);
+  };
+
+  const handleSelectCollection = addr => {
+    let newCollections = [];
+    if (collections.includes(addr)) {
+      newCollections = collections.filter(item => item !== addr);
+    } else {
+      newCollections = [...collections, addr];
+    }
+    dispatch(FilterActions.updateCollectionsFilter(newCollections));
+  };
+
+  const filteredCollections = () => {
+    return collectionItems.filter(
+      item =>
+        (item.name || item.collectionName)
+          .toLowerCase()
+          .indexOf(filter.toLowerCase()) > -1
+    );
   };
 
   return (
@@ -121,6 +154,8 @@ const ExploreCollections = () => {
               className={classes.input}
               placeholder="Filter"
               inputProps={{ 'aria-label': 'Filter' }}
+              value={filter}
+              onChange={e => setFilter(e.target.value)}
             />
             <IconButton
               type="submit"
@@ -132,54 +167,30 @@ const ExploreCollections = () => {
           </div>
 
           <div className={classes.collectionsList}>
-            <div className={classes.collection}>
-              <img className={classes.logo} />
-              <span className={classes.name}>Collection 1</span>
-            </div>
-            <div className={classes.collection}>
-              <img className={classes.logo} />
-              <span className={classes.name}>Collection 1</span>
-            </div>
-            <div className={classes.collection}>
-              <img className={classes.logo} />
-              <span className={classes.name}>Collection 1</span>
-            </div>
-            <div className={classes.collection}>
-              <img className={classes.logo} />
-              <span className={classes.name}>Collection 1</span>
-            </div>
-            <div className={classes.collection}>
-              <img className={classes.logo} />
-              <span className={classes.name}>Collection 1</span>
-            </div>
-            <div className={classes.collection}>
-              <img className={classes.logo} />
-              <span className={classes.name}>Collection 1</span>
-            </div>
-            <div className={classes.collection}>
-              <img className={classes.logo} />
-              <span className={classes.name}>Collection 1</span>
-            </div>
-            <div className={classes.collection}>
-              <img className={classes.logo} />
-              <span className={classes.name}>Collection 1</span>
-            </div>
-            <div className={classes.collection}>
-              <img className={classes.logo} />
-              <span className={classes.name}>Collection 1</span>
-            </div>
-            <div className={classes.collection}>
-              <img className={classes.logo} />
-              <span className={classes.name}>Collection 1</span>
-            </div>
-            <div className={classes.collection}>
-              <img className={classes.logo} />
-              <span className={classes.name}>Collection 1</span>
-            </div>
-            <div className={classes.collection}>
-              <img className={classes.logo} />
-              <span className={classes.name}>Collection 1</span>
-            </div>
+            {filteredCollections().map((item, idx) => (
+              <div
+                key={idx}
+                className={cx(
+                  classes.collection,
+                  collections.includes(item.address) ? classes.selected : null
+                )}
+                onClick={() => handleSelectCollection(item.address)}
+              >
+                <img
+                  className={classes.logo}
+                  src={
+                    item.isVerified
+                      ? `https://gateway.pinata.cloud/ipfs/${item.logoImageHash}`
+                      : collections.includes(item.address)
+                      ? nftActiveIcon
+                      : nftIcon
+                  }
+                />
+                <span className={classes.name}>
+                  {item.name || item.collectionName}
+                </span>
+              </div>
+            ))}
           </div>
         </AccordionDetails>
       </Accordion>

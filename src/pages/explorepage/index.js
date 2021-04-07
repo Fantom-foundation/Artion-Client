@@ -1,13 +1,38 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { useDispatch } from 'react-redux';
 import StatusFilter from '../../components/StatusFilter';
 import CollectionsFilter from '../../components/CollectionsFilter';
 import ExploreHeader from './Header';
 import ExploreFilterHeader from './Body/FilterHeader';
 import NFTsGrid from '../../components/NFTsGrid';
+import { fetchCollections } from '../../api';
+import CollectionsActions from '../../actions/collections.actions';
 
 import './styles.css';
 
 const ExploreAllPage = () => {
+  const dispatch = useDispatch();
+
+  const [fetchInterval, setFetchInterval] = useState(null);
+
+  const updateCollections = async () => {
+    const res = await fetchCollections();
+    if (res.status === 'success') {
+      dispatch(CollectionsActions.updateCollections(res.data));
+    }
+  };
+
+  useEffect(() => {
+    updateCollections();
+    setFetchInterval(setInterval(updateCollections, 1000 * 60 * 10));
+
+    return () => {
+      if (fetchInterval) {
+        clearInterval(fetchInterval);
+      }
+    };
+  }, []);
+
   return (
     <div className="exploreAllPageContainer">
       <div className="exploreSideBar">
