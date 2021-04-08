@@ -3,7 +3,7 @@ import { useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 
 import HeaderActions from '../../actions/header.actions';
-import bg from 'assets/imgs/background.png';
+import bg from 'assets/svgs/background.svg';
 import illustration from 'assets/svgs/illustration.svg';
 
 import styles from './styles.module.scss';
