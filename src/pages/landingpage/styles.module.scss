@@ -5,6 +5,33 @@
   bottom: 48px;
 }
 
+.background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  overflow: hidden;
+}
+
+.bg {
+  position: absolute;
+  width: 100%;
+  min-width: 1800px;
+  height: auto;
+  top: -100px;
+  left: 0;
+}
+
+.illustration {
+  position: absolute;
+  width: 40%;
+  max-height: 600px;
+  // right: 100px;
+  left: calc(max(60% - 100px, 750px));
+  top: 150px;
+}
+
 .graphics {
   position: absolute;
   top: 0;
@@ -16,24 +43,26 @@
   position: absolute;
   top: 200px;
   left: 60px;
-  width: 500px;
+  width: 700px;
 }
 
 .title {
   font-weight: 700;
-  font-size: 40px;
-  line-height: 48px;
+  font-size: 60px;
+  line-height: 73px;
+  color: #FFF;
 }
 
 .subtitle {
-  margin-top: 13px;
+  margin-top: 24px;
   font-weight: 400;
-  font-size: 22px;
-  line-height: 26.8px;
+  font-size: 35px;
+  line-height: 46.67px;
+  color: #FFF;
 }
 
 .buttonsContainer {
-  margin-top: 50px;
+  margin-top: 60px;
   display: flex;
 }
 
@@ -58,20 +87,20 @@
 }
 
 .exploreButton {
-  background-color: #007BFF;
-  color: #FFF;
+  background-color: #FFF;
+  color: #007BFF;
 
   &:hover {
-    background-color: #007BFF;
+    background-color: #FFF;
   }
 }
 
 .createButton {
-  background-color: #FFF;
-  color: #007BFF;
-  border: 1px solid #007BFF;
+  background-color: transparent;
+  color: #FFF;
+  border: 1px solid #FFF;
 
   &:hover {
-    background-color: #FFF;
+    background-color: transparent;
   }
 }

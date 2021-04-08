@@ -3,7 +3,8 @@ import { useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 
 import HeaderActions from '../../actions/header.actions';
-import graphics from 'assets/imgs/graphics.png';
+import bg from 'assets/imgs/background.png';
+import illustration from 'assets/svgs/illustration.svg';
 
 import styles from './styles.module.scss';
 
@@ -23,7 +24,10 @@ const LandingPage = () => {
 
   return (
     <div className={styles.container}>
-      <img src={graphics} className={styles.graphics} />
+      <div className={styles.background}>
+        <img src={bg} className={styles.bg} />
+        <img src={illustration} className={styles.illustration} />
+      </div>
       <div className={styles.body}>
         <div className={styles.title}>
           The largest NFT marketplace on Fantom
