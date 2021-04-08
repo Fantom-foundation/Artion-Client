@@ -1,13 +1,13 @@
 import React from 'react';
-import { withStyles } from '@material-ui/core/styles';
-import { register } from './styles';
-import Button from '@material-ui/core/Button';
+import { useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 
 import HeaderActions from '../../actions/header.actions';
-import { useDispatch } from 'react-redux';
+import graphics from 'assets/imgs/graphics.png';
 
-const LandingPage = ({ classes }) => {
+import styles from './styles.module.scss';
+
+const LandingPage = () => {
   const history = useHistory();
   const dispatch = useDispatch();
 
@@ -15,34 +15,33 @@ const LandingPage = ({ classes }) => {
     dispatch(HeaderActions.toggleSearchbar(false));
     history.push('/create');
   };
+
   const goToExploreAll = () => {
     dispatch(HeaderActions.toggleSearchbar(true));
     history.push('/exploreall');
   };
+
   return (
-    <div className={classes.main}>
-      <div className={classes.buttonsContainer}>
-        <Button
-          variant="contained"
-          color="primary"
-          component="span"
-          className={classes.landingPageButton}
-          onClick={goToExploreAll}
-        >
-          Explore
-        </Button>
-        <Button
-          variant="contained"
-          color="primary"
-          component="span"
-          className={classes.landingPageButton}
-          onClick={goToCreate}
-        >
-          Create
-        </Button>
+    <div className={styles.container}>
+      <img src={graphics} className={styles.graphics} />
+      <div className={styles.body}>
+        <div className={styles.title}>
+          The largest NFT marketplace on Fantom
+        </div>
+        <div className={styles.subtitle}>
+          Create, Buy, Sell and Discover rare digital assets
+        </div>
+        <div className={styles.buttonsContainer}>
+          <div className={styles.exploreButton} onClick={goToExploreAll}>
+            Explore
+          </div>
+          <div className={styles.createButton} onClick={goToCreate}>
+            Create
+          </div>
+        </div>
       </div>
     </div>
   );
 };
 
-export default withStyles(register)(LandingPage);
+export default LandingPage;

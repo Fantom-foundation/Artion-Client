@@ -1,0 +1,77 @@
+.container {
+  position: absolute;
+  width: 100%;
+  top: 64px;
+  bottom: 48px;
+}
+
+.graphics {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 90%;
+}
+
+.body {
+  position: absolute;
+  top: 200px;
+  left: 60px;
+  width: 500px;
+}
+
+.title {
+  font-weight: 700;
+  font-size: 40px;
+  line-height: 48px;
+}
+
+.subtitle {
+  margin-top: 13px;
+  font-weight: 400;
+  font-size: 22px;
+  line-height: 26.8px;
+}
+
+.buttonsContainer {
+  margin-top: 50px;
+  display: flex;
+}
+
+.exploreButton,
+.createButton {
+  width: 165px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 28px;
+  font-weight: 700;
+  font-size: 18px;
+  line-height: 21px;
+  box-shadow: none;
+  border-radius: 4px;
+  cursor: pointer;
+
+  &:hover {
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+  }
+}
+
+.exploreButton {
+  background-color: #007BFF;
+  color: #FFF;
+
+  &:hover {
+    background-color: #007BFF;
+  }
+}
+
+.createButton {
+  background-color: #FFF;
+  color: #007BFF;
+  border: 1px solid #007BFF;
+
+  &:hover {
+    background-color: #FFF;
+  }
+}
