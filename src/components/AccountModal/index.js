@@ -7,6 +7,7 @@ import Button from '@material-ui/core/Button';
 import PublishIcon from '@material-ui/icons/Publish';
 
 import ModalActions from '../../actions/modal.actions';
+import { getAccountDetails, updateAccountDetails } from 'api';
 
 const useStyles = makeStyles({
   root: {
@@ -15,7 +16,7 @@ const useStyles = makeStyles({
     height: '100vh',
     top: 0,
     left: 0,
-    zIndex: 9,
+    zIndex: 1000,
   },
   modal: {
     display: 'flex',
@@ -129,6 +130,7 @@ const AccountModal = () => {
   const rootRef = useRef(null);
   const inputRef = useRef(null);
 
+  const [loading, setLoading] = useState(false);
   const [alias, setAlias] = useState('');
   const [email, setEmail] = useState('');
   const [bio, setBio] = useState('');
@@ -137,11 +139,26 @@ const AccountModal = () => {
   const [emailError, setEmailError] = useState(null);
 
   const { accountModalVisible } = useSelector(state => state.Modal);
+  const { authToken } = useSelector(state => state.ConnectWallet);
+
+  useEffect(() => {
+    if (authToken) {
+      setLoading(true);
+      getAccountDetails(authToken).then(({ data }) => {
+        setLoading(false);
+        setAlias(data.alias || '');
+        setEmail(data.email || '');
+        setBio(data.bio || '');
+      });
+    }
+  }, [authToken]);
 
   useEffect(() => {
     if (accountModalVisible) {
+      setAvatar(null);
       setAlias('');
       setEmail('');
+      setBio('');
       setAliasError(null);
       setEmailError(null);
     }
@@ -196,8 +213,41 @@ const AccountModal = () => {
     dispatch(ModalActions.hideAccountModal());
   };
 
+  const clipImage = (image, clipX, clipY, clipWidth, clipHeight, cb) => {
+    const CANVAS_SIZE = Math.max(Math.min(512, clipWidth), 128);
+    const canvas = document.createElement('canvas');
+    canvas.width = CANVAS_SIZE;
+    canvas.height = CANVAS_SIZE;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(
+      image,
+      clipX,
+      clipY,
+      clipWidth,
+      clipHeight,
+      0,
+      0,
+      CANVAS_SIZE,
+      CANVAS_SIZE
+    );
+    cb(canvas.toDataURL());
+  };
+
   const onSave = () => {
-    closeModal();
+    const img = new Image();
+    img.onload = function() {
+      const w = this.width;
+      const h = this.height;
+      const size = Math.min(w, h);
+      const x = (w - size) / 2;
+      const y = (h - size) / 2;
+      clipImage(img, x, y, size, size, async data => {
+        await updateAccountDetails(alias, email, bio, data, authToken);
+
+        closeModal();
+      });
+    };
+    img.src = avatar;
   };
 
   const onCancel = () => {
@@ -221,7 +271,7 @@ const AccountModal = () => {
               onChange={handleFileSelect}
             />
             <div className={classes.avatarBox}>
-              <img src={avatar} className={classes.avatar} />
+              {avatar && <img src={avatar} className={classes.avatar} />}
               <div
                 className={classes.upload}
                 onClick={() => inputRef.current?.click()}
@@ -242,6 +292,7 @@ const AccountModal = () => {
               value={alias}
               onChange={e => setAlias(e.target.value)}
               onBlur={validateAlias}
+              disabled={loading}
             />
             {aliasError !== null && (
               <p className={classes.error}>{aliasError}</p>
@@ -259,6 +310,7 @@ const AccountModal = () => {
               value={email}
               onChange={e => setEmail(e.target.value)}
               onBlur={validateEmail}
+              disabled={loading}
             />
             {emailError !== null && (
               <p className={classes.error}>{emailError}</p>
@@ -271,6 +323,7 @@ const AccountModal = () => {
               placeholder="Bio"
               value={bio}
               onChange={e => setBio(e.target.value)}
+              disabled={loading}
             />
           </div>
 
