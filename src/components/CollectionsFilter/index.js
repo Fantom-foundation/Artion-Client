@@ -5,6 +5,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import Accordion from '@material-ui/core/Accordion';
 import AccordionDetails from '@material-ui/core/AccordionDetails';
 import AccordionSummary from '@material-ui/core/AccordionSummary';
+import Tooltip from '@material-ui/core/Tooltip';
 
 import InputBase from '@material-ui/core/InputBase';
 import IconButton from '@material-ui/core/IconButton';
@@ -12,10 +13,28 @@ import IconButton from '@material-ui/core/IconButton';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import PlaylistPlayIcon from '@material-ui/icons/PlaylistPlay';
 import SearchIcon from '@material-ui/icons/Search';
+import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 
 import FilterActions from '../../actions/filter.actions';
 import nftIcon from '../../assets/svgs/nft.svg';
 import nftActiveIcon from '../../assets/svgs/nft_active.svg';
+
+const useStylesBootstrap = makeStyles(theme => ({
+  arrow: {
+    color: theme.palette.common.black,
+  },
+  tooltip: {
+    backgroundColor: theme.palette.common.black,
+    padding: '8px 16px',
+    fontSize: 14,
+  },
+}));
+
+function BootstrapTooltip(props) {
+  const classes = useStylesBootstrap();
+
+  return <Tooltip arrow classes={classes} {...props} />;
+}
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -96,6 +115,11 @@ const useStyles = makeStyles(() => ({
   },
   name: {
     fontSize: 18,
+  },
+  checkIcon: {
+    fontSize: 18,
+    color: '#007bff',
+    marginLeft: 4,
   },
 }));
 
@@ -189,6 +213,11 @@ const ExploreCollections = () => {
                 <span className={classes.name}>
                   {item.name || item.collectionName}
                 </span>
+                {item.isVerified && (
+                  <BootstrapTooltip title="Verified Collection" placement="top">
+                    <CheckCircleIcon className={classes.checkIcon} />
+                  </BootstrapTooltip>
+                )}
               </div>
             ))}
           </div>
