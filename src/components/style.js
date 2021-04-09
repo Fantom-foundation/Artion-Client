@@ -15,13 +15,11 @@ const setDimensions = (full, isMobile) => {
       `;
     default:
       return css`
-        height: 640px;
-        width: 640px;
-        transform: translate(-100%, -50%);
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        box-shadow: 3px 3px 5px 6px #ccc;
+        height: calc((100vh - 112px) * 0.95);
+        width: calc((100vh - 112px) * 0.95);
+        position: relative;
+        margin-right: 110px;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.4);
         cursor: url(http://www.javascriptkit.com/dhtmltutors/cursor-hand.gif),
           auto;
       `;
@@ -29,9 +27,15 @@ const setDimensions = (full, isMobile) => {
 };
 
 export const Container = styled.div`
-  position: fixed;
-  // font-family: sans-serif;
+  position: absolute;
+  display: flex;
+  flex-direction: row;
+  top: calc(50% + 10px);
+  left: 50%;
+  transform: translate(-50%, -50%);
+`;
 
+export const Board = styled.div`
   ${({ full, isMobile }) => setDimensions(full, isMobile)}
 `;
 

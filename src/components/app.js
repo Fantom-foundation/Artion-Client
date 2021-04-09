@@ -10,7 +10,7 @@ import Metadata from './metadata';
 import SignIn from '../components/auth/signin';
 import SignUp from '../components/auth/signup';
 import AccountModal from './AccountModal';
-import { Container, Canvas } from './style';
+import { Container, Board, Canvas } from './style';
 import { isMobile } from 'utils/userAgent';
 import LandingPage from '../pages/landingpage';
 import ExploreAllPage from '../pages/explorepage';
@@ -27,23 +27,25 @@ const App = ({ paintStore }) => {
     return (
       <>
         <Layout>
-          <Container isMobile={isMobile}>
-            <Canvas
-              id="drawingboard"
-              ref={canvasRef}
-              onMouseDown={start}
-              onMouseMove={draw}
-              onMouseUp={stop}
-              onMouseOut={stop}
-              onTouchStart={start}
-              onTouchMove={draw}
-              onTouchEnd={stop}
-              onTouchCancel={stop}
-            />
-            <Toolbar />
+          <Container>
+            <Board isMobile={isMobile}>
+              <Canvas
+                id="drawingboard"
+                ref={canvasRef}
+                onMouseDown={start}
+                onMouseMove={draw}
+                onMouseUp={stop}
+                onMouseOut={stop}
+                onTouchStart={start}
+                onTouchMove={draw}
+                onTouchEnd={stop}
+                onTouchCancel={stop}
+              />
+              <Toolbar />
+            </Board>
+            <Metadata></Metadata>
           </Container>
         </Layout>
-        <Metadata></Metadata>
       </>
     );
   };
