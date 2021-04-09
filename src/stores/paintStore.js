@@ -55,7 +55,7 @@ class PaintStore {
   };
 
   initialize = canvas => {
-    if (!this.isInitialized && canvas) {
+    if (canvas) {
       this.canvas = canvas;
       this.canvas.width = canvas.clientWidth;
       this.canvas.height = canvas.clientHeight;
