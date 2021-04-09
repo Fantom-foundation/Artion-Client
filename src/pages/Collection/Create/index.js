@@ -1,5 +1,8 @@
 import React, { useRef, useState } from 'react';
+import { useSelector } from 'react-redux';
+import { useHistory } from 'react-router';
 import cx from 'classnames';
+import axios from 'axios';
 import { Menu, MenuItem, Button } from '@material-ui/core';
 import PublishIcon from '@material-ui/icons/Publish';
 import CloseIcon from '@material-ui/icons/Close';
@@ -16,13 +19,25 @@ import { Categories } from '../../../constants/filter.constants';
 import styles from './styles.module.scss';
 
 const CollectionCreate = () => {
+  const history = useHistory();
+
   const inputRef = useRef(null);
+
+  const { authToken } = useSelector(state => state.ConnectWallet);
 
   const [logo, setLogo] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
   const [selected, setSelected] = useState([]);
   const [name, setName] = useState('');
   const [nameError, setNameError] = useState(null);
+  const [description, setDescription] = useState('');
+  const [address, setAddress] = useState('');
+  const [siteUrl, setSiteUrl] = useState('');
+  const [discord, setDiscord] = useState('');
+  const [twitterHandle, setTwitterHandle] = useState('');
+  const [instagramHandle, setInstagramHandle] = useState('');
+  const [mediumHandle, setMediumHandle] = useState('');
+  const [telegram, setTelegram] = useState('');
 
   const isMenuOpen = Boolean(anchorEl);
 
@@ -69,7 +84,81 @@ const CollectionCreate = () => {
     setSelected(selected.filter(id => id !== catId));
   };
 
-  const handleSave = () => {};
+  const clipImage = (image, clipX, clipY, clipWidth, clipHeight, cb) => {
+    const CANVAS_SIZE = Math.max(Math.min(512, clipWidth), 128);
+    const canvas = document.createElement('canvas');
+    canvas.width = CANVAS_SIZE;
+    canvas.height = CANVAS_SIZE;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(
+      image,
+      clipX,
+      clipY,
+      clipWidth,
+      clipHeight,
+      0,
+      0,
+      CANVAS_SIZE,
+      CANVAS_SIZE
+    );
+    cb(canvas.toDataURL());
+  };
+
+  const handleSave = async () => {
+    const img = new Image();
+    img.onload = function() {
+      const w = this.width;
+      const h = this.height;
+      const size = Math.min(w, h);
+      const x = (w - size) / 2;
+      const y = (h - size) / 2;
+      clipImage(img, x, y, size, size, async logodata => {
+        const formData = new FormData();
+        formData.append('collectionName', name);
+        formData.append('erc721Address', address);
+        formData.append('imgData', logodata);
+        const result = await axios({
+          method: 'post',
+          url:
+            'https://nifty.fantom.network/api/ipfs/uploadCollectionImage2Server',
+          data: formData,
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            Authorization: `Bearer ${authToken}`,
+          },
+        });
+
+        const logoImageHash = result.data.data;
+        const data = {
+          erc721Address: address,
+          collectionName: name,
+          description,
+          categories: selected.join(','),
+          logoImageHash,
+          siteUrl,
+          discord,
+          twitterHandle,
+          instagramHandle,
+          mediumHandle,
+          telegram,
+        };
+
+        await axios({
+          method: 'post',
+          url: 'https://nifty.fantom.network/api/collection/collectiondetails',
+          data: JSON.stringify(data),
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${authToken}`,
+          },
+        });
+
+        // TODO: show success notification
+        history.push('/exploreall');
+      });
+    };
+    img.src = logo;
+  };
 
   const menuId = 'select-category-menu';
   const renderMenu = (
@@ -145,7 +234,11 @@ const CollectionCreate = () => {
           <div className={styles.inputTitle}>Description</div>
           <div className={styles.inputSubTitle}>4 of 1000 characters used.</div>
           <div className={styles.inputWrapper}>
-            <textarea className={cx(styles.input, styles.longInput)} />
+            <textarea
+              className={cx(styles.input, styles.longInput)}
+              value={description}
+              onChange={e => setDescription(e.target.value)}
+            />
           </div>
         </div>
 
@@ -183,21 +276,36 @@ const CollectionCreate = () => {
                 <div className={styles.inputPrefix}>
                   https://ftmscan.com/address/
                 </div>
-                <input className={styles.linkInput} placeholder="0x..." />
+                <input
+                  className={styles.linkInput}
+                  placeholder="0x..."
+                  value={address}
+                  onChange={e => setAddress(e.target.value)}
+                />
               </div>
               <div className={styles.linkItem}>
                 <div className={styles.linkIconWrapper}>
                   <Web className={styles.linkIcon} />
                 </div>
                 <div className={styles.inputPrefix} />
-                <input className={styles.linkInput} placeholder="yoursite.io" />
+                <input
+                  className={styles.linkInput}
+                  placeholder="yoursite.io"
+                  value={siteUrl}
+                  onChange={e => setSiteUrl(e.target.value)}
+                />
               </div>
               <div className={styles.linkItem}>
                 <div className={styles.linkIconWrapper}>
                   <img src={discordIcon} className={styles.linkIcon} />
                 </div>
                 <div className={styles.inputPrefix}>https://discord.gg/</div>
-                <input className={styles.linkInput} placeholder="abcdef" />
+                <input
+                  className={styles.linkInput}
+                  placeholder="abcdef"
+                  value={discord}
+                  onChange={e => setDiscord(e.target.value)}
+                />
               </div>
               <div className={styles.linkItem}>
                 <div className={styles.linkIconWrapper}>
@@ -207,6 +315,8 @@ const CollectionCreate = () => {
                 <input
                   className={styles.linkInput}
                   placeholder="YourTwitterHandle"
+                  value={twitterHandle}
+                  onChange={e => setTwitterHandle(e.target.value)}
                 />
               </div>
               <div className={styles.linkItem}>
@@ -217,6 +327,8 @@ const CollectionCreate = () => {
                 <input
                   className={styles.linkInput}
                   placeholder="YourInstagramHandle"
+                  value={instagramHandle}
+                  onChange={e => setInstagramHandle(e.target.value)}
                 />
               </div>
               <div className={styles.linkItem}>
@@ -227,6 +339,8 @@ const CollectionCreate = () => {
                 <input
                   className={styles.linkInput}
                   placeholder="YourMediumHandle"
+                  value={mediumHandle}
+                  onChange={e => setMediumHandle(e.target.value)}
                 />
               </div>
               <div className={styles.linkItem}>
@@ -234,7 +348,12 @@ const CollectionCreate = () => {
                   <Telegram className={styles.linkIcon} />
                 </div>
                 <div className={styles.inputPrefix}>https://t.me/</div>
-                <input className={styles.linkInput} placeholder="abcdef" />
+                <input
+                  className={styles.linkInput}
+                  placeholder="abcdef"
+                  value={telegram}
+                  onChange={e => setTelegram(e.target.value)}
+                />
               </div>
             </div>
           </div>
@@ -245,7 +364,7 @@ const CollectionCreate = () => {
             variant="contained"
             color="primary"
             component="span"
-            onSave={handleSave}
+            onClick={handleSave}
           >
             Save
           </Button>

@@ -22,7 +22,6 @@ import {
   NotificationManager,
 } from 'react-notifications';
 
-import './styles.css';
 import { BigNumber } from 'ethers';
 
 import { FantomNFTConstants } from '../../constants/smartcontracts/fnft.constants';
@@ -35,48 +34,38 @@ import WalletUtils from '../../utils/wallet';
 
 const useStyles = makeStyles(() => ({
   container: {
-    width: '40%',
+    width: 400,
     height: '80%',
     background: 'white',
-    position: 'fixed',
     right: '36px',
     top: '12%',
   },
-  inkContainer: {
-    borderBottom: '1px dotted blue',
-  },
   inkMetadataInput: {
-    margin: '24px',
-    backgroundColor: '#ffffff !important',
-    background: 'transparent !important',
+    width: '100%',
+    borderRadius: 5,
+    backgroundColor: '#F6F6F6',
+    padding: '0 22px 12px',
+    marginBottom: 20,
+  },
+  inkMetadataInputLabel: {
+    left: 22,
   },
   inkButton: {
-    width: '30%',
-    letterSpacing: '11px',
-    fontFamily: 'monospace',
-    fontSize: 'x-large',
+    width: '60%',
+    letterSpacing: 5,
+    fontSize: 20,
     backgroundColor: '#007bff !important',
-    margin: '0 0 24px 0',
-    height: '50px',
-  },
-  inkInputContainer: {
-    display: 'flex',
-    justifyContent: 'center',
-  },
-  inkButtonContainer: {
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  inkDescriptionContainer: {
-    marginTop: '40px',
-    marginBottom: '40px',
-    justifyContent: 'center',
-    display: 'flex',
-    flexDirection: 'column',
+    color: '#fff !important',
+    margin: '0 20% 24px',
+    height: 48,
+    cursor: 'pointer',
+
+    '&:disabled': {
+      color: '#fffa !important',
+    },
   },
   autocomplete: {
-    width: '200px',
+    width: '100%',
     backgroundColor: '#ffffff !important',
     background: 'transparent !important',
   },
@@ -87,13 +76,15 @@ const useStyles = makeStyles(() => ({
     justifyContent: 'center',
     alignItems: 'center',
     fontSize: 'x-large',
-    marginTop: '60px',
+    marginTop: 40,
   },
   nftIDLabel: {
-    marginTop: '20px',
+    fontSize: 18,
+    color: '#A5A5A5',
   },
   tnxAnchor: {
     textDecoration: 'unset',
+    fontSize: 18,
     marginTop: '18px',
     color: '#007bff',
   },
@@ -101,8 +92,8 @@ const useStyles = makeStyles(() => ({
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    fontSize: 'x-large',
-    // borderTop: '1px dotted #007bff',
+    fontSize: 18,
+    color: '#A5A5A5',
     marginTop: '20px',
   },
   createCollectionContainer: {
@@ -110,13 +101,18 @@ const useStyles = makeStyles(() => ({
   },
   createCollectionBtn: {
     marginTop: '30px',
-    width: '30%',
-    letterSpacing: '11px',
-    fontFamily: 'monospace',
-    fontSize: 'x-large',
+    width: '60%',
+    letterSpacing: 5,
+    fontSize: 20,
     backgroundColor: '#007bff !important',
-    margin: '0 0 24px 0',
-    height: '50px',
+    color: '#fff !important',
+    margin: '0 20% 24px',
+    height: 48,
+    cursor: 'pointer',
+
+    '&:disabled': {
+      color: '#fffa !important',
+    },
   },
   createCollectionImgContainer: {
     height: '240px',
@@ -507,74 +503,81 @@ const Metadata = () => {
   return (
     <div className={classes.container}>
       <NotificationContainer />
-      <div className={classes.inkContainer}>
-        <div className={classes.inkInputContainer}>
-          <TextField
-            className={classes.inkMetadataInput}
-            label="Name"
-            id="inkmetadatanameinput"
-            value={name}
-            onChange={e => {
-              handleInputChange(e.target.value, 'name');
-            }}
-          />
-          <TextField
-            className={classes.inkMetadataInput}
-            label="Symbol"
-            id="inkmetadatasymbolinput"
-            value={symbol}
-            onChange={e => {
-              handleInputChange(e.target.value, 'symbol');
-            }}
-          />
-          <TextField
-            className={classes.inkMetadataInput}
-            label="Royalties (%)"
-            type="number"
-            id="inkmetadatalimitinput"
-            value={royalty}
-            onChange={e => {
-              handleInputChange(e.target.value, 'royalty');
-            }}
-            InputProps={{
-              inputProps: {
-                min: 1,
-              },
-            }}
-          />
-          <Autocomplete
-            id="category-combo-box"
-            options={assetCategories}
-            getOptionLabel={option => {
-              handleInputChange(option, 'category');
-              return option;
-            }}
-            value={category}
-            className={classes.autocomplete}
-            renderInput={params => (
-              <TextField
-                {...params}
-                className={classes.inkMetadataInput}
-                label="Categories"
-                id="inkmetadatacategoryinput"
-              />
-            )}
-          />
-        </div>
-        <div className={classes.inkDescriptionContainer}>
-          <TextField
-            label="description(Optional)"
-            style={{ textAlign: 'left' }}
-            hinttext="Message Field"
-            defaultValue={description}
-            floatinglabeltext="MultiLine and FloatingLabel"
-            multiline
-            rows={2}
-            onChange={e => {
-              handleInputChange(e.target.value, 'description');
-            }}
-          />
-        </div>
+      <div>
+        <TextField
+          className={classes.inkMetadataInput}
+          InputLabelProps={{
+            className: classes.inkMetadataInputLabel,
+          }}
+          label="Name"
+          value={name}
+          onChange={e => {
+            handleInputChange(e.target.value, 'name');
+          }}
+        />
+        <TextField
+          className={classes.inkMetadataInput}
+          InputLabelProps={{
+            className: classes.inkMetadataInputLabel,
+          }}
+          label="Symbol"
+          value={symbol}
+          onChange={e => {
+            handleInputChange(e.target.value, 'symbol');
+          }}
+        />
+        <TextField
+          className={classes.inkMetadataInput}
+          InputLabelProps={{
+            className: classes.inkMetadataInputLabel,
+          }}
+          label="Royalties (%)"
+          type="number"
+          value={royalty}
+          onChange={e => {
+            handleInputChange(e.target.value, 'royalty');
+          }}
+          InputProps={{
+            inputProps: {
+              min: 1,
+            },
+          }}
+        />
+        <Autocomplete
+          options={assetCategories}
+          getOptionLabel={option => {
+            handleInputChange(option, 'category');
+            return option;
+          }}
+          value={category}
+          className={classes.autocomplete}
+          renderInput={params => (
+            <TextField
+              {...params}
+              className={classes.inkMetadataInput}
+              InputLabelProps={{
+                className: classes.inkMetadataInputLabel,
+              }}
+              label="Category"
+            />
+          )}
+        />
+        <TextField
+          className={classes.inkMetadataInput}
+          InputLabelProps={{
+            className: classes.inkMetadataInputLabel,
+          }}
+          label="Description(Optional)"
+          style={{ textAlign: 'left' }}
+          hinttext="Message Field"
+          defaultValue={description}
+          floatinglabeltext="MultiLine and FloatingLabel"
+          multiline
+          rows={2}
+          onChange={e => {
+            handleInputChange(e.target.value, 'description');
+          }}
+        />
 
         {isMinting && (
           <div>
@@ -587,30 +590,28 @@ const Metadata = () => {
             </Stepper>
           </div>
         )}
-        <div className={classes.inkButtonContainer}>
-          <Button
-            variant="contained"
-            color="primary"
-            className={classes.inkButton}
-            onClick={mintNFT}
-            disabled={isMinting || !isWalletConnected}
-          >
-            {isMinting ? (
-              <ClipLoader size="16" color="white"></ClipLoader>
-            ) : (
-              'MINT'
-            )}
-          </Button>
-        </div>
+        <Button
+          variant="contained"
+          color="primary"
+          className={classes.inkButton}
+          onClick={mintNFT}
+          disabled={isMinting || !isWalletConnected}
+        >
+          {isMinting ? (
+            <ClipLoader size="16" color="white"></ClipLoader>
+          ) : (
+            'MINT'
+          )}
+        </Button>
       </div>
       <div className={classes.mintStatusContainer}>
-        {lastMintedTkId != 0 && (
+        {lastMintedTkId !== 0 && (
           <label className={classes.nftIDLabel}>
             You have created an NFT with ID of {lastMintedTkId}
           </label>
         )}
 
-        {lastMintedTnxId != '' && (
+        {lastMintedTnxId !== '' && (
           <a
             className={classes.tnxAnchor}
             target="_blank"
@@ -688,7 +689,6 @@ const Metadata = () => {
               <div className={classes.createCollectionNameInput}>
                 <TextField
                   label="Name"
-                  id="inkmetadatasymbolinput"
                   className={classes.createCollectionNameInput}
                   placeholder="e.g.FMT Gems"
                   value={collectionName}

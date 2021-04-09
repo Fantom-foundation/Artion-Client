@@ -26,18 +26,18 @@ export const Wrapper = styled.div`
 
 export const Container = styled.div`
   position: relative;
-  width: 30px;
-  height: 30px;
+  width: 34px;
+  height: 34px;
   z-index: 10;
-  background: white;
-  margin: 5px 0;
-  border-radius: 3px;
+  background: rgba(197, 221, 248, 0.5);
+  margin: 10px 0;
+  border-radius: 5px;
   transition: 150ms transform ease;
 
   & svg {
     width: 100% !important;
     height: 100% !important;
-    padding: 6px;
+    padding: 8px;
   }
 
   ${({ isActive }) =>
