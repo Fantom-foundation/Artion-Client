@@ -1,9 +1,9 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 
 import {
   GroupFilters,
@@ -32,48 +32,65 @@ const ExploreFilterHeader = () => {
     <div className="filterHeaderRoot">
       <label className="filterResultLabel">0 results</label>
       <div className="filterSelectGroup">
-        <FormControl variant="outlined" className="filterHeaderFormControl">
-          <InputLabel id="demo-simple-select-outlined-label">Group</InputLabel>
+        <FormControl className="filterHeaderFormControl">
+          {/* <label>Group</label> */}
           <Select
-            labelId="demo-simple-select-outlined-label"
-            id="demo-simple-select-outlined"
             value={groupType}
             onChange={handleGroupTypeChange}
-            label="Group"
+            className="selectBox"
+            classes={{
+              select: 'selectInner',
+              selectMenu: 'selectMenu',
+              icon: 'selectIcon',
+            }}
             MenuProps={{
               classes: {
                 paper: 'menuPropsPaper',
+                list: 'menuItemList',
               },
             }}
+            IconComponent={ExpandMoreIcon}
           >
             {GroupFilters.map((filter, idx) => {
               return (
-                <MenuItem value={idx} key={idx}>
+                <MenuItem
+                  value={idx}
+                  key={idx}
+                  className="menuItem"
+                  classes={{ selected: 'menuItemSelected ' }}
+                >
                   {filter}
                 </MenuItem>
               );
             })}
           </Select>
         </FormControl>
-        <FormControl variant="outlined" className="filterHeaderFormControl">
-          <InputLabel id="demo-simple-select-outlined-label">
-            Sort By
-          </InputLabel>
+        <FormControl className="filterHeaderFormControl">
           <Select
-            labelId="demo-simple-select-outlined-label"
-            id="demo-simple-select-outlined"
             value={sortBy}
             onChange={handleSortByChange}
-            label="Sort By"
+            className="selectBox"
+            classes={{
+              select: 'selectInner',
+              selectMenu: 'selectMenu',
+              icon: 'selectIcon',
+            }}
             MenuProps={{
               classes: {
                 paper: 'menuPropsPaper',
+                list: 'menuItemList',
               },
             }}
+            IconComponent={ExpandMoreIcon}
           >
             {SortByOptions.map((option, idx) => {
               return (
-                <MenuItem value={option.id} key={idx}>
+                <MenuItem
+                  value={option.id}
+                  key={idx}
+                  className="menuItem"
+                  classes={{ selected: 'menuItemSelected ' }}
+                >
                   {option.label}
                 </MenuItem>
               );

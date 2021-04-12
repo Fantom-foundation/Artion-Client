@@ -25,6 +25,56 @@
     top : unset !important;
 }
 
+.selectBox {
+    padding: 16px 19px;
+    box-sizing: border-box;
+    border-radius: 10px !important;
+    outline: none !important;
+    background-color: #FFF !important;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.05) !important;
+}
+
+.selectInner {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+}
+
+.selectMenu {
+    background-color: transparent !important;
+}
+
+.selectIcon {
+    right: 10px !important;
+}
+
 .menuPropsPaper {
+    box-sizing: border-box;
     top: 200px !important;
+    padding: 25px;
+    background-color: #FFF;
+    border-radius: 8px !important;
+    box-shadow: 0 0 8px 2px rgba(0,0, 0, 0.15);
+}
+
+.menuItemList {
+    padding: 0 !important;
+}
+
+.menuItem {
+    width: fit-content !important;
+    font-weight: 400 !important;
+    font-size: 18px;
+    line-height: 22px;
+    color: #8C8C8C !important;
+    padding: 0 !important;
+    margin-bottom: 20px !important;
+    background-color: transparent !important;
+}
+
+.menuItem:last-child {
+    margin-bottom: 0 !important;
+}
+
+.menuItemSelected {
+    color: #1665EE !important;
 }
