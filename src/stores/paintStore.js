@@ -109,6 +109,8 @@ class PaintStore {
       this.isInitialized = true;
 
       console.log('is initialized ', this.isInitialized);
+
+      this.redraw();
     } else {
       console.log('the canvas was initialized already');
     }
@@ -167,11 +169,10 @@ class PaintStore {
           entry.forEach(this.stroke);
         });
       };
-    } else {
-      stack.forEach(entry => {
-        entry.forEach(this.stroke);
-      });
     }
+    stack.forEach(entry => {
+      entry.forEach(this.stroke);
+    });
   };
 
   start = event => {
@@ -212,6 +213,7 @@ class PaintStore {
     this.strokeHistory = [];
     this.session = [];
     this.redos = [];
+    localStorage.removeItem('background');
     this.clear();
   };
 
