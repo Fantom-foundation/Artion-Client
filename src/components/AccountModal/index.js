@@ -4,7 +4,7 @@ import cx from 'classnames';
 import { makeStyles } from '@material-ui/core/styles';
 import Modal from '@material-ui/core/Modal';
 import Button from '@material-ui/core/Button';
-import PublishIcon from '@material-ui/icons/Publish';
+import CreateIcon from '@material-ui/icons/Create';
 
 import ModalActions from '../../actions/modal.actions';
 import { getAccountDetails, updateAccountDetails } from 'api';
@@ -27,33 +27,33 @@ const useStyles = makeStyles({
     width: '60%',
     maxWidth: 800,
     minWidth: 400,
-    padding: '64px 48px 48px',
-    borderRadius: 20,
+    padding: 50,
+    borderRadius: 25,
     boxSizing: 'border-box',
     backgroundColor: '#fff',
     outline: 'none',
-    boxShadow: '0 0 30px rgba(0, 0, 0, 0.4)',
+    boxShadow: '0 0 8px rgba(0, 0, 0, 0.15)',
     color: '#333',
   },
   title: {
-    fontSize: 32,
-    margin: 0,
-    marginBottom: 32,
+    fontSize: 36,
+    margin: '0 0 30px',
   },
   formGroup: {
-    marginBottom: 24,
+    marginBottom: 25,
   },
   formLabel: {
-    margin: '0 0 12px',
-    fontSize: 21,
-    fontWeight: 600,
+    margin: '0 0 10px',
+    fontSize: 18,
+    fontWeight: 500,
   },
   formInput: {
     width: '100%',
     outline: 'none',
     height: 40,
-    borderRadius: 8,
-    border: '1px solid #bbb',
+    borderRadius: 5,
+    border: 'none',
+    backgroundColor: '#FAFAFA',
     padding: '8px 12px',
     boxSizing: 'border-box',
     fontSize: 16,
@@ -75,51 +75,57 @@ const useStyles = makeStyles({
   },
   footer: {
     display: 'flex',
-    justifyContent: 'space-evenly',
+    justifyContent: 'center',
   },
   button: {
     width: '140px',
     height: '40px',
     fontSize: 'large',
     backgroundColor: '#007bff',
+    boxShadow: 'none',
+  },
+  save: {
+    backgroundColor: '#007BFF',
+    color: '#FFF',
+    marginRight: 45,
+  },
+  cancel: {
+    backgroundColor: '#FFF',
+    border: '1px solid #007BFF',
+    color: '#007BFF',
   },
   avatarBox: {
     position: 'relative',
     width: 100,
     height: 100,
+    backgroundColor: '#F7F7F7',
     borderRadius: 100,
-    border: '1px solid #bbb',
-    overflow: 'hidden',
+    border: '1px solid #8C8C8C',
   },
   avatar: {
-    width: 'calc(100% + 2px)',
-    height: 'calc(100% + 2px)',
+    width: '100%',
+    height: '100%',
+    borderRadius: '100%',
     objectFit: 'cover',
-    marginTop: -1,
-    marginLeft: -1,
   },
   upload: {
     position: 'absolute',
-    width: '100%',
-    height: '100%',
-    top: 0,
-    left: 0,
+    width: 37,
+    height: 37,
+    bottom: 4,
+    right: -4,
+    border: '1px solid #939393',
     borderRadius: '100%',
-    backgroundColor: 'rgba(255, 255, 255, 0.6)',
+    backgroundColor: '#FFF',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    opacity: 0,
-    transition: 'opacity ease 200ms',
     cursor: 'pointer',
-
-    '&:hover': {
-      opacity: 1,
-    },
   },
   uploadIcon: {
-    width: 40,
-    height: 40,
+    width: 24,
+    height: 24,
+    color: '#007BFF',
   },
 });
 
@@ -283,7 +289,7 @@ const AccountModal = () => {
                 className={classes.upload}
                 onClick={() => inputRef.current?.click()}
               >
-                <PublishIcon className={classes.uploadIcon} />
+                <CreateIcon className={classes.uploadIcon} />
               </div>
             </div>
           </div>
@@ -339,7 +345,7 @@ const AccountModal = () => {
               variant="contained"
               color="primary"
               component="span"
-              className={classes.button}
+              className={cx(classes.button, classes.save)}
               onClick={onSave}
               disabled={!validate()}
             >
@@ -350,7 +356,7 @@ const AccountModal = () => {
               variant="contained"
               color="primary"
               component="span"
-              className={classes.button}
+              className={cx(classes.button, classes.cancel)}
               onClick={onCancel}
             >
               Cancel
