@@ -121,3 +121,106 @@
   border-radius: 32px;
   margin-right: 8px;
 }
+
+.createCollectionContainer {
+  width: 400px;
+}
+
+.createCollectionImgContainer {
+  margin-bottom: 36px;
+}
+
+.createCollectionImageBox {
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  margin: 0 auto;
+  border: 1px solid gray;
+  overflow: hidden;
+  position: relative;
+}
+
+.collectionLogoImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.uploadOverlay {
+  position: absolute;
+  border-radius: 50%;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.6);
+  opacity: 0;
+  transition: opacity ease 100ms;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+
+  &:hover {
+    opacity: 1;
+  }
+}
+
+.uploadIcon {
+  width: 40px !important;
+  height: 40px !important;
+  color: #333;
+}
+
+.createCollectionDlgTitle {
+  text-align: 'center';
+}
+
+.createCollectionLogo {
+  font-size: 18px;
+  margin-bottom: 36px;
+}
+
+.createCollectionNameInputDiv {
+  margin-bottom: 36px;
+}
+
+.createCollectionNameInput {
+  width: 100%;
+  border-radius: 5px;
+  background-color: #F6F6F6;
+  padding: 0 22px 12px;
+  margin-bottom: 20px;
+  box-sizing: border-box;
+}
+
+.createCollectionNameInputLabel {
+  left: 22px;
+}
+
+.createButton,
+.cancelButton {
+  width: 100px;
+  height: 36px;
+  border-radius: 5px;
+  margin-right: 10px;
+}
+
+.createButton {
+  background-color: #007bff;
+  color: #FFF;
+
+  &:hover {
+    background-color: #007bff;
+  }
+}
+
+.cancelButton {
+  background-color: #FFF;
+  color: #007bff;
+  border: 1px solid #007bff;
+
+  &:hover {
+    background-color: #FFF;
+  }
+}
