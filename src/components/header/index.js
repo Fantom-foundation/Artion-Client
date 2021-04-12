@@ -1,5 +1,6 @@
 import React from 'react';
 import { useHistory, withRouter } from 'react-router-dom';
+import cx from 'classnames';
 import { fade, makeStyles } from '@material-ui/core/styles';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
@@ -37,6 +38,29 @@ const useStyles = makeStyles(theme => ({
   },
   menu: {
     top: '72px !important',
+    padding: 25,
+  },
+  menuList: {
+    padding: 0,
+  },
+  menuItem: {
+    padding: 0,
+    fontSize: 18,
+    lineHeight: '22px',
+    color: '#8C8C8C',
+
+    '&:hover': {
+      backgroundColor: 'transparent',
+    },
+  },
+  topItem: {
+    marginBottom: 20,
+  },
+  menuSeparator: {
+    width: '100%',
+    height: 0,
+    border: '0.5px solid #8C8C8C',
+    margin: '15px 0',
   },
   logoImg: {
     height: '36px',
@@ -214,12 +238,32 @@ const NiftyHeader = () => {
       onClose={handleMenuClose}
       classes={{
         paper: classes.menu,
+        list: classes.menuList,
       }}
     >
-      <MenuItem onClick={handleMenuClose}>My Profile</MenuItem>
-      <MenuItem onClick={openAccountSettings}>Account Settings</MenuItem>
-      <MenuItem onClick={handleCreateCollection}>Create Collection</MenuItem>
-      <MenuItem onClick={handleConnectWallet}>
+      <MenuItem
+        classes={{ root: cx(classes.menuItem, classes.topItem) }}
+        onClick={handleMenuClose}
+      >
+        My Profile
+      </MenuItem>
+      <MenuItem
+        classes={{ root: cx(classes.menuItem, classes.topItem) }}
+        onClick={openAccountSettings}
+      >
+        Account Settings
+      </MenuItem>
+      <MenuItem
+        classes={{ root: classes.menuItem }}
+        onClick={handleCreateCollection}
+      >
+        Create Collection
+      </MenuItem>
+      <div className={classes.menuSeparator} />
+      <MenuItem
+        classes={{ root: classes.menuItem }}
+        onClick={handleConnectWallet}
+      >
         {isWalletConnected ? 'Sign Out' : 'Sign In'}
       </MenuItem>
     </Menu>
