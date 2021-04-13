@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
+
 import StatusFilter from '../../components/StatusFilter';
 import CollectionsFilter from '../../components/CollectionsFilter';
 import ExploreHeader from './Header';
@@ -7,6 +8,7 @@ import ExploreFilterHeader from './Body/FilterHeader';
 import NFTsGrid from '../../components/NFTsGrid';
 import { fetchCollections } from '../../api';
 import CollectionsActions from '../../actions/collections.actions';
+import { getSalesContract } from 'contracts';
 
 import './styles.css';
 
@@ -22,7 +24,15 @@ const ExploreAllPage = () => {
     }
   };
 
+  const getAllListings = async () => {
+    const contract = await getSalesContract();
+    const _fee = await contract.platformFee();
+    const fee = parseFloat(_fee.toString());
+    console.log(fee);
+  };
+
   useEffect(() => {
+    getAllListings();
     updateCollections();
     setFetchInterval(setInterval(updateCollections, 1000 * 60 * 10));
 

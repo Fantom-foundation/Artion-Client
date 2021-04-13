@@ -39,6 +39,7 @@ const useStyles = makeStyles(theme => ({
   menu: {
     top: '72px !important',
     padding: 25,
+    borderRadius: '8px !important',
   },
   menuList: {
     padding: 0,
@@ -58,8 +59,8 @@ const useStyles = makeStyles(theme => ({
   },
   menuSeparator: {
     width: '100%',
-    height: 0,
-    border: '0.5px solid #8C8C8C',
+    height: 0.5,
+    backgroundColor: '#8C8C8C',
     margin: '15px 0',
   },
   logoImg: {
