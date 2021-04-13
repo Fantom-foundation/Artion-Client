@@ -6,14 +6,14 @@ import axios from 'axios';
 import { Menu, MenuItem, Button } from '@material-ui/core';
 import PublishIcon from '@material-ui/icons/Publish';
 import CloseIcon from '@material-ui/icons/Close';
-import Web from '@material-ui/icons/Web';
-import Twitter from '@material-ui/icons/Twitter';
-import Instagram from '@material-ui/icons/Instagram';
-import Telegram from '@material-ui/icons/Telegram';
 
-import discordIcon from '../../../assets/svgs/discord.svg';
+import webIcon from '../../../assets/svgs/web.svg';
+import discordIcon from '../../../assets/imgs/discord.png';
+import telegramIcon from '../../../assets/imgs/telegram.png';
+import twitterIcon from '../../../assets/imgs/twitter.png';
+import instagramIcon from '../../../assets/imgs/instagram.png';
 import mediumIcon from '../../../assets/svgs/medium.svg';
-import nftIcon from '../../../assets/svgs/nft.svg';
+import nftIcon from '../../../assets/svgs/nft_active.svg';
 import { Categories } from '../../../constants/filter.constants';
 
 import styles from './styles.module.scss';
@@ -232,7 +232,9 @@ const CollectionCreate = () => {
 
         <div className={styles.inputGroup}>
           <div className={styles.inputTitle}>Description</div>
-          <div className={styles.inputSubTitle}>4 of 1000 characters used.</div>
+          <div className={styles.inputSubTitle}>
+            {description.length} of 1000 characters used.
+          </div>
           <div className={styles.inputWrapper}>
             <textarea
               className={cx(styles.input, styles.longInput)}
@@ -257,7 +259,7 @@ const CollectionCreate = () => {
                 key={idx}
                 onClick={() => deselectCategory(cat.id)}
               >
-                <cat.icon />
+                <cat.icon className={styles.categoryIcon} />
                 <span className={styles.categoryLabel}>{cat.label}</span>
                 <CloseIcon className={styles.closeIcon} />
               </div>
@@ -285,7 +287,7 @@ const CollectionCreate = () => {
               </div>
               <div className={styles.linkItem}>
                 <div className={styles.linkIconWrapper}>
-                  <Web className={styles.linkIcon} />
+                  <img src={webIcon} className={styles.linkIcon} />
                 </div>
                 <div className={styles.inputPrefix} />
                 <input
@@ -309,7 +311,7 @@ const CollectionCreate = () => {
               </div>
               <div className={styles.linkItem}>
                 <div className={styles.linkIconWrapper}>
-                  <Twitter className={styles.linkIcon} />
+                  <img src={twitterIcon} className={styles.linkIcon} />
                 </div>
                 <div className={styles.inputPrefix}>@</div>
                 <input
@@ -321,7 +323,7 @@ const CollectionCreate = () => {
               </div>
               <div className={styles.linkItem}>
                 <div className={styles.linkIconWrapper}>
-                  <Instagram className={styles.linkIcon} />
+                  <img src={instagramIcon} className={styles.linkIcon} />
                 </div>
                 <div className={styles.inputPrefix}>@</div>
                 <input
@@ -345,7 +347,7 @@ const CollectionCreate = () => {
               </div>
               <div className={styles.linkItem}>
                 <div className={styles.linkIconWrapper}>
-                  <Telegram className={styles.linkIcon} />
+                  <img src={telegramIcon} className={styles.linkIcon} />
                 </div>
                 <div className={styles.inputPrefix}>https://t.me/</div>
                 <input
@@ -360,13 +362,8 @@ const CollectionCreate = () => {
         </div>
 
         <div className={styles.buttonsWrapper}>
-          <Button
-            variant="contained"
-            color="primary"
-            component="span"
-            onClick={handleSave}
-          >
-            Save
+          <Button className={styles.createButton} onClick={handleSave}>
+            Create
           </Button>
         </div>
       </div>

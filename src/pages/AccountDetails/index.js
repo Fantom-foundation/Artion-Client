@@ -1,14 +1,72 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSelector } from 'react-redux';
+import {
+  NotificationContainer,
+  NotificationManager,
+} from 'react-notifications';
+import axios from 'axios';
 import cx from 'classnames';
+import TextField from '@material-ui/core/TextField';
+import Button from '@material-ui/core/Button';
+import AddIcon from '@material-ui/icons/Add';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogActions from '@material-ui/core/DialogActions';
+import Dialog from '@material-ui/core/Dialog';
+import PublishIcon from '@material-ui/icons/Publish';
 
 import NFTsGrid from '../../components/NFTsGrid';
 import StatusFilter from '../../components/StatusFilter';
 import CollectionsFilter from '../../components/CollectionsFilter';
+import SCHandlers from '../../utils/sc.interaction';
 
 import styles from './styles.module.scss';
 
 const AccountDetails = () => {
+  let isWalletConnected = useSelector(state => state.ConnectWallet.isConnected);
+  let connectedChainId = useSelector(state => state.ConnectWallet.chainId);
+  const address = useSelector(state => state.ConnectWallet.address); //connected address
+
+  const [collectionName, setCollectionName] = useState('');
+  const [collectionDescription, setCollectionDescription] = useState('');
+  const [isCollectionLogoUploaded, setIsCollectionLogoUploaded] = useState(
+    false
+  );
+  const [collectionLogoUrl, setCollectioLogoUrl] = useState('');
+  const [collectionImgData, setCollectionImgData] = useState(null);
+  const [isCreateCollectionShown, setIsCreateCollectionShown] = useState(false);
   const [bundleIndex, setBundleIndex] = useState(null);
+
+  const [fileSelector, setFileSelector] = useState();
+
+  useEffect(() => {
+    let _fileSelector = document.createElement('input');
+    _fileSelector.setAttribute('type', 'file');
+    _fileSelector.setAttribute('accept', 'image/*');
+    _fileSelector.addEventListener('change', () => {
+      try {
+        let selected = _fileSelector.files[0];
+        let url = URL.createObjectURL(selected);
+        setCollectioLogoUrl(url);
+        console.log('created url is ', url);
+        let reader = new FileReader();
+        reader.readAsDataURL(selected);
+        reader.onloadend = () => {
+          let background = new Image();
+          background.src = reader.result;
+          background.onload = () => {
+            setCollectionImgData(background.src);
+            console.log(background.src);
+            setIsCollectionLogoUploaded(true);
+            _fileSelector.value = null;
+          };
+        };
+      } catch (error) {
+        console.log('file selection cancelled');
+      }
+    });
+    setFileSelector(_fileSelector);
+  }, []);
 
   const bundles = Array.from({ length: 10 }, (_, index) => ({
     logo:
@@ -24,8 +82,90 @@ const AccountDetails = () => {
     }
   };
 
+  const createNotification = (type, msgContent) => {
+    switch (type) {
+      case 'info':
+        NotificationManager.info('Your asset has been successfully created');
+        break;
+      case 'success':
+        NotificationManager.success(
+          'Your asset has been successfully created',
+          'Success'
+        );
+        break;
+      case 'warning':
+        NotificationManager.warning(
+          'Warning message',
+          'Close after 3000ms',
+          3000
+        );
+        break;
+      case 'custom':
+        NotificationManager.info(msgContent);
+        break;
+      case 'error':
+        NotificationManager.error(
+          'Failed to create your asset',
+          'Error',
+          5000,
+          () => {
+            console.log('callback');
+          }
+        );
+        break;
+    }
+  };
+
+  const openCreateBundleModal = async () => {
+    let balance = await SCHandlers.getAccountBalance(address);
+    console.log(`total balance of ${address} is ${balance}`);
+    if (!isWalletConnected) {
+      createNotification('custom', 'Connect your wallet first');
+      return;
+    }
+    if (connectedChainId != 4002) {
+      createNotification('custom', 'You are not connected to Opera Testnet');
+      return;
+    }
+    setIsCreateCollectionShown(true);
+  };
+
+  const uploadImageForCollection = () => {
+    fileSelector.click();
+  };
+
+  const handleCreateBundle = async () => {
+    if (collectionLogoUrl == '') {
+      createNotification('custom', 'You need to upload the collection logo');
+      return;
+    }
+    let formData = new FormData();
+    formData.append('name', collectionName);
+    formData.append('description', collectionDescription);
+    formData.append('address', address);
+    formData.append('imgData', collectionImgData);
+    try {
+      let result = await axios({
+        method: 'post',
+        url: 'https://nifty.fantom.network/api/ipfs/uploadBundleImage2Server',
+        data: formData,
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      console.log(result);
+    } catch (error) {
+      console.log('failed to upload to the server');
+    }
+    setCollectionName('');
+    setCollectionDescription('');
+    setIsCollectionLogoUploaded(false);
+    setCollectioLogoUrl('');
+    setIsCreateCollectionShown(false);
+    setCollectionImgData(null);
+  };
+
   return (
     <div className={styles.container}>
+      <NotificationContainer />
       <div className={styles.sidebar}>
         <div className={styles.profileWrapper}>
           <img
@@ -56,10 +196,97 @@ const AccountDetails = () => {
                 {bundle.name}
               </div>
             ))}
+            <div className={styles.bundle} onClick={openCreateBundleModal}>
+              <AddIcon />
+            </div>
           </div>
         </div>
         <NFTsGrid items={new Array(100).fill(0)} />
       </div>
+
+      {isCreateCollectionShown && (
+        <div>
+          <Dialog
+            disableBackdropClick
+            disableEscapeKeyDown
+            classes={{
+              paper: styles.createCollectionContainer,
+            }}
+            aria-labelledby="confirmation-dialog-title"
+            open={true}
+          >
+            <DialogTitle id="confirmation-dialog-title">
+              <div className={styles.createCollectionDlgTitle}>
+                Create your bundle
+              </div>
+            </DialogTitle>
+            <DialogContent dividers>
+              <div>
+                <div className={styles.createCollectionLogo}>
+                  <p>Logo</p>
+                  <p>(350 x 350 recommended)</p>
+                </div>
+                <div className={styles.createCollectionImgContainer}>
+                  <div className={styles.createCollectionImageBox}>
+                    {isCollectionLogoUploaded ? (
+                      <img
+                        src={collectionLogoUrl}
+                        alt="icon"
+                        className={styles.collectionLogoImage}
+                      ></img>
+                    ) : null}
+                    <div
+                      className={styles.uploadOverlay}
+                      onClick={uploadImageForCollection}
+                    >
+                      <PublishIcon className={styles.uploadIcon} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <TextField
+                label="Name"
+                className={styles.createCollectionNameInput}
+                InputLabelProps={{
+                  className: styles.createCollectionNameInputLabel,
+                }}
+                placeholder="e.g.FMT Gems"
+                value={collectionName}
+                onChange={e => setCollectionName(e.target.value)}
+              />
+              <TextField
+                label="Description (Optional)"
+                hinttext="Message Field"
+                value={collectionDescription}
+                placeholder="Provide a description for your collection."
+                floatinglabeltext="MultiLine and FloatingLabel"
+                className={styles.createCollectionNameInput}
+                InputLabelProps={{
+                  className: styles.createCollectionNameInputLabel,
+                }}
+                multiline
+                rows={2}
+                onChange={e => setCollectionDescription(e.target.value)}
+              />
+            </DialogContent>
+            <DialogActions>
+              <Button
+                onClick={handleCreateBundle}
+                className={styles.createButton}
+              >
+                Create
+              </Button>
+              <Button
+                autoFocus
+                onClick={() => setIsCreateCollectionShown(false)}
+                className={styles.cancelButton}
+              >
+                Cancel
+              </Button>
+            </DialogActions>
+          </Dialog>
+        </div>
+      )}
     </div>
   );
 };

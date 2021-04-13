@@ -23,7 +23,19 @@ const App = ({ paintStore }) => {
   const { start, draw, stop } = paintStore;
 
   const PaintBoard = () => {
-    useEffect(() => paintStore.initialize(canvasRef.current), [paintStore]);
+    const initPaintStore = () => {
+      paintStore.initialize(canvasRef.current);
+    };
+    useEffect(() => initPaintStore(), [paintStore]);
+
+    useEffect(() => {
+      window.addEventListener('resize', initPaintStore);
+
+      return () => {
+        window.removeEventListener('resize', initPaintStore);
+      };
+    }, []);
+
     return (
       <>
         <Layout>

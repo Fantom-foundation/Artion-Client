@@ -1,20 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import axios from 'axios';
 import { makeStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import Autocomplete from '@material-ui/lab/Autocomplete';
-import DialogTitle from '@material-ui/core/DialogTitle';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogActions from '@material-ui/core/DialogActions';
-import Dialog from '@material-ui/core/Dialog';
 
 import Stepper from '@material-ui/core/Stepper';
 import Step from '@material-ui/core/Step';
 import StepLabel from '@material-ui/core/StepLabel';
 import { ClipLoader } from 'react-spinners';
-
-import ImageIcon from '@material-ui/icons/Image';
 
 import 'react-notifications/lib/notifications.css';
 import {
@@ -35,10 +29,9 @@ import WalletUtils from '../../utils/wallet';
 const useStyles = makeStyles(() => ({
   container: {
     width: 400,
-    height: '80%',
+    height: 'fit-content',
     background: 'white',
-    right: '36px',
-    top: '12%',
+    position: 'relative',
   },
   inkMetadataInput: {
     width: '100%',
@@ -77,6 +70,8 @@ const useStyles = makeStyles(() => ({
     alignItems: 'center',
     fontSize: 'x-large',
     marginTop: 40,
+    position: 'absolute',
+    width: '100%',
   },
   nftIDLabel: {
     fontSize: 18,
@@ -87,54 +82,6 @@ const useStyles = makeStyles(() => ({
     fontSize: 18,
     marginTop: '18px',
     color: '#007bff',
-  },
-  createCollectionDiv: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    fontSize: 18,
-    color: '#A5A5A5',
-    marginTop: '20px',
-  },
-  createCollectionContainer: {
-    width: '24%',
-  },
-  createCollectionBtn: {
-    marginTop: '30px',
-    width: '60%',
-    letterSpacing: 5,
-    fontSize: 20,
-    backgroundColor: '#007bff !important',
-    color: '#fff !important',
-    margin: '0 20% 24px',
-    height: 48,
-    cursor: 'pointer',
-
-    '&:disabled': {
-      color: '#fffa !important',
-    },
-  },
-  createCollectionImgContainer: {
-    height: '240px',
-    marginBottom: '36px',
-  },
-  createCollectionImageBox: {
-    width: '240px',
-    height: '100%',
-    border: '3px dotted gray',
-  },
-  createCollectionDlgTitle: {
-    textAlign: 'center',
-  },
-  createCollectionLogo: {
-    marginBottom: '36px',
-  },
-  createCollectionNameInputDiv: {
-    marginBottom: '36px',
-  },
-  createCollectionNameInput: {
-    width: '100%',
-    textAlign: 'left',
   },
   creteCollectionImageIcon: {
     width: 'unset !important',
@@ -178,47 +125,6 @@ const Metadata = () => {
 
   const [lastMintedTkId, setLastMintedTkId] = useState(0);
   const [lastMintedTnxId, setLastMintedTnxId] = useState('');
-
-  const [collectionName, setCollectionName] = useState('');
-  const [collectionDescription, setCollectionDescription] = useState('');
-  const [isCollectionLogoUploaded, setIsCollectionLogoUploaded] = useState(
-    false
-  );
-  const [collectionLogoUrl, setCollectioLogoUrl] = useState('');
-  const [isCreateCollectionShown, setIsCreateCollectionShown] = useState(false);
-
-  const [collectionImgData, setCollectionImgData] = useState(null);
-
-  const [fileSelector, setFileSelector] = useState();
-
-  useEffect(() => {
-    let _fileSelector = document.createElement('input');
-    _fileSelector.setAttribute('type', 'file');
-    _fileSelector.setAttribute('accept', '.png');
-    _fileSelector.addEventListener('change', () => {
-      try {
-        let selected = _fileSelector.files[0];
-        let url = URL.createObjectURL(selected);
-        setCollectioLogoUrl(url);
-        console.log('created url is ', url);
-        let reader = new FileReader();
-        reader.readAsDataURL(selected);
-        reader.onloadend = () => {
-          let background = new Image();
-          background.src = reader.result;
-          background.onload = () => {
-            setCollectionImgData(background.src);
-            console.log(background.src);
-            setIsCollectionLogoUploaded(true);
-            _fileSelector.value = null;
-          };
-        };
-      } catch (error) {
-        console.log('file selection cancelled');
-      }
-    });
-    setFileSelector(_fileSelector);
-  }, []);
 
   let isWalletConnected = useSelector(state => state.ConnectWallet.isConnected);
   let connectedChainId = useSelector(state => state.ConnectWallet.chainId);
@@ -284,16 +190,6 @@ const Metadata = () => {
       case 'symbol':
         {
           setSymbol(value);
-        }
-        break;
-      case 'collectionName':
-        {
-          setCollectionName(value);
-        }
-        break;
-      case 'collectionDescription':
-        {
-          setCollectionDescription(value);
         }
         break;
       default: {
@@ -452,54 +348,6 @@ const Metadata = () => {
     }
   };
 
-  const uploadImageForCollection = () => {
-    fileSelector.click();
-  };
-
-  const toggleCreateCollectionDlg = async () => {
-    console.log('clicked');
-    let balance = await SCHandlers.getAccountBalance(address);
-    console.log(`total balance of ${address} is ${balance}`);
-    if (!isWalletConnected) {
-      createNotification('custom', 'Connect your wallet first');
-      return;
-    }
-    if (connectedChainId != 4002) {
-      createNotification('custom', 'You are not connected to Opera Testnet');
-      return;
-    }
-    setIsCreateCollectionShown(true);
-  };
-
-  const handleCreateBundle = async () => {
-    if (collectionLogoUrl == '') {
-      createNotification('custom', 'You need to upload the collection logo');
-      return;
-    }
-    let formData = new FormData();
-    formData.append('name', collectionName);
-    formData.append('description', collectionDescription);
-    formData.append('address', address);
-    formData.append('imgData', collectionImgData);
-    try {
-      let result = await axios({
-        method: 'post',
-        url: 'https://nifty.fantom.network/api/ipfs/uploadBundleImage2Server',
-        data: formData,
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
-      console.log(result);
-    } catch (error) {
-      console.log('failed to upload to the server');
-    }
-    setCollectionName('');
-    setCollectionDescription('');
-    setIsCollectionLogoUploaded(false);
-    setCollectioLogoUrl('');
-    setIsCreateCollectionShown(false);
-    setCollectionImgData(null);
-  };
-
   return (
     <div className={classes.container}>
       <NotificationContainer />
@@ -573,7 +421,7 @@ const Metadata = () => {
           defaultValue={description}
           floatinglabeltext="MultiLine and FloatingLabel"
           multiline
-          rows={2}
+          rows={4}
           onChange={e => {
             handleInputChange(e.target.value, 'description');
           }}
@@ -625,111 +473,6 @@ const Metadata = () => {
           </a>
         )}
       </div>
-      <div className={classes.createCollectionDiv}>
-        <div>
-          By creating a bundle, you can group a set of NFTs and sell with a
-          single tap.
-        </div>
-        <Button
-          variant="contained"
-          color="primary"
-          className={classes.createCollectionBtn}
-          onClick={async () => {
-            await toggleCreateCollectionDlg();
-          }}
-          disabled={!isWalletConnected}
-        >
-          Create
-        </Button>
-      </div>
-      {isCreateCollectionShown && (
-        <div>
-          <Dialog
-            disableBackdropClick
-            disableEscapeKeyDown
-            // maxWidth="xs"
-            classes={{
-              paper: classes.createCollectionContainer,
-            }}
-            onEntering={() => {}}
-            aria-labelledby="confirmation-dialog-title"
-            open={true}
-          >
-            <DialogTitle id="confirmation-dialog-title">
-              <div className={classes.createCollectionDlgTitle}>
-                Create your bundle
-              </div>
-            </DialogTitle>
-            <DialogContent dividers>
-              <div>
-                <div className={classes.createCollectionLogo}>
-                  <p>Logo</p>
-                  <p>(350 x 350 recommended)</p>
-                </div>
-                <div className={classes.createCollectionImgContainer}>
-                  <div
-                    className={classes.createCollectionImageBox}
-                    onClick={uploadImageForCollection}
-                  >
-                    {isCollectionLogoUploaded ? (
-                      <img
-                        src={collectionLogoUrl}
-                        alt="icon"
-                        className={classes.collectionLogoImage}
-                      ></img>
-                    ) : (
-                      <ImageIcon
-                        viewBox="-10 -10 44 44"
-                        className={classes.creteCollectionImageIcon}
-                      ></ImageIcon>
-                    )}
-                  </div>
-                </div>
-              </div>
-              <div className={classes.createCollectionNameInput}>
-                <TextField
-                  label="Name"
-                  className={classes.createCollectionNameInput}
-                  placeholder="e.g.FMT Gems"
-                  value={collectionName}
-                  onChange={e => {
-                    handleInputChange(e.target.value, 'collectionName');
-                  }}
-                />
-              </div>
-              <div>
-                <TextField
-                  label="description(Optional)"
-                  hinttext="Message Field"
-                  value={collectionDescription}
-                  placeholder="Provide a description for your collection."
-                  floatinglabeltext="MultiLine and FloatingLabel"
-                  className={classes.createCollectionNameInput}
-                  multiline
-                  rows={2}
-                  onChange={e => {
-                    handleInputChange(e.target.value, 'collectionDescription');
-                  }}
-                />
-              </div>
-            </DialogContent>
-            <DialogActions>
-              <Button
-                autoFocus
-                onClick={() => {
-                  setIsCreateCollectionShown(false);
-                }}
-                color="primary"
-              >
-                Cancel
-              </Button>
-              <Button onClick={handleCreateBundle} color="primary">
-                Create
-              </Button>
-            </DialogActions>
-          </Dialog>
-        </div>
-      )}
     </div>
   );
 };

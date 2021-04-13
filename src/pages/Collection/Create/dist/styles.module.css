@@ -45,11 +45,11 @@
 
 .error {
   margin: 6px 0 0 6px;
-  color: rgba(235, 87, 87);
+  color: #eb5757;
 }
 
 .hasError {
-  border: 1px solid rgb(235, 87, 87) !important;
+  border: 1px solid #eb5757 !important;
 }
 
 .logoUploadBox {
@@ -61,17 +61,15 @@
   border-radius: 8px;
   background-color: #F7F7F7;
   position: relative;
-
-  &:hover {
-    border-color: #888;
-  }
-
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border: none;
-  }
+}
+.logoUploadBox:hover {
+  border-color: #888;
+}
+.logoUploadBox img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border: none;
 }
 
 .uploadOverlay {
@@ -87,10 +85,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-
-  &:hover {
-    opacity: 1;
-  }
+}
+.uploadOverlay:hover {
+  opacity: 1;
 }
 
 .uploadIcon {
@@ -110,10 +107,9 @@
   border: none;
   outline: none;
   background-color: #FAFAFA;
-
-  &:focus {
-    box-shadow: 0 0 8px rgba(0, 0, 0, 0.25);
-  }
+}
+.input:focus {
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.25);
 }
 
 .longInput {
@@ -136,14 +132,12 @@
   cursor: pointer;
   user-select: none;
   white-space: nowrap;
-
-  &:hover {
-    box-shadow: 0 0 8px rgba(0, 0, 0, 0.25);
-  }
+}
+.categoryButton:hover {
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.25);
 }
 
 .menu {
-  // margin-top: 68px;
   min-width: 160px;
   max-height: 350px;
   overflow-y: auto;
@@ -175,10 +169,9 @@
   cursor: pointer;
   user-select: none;
   white-space: nowrap;
-
-  &:hover {
-    box-shadow: 0 0 8px rgba(0, 0, 0, 0.25);
-  }
+}
+.selectedCategory:hover {
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.25);
 }
 
 .closeIcon {
@@ -235,10 +228,9 @@
   font-size: 16px;
   color: #333;
   background-color: transparent;
-
-  &::placeholder {
-    color: #888;
-  }
+}
+.linkInput::placeholder {
+  color: #888;
 }
 
 .buttonsWrapper {
