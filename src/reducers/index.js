@@ -8,6 +8,7 @@ import { HeaderOptions } from './header.reducers';
 import { Modal } from './modal.reducers';
 import { Filter } from './filter.reducers';
 import { Collections } from './collections.reducers';
+import { Tokens } from './tokens.reducers';
 
 const persistConfig = {
   key: 'collections',
@@ -22,6 +23,7 @@ const rootReducer = combineReducers({
   Modal,
   Filter,
   Collections,
+  Tokens,
 });
 
 export default persistReducer(persistConfig, rootReducer);

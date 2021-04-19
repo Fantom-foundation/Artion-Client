@@ -1,6 +1,6 @@
 import ModalConstants from '../constants/modal.constants';
 
-const FilterActions = {
+const ModalActions = {
   showAccountModal,
   hideAccountModal,
 };
@@ -29,4 +29,4 @@ const _hideAccountModal = () => {
   };
 };
 
-export default FilterActions;
+export default ModalActions;

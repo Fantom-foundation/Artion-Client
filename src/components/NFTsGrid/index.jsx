@@ -9,7 +9,7 @@ const NFTsGrid = ({ items }) => {
     <div className={styles.container}>
       {(items || []).map((item, idx) => (
         <div className={styles.nft} key={idx}>
-          <Card />
+          <Card item={item} />
         </div>
       ))}
     </div>

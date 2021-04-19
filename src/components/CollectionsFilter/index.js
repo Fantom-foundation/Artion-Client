@@ -90,7 +90,7 @@ const useStyles = makeStyles(() => ({
     padding: 10,
   },
   collectionsList: {
-    maxHeight: 400,
+    maxHeight: 300,
     overflowY: 'auto',
     marginTop: 20,
     flexGrow: 1,

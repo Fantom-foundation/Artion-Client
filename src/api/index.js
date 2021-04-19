@@ -44,3 +44,29 @@ export const fetchCollections = async () => {
   const res = await axios.get(`${BASE_URL}/api/info/geterc721contracts`);
   return res.data;
 };
+
+export const fetchTokens = async step => {
+  const data = { step };
+  const res = await axios({
+    method: 'post',
+    url: `${BASE_URL}/api/erc721token/fetchTokens`,
+    data: JSON.stringify(data),
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+  return res.data;
+};
+
+export const fetchTokenURI = async (address, tokenID) => {
+  const data = { address, tokenID };
+  const res = await axios({
+    method: 'post',
+    url: `${BASE_URL}/api/erc721token/getTokenURI`,
+    data: JSON.stringify(data),
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+  return res.data;
+};
