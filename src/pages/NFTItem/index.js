@@ -9,6 +9,7 @@ import Panel from '../../components/Panel';
 import ResizableBox from '../../components/ResizableBox';
 import { fetchTokenURI } from '../../api';
 import { NFT_CONTRACT_ABI } from 'contracts';
+import { abbrAddress } from 'utils';
 
 import styles from './styles.module.scss';
 
@@ -41,7 +42,7 @@ const NFTItem = () => {
     setOwner(res);
   };
 
-  useEffect(async () => {
+  useEffect(() => {
     getTokenURI(address, tokenID);
     getTokenOwner(address, tokenID);
   }, [address, tokenID]);
@@ -92,10 +93,32 @@ const NFTItem = () => {
                 </Panel>
               )}
               <Panel title={`About ${collection?.name}`}>
-                <div className={styles.fakeBody} />
+                <div className={styles.panelBody}>
+                  {collection?.description || 'Unverified Collection'}
+                </div>
               </Panel>
               <Panel title="Chain Info">
-                <div className={styles.fakeBody} />
+                <div className={styles.panelBody}>
+                  <div className={styles.panelLine}>
+                    <div className={styles.panelLabel}>Collection</div>
+                    <a
+                      href={`https://ftmscan.com/token/${address}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={styles.panelValue}
+                    >
+                      {abbrAddress(address)}
+                    </a>
+                  </div>
+                  <div className={styles.panelLine}>
+                    <div className={styles.panelLabel}>Network</div>
+                    <div className={styles.panelValue}>Fantom Opera</div>
+                  </div>
+                  <div className={styles.panelLine}>
+                    <div className={styles.panelLabel}>Chain ID</div>
+                    <div className={styles.panelValue}>250</div>
+                  </div>
+                </div>
               </Panel>
             </div>
           </div>
