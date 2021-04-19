@@ -1,84 +1,45 @@
 import { AuthConstants } from '../constants/auth.constants';
 
 const AuthActions = {
-  signin,
-  signinSuccess,
-  signinFailed,
-  signupSuccess,
-  signupFailed,
-  signout,
+  fetchStart,
+  fetchSuccess,
+  fetchFailed,
 };
 
-function signin() {
+function fetchStart() {
   return dispatch => {
-    dispatch(_signin());
+    dispatch(_fetchStart());
   };
 }
 
-const _signin = () => {
+const _fetchStart = () => {
   return {
-    type: AuthConstants.SIGNUPREQUEST,
+    type: AuthConstants.PROFILE_GET_START,
   };
 };
 
-function signinSuccess(authToken) {
+function fetchSuccess(user) {
   return dispatch => {
-    dispatch(_signinSuccess(authToken));
+    dispatch(_fetchSuccess(user));
   };
 }
 
-const _signinSuccess = authToken => {
+const _fetchSuccess = user => {
   return {
-    type: AuthConstants.SIGNINSUCCESS,
-    token: authToken,
+    type: AuthConstants.PROFILE_GET_SUCCESS,
+    payload: user,
   };
 };
 
-function signinFailed() {
+function fetchFailed() {
   return dispatch => {
-    dispatch(_signinFailed());
+    dispatch(_fetchFailed());
   };
 }
 
-const _signinFailed = () => {
+const _fetchFailed = () => {
   return {
-    type: AuthConstants.SIGNUPREQUEST,
-  };
-};
-
-function signupSuccess() {
-  return dispatch => {
-    dispatch(_signupSuccess());
-  };
-}
-
-const _signupSuccess = () => {
-  return {
-    type: AuthConstants.SIGNUPSUCCESS,
-  };
-};
-
-function signupFailed() {
-  return dispatch => {
-    dispatch(_signupFailed());
-  };
-}
-
-const _signupFailed = () => {
-  return {
-    type: AuthConstants.SIGNUPFAILED,
-  };
-};
-
-function signout() {
-  return dispatch => {
-    dispatch(_signout());
-  };
-}
-
-const _signout = () => {
-  return {
-    type: AuthConstants.SIGNOUT,
+    type: AuthConstants.PROFILE_GET_FAILED,
   };
 };
 

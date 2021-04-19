@@ -7,7 +7,8 @@ import Button from '@material-ui/core/Button';
 import CreateIcon from '@material-ui/icons/Create';
 
 import ModalActions from '../../actions/modal.actions';
-import { getAccountDetails, updateAccountDetails } from 'api';
+import AuthActions from 'actions/auth.actions';
+import { updateAccountDetails } from 'api';
 
 const useStyles = makeStyles({
   root: {
@@ -132,11 +133,12 @@ const useStyles = makeStyles({
 const AccountModal = () => {
   const dispatch = useDispatch();
 
+  const { fetching, user } = useSelector(state => state.Auth);
+
   const classes = useStyles();
   const rootRef = useRef(null);
   const inputRef = useRef(null);
 
-  const [loading, setLoading] = useState(false);
   const [alias, setAlias] = useState('');
   const [email, setEmail] = useState('');
   const [bio, setBio] = useState('');
@@ -149,27 +151,18 @@ const AccountModal = () => {
 
   useEffect(() => {
     if (accountModalVisible) {
-      setAvatar(null);
-      setAlias('');
-      setEmail('');
-      setBio('');
+      if (user.imageHash) {
+        setAvatar(`https://gateway.pinata.cloud/ipfs/${user.imageHash}`);
+      } else {
+        setAvatar(null);
+      }
+      setAlias(user.alias || '');
+      setEmail(user.email || '');
+      setBio(user.bio || '');
       setAliasError(null);
       setEmailError(null);
-
-      if (authToken) {
-        setLoading(true);
-        getAccountDetails(authToken).then(({ data }) => {
-          setLoading(false);
-          if (data.imageHash) {
-            setAvatar(`https://gateway.pinata.cloud/ipfs/${data.imageHash}`);
-          }
-          setAlias(data.alias || '');
-          setEmail(data.email || '');
-          setBio(data.bio || '');
-        });
-      }
     }
-  }, [accountModalVisible, authToken]);
+  }, [accountModalVisible]);
 
   const validAlias = alias => {
     return alias.length > 0 && alias.length <= 20 && alias.indexOf(' ') === -1;
@@ -242,7 +235,14 @@ const AccountModal = () => {
 
   const onSave = async () => {
     if (avatar.startsWith('https')) {
-      await updateAccountDetails(alias, email, bio, avatar, authToken);
+      const res = await updateAccountDetails(
+        alias,
+        email,
+        bio,
+        avatar,
+        authToken
+      );
+      dispatch(AuthActions.fetchSuccess(res.data));
 
       closeModal();
     } else {
@@ -254,7 +254,14 @@ const AccountModal = () => {
         const x = (w - size) / 2;
         const y = (h - size) / 2;
         clipImage(img, x, y, size, size, async data => {
-          await updateAccountDetails(alias, email, bio, data, authToken);
+          const res = await updateAccountDetails(
+            alias,
+            email,
+            bio,
+            data,
+            authToken
+          );
+          dispatch(AuthActions.fetchSuccess(res.data));
 
           closeModal();
         });
@@ -305,7 +312,7 @@ const AccountModal = () => {
               value={alias}
               onChange={e => setAlias(e.target.value)}
               onBlur={validateAlias}
-              disabled={loading}
+              disabled={fetching}
             />
             {aliasError !== null && (
               <p className={classes.error}>{aliasError}</p>
@@ -323,7 +330,7 @@ const AccountModal = () => {
               value={email}
               onChange={e => setEmail(e.target.value)}
               onBlur={validateEmail}
-              disabled={loading}
+              disabled={fetching}
             />
             {emailError !== null && (
               <p className={classes.error}>{emailError}</p>
@@ -336,7 +343,7 @@ const AccountModal = () => {
               placeholder="Bio"
               value={bio}
               onChange={e => setBio(e.target.value)}
-              disabled={loading}
+              disabled={fetching}
             />
           </div>
 

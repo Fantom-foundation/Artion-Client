@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router';
+import { useSelector } from 'react-redux';
 import { makeStyles } from '@material-ui/core/styles';
 import Box from '@material-ui/core/Box';
 import Card from '@material-ui/core/Card';
@@ -7,6 +8,7 @@ import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
 import CardMedia from '@material-ui/core/CardMedia';
 import Typography from '@material-ui/core/Typography';
+import axios from 'axios';
 
 const useStyles = makeStyles({
   root: {
@@ -70,12 +72,33 @@ const useStyles = makeStyles({
   },
 });
 
-const BaseCard = ({ style }) => {
+const BaseCard = ({ item, style }) => {
   const classes = useStyles();
   const history = useHistory();
 
+  const [info, setInfo] = useState();
+
+  const collections = useSelector(state => state.Collections);
+
+  const collection = collections.find(
+    col => col.address === item.contractAddress
+  );
+
+  const getTokenURI = async tokenURI => {
+    try {
+      const res = await axios.get(tokenURI);
+      setInfo(res.data);
+    } catch {
+      console.log('Token URI not available');
+    }
+  };
+
+  useEffect(() => {
+    getTokenURI(item.tokenURI);
+  }, [item]);
+
   const viewNFTDetails = () => {
-    history.push('/explore/0x123/1');
+    history.push(`/explore/${item.contractAddress}/${item.tokenID}`);
   };
 
   return (
@@ -83,16 +106,16 @@ const BaseCard = ({ style }) => {
       <Card className={classes.card} onClick={viewNFTDetails}>
         <CardMedia
           className={classes.media}
-          image="https://lh3.googleusercontent.com/c2Y0zp4LpzETIMO6FL4unRHXrGuxt9_ifWmqzbzQ_oqvh4LCZhMrswzWiBttEr3J-kQ5d9AVoq7VTfY2UxPhwynY=s992"
+          image={info?.image}
           title="Contemplative Reptile"
         />
         <CardContent className={classes.content}>
           <div className={classes.alignLeft}>
             <Typography component="h4" className={classes.label}>
-              Category
+              {collection?.name || ''}
             </Typography>
             <Typography component="h4" className={classes.name}>
-              Sample
+              {info?.name}
             </Typography>
           </div>
           <div className={classes.alignRight}>
@@ -100,7 +123,7 @@ const BaseCard = ({ style }) => {
               Price
             </Typography>
             <Typography component="h4" className={classes.price}>
-              Ξ 1.111
+              Ξ {item.price}
             </Typography>
           </div>
         </CardContent>

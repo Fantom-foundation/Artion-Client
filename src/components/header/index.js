@@ -18,10 +18,12 @@ import { useDispatch, useSelector } from 'react-redux';
 import FantomLogo from '../../assets/svgs/fantom_logo_white_new.svg';
 import { ethers } from 'ethers';
 import WalletConnectActions from '../../actions/walletconnect.actions';
+import AuthActions from 'actions/auth.actions';
 import ModalActions from '../../actions/modal.actions';
 import { abbrAddress } from '../../utils';
 import HeaderActions from '../../actions/header.actions';
 import General from '../../utils/general';
+import { getAccountDetails } from 'api';
 
 const useStyles = makeStyles(theme => ({
   grow: {
@@ -39,6 +41,7 @@ const useStyles = makeStyles(theme => ({
   menu: {
     top: '72px !important',
     padding: 25,
+    borderRadius: '8px !important',
   },
   menuList: {
     padding: 0,
@@ -58,8 +61,8 @@ const useStyles = makeStyles(theme => ({
   },
   menuSeparator: {
     width: '100%',
-    height: 0,
-    border: '0.5px solid #8C8C8C',
+    height: 0.5,
+    backgroundColor: '#8C8C8C',
     margin: '15px 0',
   },
   logoImg: {
@@ -148,6 +151,7 @@ const NiftyHeader = () => {
     history.push('/');
   };
 
+  const { user } = useSelector(state => state.Auth);
   const isWalletConnected = useSelector(
     state => state.ConnectWallet.isConnected
   );
@@ -201,6 +205,11 @@ const NiftyHeader = () => {
     return { connectedAddress, chainId, token };
   };
 
+  const goToMyProfile = () => {
+    history.push(`/account/${address}`);
+    handleMenuClose();
+  };
+
   const openAccountSettings = () => {
     dispatch(ModalActions.showAccountModal());
     handleMenuClose();
@@ -221,6 +230,14 @@ const NiftyHeader = () => {
         dispatch(
           WalletConnectActions.connectWallet(chainId, connectedAddress, token)
         );
+
+        dispatch(AuthActions.fetchStart());
+        try {
+          const { data } = await getAccountDetails(token);
+          dispatch(AuthActions.fetchSuccess(data));
+        } catch {
+          dispatch(AuthActions.fetchFailed());
+        }
       }
     }
     handleMenuClose();
@@ -241,12 +258,14 @@ const NiftyHeader = () => {
         list: classes.menuList,
       }}
     >
-      <MenuItem
-        classes={{ root: cx(classes.menuItem, classes.topItem) }}
-        onClick={handleMenuClose}
-      >
-        My Profile
-      </MenuItem>
+      {isWalletConnected && (
+        <MenuItem
+          classes={{ root: cx(classes.menuItem, classes.topItem) }}
+          onClick={goToMyProfile}
+        >
+          My Profile
+        </MenuItem>
+      )}
       <MenuItem
         classes={{ root: cx(classes.menuItem, classes.topItem) }}
         onClick={openAccountSettings}
@@ -303,7 +322,11 @@ const NiftyHeader = () => {
           aria-haspopup="true"
           color="inherit"
         >
-          <AccountCircle />
+          {user.imageHash ? (
+            <img src={`https://gateway.pinata.cloud/ipfs/${user.imageHash}`} />
+          ) : (
+            <AccountCircle />
+          )}
         </IconButton>
         <p>Profile</p>
       </MenuItem>
@@ -357,7 +380,15 @@ const NiftyHeader = () => {
               onClick={handleProfileMenuOpen}
               color="inherit"
             >
-              <AccountCircle />
+              {user.imageHash ? (
+                <img
+                  src={`https://gateway.pinata.cloud/ipfs/${user.imageHash}`}
+                  width="24"
+                  height="24"
+                />
+              ) : (
+                <AccountCircle />
+              )}
             </IconButton>
           </div>
           <div className={classes.sectionMobile}>

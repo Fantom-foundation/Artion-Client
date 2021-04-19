@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { useParams } from 'react-router-dom';
 import {
   NotificationContainer,
   NotificationManager,
@@ -19,10 +20,18 @@ import NFTsGrid from '../../components/NFTsGrid';
 import StatusFilter from '../../components/StatusFilter';
 import CollectionsFilter from '../../components/CollectionsFilter';
 import SCHandlers from '../../utils/sc.interaction';
+import { abbrAddress } from 'utils';
+import { getUserAccountDetails, fetchTokens } from 'api';
+import TokensActions from 'actions/tokens.actions';
 
 import styles from './styles.module.scss';
 
 const AccountDetails = () => {
+  const dispatch = useDispatch();
+
+  const { uid } = useParams();
+
+  const { fetching, tokens } = useSelector(state => state.Tokens);
   let isWalletConnected = useSelector(state => state.ConnectWallet.isConnected);
   let connectedChainId = useSelector(state => state.ConnectWallet.chainId);
   const address = useSelector(state => state.ConnectWallet.address); //connected address
@@ -38,6 +47,47 @@ const AccountDetails = () => {
   const [bundleIndex, setBundleIndex] = useState(null);
 
   const [fileSelector, setFileSelector] = useState();
+
+  const [page, setPage] = useState(0);
+  const [user, setUser] = useState({});
+
+  const getUserDetails = async address => {
+    try {
+      const { data } = await getUserAccountDetails(address);
+      setUser(data);
+    } catch {
+      setUser({});
+    }
+  };
+
+  const fetchNFTs = async step => {
+    dispatch(TokensActions.startFetching());
+
+    try {
+      const { data } = await fetchTokens(step);
+      dispatch(
+        TokensActions.fetchingSuccess(data.totalTokenCounts, data.tokens)
+      );
+    } catch {
+      dispatch(TokensActions.fetchingFailed());
+    }
+  };
+
+  useEffect(() => {
+    getUserDetails(uid);
+    dispatch(TokensActions.resetTokens());
+    fetchNFTs(0);
+  }, [uid]);
+
+  const handleScroll = e => {
+    if (fetching) return;
+
+    const obj = e.currentTarget;
+    if (obj.scrollHeight - obj.clientHeight - obj.scrollTop < 50) {
+      fetchNFTs(page + 1);
+      setPage(page + 1);
+    }
+  };
 
   useEffect(() => {
     let _fileSelector = document.createElement('input');
@@ -169,18 +219,29 @@ const AccountDetails = () => {
       <div className={styles.sidebar}>
         <div className={styles.profileWrapper}>
           <img
-            src="https://lh3.googleusercontent.com/ojVpeYTZbASHsP-9z385kSIQSAHYaNFZkVMgiU4j6djSmRDtyc0psef3vy1LVoyREFDHSY7VzqQKiqYoJo9teMOxcvoCdlkatucflw=s0"
+            src={
+              user.imageHash
+                ? `https://gateway.pinata.cloud/ipfs/${user.imageHash}`
+                : 'https://lh3.googleusercontent.com/ojVpeYTZbASHsP-9z385kSIQSAHYaNFZkVMgiU4j6djSmRDtyc0psef3vy1LVoyREFDHSY7VzqQKiqYoJo9teMOxcvoCdlkatucflw=s0'
+            }
             className={styles.avatar}
           />
-          <div className={styles.username}>username</div>
-          <div className={styles.address}>0x12345678901234567890</div>
-          <div className={styles.bio}>Crazy Crypto Fan, Bitcoin Trader</div>
+          <div className={styles.username}>{user.alias || ''}</div>
+          <a
+            href={`https://ftmscan.com/address/${uid}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={styles.address}
+          >
+            {abbrAddress(uid)}
+          </a>
+          <div className={styles.bio}>{user.bio || ''}</div>
         </div>
         <StatusFilter />
         <CollectionsFilter />
       </div>
 
-      <div className={styles.body}>
+      <div className={styles.body} onScroll={handleScroll}>
         <div className={styles.bundleBox}>
           <div className={styles.bundleList}>
             {bundles.map((bundle, idx) => (
@@ -201,7 +262,7 @@ const AccountDetails = () => {
             </div>
           </div>
         </div>
-        <NFTsGrid items={new Array(100).fill(0)} />
+        <NFTsGrid items={tokens} />
       </div>
 
       {isCreateCollectionShown && (
