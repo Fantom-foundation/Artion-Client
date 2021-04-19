@@ -219,8 +219,11 @@ const Metadata = () => {
       createNotification('custom', 'Connect your wallet first');
       return;
     }
-    if (connectedChainId != 4002) {
-      createNotification('custom', 'You are not connected to Opera Testnet');
+    if (connectedChainId != 250) {
+      createNotification(
+        'custom',
+        'You are not connected to Fantom Opera Network'
+      );
       return;
     }
     // only when the user has more than 1k ftms on the wallet
@@ -263,13 +266,16 @@ const Metadata = () => {
         },
       });
 
+      console.log('upload image result is ');
+      console.log(result);
+
       const jsonHash = result.data.jsonHash;
       const fileHash = result.data.fileHash;
 
       // let status = result.data.status;
 
       let fnft_sc = await SCHandlers.loadContract(
-        FantomNFTConstants.TESTNETADDRESS,
+        FantomNFTConstants.MAINNETADDRESS,
         FantomNFTConstants.ABI
       );
 
@@ -315,6 +321,8 @@ const Metadata = () => {
               Authorization: 'Bearer ' + authToken,
             },
           });
+          console.log('save token result is ');
+          console.log(saveNewTKResult);
           let status = saveNewTKResult.status;
           switch (status) {
             case 'success':

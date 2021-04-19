@@ -1,5 +1,5 @@
 const SystemConstants = {
-  FMT_BALANCE_LIMIT: 1000,
+  FMT_BALANCE_LIMIT: 1,
 };
 
 export default SystemConstants;
