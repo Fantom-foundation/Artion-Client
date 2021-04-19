@@ -1,9 +1,22 @@
 import TokensConstants from '../constants/tokens.constants';
 
 const TokensActions = {
+  resetTokens,
   startFetching,
   fetchingSuccess,
   fetchingFailed,
+};
+
+function resetTokens() {
+  return dispatch => {
+    dispatch(_resetTokens());
+  };
+}
+
+const _resetTokens = () => {
+  return {
+    type: TokensConstants.RESET_TOKENS,
+  };
 };
 
 function startFetching() {

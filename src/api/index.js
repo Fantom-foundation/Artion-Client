@@ -14,6 +14,20 @@ export const getAccountDetails = async authToken => {
   return res.data;
 };
 
+export const getUserAccountDetails = async address => {
+  const data = { address };
+  const res = await axios({
+    method: 'post',
+    url: `${BASE_URL}/api/account/getuseraccountinfo`,
+    data: JSON.stringify(data),
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+
+  return res.data;
+};
+
 export const updateAccountDetails = async (
   alias,
   email,
@@ -29,7 +43,7 @@ export const updateAccountDetails = async (
   }
   formData.append('imgData', avatar);
 
-  await axios({
+  const res = await axios({
     method: 'post',
     url: `${BASE_URL}/api/account/accountdetails`,
     data: formData,
@@ -38,6 +52,7 @@ export const updateAccountDetails = async (
       Authorization: `Bearer ${authToken}`,
     },
   });
+  return res.data;
 };
 
 export const fetchCollections = async () => {

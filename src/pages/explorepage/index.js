@@ -56,7 +56,6 @@ const ExploreAllPage = () => {
     if (fetching) return;
 
     const obj = e.currentTarget;
-    console.log(obj.scrollTop, obj.scrollHeight, obj.clientHeight);
     if (obj.scrollHeight - obj.clientHeight - obj.scrollTop < 50) {
       fetchNFTs(page + 1);
       setPage(page + 1);

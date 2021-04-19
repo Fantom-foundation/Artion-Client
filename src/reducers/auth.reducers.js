@@ -2,42 +2,30 @@ import { AuthConstants } from '../constants/auth.constants';
 
 export function Auth(
   state = {
-    isLoggedIn: false,
-    authToken: null,
+    fetching: false,
+    user: {},
   },
   action
 ) {
   switch (action.type) {
-    case AuthConstants.SIGNINSUCCESS: {
+    case AuthConstants.PROFILE_GET_START: {
       return {
         ...state,
-        isLoggedIn: true,
-        authToken: action.token,
+        fetching: true,
       };
     }
-    case AuthConstants.SIGNINFAILED: {
+    case AuthConstants.PROFILE_GET_SUCCESS: {
       return {
         ...state,
-        isLoggedIn: false,
+        fetching: false,
+        user: action.payload,
       };
     }
-    case AuthConstants.SIGNUPSUCCESS: {
+    case AuthConstants.PROFILE_GET_FAILED: {
       return {
         ...state,
-        isLoggedIn: false,
-      };
-    }
-    case AuthConstants.SIGNUPFAILED: {
-      return {
-        ...state,
-        isLoggedIn: false,
-      };
-    }
-    case AuthConstants.SIGNOUT: {
-      return {
-        ...state,
-        isLoggedIn: false,
-        authToken: null,
+        fetching: false,
+        user: {},
       };
     }
 
