@@ -32,6 +32,7 @@ const useStyles = makeStyles(() => ({
     height: 'fit-content',
     background: 'white',
     position: 'relative',
+    marginTop: -40,
   },
   inkMetadataInput: {
     width: '100%',
@@ -69,7 +70,6 @@ const useStyles = makeStyles(() => ({
     justifyContent: 'center',
     alignItems: 'center',
     fontSize: 'x-large',
-    marginTop: 40,
     position: 'absolute',
     width: '100%',
   },
@@ -471,7 +471,7 @@ const Metadata = () => {
           <a
             className={classes.tnxAnchor}
             target="_blank"
-            rel="noreferrer"
+            rel="noopener noreferrer"
             href={
               'https://explorer.testnet.fantom.network/transactions/' +
               lastMintedTnxId

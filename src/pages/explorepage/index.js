@@ -21,17 +21,21 @@ const ExploreAllPage = () => {
   const { fetching, tokens } = useSelector(state => state.Tokens);
 
   const updateCollections = async () => {
-    const res = await fetchCollections();
-    if (res.status === 'success') {
-      const verified = [];
-      const unverified = [];
-      res.data.map(item => {
-        if (item.isVerified) verified.push(item);
-        else unverified.push(item);
-      });
-      dispatch(
-        CollectionsActions.updateCollections([...verified, ...unverified])
-      );
+    try {
+      const res = await fetchCollections();
+      if (res.status === 'success') {
+        const verified = [];
+        const unverified = [];
+        res.data.map(item => {
+          if (item.isVerified) verified.push(item);
+          else unverified.push(item);
+        });
+        dispatch(
+          CollectionsActions.updateCollections([...verified, ...unverified])
+        );
+      }
+    } catch {
+      CollectionsActions.updateCollections([]);
     }
   };
 
