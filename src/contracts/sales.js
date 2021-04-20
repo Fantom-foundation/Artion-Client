@@ -56,7 +56,7 @@ export const listItem = async (
   allowedAddress
 ) => {
   const contract = await getSalesContract();
-  await contract.listItem(
+  return await contract.listItem(
     nftAddress,
     tokenId,
     quantity,

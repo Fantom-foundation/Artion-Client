@@ -46,7 +46,7 @@ const NFTItem = () => {
 
   const getTokenOwner = async () => {
     try {
-      const contract = await getNFTContract(address);
+      const [contract] = await getNFTContract(address);
       const res = await contract.ownerOf(tokenID);
       setOwner(res);
     } catch {
@@ -73,7 +73,7 @@ const NFTItem = () => {
 
   const handleListItem = async _price => {
     try {
-      const contract = await getNFTContract(address);
+      const [contract, provider] = await getNFTContract(address);
       const approved = await contract.isApprovedForAll(
         myAddress,
         SALES_CONTRACT_ADDRESS
@@ -84,7 +84,7 @@ const NFTItem = () => {
       }
 
       const price = ethers.utils.parseEther(_price);
-      await listItem(
+      const tx = await listItem(
         address,
         ethers.BigNumber.from(tokenID),
         ethers.BigNumber.from(1),
@@ -94,6 +94,9 @@ const NFTItem = () => {
       );
 
       setSellModalVisible(false);
+
+      await provider.waitForTransaction(tx.hash);
+
       getItemListings();
     } catch (e) {
       console.log('Error while listing item', e);

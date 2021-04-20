@@ -8,5 +8,5 @@ export const getNFTContract = async address => {
   const signer = provider.getSigner();
   const contract = new ethers.Contract(address, NFT_CONTRACT_ABI, signer);
 
-  return contract;
+  return [contract, provider];
 };
