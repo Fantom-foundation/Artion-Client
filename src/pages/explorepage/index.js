@@ -41,6 +41,7 @@ const ExploreAllPage = () => {
   };
 
   useEffect(() => {
+    dispatch(TokensActions.resetTokens());
     fetchNFTs(0);
     updateCollections();
     setFetchInterval(setInterval(updateCollections, 1000 * 60 * 10));
