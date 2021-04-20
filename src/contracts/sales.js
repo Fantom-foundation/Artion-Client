@@ -5,11 +5,12 @@ import { SALES_CONTRACT_ADDRESS, SALES_CONTRACT_ABI } from './abi';
 const getSalesContract = async () => {
   await window.ethereum.enable();
   const provider = new ethers.providers.Web3Provider(window.ethereum);
+  const signer = provider.getSigner();
 
   const contract = new ethers.Contract(
     SALES_CONTRACT_ADDRESS,
     SALES_CONTRACT_ABI,
-    provider
+    signer
   );
 
   return contract;
@@ -19,13 +20,21 @@ export const getListings = async (nftAddress, tokenId) => {
   const contract = await getSalesContract();
   const res = await contract.listings(nftAddress, tokenId);
   const owner = res[0];
-  const quantity = res[1].toNumber();
-  const pricePerItem = res[2].toNumber();
-  const startingTime = res[3].toNumber();
+  const quantity = parseFloat(res[1].toString());
+  const pricePerItem = parseFloat(res[2].toString()) / 10 ** 18;
+  const startingTime = parseFloat(res[3].toString());
   const allowedAddress = res[4];
-  const listings = [];
-  console.log(owner, quantity, pricePerItem, startingTime, allowedAddress);
-  return listings;
+  const result = [];
+  if (pricePerItem > 0) {
+    result.push({
+      owner,
+      quantity,
+      pricePerItem,
+      startingTime,
+      allowedAddress,
+    });
+  }
+  return result;
 };
 
 export const buyItem = async (amount, nftAddress, tokenId) => {

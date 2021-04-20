@@ -3,13 +3,21 @@ import { useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { Chart } from 'react-charts';
 import axios from 'axios';
+import cx from 'classnames';
 import { ethers } from 'ethers';
 
 import Panel from '../../components/Panel';
 import ResizableBox from '../../components/ResizableBox';
 import { fetchTokenURI } from '../../api';
-import { NFT_CONTRACT_ABI } from 'contracts';
+import {
+  getNFTContract,
+  getListings,
+  listItem,
+  cancelListing,
+  SALES_CONTRACT_ADDRESS,
+} from 'contracts';
 import { abbrAddress } from 'utils';
+import SellModal from 'components/SellModal';
 
 import styles from './styles.module.scss';
 
@@ -18,13 +26,15 @@ const NFTItem = () => {
 
   const [info, setInfo] = useState();
   const [owner, setOwner] = useState();
+  const [sellModalVisible, setSellModalVisible] = useState(false);
+  const [listings, setListings] = useState([]);
 
   const collections = useSelector(state => state.Collections);
   const myAddress = useSelector(state => state.ConnectWallet.address);
 
   const collection = collections.find(col => col.address === address);
 
-  const getTokenURI = async (address, tokenID) => {
+  const getTokenURI = async () => {
     try {
       const { data: tokenURI } = await fetchTokenURI(address, tokenID);
       const { data } = await axios.get(tokenURI);
@@ -34,21 +44,63 @@ const NFTItem = () => {
     }
   };
 
-  const getTokenOwner = async (address, tokenID) => {
-    await window.ethereum.enable();
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    const contract = new ethers.Contract(address, NFT_CONTRACT_ABI, provider);
-    const res = await contract.ownerOf(tokenID);
-    setOwner(res);
+  const getTokenOwner = async () => {
+    try {
+      const contract = await getNFTContract(address);
+      const res = await contract.ownerOf(tokenID);
+      setOwner(res);
+    } catch {
+      setOwner(null);
+    }
+  };
+
+  const getItemListings = async () => {
+    try {
+      const listings = await getListings(address, tokenID);
+      setListings(listings);
+    } catch (e) {
+      console.log(e);
+    }
   };
 
   useEffect(() => {
-    getTokenURI(address, tokenID);
-    getTokenOwner(address, tokenID);
+    getTokenURI();
+    getTokenOwner();
+    getItemListings();
   }, [address, tokenID]);
 
-  const isMine = owner === myAddress;
-  console.log(isMine);
+  const isMine = owner === myAddress || true;
+
+  const handleListItem = async _price => {
+    try {
+      const contract = await getNFTContract(address);
+      const approved = await contract.isApprovedForAll(
+        myAddress,
+        SALES_CONTRACT_ADDRESS
+      );
+
+      if (!approved) {
+        await contract.setApprovalForAll(SALES_CONTRACT_ADDRESS, true);
+      }
+
+      const price = ethers.utils.parseEther(_price);
+      await listItem(
+        address,
+        ethers.BigNumber.from(tokenID),
+        ethers.BigNumber.from(1),
+        price,
+        ethers.BigNumber.from(new Date().getTime()),
+        '0x0000000000000000000000000000000000000000'
+      );
+    } catch (e) {
+      console.log('Error while listing item', e);
+    }
+  };
+
+  const cancelList = async () => {
+    await cancelListing(address, tokenID);
+    setListings([]);
+  };
 
   const series = useMemo(
     () => ({
@@ -79,7 +131,19 @@ const NFTItem = () => {
   }));
 
   return (
-    <div className={styles.container}>
+    <div className={cx(styles.container, isMine ? styles.withHeader : null)}>
+      {isMine && (
+        <div className={styles.header}>
+          <div
+            className={styles.headerButton}
+            onClick={
+              listings.length ? cancelList : () => setSellModalVisible(true)
+            }
+          >
+            {listings.length ? 'Cancel Listing' : 'Sell'}
+          </div>
+        </div>
+      )}
       <div className={styles.inner}>
         <div className={styles.topContainer}>
           <div className={styles.itemSummary}>
@@ -92,7 +156,10 @@ const NFTItem = () => {
                   <div className={styles.fakeBody} />
                 </Panel>
               )}
-              <Panel title={`About ${collection?.name}`}>
+              <Panel
+                title={`About ${collection?.collectionName ||
+                  collection?.name}`}
+              >
                 <div className={styles.panelBody}>
                   {collection?.description || 'Unverified Collection'}
                 </div>
@@ -145,7 +212,19 @@ const NFTItem = () => {
             </div>
             <div className={styles.panelWrapper}>
               <Panel title="Listings">
-                <div className={styles.fakeBody} />
+                <div className={styles.listings}>
+                  {listings.map((listing, idx) => (
+                    <div className={styles.listing} key={idx}>
+                      <div className={styles.owner}>
+                        {abbrAddress(listing.owner)}
+                      </div>
+                      <div className={styles.price}>
+                        {listing.pricePerItem} FTM
+                      </div>
+                      {!isMine && <div className={styles.buyButton}>Buy</div>}
+                    </div>
+                  ))}
+                </div>
               </Panel>
             </div>
             <div className={styles.panelWrapper}>
@@ -161,6 +240,12 @@ const NFTItem = () => {
           </Panel>
         </div>
       </div>
+
+      <SellModal
+        visible={sellModalVisible}
+        onClose={() => setSellModalVisible(false)}
+        onSell={handleListItem}
+      />
     </div>
   );
 };
