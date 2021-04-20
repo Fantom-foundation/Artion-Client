@@ -10,6 +10,8 @@ import CardMedia from '@material-ui/core/CardMedia';
 import Typography from '@material-ui/core/Typography';
 import axios from 'axios';
 
+import PLACEHOLDER from 'assets/imgs/nft-placeholder.png';
+
 const useStyles = makeStyles({
   root: {
     boxSizing: 'border-box',
@@ -52,6 +54,11 @@ const useStyles = makeStyles({
     height: 200,
     backgroundSize: 'contain',
   },
+  mediaMissing: {
+    width: '100%',
+    height: 200,
+    backgroundSize: 'cover',
+  },
   content: {
     borderTop: '1px solid #ddd',
     padding: '12px !important',
@@ -76,7 +83,7 @@ const BaseCard = ({ item, style }) => {
   const classes = useStyles();
   const history = useHistory();
 
-  const [info, setInfo] = useState();
+  const [info, setInfo] = useState(null);
 
   const collections = useSelector(state => state.Collections);
 
@@ -89,7 +96,7 @@ const BaseCard = ({ item, style }) => {
       const res = await axios.get(tokenURI);
       setInfo(res.data);
     } catch {
-      console.log('Token URI not available');
+      setInfo(null);
     }
   };
 
@@ -105,8 +112,8 @@ const BaseCard = ({ item, style }) => {
     <Box style={style} className={classes.root}>
       <Card className={classes.card} onClick={viewNFTDetails}>
         <CardMedia
-          className={classes.media}
-          image={info?.image}
+          className={info?.image ? classes.media : classes.mediaMissing}
+          image={info?.image || PLACEHOLDER}
           title="Contemplative Reptile"
         />
         <CardContent className={classes.content}>

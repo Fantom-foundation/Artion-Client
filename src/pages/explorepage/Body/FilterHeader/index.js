@@ -16,7 +16,7 @@ import './styles.css';
 const ExploreFilterHeader = () => {
   const dispatch = useDispatch();
 
-  const { tokens } = useSelector(state => state.Tokens);
+  const { count } = useSelector(state => state.Tokens);
   const { groupType, sortBy } = useSelector(state => state.Filter);
 
   const handleGroupTypeChange = e => {
@@ -31,7 +31,7 @@ const ExploreFilterHeader = () => {
 
   return (
     <div className="filterHeaderRoot">
-      <label className="filterResultLabel">{tokens.length} results</label>
+      <label className="filterResultLabel">{count} results</label>
       <div className="filterSelectGroup">
         <FormControl className="filterHeaderFormControl">
           {/* <label>Group</label> */}
