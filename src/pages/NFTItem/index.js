@@ -69,7 +69,7 @@ const NFTItem = () => {
     getItemListings();
   }, [address, tokenID]);
 
-  const isMine = owner === myAddress || true;
+  const isMine = owner === myAddress;
 
   const handleListItem = async _price => {
     try {
@@ -92,6 +92,9 @@ const NFTItem = () => {
         ethers.BigNumber.from(new Date().getTime()),
         '0x0000000000000000000000000000000000000000'
       );
+
+      setSellModalVisible(false);
+      getItemListings();
     } catch (e) {
       console.log('Error while listing item', e);
     }
