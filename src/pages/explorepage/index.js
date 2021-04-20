@@ -47,6 +47,7 @@ const ExploreAllPage = () => {
       dispatch(
         TokensActions.fetchingSuccess(data.totalTokenCounts, data.tokens)
       );
+      setPage(step);
     } catch {
       dispatch(TokensActions.fetchingFailed());
     }
@@ -71,7 +72,6 @@ const ExploreAllPage = () => {
     const obj = e.currentTarget;
     if (obj.scrollHeight - obj.clientHeight - obj.scrollTop < 50) {
       fetchNFTs(page + 1);
-      setPage(page + 1);
     }
   };
 
