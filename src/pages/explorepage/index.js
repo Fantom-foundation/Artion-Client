@@ -23,7 +23,15 @@ const ExploreAllPage = () => {
   const updateCollections = async () => {
     const res = await fetchCollections();
     if (res.status === 'success') {
-      dispatch(CollectionsActions.updateCollections(res.data));
+      const verified = [];
+      const unverified = [];
+      res.data.map(item => {
+        if (item.isVerified) verified.push(item);
+        else unverified.push(item);
+      });
+      dispatch(
+        CollectionsActions.updateCollections([...verified, ...unverified])
+      );
     }
   };
 
