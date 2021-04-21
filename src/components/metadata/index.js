@@ -257,7 +257,7 @@ const Metadata = () => {
     try {
       let result = await axios({
         method: 'post',
-        url: 'https://nifty.fantom.network/api/ipfs/uploadImage2Server',
+        url: 'https://fmarket.fantom.network/api/ipfs/uploadImage2Server',
         data: formData,
         headers: {
           'Content-Type': 'multipart/form-data',
@@ -309,7 +309,7 @@ const Metadata = () => {
         try {
           let saveNewTKResult = await axios({
             method: 'post',
-            url: 'https://nifty.fantom.network/api/erc721token/savenewtoken',
+            url: 'https://fmarket.fantom.network/api/erc721token/savenewtoken',
             data: erc721tk,
             headers: {
               'Content-Type': 'multipart/form-data',

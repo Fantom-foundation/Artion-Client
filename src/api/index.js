@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const BASE_URL = 'https://nifty.fantom.network';
+const BASE_URL = 'https://fmarket.fantom.network';
 
 export const getAccountDetails = async authToken => {
   const res = await axios({
