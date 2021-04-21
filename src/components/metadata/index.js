@@ -20,7 +20,6 @@ import { BigNumber } from 'ethers';
 
 import { FantomNFTConstants } from '../../constants/smartcontracts/fnft.constants';
 import SCHandlers from '../../utils/sc.interaction';
-import IPFSConstants from '../../constants/ipfs.constants';
 import SystemConstants from '../../constants/system.constants';
 import { useSelector } from 'react-redux';
 
@@ -32,6 +31,7 @@ const useStyles = makeStyles(() => ({
     height: 'fit-content',
     background: 'white',
     position: 'relative',
+    marginTop: -40,
   },
   inkMetadataInput: {
     width: '100%',
@@ -69,7 +69,6 @@ const useStyles = makeStyles(() => ({
     justifyContent: 'center',
     alignItems: 'center',
     fontSize: 'x-large',
-    marginTop: 40,
     position: 'absolute',
     width: '100%',
   },
@@ -283,13 +282,9 @@ const Metadata = () => {
       fnft_sc = fnft_sc[0];
 
       try {
-        let tx = await fnft_sc.mint(
-          address,
-          IPFSConstants.HashURI + jsonHash + '/',
-          {
-            gasLimit: 3000000,
-          }
-        );
+        let tx = await fnft_sc.mint(address, jsonHash, {
+          gasLimit: 3000000,
+        });
         setCurrentMintingStep(1);
         // console.log('tnx is ', tx);
         setLastMintedTnxId(tx.hash);
@@ -471,7 +466,7 @@ const Metadata = () => {
           <a
             className={classes.tnxAnchor}
             target="_blank"
-            rel="noreferrer"
+            rel="noopener noreferrer"
             href={
               'https://explorer.testnet.fantom.network/transactions/' +
               lastMintedTnxId

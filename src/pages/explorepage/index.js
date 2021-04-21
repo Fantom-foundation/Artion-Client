@@ -21,9 +21,21 @@ const ExploreAllPage = () => {
   const { fetching, tokens } = useSelector(state => state.Tokens);
 
   const updateCollections = async () => {
-    const res = await fetchCollections();
-    if (res.status === 'success') {
-      dispatch(CollectionsActions.updateCollections(res.data));
+    try {
+      const res = await fetchCollections();
+      if (res.status === 'success') {
+        const verified = [];
+        const unverified = [];
+        res.data.map(item => {
+          if (item.isVerified) verified.push(item);
+          else unverified.push(item);
+        });
+        dispatch(
+          CollectionsActions.updateCollections([...verified, ...unverified])
+        );
+      }
+    } catch {
+      CollectionsActions.updateCollections([]);
     }
   };
 
@@ -35,12 +47,14 @@ const ExploreAllPage = () => {
       dispatch(
         TokensActions.fetchingSuccess(data.totalTokenCounts, data.tokens)
       );
+      setPage(step);
     } catch {
       dispatch(TokensActions.fetchingFailed());
     }
   };
 
   useEffect(() => {
+    dispatch(TokensActions.resetTokens());
     fetchNFTs(0);
     updateCollections();
     setFetchInterval(setInterval(updateCollections, 1000 * 60 * 10));
@@ -58,7 +72,6 @@ const ExploreAllPage = () => {
     const obj = e.currentTarget;
     if (obj.scrollHeight - obj.clientHeight - obj.scrollTop < 50) {
       fetchNFTs(page + 1);
-      setPage(page + 1);
     }
   };
 
