@@ -8,16 +8,20 @@ import { ethers } from 'ethers';
 
 import Panel from '../../components/Panel';
 import ResizableBox from '../../components/ResizableBox';
-import { fetchTokenURI } from '../../api';
+import { fetchTokenURI, increaseViewCount } from '../../api';
 import {
   getNFTContract,
   getListings,
   listItem,
   cancelListing,
+  updateListing,
+  buyItem,
   SALES_CONTRACT_ADDRESS,
 } from 'contracts';
 import { abbrAddress } from 'utils';
 import SellModal from 'components/SellModal';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faEye } from '@fortawesome/free-solid-svg-icons';
 
 import styles from './styles.module.scss';
 
@@ -28,6 +32,7 @@ const NFTItem = () => {
   const [owner, setOwner] = useState();
   const [sellModalVisible, setSellModalVisible] = useState(false);
   const [listings, setListings] = useState([]);
+  const [views, setViews] = useState();
 
   const collections = useSelector(state => state.Collections);
   const myAddress = useSelector(state => state.ConnectWallet.address);
@@ -67,6 +72,10 @@ const NFTItem = () => {
     getTokenURI();
     getTokenOwner();
     getItemListings();
+
+    increaseViewCount(address, tokenID).then(({ data }) => {
+      setViews(data);
+    });
   }, [address, tokenID]);
 
   const isMine = owner === myAddress;
@@ -80,7 +89,11 @@ const NFTItem = () => {
       );
 
       if (!approved) {
-        await contract.setApprovalForAll(SALES_CONTRACT_ADDRESS, true);
+        const approveTx = await contract.setApprovalForAll(
+          SALES_CONTRACT_ADDRESS,
+          true
+        );
+        await provider.waitForTransaction(approveTx.hash);
       }
 
       const price = ethers.utils.parseEther(_price);
@@ -89,7 +102,7 @@ const NFTItem = () => {
         ethers.BigNumber.from(tokenID),
         ethers.BigNumber.from(1),
         price,
-        ethers.BigNumber.from(new Date().getTime()),
+        ethers.BigNumber.from(Math.floor(new Date().getTime() / 1000)),
         '0x0000000000000000000000000000000000000000'
       );
 
@@ -103,9 +116,50 @@ const NFTItem = () => {
     }
   };
 
+  const handleUpdatePrice = async _price => {
+    try {
+      const price = ethers.utils.parseEther(_price);
+      const tx = await updateListing(address, tokenID, price);
+
+      setSellModalVisible(false);
+
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      await provider.waitForTransaction(tx.hash);
+
+      getItemListings();
+    } catch (e) {
+      console.log('Error while updating listing price', e);
+    }
+  };
+
   const cancelList = async () => {
     await cancelListing(address, tokenID);
     setListings([]);
+  };
+
+  const handleBuyItem = async _price => {
+    const [contract, provider] = await getNFTContract(address);
+    const approved = await contract.isApprovedForAll(
+      myAddress,
+      SALES_CONTRACT_ADDRESS
+    );
+
+    if (!approved) {
+      const approveTx = await contract.setApprovalForAll(
+        SALES_CONTRACT_ADDRESS,
+        true
+      );
+      await provider.waitForTransaction(approveTx.hash);
+    }
+
+    const price = ethers.utils.parseEther(_price.toString());
+    const tx = await buyItem(
+      address,
+      ethers.BigNumber.from(tokenID),
+      price,
+      myAddress
+    );
+    await provider.waitForTransaction(tx.hash);
   };
 
   const series = useMemo(
@@ -140,13 +194,16 @@ const NFTItem = () => {
     <div className={cx(styles.container, isMine ? styles.withHeader : null)}>
       {isMine && (
         <div className={styles.header}>
+          {listings.length ? (
+            <div className={styles.headerButton} onClick={cancelList}>
+              Cancel Listing
+            </div>
+          ) : null}
           <div
             className={styles.headerButton}
-            onClick={
-              listings.length ? cancelList : () => setSellModalVisible(true)
-            }
+            onClick={() => setSellModalVisible(true)}
           >
-            {listings.length ? 'Cancel Listing' : 'Sell'}
+            {listings.length ? 'Update Listing' : 'Sell'}
           </div>
         </div>
       )}
@@ -201,6 +258,10 @@ const NFTItem = () => {
                 {collection?.name || ''}
               </div>
               <div className={styles.itemName}>{info?.name || ''}</div>
+              <div className={styles.itemViews}>
+                <FontAwesomeIcon icon={faEye} color="#777" />
+                &nbsp;{views} Views
+              </div>
             </div>
             <div className={styles.panelWrapper}>
               <Panel title="Price History">
@@ -227,7 +288,14 @@ const NFTItem = () => {
                       <div className={styles.price}>
                         {listing.pricePerItem} FTM
                       </div>
-                      {!isMine && <div className={styles.buyButton}>Buy</div>}
+                      {!isMine && (
+                        <div
+                          className={styles.buyButton}
+                          onClick={() => handleBuyItem(listing.pricePerItem)}
+                        >
+                          Buy
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -250,7 +318,8 @@ const NFTItem = () => {
       <SellModal
         visible={sellModalVisible}
         onClose={() => setSellModalVisible(false)}
-        onSell={handleListItem}
+        onSell={listings.length ? handleUpdatePrice : handleListItem}
+        startPrice={listings.length ? listings[0].pricePerItem : 0}
       />
     </div>
   );

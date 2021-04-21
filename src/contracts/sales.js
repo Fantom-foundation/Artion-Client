@@ -16,6 +16,12 @@ const getSalesContract = async () => {
   return contract;
 };
 
+const calculateGasMargin = value => {
+  return value
+    .mul(ethers.BigNumber.from(10000).add(ethers.BigNumber.from(1000)))
+    .div(ethers.BigNumber.from(10000));
+};
+
 export const getListings = async (nftAddress, tokenId) => {
   const contract = await getSalesContract();
   const res = await contract.listings(nftAddress, tokenId);
@@ -37,9 +43,17 @@ export const getListings = async (nftAddress, tokenId) => {
   return result;
 };
 
-export const buyItem = async (amount, nftAddress, tokenId) => {
+export const buyItem = async (nftAddress, tokenId, value, from) => {
   const contract = await getSalesContract();
-  await contract.buyItem(amount, nftAddress, tokenId);
+  const args = [nftAddress, tokenId];
+  const options = {
+    value,
+    from,
+  };
+  const gasEstimate = await contract.estimateGas.buyItem(...args, options);
+  options.from = from;
+  options.gasLimit = calculateGasMargin(gasEstimate);
+  return await contract.buyItem(...args, options);
 };
 
 export const cancelListing = async (nftAddress, tokenId) => {
@@ -68,5 +82,5 @@ export const listItem = async (
 
 export const updateListing = async (nftAddress, tokenId, newPrice) => {
   const contract = await getSalesContract();
-  await contract.updateListing(nftAddress, tokenId, newPrice);
+  return await contract.updateListing(nftAddress, tokenId, newPrice);
 };

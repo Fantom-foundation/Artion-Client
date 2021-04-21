@@ -3,11 +3,11 @@ import cx from 'classnames';
 
 import styles from './styles.module.scss';
 
-const SellModal = ({ visible, onClose, onSell }) => {
+const SellModal = ({ visible, onClose, onSell, startPrice }) => {
   const [price, setPrice] = useState('');
 
   useEffect(() => {
-    setPrice('');
+    setPrice(startPrice > 0 ? startPrice.toString() : '');
   }, [visible]);
 
   const handleClick = e => {
@@ -37,7 +37,7 @@ const SellModal = ({ visible, onClose, onSell }) => {
         </div>
         <div className={styles.footer}>
           <div className={styles.listButton} onClick={() => onSell(price)}>
-            List Item
+            {startPrice > 0 ? 'Update Price' : 'List Item'}
           </div>
           <div className={styles.cancelButton} onClick={onClose}>
             Cancel
