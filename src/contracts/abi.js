@@ -4,6 +4,8 @@ export const SALES_CONTRACT_ADDRESS =
 export const AUCTION_CONTRACT_ADDRESS =
   '0x5c0527165C5400ceE363A0d26B4E92DB725284eb';
 
+export const WFTM_ADDRESS = '0x21be370d5312f44cb42ce377bc9b8a0cef1a4c83';
+
 export const SALES_CONTRACT_ABI = [
   {
     inputs: [
@@ -1056,10 +1058,42 @@ export const NFT_CONTRACT_ABI = [
   },
 ];
 
+export const WFTM_ABI = [
+  {
+    constant: true,
+    inputs: [{ internalType: 'address', name: 'account', type: 'address' }],
+    name: 'balanceOf',
+    outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+    payable: false,
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    constant: false,
+    inputs: [],
+    name: 'deposit',
+    outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+    payable: true,
+    stateMutability: 'payable',
+    type: 'function',
+  },
+  {
+    constant: false,
+    inputs: [{ internalType: 'uint256', name: 'amount', type: 'uint256' }],
+    name: 'withdraw',
+    outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+    payable: false,
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+];
+
 export default {
   SALES_CONTRACT_ADDRESS,
   SALES_CONTRACT_ABI,
   AUCTION_CONTRACT_ADDRESS,
   AUCTION_CONTRACT_ABI,
   NFT_CONTRACT_ABI,
+  WFTM_ADDRESS,
+  WFTM_ABI,
 };

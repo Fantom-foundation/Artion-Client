@@ -2,7 +2,7 @@ import { ethers } from 'ethers';
 
 import { SALES_CONTRACT_ADDRESS, SALES_CONTRACT_ABI } from './abi';
 
-const getSalesContract = async () => {
+export const getSalesContract = async () => {
   await window.ethereum.enable();
   const provider = new ethers.providers.Web3Provider(window.ethereum);
   const signer = provider.getSigner();
@@ -16,13 +16,13 @@ const getSalesContract = async () => {
   return contract;
 };
 
-const calculateGasMargin = value => {
+export const calculateGasMargin = value => {
   return value
     .mul(ethers.BigNumber.from(10000).add(ethers.BigNumber.from(1000)))
     .div(ethers.BigNumber.from(10000));
 };
 
-export const getListings = async (nftAddress, tokenId) => {
+export const getListing = async (nftAddress, tokenId) => {
   const contract = await getSalesContract();
   const res = await contract.listings(nftAddress, tokenId);
   const owner = res[0];
@@ -30,17 +30,17 @@ export const getListings = async (nftAddress, tokenId) => {
   const pricePerItem = parseFloat(res[2].toString()) / 10 ** 18;
   const startingTime = parseFloat(res[3].toString());
   const allowedAddress = res[4];
-  const result = [];
+
   if (pricePerItem > 0) {
-    result.push({
+    return {
       owner,
       quantity,
       pricePerItem,
       startingTime,
       allowedAddress,
-    });
+    };
   }
-  return result;
+  return null;
 };
 
 export const buyItem = async (nftAddress, tokenId, value, from) => {
@@ -51,7 +51,6 @@ export const buyItem = async (nftAddress, tokenId, value, from) => {
     from,
   };
   const gasEstimate = await contract.estimateGas.buyItem(...args, options);
-  options.from = from;
   options.gasLimit = calculateGasMargin(gasEstimate);
   return await contract.buyItem(...args, options);
 };
@@ -83,4 +82,33 @@ export const listItem = async (
 export const updateListing = async (nftAddress, tokenId, newPrice) => {
   const contract = await getSalesContract();
   return await contract.updateListing(nftAddress, tokenId, newPrice);
+};
+
+export const createOffer = async (
+  nftAddress,
+  tokenId,
+  payToken,
+  quantity,
+  pricePerItem,
+  deadline
+) => {
+  const contract = await getSalesContract();
+  return await contract.createOffer(
+    nftAddress,
+    tokenId,
+    payToken,
+    quantity,
+    pricePerItem,
+    deadline
+  );
+};
+
+export const cancelOffer = async (nftAddress, tokenId) => {
+  const contract = await getSalesContract();
+  return await contract.cancelOffer(nftAddress, tokenId);
+};
+
+export const acceptOffer = async (nftAddress, tokenId, creator) => {
+  const contract = await getSalesContract();
+  return await contract.acceptOffer(nftAddress, tokenId, creator);
 };
