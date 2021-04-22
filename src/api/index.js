@@ -111,3 +111,16 @@ export const getOffers = async (contractAddress, tokenID) => {
   });
   return res.data;
 };
+
+export const getTradeHistory = async (contractAddress, tokenID) => {
+  const data = { contractAddress, tokenID };
+  const res = await axios({
+    method: 'post',
+    url: `${BASE_URL}/api/tradehistory/getTradeHistory`,
+    data: JSON.stringify(data),
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+  return res.data;
+};

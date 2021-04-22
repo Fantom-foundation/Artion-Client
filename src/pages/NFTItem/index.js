@@ -7,7 +7,12 @@ import { ethers } from 'ethers';
 
 import Panel from '../../components/Panel';
 import ResizableBox from '../../components/ResizableBox';
-import { fetchTokenURI, increaseViewCount, getOffers } from '../../api';
+import {
+  fetchTokenURI,
+  increaseViewCount,
+  getOffers,
+  getTradeHistory,
+} from '../../api';
 import {
   getSalesContract,
   getNFTContract,
@@ -30,6 +35,12 @@ import OfferModal from 'components/OfferModal';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye } from '@fortawesome/free-solid-svg-icons';
 
+import webIcon from 'assets/svgs/web.svg';
+import discordIcon from 'assets/imgs/discord.png';
+import telegramIcon from 'assets/imgs/telegram.png';
+import twitterIcon from 'assets/imgs/twitter.png';
+import mediumIcon from 'assets/svgs/medium.svg';
+
 import styles from './styles.module.scss';
 
 const NFTItem = () => {
@@ -41,6 +52,7 @@ const NFTItem = () => {
   const [offerModalVisible, setOfferModalVisible] = useState(false);
   const [listing, setListing] = useState(null);
   const [offers, setOffers] = useState([]);
+  const [tradeHistory, setTradeHistory] = useState([]);
   const [views, setViews] = useState();
 
   const collections = useSelector(state => state.Collections);
@@ -81,6 +93,15 @@ const NFTItem = () => {
     try {
       const { data } = await getOffers(address, tokenID);
       setOffers(data);
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  const getItemTradeHistory = async () => {
+    try {
+      const { data } = await getTradeHistory(address, tokenID);
+      setTradeHistory(data);
     } catch (e) {
       console.log(e);
     }
@@ -136,9 +157,18 @@ const NFTItem = () => {
       }
     });
 
-    contract.on('ItemSold', (seller, buyer, nft, id) => {
+    contract.on('ItemSold', (seller, buyer, nft, id, price) => {
       if (eventMatches(nft, id)) {
         setListing(null);
+        setOwner(buyer);
+        const newTradeHistory = [...tradeHistory];
+        newTradeHistory.push({
+          from: seller,
+          to: buyer,
+          price: parseFloat(price.toString()) / 10 ** 18,
+          saleDate: new Date().toISOString(),
+        });
+        setTradeHistory(newTradeHistory);
       }
     });
 
@@ -178,6 +208,7 @@ const NFTItem = () => {
     getTokenOwner();
     getItemListings();
     getCurrentOffers();
+    getItemTradeHistory();
 
     increaseViewCount(address, tokenID).then(({ data }) => {
       setViews(data);
@@ -397,7 +428,64 @@ const NFTItem = () => {
                   collection?.name}`}
               >
                 <div className={styles.panelBody}>
-                  {collection?.description || 'Unverified Collection'}
+                  <div className={styles.collectionDescription}>
+                    {collection?.description || 'Unverified Collection'}
+                  </div>
+
+                  {collection.isVerified && (
+                    <div className={styles.socialLinks}>
+                      {collection.siteUrl?.length > 0 && (
+                        <a
+                          href={collection.siteUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={styles.socialLink}
+                        >
+                          <img src={webIcon} />
+                        </a>
+                      )}
+                      {collection.twitterHandle?.length > 0 && (
+                        <a
+                          href={`https://twitter.com/${collection.twitterHandle}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={styles.socialLink}
+                        >
+                          <img src={twitterIcon} />
+                        </a>
+                      )}
+                      {collection.mediumHandle?.length > 0 && (
+                        <a
+                          href={`https://medium.com/${collection.mediumHandle}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={styles.socialLink}
+                        >
+                          <img src={mediumIcon} />
+                        </a>
+                      )}
+                      {collection.telegram?.length > 0 && (
+                        <a
+                          href={`https://t.me/${collection.telegram}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={styles.socialLink}
+                        >
+                          <img src={telegramIcon} />
+                        </a>
+                      )}
+                      {collection.discord?.length > 0 && (
+                        <a
+                          href={`https://discord.gg/${collection.discord}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={styles.socialLink}
+                        >
+                          <img src={discordIcon} />
+                        </a>
+                      )}
+                    </div>
+                  )}
                 </div>
               </Panel>
               <Panel title="Chain Info">
@@ -510,7 +598,36 @@ const NFTItem = () => {
         </div>
         <div className={styles.panelWrapper}>
           <Panel title="Trade History">
-            <div className={styles.fakeBody} />
+            <div className={styles.listings}>
+              <div className={styles.listing}>
+                <div className={styles.from}>From</div>
+                <div className={styles.to}>To</div>
+                <div className={styles.historyPrice}>Price</div>
+                <div className={styles.saleDate}>Date</div>
+              </div>
+              {tradeHistory.map((history, idx) => {
+                const saleDate = new Date(history.saleDate);
+                return (
+                  <div className={styles.listing} key={idx}>
+                    <a
+                      href={`/account/${history.from}`}
+                      className={styles.from}
+                    >
+                      {history.from}
+                    </a>
+                    <a href={`/account/${history.to}`} className={styles.to}>
+                      {history.to}
+                    </a>
+                    <div className={styles.historyPrice}>
+                      {history.price} FTM
+                    </div>
+                    <div className={styles.saleDate}>
+                      {saleDate.toUTCString()}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </Panel>
         </div>
       </div>
