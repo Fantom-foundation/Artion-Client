@@ -2,16 +2,12 @@
   width: 100%;
   height: 100vh;
   overflow-y: auto;
-  padding-top: 64px;
+  padding-top: 128px;
   padding-bottom: 48px;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
   align-items: center;
-
-  &.withHeader {
-    padding-top: 128px;
-  }
 }
 
 .header {
@@ -142,11 +138,13 @@
   height: 200px;
 }
 
-.listings {
+.listings,
+.offers {
   margin-bottom: -1px;
 }
 
-.listing {
+.listing,
+.offer {
   height: 58px;
   padding: 8px 16px;
   box-sizing: border-box;

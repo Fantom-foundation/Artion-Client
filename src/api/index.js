@@ -98,3 +98,16 @@ export const increaseViewCount = async (contractAddress, tokenID) => {
   });
   return res.data;
 };
+
+export const getOffers = async (contractAddress, tokenID) => {
+  const data = { contractAddress, tokenID };
+  const res = await axios({
+    method: 'post',
+    url: `${BASE_URL}/api/offer/getOffers`,
+    data: JSON.stringify(data),
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+  return res.data;
+};

@@ -3,23 +3,30 @@ import { useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { Chart } from 'react-charts';
 import axios from 'axios';
-import cx from 'classnames';
 import { ethers } from 'ethers';
 
 import Panel from '../../components/Panel';
 import ResizableBox from '../../components/ResizableBox';
-import { fetchTokenURI, increaseViewCount } from '../../api';
+import { fetchTokenURI, increaseViewCount, getOffers } from '../../api';
 import {
+  getSalesContract,
   getNFTContract,
-  getListings,
+  getListing,
   listItem,
   cancelListing,
   updateListing,
   buyItem,
+  getWFTMBalance,
+  wrapFTM,
+  createOffer,
+  cancelOffer,
+  acceptOffer,
   SALES_CONTRACT_ADDRESS,
+  WFTM_ADDRESS,
 } from 'contracts';
 import { abbrAddress } from 'utils';
 import SellModal from 'components/SellModal';
+import OfferModal from 'components/OfferModal';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye } from '@fortawesome/free-solid-svg-icons';
 
@@ -31,7 +38,9 @@ const NFTItem = () => {
   const [info, setInfo] = useState();
   const [owner, setOwner] = useState();
   const [sellModalVisible, setSellModalVisible] = useState(false);
-  const [listings, setListings] = useState([]);
+  const [offerModalVisible, setOfferModalVisible] = useState(false);
+  const [listing, setListing] = useState(null);
+  const [offers, setOffers] = useState([]);
   const [views, setViews] = useState();
 
   const collections = useSelector(state => state.Collections);
@@ -61,17 +70,114 @@ const NFTItem = () => {
 
   const getItemListings = async () => {
     try {
-      const listings = await getListings(address, tokenID);
-      setListings(listings);
+      const listing = await getListing(address, tokenID);
+      setListing(listing);
     } catch (e) {
       console.log(e);
     }
   };
 
+  const getCurrentOffers = async () => {
+    try {
+      const { data } = await getOffers(address, tokenID);
+      setOffers(data);
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  const eventMatches = (nft, id) => {
+    return (
+      address.toLowerCase() === nft.toLowerCase() &&
+      parseFloat(tokenID) === parseFloat(id.toString())
+    );
+  };
+
+  const addEventListeners = async () => {
+    const contract = await getSalesContract();
+
+    contract.on(
+      'ItemListed',
+      (
+        owner,
+        nft,
+        id,
+        quantity,
+        pricePerItem,
+        startingTime,
+        isPrivate,
+        allowedAddress
+      ) => {
+        if (eventMatches(nft, id)) {
+          setListing({
+            owner,
+            quantity: parseFloat(quantity.toString()),
+            pricePerItem: parseFloat(pricePerItem.toString()) / 10 ** 18,
+            startingTime: parseFloat(startingTime.toString()),
+            allowedAddress,
+          });
+        }
+      }
+    );
+
+    contract.on('ItemUpdated', (owner, nft, id, newPrice) => {
+      if (eventMatches(nft, id)) {
+        const newListing = {
+          ...listing,
+          pricePerItem: parseFloat(newPrice.toString()) / 10 ** 18,
+        };
+        setListing(newListing);
+      }
+    });
+
+    contract.on('ItemCanceled', (owner, nft, id) => {
+      if (eventMatches(nft, id)) {
+        setListing(null);
+      }
+    });
+
+    contract.on('ItemSold', (seller, buyer, nft, id) => {
+      if (eventMatches(nft, id)) {
+        setListing(null);
+      }
+    });
+
+    contract.on(
+      'OfferCreated',
+      (creator, nft, id, payToken, quantity, pricePerItem, deadline) => {
+        if (eventMatches(nft, id)) {
+          const newOffers = [...offers];
+          newOffers.push({
+            creator,
+            deadline: parseFloat(deadline.toString()),
+            payToken,
+            pricePerItem: parseFloat(pricePerItem.toString()) / 10 ** 18,
+            quantity: parseFloat(quantity.toString()),
+          });
+          setOffers(newOffers);
+        }
+      }
+    );
+
+    contract.on('OfferCanceled', (creator, nft, id) => {
+      if (eventMatches(nft, id)) {
+        const newOffers = offers.filter(
+          offer => offer.creator.toLowerCase() === creator.toLowerCase()
+        );
+        setOffers(newOffers);
+      }
+    });
+  };
+
+  useEffect(() => {
+    addEventListeners();
+  }, []);
+
   useEffect(() => {
     getTokenURI();
     getTokenOwner();
     getItemListings();
+    getCurrentOffers();
 
     increaseViewCount(address, tokenID).then(({ data }) => {
       setViews(data);
@@ -109,8 +215,6 @@ const NFTItem = () => {
       setSellModalVisible(false);
 
       await provider.waitForTransaction(tx.hash);
-
-      getItemListings();
     } catch (e) {
       console.log('Error while listing item', e);
     }
@@ -125,8 +229,6 @@ const NFTItem = () => {
 
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       await provider.waitForTransaction(tx.hash);
-
-      getItemListings();
     } catch (e) {
       console.log('Error while updating listing price', e);
     }
@@ -134,7 +236,7 @@ const NFTItem = () => {
 
   const cancelList = async () => {
     await cancelListing(address, tokenID);
-    setListings([]);
+    setListing(null);
   };
 
   const handleBuyItem = async _price => {
@@ -161,6 +263,62 @@ const NFTItem = () => {
     );
     await provider.waitForTransaction(tx.hash);
   };
+
+  const handleMakeOffer = async (_price, endTime) => {
+    const [contract, provider] = await getNFTContract(address);
+    const approved = await contract.isApprovedForAll(
+      myAddress,
+      SALES_CONTRACT_ADDRESS
+    );
+
+    if (!approved) {
+      const approveTx = await contract.setApprovalForAll(
+        SALES_CONTRACT_ADDRESS,
+        true
+      );
+      await provider.waitForTransaction(approveTx.hash);
+    }
+
+    const price = ethers.utils.parseEther(_price.toString());
+    const deadline = Math.floor(endTime.getTime() / 1000);
+
+    const balance = await getWFTMBalance(myAddress);
+
+    if (balance.lt(price)) {
+      await wrapFTM(price, myAddress);
+    }
+
+    const tx = await createOffer(
+      address,
+      ethers.BigNumber.from(tokenID),
+      WFTM_ADDRESS,
+      ethers.BigNumber.from(1),
+      price,
+      ethers.BigNumber.from(deadline)
+    );
+
+    setOfferModalVisible(false);
+
+    await provider.waitForTransaction(tx.hash);
+  };
+
+  const handleAcceptOffer = async creator => {
+    const tx = await acceptOffer(address, tokenID, creator);
+
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    await provider.waitForTransaction(tx.hash);
+  };
+
+  const handleCancelOffer = async () => {
+    const tx = await cancelOffer(address, tokenID);
+
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    await provider.waitForTransaction(tx.hash);
+  };
+
+  const hasMyOffer = useMemo(() => {
+    return offers.findIndex(offer => offer.creator === myAddress) > -1;
+  }, [offers]);
 
   const series = useMemo(
     () => ({
@@ -191,22 +349,37 @@ const NFTItem = () => {
   }));
 
   return (
-    <div className={cx(styles.container, isMine ? styles.withHeader : null)}>
-      {isMine && (
-        <div className={styles.header}>
-          {listings.length ? (
-            <div className={styles.headerButton} onClick={cancelList}>
-              Cancel Listing
+    <div className={styles.container}>
+      <div className={styles.header}>
+        {isMine ? (
+          <>
+            {listing ? (
+              <div className={styles.headerButton} onClick={cancelList}>
+                Cancel Listing
+              </div>
+            ) : null}
+            <div
+              className={styles.headerButton}
+              onClick={() => setSellModalVisible(true)}
+            >
+              {listing ? 'Update Listing' : 'Sell'}
             </div>
-          ) : null}
-          <div
-            className={styles.headerButton}
-            onClick={() => setSellModalVisible(true)}
-          >
-            {listings.length ? 'Update Listing' : 'Sell'}
-          </div>
-        </div>
-      )}
+          </>
+        ) : (
+          <>
+            <div
+              className={styles.headerButton}
+              onClick={
+                hasMyOffer
+                  ? handleCancelOffer
+                  : () => setOfferModalVisible(true)
+              }
+            >
+              {hasMyOffer ? 'Cancel Offer' : 'Make Offer'}
+            </div>
+          </>
+        )}
+      </div>
       <div className={styles.inner}>
         <div className={styles.topContainer}>
           <div className={styles.itemSummary}>
@@ -280,8 +453,8 @@ const NFTItem = () => {
             <div className={styles.panelWrapper}>
               <Panel title="Listings">
                 <div className={styles.listings}>
-                  {listings.map((listing, idx) => (
-                    <div className={styles.listing} key={idx}>
+                  {listing && (
+                    <div className={styles.listing}>
                       <div className={styles.owner}>
                         {abbrAddress(listing.owner)}
                       </div>
@@ -297,13 +470,40 @@ const NFTItem = () => {
                         </div>
                       )}
                     </div>
-                  ))}
+                  )}
                 </div>
               </Panel>
             </div>
             <div className={styles.panelWrapper}>
               <Panel title="Offers">
-                <div className={styles.fakeBody} />
+                <div className={styles.offers}>
+                  {offers.map((offer, idx) => (
+                    <div className={styles.offer} key={idx}>
+                      <div className={styles.owner}>
+                        {abbrAddress(offer.creator)}
+                      </div>
+                      <div className={styles.price}>
+                        {offer.pricePerItem} FTM
+                      </div>
+                      {isMine && (
+                        <div
+                          className={styles.buyButton}
+                          onClick={() => handleAcceptOffer(offer.creator)}
+                        >
+                          Accept
+                        </div>
+                      )}
+                      {offer.creator === myAddress && (
+                        <div
+                          className={styles.buyButton}
+                          onClick={() => handleCancelOffer()}
+                        >
+                          Withdraw
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
               </Panel>
             </div>
           </div>
@@ -318,8 +518,13 @@ const NFTItem = () => {
       <SellModal
         visible={sellModalVisible}
         onClose={() => setSellModalVisible(false)}
-        onSell={listings.length ? handleUpdatePrice : handleListItem}
-        startPrice={listings.length ? listings[0].pricePerItem : 0}
+        onSell={listing ? handleUpdatePrice : handleListItem}
+        startPrice={listing?.pricePerItem || 0}
+      />
+      <OfferModal
+        visible={offerModalVisible}
+        onClose={() => setOfferModalVisible(false)}
+        onMakeOffer={handleMakeOffer}
       />
     </div>
   );
