@@ -77,8 +77,6 @@ const AccountDetails = () => {
 
   useEffect(() => {
     getUserDetails(uid);
-    dispatch(TokensActions.resetTokens());
-    fetchNFTs(0);
   }, [uid]);
 
   const handleScroll = e => {
@@ -93,7 +91,7 @@ const AccountDetails = () => {
   useEffect(() => {
     dispatch(TokensActions.resetTokens());
     fetchNFTs(0);
-  }, [collections]);
+  }, [collections, uid]);
 
   useEffect(() => {
     let _fileSelector = document.createElement('input');
