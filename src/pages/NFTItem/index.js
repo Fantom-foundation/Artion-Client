@@ -23,6 +23,8 @@ import {
   buyItem,
   getWFTMBalance,
   wrapFTM,
+  getAllowance,
+  approve,
   createOffer,
   cancelOffer,
   acceptOffer,
@@ -319,6 +321,11 @@ const NFTItem = () => {
       await wrapFTM(price, myAddress);
     }
 
+    const allowance = await getAllowance(myAddress, SALES_CONTRACT_ADDRESS);
+    if (allowance.lt(price)) {
+      await approve(SALES_CONTRACT_ADDRESS, price);
+    }
+
     const tx = await createOffer(
       address,
       ethers.BigNumber.from(tokenID),
@@ -333,8 +340,8 @@ const NFTItem = () => {
     await provider.waitForTransaction(tx.hash);
   };
 
-  const handleAcceptOffer = async creator => {
-    const tx = await acceptOffer(address, tokenID, creator);
+  const handleAcceptOffer = async offer => {
+    const tx = await acceptOffer(address, tokenID, offer.creator);
 
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     await provider.waitForTransaction(tx.hash);
@@ -576,7 +583,7 @@ const NFTItem = () => {
                       {isMine && (
                         <div
                           className={styles.buyButton}
-                          onClick={() => handleAcceptOffer(offer.creator)}
+                          onClick={() => handleAcceptOffer(offer)}
                         >
                           Accept
                         </div>
