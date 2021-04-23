@@ -4,6 +4,13 @@ import { useSelector } from 'react-redux';
 import { Chart } from 'react-charts';
 import axios from 'axios';
 import { ethers } from 'ethers';
+import TimelineIcon from '@material-ui/icons/Timeline';
+import LocalOfferIcon from '@material-ui/icons/LocalOffer';
+import TocIcon from '@material-ui/icons/Toc';
+import LabelIcon from '@material-ui/icons/Label';
+import VerticalSplitIcon from '@material-ui/icons/VerticalSplit';
+import BallotIcon from '@material-ui/icons/Ballot';
+import SwapVertIcon from '@material-ui/icons/SwapVert';
 
 import Panel from '../../components/Panel';
 import ResizableBox from '../../components/ResizableBox';
@@ -453,11 +460,12 @@ const NFTItem = () => {
             </div>
             <div className={styles.itemInfoCont}>
               {info?.properties && (
-                <Panel title="Properties">
+                <Panel icon={LabelIcon} title="Properties">
                   <div className={styles.fakeBody} />
                 </Panel>
               )}
               <Panel
+                icon={VerticalSplitIcon}
                 title={`About ${collection?.collectionName ||
                   collection?.name}`}
               >
@@ -522,7 +530,7 @@ const NFTItem = () => {
                   )}
                 </div>
               </Panel>
-              <Panel title="Chain Info">
+              <Panel icon={BallotIcon} title="Chain Info">
                 <div className={styles.panelBody}>
                   <div className={styles.panelLine}>
                     <div className={styles.panelLabel}>Collection</div>
@@ -559,7 +567,7 @@ const NFTItem = () => {
               </div>
             </div>
             <div className={styles.panelWrapper}>
-              <Panel title="Price History">
+              <Panel icon={TimelineIcon} title="Price History">
                 <div className={styles.chartWrapper}>
                   <ResizableBox width="100%" height={250} resizable={false}>
                     <Chart
@@ -573,7 +581,7 @@ const NFTItem = () => {
               </Panel>
             </div>
             <div className={styles.panelWrapper}>
-              <Panel title="Listings">
+              <Panel icon={LocalOfferIcon} title="Listings">
                 <div className={styles.listings}>
                   {listing && (
                     <div className={styles.listing}>
@@ -597,7 +605,7 @@ const NFTItem = () => {
               </Panel>
             </div>
             <div className={styles.panelWrapper}>
-              <Panel title="Offers">
+              <Panel icon={TocIcon} title="Offers">
                 <div className={styles.offers}>
                   <div className={styles.offer}>
                     <div className={styles.owner}>From</div>
@@ -639,7 +647,7 @@ const NFTItem = () => {
           </div>
         </div>
         <div className={styles.panelWrapper}>
-          <Panel title="Trade History">
+          <Panel icon={SwapVertIcon} title="Trade History">
             <div className={styles.listings}>
               <div className={styles.listing}>
                 <div className={styles.from}>From</div>
