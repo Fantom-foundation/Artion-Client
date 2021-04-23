@@ -60,8 +60,14 @@ export const fetchCollections = async () => {
   return res.data;
 };
 
-export const fetchTokens = async step => {
+export const fetchTokens = async (step, collections = [], address = null) => {
   const data = { step };
+  if (collections.length > 0) {
+    data.contractAddress = collections;
+  }
+  if (address) {
+    data.address = address;
+  }
   const res = await axios({
     method: 'post',
     url: `${BASE_URL}/api/erc721token/fetchTokens`,

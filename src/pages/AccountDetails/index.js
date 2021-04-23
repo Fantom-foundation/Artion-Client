@@ -35,6 +35,7 @@ const AccountDetails = () => {
   let isWalletConnected = useSelector(state => state.ConnectWallet.isConnected);
   let connectedChainId = useSelector(state => state.ConnectWallet.chainId);
   const address = useSelector(state => state.ConnectWallet.address); //connected address
+  const { collections } = useSelector(state => state.Filter);
 
   const [collectionName, setCollectionName] = useState('');
   const [collectionDescription, setCollectionDescription] = useState('');
@@ -64,7 +65,7 @@ const AccountDetails = () => {
     dispatch(TokensActions.startFetching());
 
     try {
-      const { data } = await fetchTokens(step);
+      const { data } = await fetchTokens(step, collections, uid);
       dispatch(
         TokensActions.fetchingSuccess(data.totalTokenCounts, data.tokens)
       );
@@ -88,6 +89,11 @@ const AccountDetails = () => {
       fetchNFTs(page + 1);
     }
   };
+
+  useEffect(() => {
+    dispatch(TokensActions.resetTokens());
+    fetchNFTs(0);
+  }, [collections]);
 
   useEffect(() => {
     let _fileSelector = document.createElement('input');
