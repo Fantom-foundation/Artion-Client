@@ -56,6 +56,7 @@ const NFTItem = () => {
   const [offers, setOffers] = useState([]);
   const [tradeHistory, setTradeHistory] = useState([]);
   const [views, setViews] = useState();
+  const [now, setNow] = useState(new Date());
 
   const collections = useSelector(state => state.Collections);
   const myAddress = useSelector(state => state.ConnectWallet.address);
@@ -203,6 +204,9 @@ const NFTItem = () => {
 
   useEffect(() => {
     addEventListeners();
+    setInterval(() => {
+      setNow(new Date());
+    }, 1000);
   }, []);
 
   useEffect(() => {
@@ -378,13 +382,36 @@ const NFTItem = () => {
     []
   );
 
-  const startDate = new Date();
-  const data = Array.from(Array(10), (_, i) => ({
-    primary: new Date(startDate.getTime() + 60 * 1000 * 60 * 24 * i),
-    // primary: i,
-    secondary: Math.floor(Math.random() * 30),
-    radius: undefined,
-  }));
+  const data = tradeHistory.map(history => {
+    const saleDate = new Date(history.saleDate);
+    return {
+      primary: saleDate,
+      secondary: history.price,
+    };
+  });
+
+  const formatExpiration = deadline => {
+    const duration = new Date(deadline * 1000).getTime() - now.getTime();
+    let s = Math.floor(duration / 1000);
+    let m = Math.floor(s / 60);
+    s %= 60;
+    let h = Math.floor(m / 60);
+    m %= 60;
+    const d = Math.floor(h / 24);
+    h %= 24;
+    const res = [];
+    if (d > 0) {
+      res.push(`${d} days`);
+    }
+    if (d > 0 || h > 0) {
+      res.push(`${h} hours`);
+    }
+    if (d > 0 || h > 0 || m > 0) {
+      res.push(`${m} mins`);
+    }
+    res.push(`${s}s`);
+    return res.join(' ');
+  };
 
   return (
     <div className={styles.container}>
@@ -572,6 +599,11 @@ const NFTItem = () => {
             <div className={styles.panelWrapper}>
               <Panel title="Offers">
                 <div className={styles.offers}>
+                  <div className={styles.offer}>
+                    <div className={styles.owner}>From</div>
+                    <div className={styles.price}>Price</div>
+                    <div className={styles.deadline}>Expires In</div>
+                  </div>
                   {offers.map((offer, idx) => (
                     <div className={styles.offer} key={idx}>
                       <div className={styles.owner}>
@@ -579,6 +611,9 @@ const NFTItem = () => {
                       </div>
                       <div className={styles.price}>
                         {offer.pricePerItem} FTM
+                      </div>
+                      <div className={styles.deadline}>
+                        {formatExpiration(offer.deadline)}
                       </div>
                       {isMine && (
                         <div
