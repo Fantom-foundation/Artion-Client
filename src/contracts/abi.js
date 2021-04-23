@@ -1069,6 +1069,30 @@ export const WFTM_ABI = [
     type: 'function',
   },
   {
+    constant: true,
+    inputs: [
+      { internalType: 'address', name: 'owner', type: 'address' },
+      { internalType: 'address', name: 'spender', type: 'address' },
+    ],
+    name: 'allowance',
+    outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+    payable: false,
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    constant: false,
+    inputs: [
+      { internalType: 'address', name: 'spender', type: 'address' },
+      { internalType: 'uint256', name: 'value', type: 'uint256' },
+    ],
+    name: 'approve',
+    outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
+    payable: false,
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
     constant: false,
     inputs: [],
     name: 'deposit',

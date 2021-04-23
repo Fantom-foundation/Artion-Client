@@ -19,6 +19,7 @@ const ExploreAllPage = () => {
   const [fetchInterval, setFetchInterval] = useState(null);
 
   const { fetching, tokens } = useSelector(state => state.Tokens);
+  const { collections } = useSelector(state => state.Filter);
 
   const updateCollections = async () => {
     try {
@@ -43,7 +44,7 @@ const ExploreAllPage = () => {
     dispatch(TokensActions.startFetching());
 
     try {
-      const { data } = await fetchTokens(step);
+      const { data } = await fetchTokens(step, collections);
       dispatch(
         TokensActions.fetchingSuccess(data.totalTokenCounts, data.tokens)
       );
@@ -74,6 +75,11 @@ const ExploreAllPage = () => {
       fetchNFTs(page + 1);
     }
   };
+
+  useEffect(() => {
+    dispatch(TokensActions.resetTokens());
+    fetchNFTs(0);
+  }, [collections]);
 
   return (
     <div className="exploreAllPageContainer">

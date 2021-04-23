@@ -4,6 +4,13 @@ import { useSelector } from 'react-redux';
 import { Chart } from 'react-charts';
 import axios from 'axios';
 import { ethers } from 'ethers';
+import TimelineIcon from '@material-ui/icons/Timeline';
+import LocalOfferIcon from '@material-ui/icons/LocalOffer';
+import TocIcon from '@material-ui/icons/Toc';
+import LabelIcon from '@material-ui/icons/Label';
+import VerticalSplitIcon from '@material-ui/icons/VerticalSplit';
+import BallotIcon from '@material-ui/icons/Ballot';
+import SwapVertIcon from '@material-ui/icons/SwapVert';
 
 import Panel from '../../components/Panel';
 import ResizableBox from '../../components/ResizableBox';
@@ -23,6 +30,8 @@ import {
   buyItem,
   getWFTMBalance,
   wrapFTM,
+  getAllowance,
+  approve,
   createOffer,
   cancelOffer,
   acceptOffer,
@@ -54,6 +63,7 @@ const NFTItem = () => {
   const [offers, setOffers] = useState([]);
   const [tradeHistory, setTradeHistory] = useState([]);
   const [views, setViews] = useState();
+  const [now, setNow] = useState(new Date());
 
   const collections = useSelector(state => state.Collections);
   const myAddress = useSelector(state => state.ConnectWallet.address);
@@ -201,6 +211,9 @@ const NFTItem = () => {
 
   useEffect(() => {
     addEventListeners();
+    setInterval(() => {
+      setNow(new Date());
+    }, 1000);
   }, []);
 
   useEffect(() => {
@@ -319,6 +332,11 @@ const NFTItem = () => {
       await wrapFTM(price, myAddress);
     }
 
+    const allowance = await getAllowance(myAddress, SALES_CONTRACT_ADDRESS);
+    if (allowance.lt(price)) {
+      await approve(SALES_CONTRACT_ADDRESS, price);
+    }
+
     const tx = await createOffer(
       address,
       ethers.BigNumber.from(tokenID),
@@ -333,8 +351,8 @@ const NFTItem = () => {
     await provider.waitForTransaction(tx.hash);
   };
 
-  const handleAcceptOffer = async creator => {
-    const tx = await acceptOffer(address, tokenID, creator);
+  const handleAcceptOffer = async offer => {
+    const tx = await acceptOffer(address, tokenID, offer.creator);
 
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     await provider.waitForTransaction(tx.hash);
@@ -371,13 +389,36 @@ const NFTItem = () => {
     []
   );
 
-  const startDate = new Date();
-  const data = Array.from(Array(10), (_, i) => ({
-    primary: new Date(startDate.getTime() + 60 * 1000 * 60 * 24 * i),
-    // primary: i,
-    secondary: Math.floor(Math.random() * 30),
-    radius: undefined,
-  }));
+  const data = tradeHistory.map(history => {
+    const saleDate = new Date(history.saleDate);
+    return {
+      primary: saleDate,
+      secondary: history.price,
+    };
+  });
+
+  const formatExpiration = deadline => {
+    const duration = new Date(deadline * 1000).getTime() - now.getTime();
+    let s = Math.floor(duration / 1000);
+    let m = Math.floor(s / 60);
+    s %= 60;
+    let h = Math.floor(m / 60);
+    m %= 60;
+    const d = Math.floor(h / 24);
+    h %= 24;
+    const res = [];
+    if (d > 0) {
+      res.push(`${d} days`);
+    }
+    if (d > 0 || h > 0) {
+      res.push(`${h} hours`);
+    }
+    if (d > 0 || h > 0 || m > 0) {
+      res.push(`${m} mins`);
+    }
+    res.push(`${s}s`);
+    return res.join(' ');
+  };
 
   return (
     <div className={styles.container}>
@@ -419,11 +460,12 @@ const NFTItem = () => {
             </div>
             <div className={styles.itemInfoCont}>
               {info?.properties && (
-                <Panel title="Properties">
+                <Panel icon={LabelIcon} title="Properties">
                   <div className={styles.fakeBody} />
                 </Panel>
               )}
               <Panel
+                icon={VerticalSplitIcon}
                 title={`About ${collection?.collectionName ||
                   collection?.name}`}
               >
@@ -488,7 +530,7 @@ const NFTItem = () => {
                   )}
                 </div>
               </Panel>
-              <Panel title="Chain Info">
+              <Panel icon={BallotIcon} title="Chain Info">
                 <div className={styles.panelBody}>
                   <div className={styles.panelLine}>
                     <div className={styles.panelLabel}>Collection</div>
@@ -525,7 +567,7 @@ const NFTItem = () => {
               </div>
             </div>
             <div className={styles.panelWrapper}>
-              <Panel title="Price History">
+              <Panel icon={TimelineIcon} title="Price History">
                 <div className={styles.chartWrapper}>
                   <ResizableBox width="100%" height={250} resizable={false}>
                     <Chart
@@ -539,7 +581,7 @@ const NFTItem = () => {
               </Panel>
             </div>
             <div className={styles.panelWrapper}>
-              <Panel title="Listings">
+              <Panel icon={LocalOfferIcon} title="Listings">
                 <div className={styles.listings}>
                   {listing && (
                     <div className={styles.listing}>
@@ -563,8 +605,13 @@ const NFTItem = () => {
               </Panel>
             </div>
             <div className={styles.panelWrapper}>
-              <Panel title="Offers">
+              <Panel icon={TocIcon} title="Offers">
                 <div className={styles.offers}>
+                  <div className={styles.offer}>
+                    <div className={styles.owner}>From</div>
+                    <div className={styles.price}>Price</div>
+                    <div className={styles.deadline}>Expires In</div>
+                  </div>
                   {offers.map((offer, idx) => (
                     <div className={styles.offer} key={idx}>
                       <div className={styles.owner}>
@@ -573,10 +620,13 @@ const NFTItem = () => {
                       <div className={styles.price}>
                         {offer.pricePerItem} FTM
                       </div>
+                      <div className={styles.deadline}>
+                        {formatExpiration(offer.deadline)}
+                      </div>
                       {isMine && (
                         <div
                           className={styles.buyButton}
-                          onClick={() => handleAcceptOffer(offer.creator)}
+                          onClick={() => handleAcceptOffer(offer)}
                         >
                           Accept
                         </div>
@@ -597,7 +647,7 @@ const NFTItem = () => {
           </div>
         </div>
         <div className={styles.panelWrapper}>
-          <Panel title="Trade History">
+          <Panel icon={SwapVertIcon} title="Trade History">
             <div className={styles.listings}>
               <div className={styles.listing}>
                 <div className={styles.from}>From</div>

@@ -16,6 +16,15 @@
   cursor: pointer;
 }
 
+.headerLeft {
+  display: flex;
+  align-items: center;
+}
+
+.icon {
+  margin-right: 10px;
+}
+
 .title {
   font-size: 20px;
   font-weight: 600;

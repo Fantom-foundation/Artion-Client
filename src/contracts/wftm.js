@@ -29,3 +29,14 @@ export const wrapFTM = async (value, from) => {
   const tx = await contract.deposit(options);
   await provider.waitForTransaction(tx.hash);
 };
+
+export const getAllowance = async (owner, spender) => {
+  const [contract] = await getWFTMContract();
+  return await contract.allowance(owner, spender);
+};
+
+export const approve = async (address, value) => {
+  const [contract, provider] = await getWFTMContract();
+  const tx = await contract.approve(address, value);
+  await provider.waitForTransaction(tx.hash);
+};
