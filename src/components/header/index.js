@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useHistory, withRouter } from 'react-router-dom';
 import cx from 'classnames';
 import { fade, makeStyles } from '@material-ui/core/styles';
@@ -146,6 +146,10 @@ const NiftyHeader = () => {
   const isMenuOpen = Boolean(anchorEl);
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
 
+  useEffect(() => {
+    connect();
+  }, []);
+
   const goToHomepage = () => {
     dispatch(HeaderActions.toggleSearchbar(false));
     history.push('/');
@@ -220,25 +224,29 @@ const NiftyHeader = () => {
     handleMenuClose();
   };
 
-  const handleConnectWallet = async () => {
+  const connect = async () => {
+    let { connectedAddress, chainId, token } = await connectWallet();
+    if (connectedAddress) {
+      console.log('connected');
+      dispatch(
+        WalletConnectActions.connectWallet(chainId, connectedAddress, token)
+      );
+
+      dispatch(AuthActions.fetchStart());
+      try {
+        const { data } = await getAccountDetails(token);
+        dispatch(AuthActions.fetchSuccess(data));
+      } catch {
+        dispatch(AuthActions.fetchFailed());
+      }
+    }
+  };
+
+  const handleConnectWallet = () => {
     if (isWalletConnected) {
       dispatch(WalletConnectActions.disconnectWallet());
     } else {
-      let { connectedAddress, chainId, token } = await connectWallet();
-      if (connectedAddress) {
-        console.log('connected');
-        dispatch(
-          WalletConnectActions.connectWallet(chainId, connectedAddress, token)
-        );
-
-        dispatch(AuthActions.fetchStart());
-        try {
-          const { data } = await getAccountDetails(token);
-          dispatch(AuthActions.fetchSuccess(data));
-        } catch {
-          dispatch(AuthActions.fetchFailed());
-        }
-      }
+      connect();
     }
     handleMenuClose();
   };

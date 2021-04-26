@@ -114,7 +114,7 @@ const BaseCard = ({ item, style }) => {
         <CardMedia
           className={info?.image ? classes.media : classes.mediaMissing}
           image={info?.image || PLACEHOLDER}
-          title="Contemplative Reptile"
+          title={info?.name}
         />
         <CardContent className={classes.content}>
           <div className={classes.alignLeft}>
