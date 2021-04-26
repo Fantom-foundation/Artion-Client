@@ -4,6 +4,7 @@ const AuthActions = {
   fetchStart,
   fetchSuccess,
   fetchFailed,
+  signOut,
 };
 
 function fetchStart() {
@@ -40,6 +41,18 @@ function fetchFailed() {
 const _fetchFailed = () => {
   return {
     type: AuthConstants.PROFILE_GET_FAILED,
+  };
+};
+
+function signOut() {
+  return dispatch => {
+    dispatch(_signOut());
+  };
+}
+
+const _signOut = () => {
+  return {
+    type: AuthConstants.SIGN_OUT,
   };
 };
 
