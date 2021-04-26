@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { useHistory } from 'react-router';
 import { useSelector } from 'react-redux';
+import { Link } from 'react-router-dom';
 import { makeStyles } from '@material-ui/core/styles';
 import Box from '@material-ui/core/Box';
 import Card from '@material-ui/core/Card';
@@ -25,13 +25,16 @@ const useStyles = makeStyles({
     boxShadow: 'none',
     border: '1px solid #ddd',
     transition: 'transform ease 0.1s',
-    display: 'flex',
-    flexDirection: 'column',
 
     '&:hover': {
       boxShadow: '0 0 8px rgba(0, 0, 0, 0.2)',
       transform: 'translateY(-2px)',
     },
+  },
+  link: {
+    display: 'flex',
+    flexDirection: 'column',
+    textDecoration: 'inherit',
   },
   label: {
     fontSize: 14,
@@ -81,7 +84,6 @@ const useStyles = makeStyles({
 
 const BaseCard = ({ item, style }) => {
   const classes = useStyles();
-  const history = useHistory();
 
   const [info, setInfo] = useState(null);
 
@@ -104,36 +106,37 @@ const BaseCard = ({ item, style }) => {
     getTokenURI(item.tokenURI);
   }, [item]);
 
-  const viewNFTDetails = () => {
-    history.push(`/explore/${item.contractAddress}/${item.tokenID}`);
-  };
-
   return (
     <Box style={style} className={classes.root}>
-      <Card className={classes.card} onClick={viewNFTDetails}>
-        <CardMedia
-          className={info?.image ? classes.media : classes.mediaMissing}
-          image={info?.image || PLACEHOLDER}
-          title={info?.name}
-        />
-        <CardContent className={classes.content}>
-          <div className={classes.alignLeft}>
-            <Typography component="h4" className={classes.label}>
-              {collection?.name || ''}
-            </Typography>
-            <Typography component="h4" className={classes.name}>
-              {info?.name}
-            </Typography>
-          </div>
-          <div className={classes.alignRight}>
-            <Typography component="h4" className={classes.label}>
-              Price
-            </Typography>
-            <Typography component="h4" className={classes.price}>
-              Ξ {item.price}
-            </Typography>
-          </div>
-        </CardContent>
+      <Card className={classes.card}>
+        <Link
+          to={`/explore/${item.contractAddress}/${item.tokenID}`}
+          className={classes.link}
+        >
+          <CardMedia
+            className={info?.image ? classes.media : classes.mediaMissing}
+            image={info?.image || PLACEHOLDER}
+            title={info?.name}
+          />
+          <CardContent className={classes.content}>
+            <div className={classes.alignLeft}>
+              <Typography component="h4" className={classes.label}>
+                {collection?.name || ''}
+              </Typography>
+              <Typography component="h4" className={classes.name}>
+                {info?.name}
+              </Typography>
+            </div>
+            <div className={classes.alignRight}>
+              <Typography component="h4" className={classes.label}>
+                Price
+              </Typography>
+              <Typography component="h4" className={classes.price}>
+                Ξ {item.price}
+              </Typography>
+            </div>
+          </CardContent>
+        </Link>
       </Card>
     </Box>
   );
