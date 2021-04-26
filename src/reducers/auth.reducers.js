@@ -28,6 +28,12 @@ export function Auth(
         user: {},
       };
     }
+    case AuthConstants.SIGN_OUT: {
+      return {
+        ...state,
+        user: {},
+      };
+    }
 
     default: {
       return state;

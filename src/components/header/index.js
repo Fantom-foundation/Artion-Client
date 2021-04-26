@@ -206,11 +206,13 @@ const NiftyHeader = () => {
     });
     window.ethereum.on('disconnect', error => {
       dispatch(WalletConnectActions.disconnectWallet());
+      dispatch(AuthActions.signOut());
       console.log('handler for disconnection', error);
     });
     window.ethereum.on('accountsChanged', accounts => {
       if (accounts.length == 0) {
         dispatch(WalletConnectActions.disconnectWallet());
+        dispatch(AuthActions.signOut());
       }
     });
 
@@ -284,6 +286,7 @@ const NiftyHeader = () => {
   const handleConnectWallet = () => {
     if (isWalletConnected) {
       dispatch(WalletConnectActions.disconnectWallet());
+      dispatch(AuthActions.signOut());
     } else {
       connect();
     }
