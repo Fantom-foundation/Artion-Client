@@ -147,6 +147,9 @@ const useStyles = makeStyles(theme => ({
   wrongIcon: {
     marginRight: 10,
   },
+  avatar: {
+    borderRadius: '50%',
+  },
 }));
 
 const NiftyHeader = () => {
@@ -212,12 +215,6 @@ const NiftyHeader = () => {
     });
 
     let provider = new ethers.providers.Web3Provider(window.ethereum);
-    provider.on('network', (newNetwork, oldNetwork) => {
-      if (oldNetwork) {
-        window.location.reload();
-      }
-    });
-
     let chainId = (await provider.getNetwork()).chainId;
     if (chainId !== 250) {
       const params = {
@@ -232,10 +229,13 @@ const NiftyHeader = () => {
         blockExplorerUrls: ['https://ftmscan.com'],
       };
 
-      window.ethereum.request({
+      await window.ethereum.request({
         method: 'wallet_addEthereumChain',
         params: [params],
       });
+      await window.ethereum.enable();
+      provider = new ethers.providers.Web3Provider(window.ethereum);
+      chainId = (await provider.getNetwork()).chainId;
     }
     let signer = provider.getSigner();
     console.log(signer);
@@ -441,6 +441,7 @@ const NiftyHeader = () => {
                   src={`https://gateway.pinata.cloud/ipfs/${user.imageHash}`}
                   width="24"
                   height="24"
+                  className={classes.avatar}
                 />
               ) : (
                 <AccountCircle />
