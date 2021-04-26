@@ -8,12 +8,15 @@ import IconButton from '@material-ui/core/IconButton';
 import Badge from '@material-ui/core/Badge';
 import MenuItem from '@material-ui/core/MenuItem';
 import Menu from '@material-ui/core/Menu';
-import AccountCircle from '@material-ui/icons/AccountCircle';
-import MailIcon from '@material-ui/icons/Mail';
-import NotificationsIcon from '@material-ui/icons/Notifications';
-import MoreIcon from '@material-ui/icons/MoreVert';
+import {
+  AccountCircle,
+  Mail as MailIcon,
+  Notifications as NotificationsIcon,
+  More as MoreIcon,
+  Search as SearchIcon,
+  Warning as WarningIcon,
+} from '@material-ui/icons';
 import InputBase from '@material-ui/core/InputBase';
-import SearchIcon from '@material-ui/icons/Search';
 import { useDispatch, useSelector } from 'react-redux';
 import FantomLogo from '../../assets/svgs/fantom_logo_white_new.svg';
 import { ethers } from 'ethers';
@@ -133,6 +136,17 @@ const useStyles = makeStyles(theme => ({
     display: 'flex',
     alignItems: 'center',
   },
+  wrongNetwork: {
+    display: 'flex',
+    alignItems: 'center',
+    marginRight: 10,
+    backgroundColor: '#dc3545',
+    padding: '0 15px',
+    borderRadius: 6,
+  },
+  wrongIcon: {
+    marginRight: 10,
+  },
 }));
 
 const NiftyHeader = () => {
@@ -156,8 +170,8 @@ const NiftyHeader = () => {
   };
 
   const { user } = useSelector(state => state.Auth);
-  const isWalletConnected = useSelector(
-    state => state.ConnectWallet.isConnected
+  const { isConnected: isWalletConnected, chainId } = useSelector(
+    state => state.ConnectWallet
   );
   let isSearchbarShown = useSelector(state => state.HeaderOptions.isShown);
   const address = useSelector(state => state.ConnectWallet.address);
@@ -183,8 +197,9 @@ const NiftyHeader = () => {
     await window.ethereum.enable();
 
     window.ethereum.on('chainChanged', _chainId => {
-      dispatch(WalletConnectActions.changeChainId(_chainId));
-      console.log('chainid is changed to ', _chainId);
+      const chainId = parseInt(_chainId);
+      dispatch(WalletConnectActions.changeChainId(chainId));
+      console.log('chainid is changed to ', chainId);
     });
     window.ethereum.on('disconnect', error => {
       dispatch(WalletConnectActions.disconnectWallet());
@@ -197,7 +212,31 @@ const NiftyHeader = () => {
     });
 
     let provider = new ethers.providers.Web3Provider(window.ethereum);
+    provider.on('network', (newNetwork, oldNetwork) => {
+      if (oldNetwork) {
+        window.location.reload();
+      }
+    });
+
     let chainId = (await provider.getNetwork()).chainId;
+    if (chainId !== 250) {
+      const params = {
+        chainId: '0xfa',
+        chainName: 'Fantom',
+        nativeCurrency: {
+          name: 'Fantom',
+          symbol: 'FTM',
+          decimals: 18,
+        },
+        rpcUrls: ['https://rpcapi.fantom.network'],
+        blockExplorerUrls: ['https://ftmscan.com'],
+      };
+
+      window.ethereum.request({
+        method: 'wallet_addEthereumChain',
+        params: [params],
+      });
+    }
     let signer = provider.getSigner();
     console.log(signer);
     let accounts = await provider.listAccounts();
@@ -369,7 +408,16 @@ const NiftyHeader = () => {
           )}
           <div className={classes.grow} />
           <div className={classes.sectionDesktop}>
-            <div className={classes.address}>{abbrAddress(address)}</div>
+            {isWalletConnected ? (
+              chainId === 250 ? (
+                <div className={classes.address}>{abbrAddress(address)}</div>
+              ) : (
+                <div className={classes.wrongNetwork}>
+                  <WarningIcon className={classes.wrongIcon} />
+                  Wrong Network
+                </div>
+              )
+            ) : null}
             <IconButton aria-label="show 4 new mails" color="inherit">
               <Badge badgeContent={0} color="secondary">
                 <MailIcon />
