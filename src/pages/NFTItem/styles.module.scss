@@ -2,12 +2,16 @@
   width: 100%;
   height: 100vh;
   overflow-y: auto;
-  padding-top: 128px;
+  padding-top: 64px;
   padding-bottom: 48px;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
   align-items: center;
+
+  &.withHeader {
+    padding-top: 128px;
+  }
 }
 
 .header {

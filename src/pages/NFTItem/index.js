@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { Chart } from 'react-charts';
+import cx from 'classnames';
 import axios from 'axios';
 import { ethers } from 'ethers';
 import TimelineIcon from '@material-ui/icons/Timeline';
@@ -67,8 +68,15 @@ const NFTItem = () => {
 
   const collections = useSelector(state => state.Collections);
   const myAddress = useSelector(state => state.ConnectWallet.address);
+  const { isConnected: isWalletConnected, chainId } = useSelector(
+    state => state.ConnectWallet
+  );
 
   const collection = collections.find(col => col.address === address);
+
+  const isLoggedIn = () => {
+    return isWalletConnected && chainId === 250;
+  };
 
   const getTokenURI = async () => {
     try {
@@ -421,37 +429,41 @@ const NFTItem = () => {
   };
 
   return (
-    <div className={styles.container}>
-      <div className={styles.header}>
-        {isMine ? (
-          <>
-            {listing ? (
-              <div className={styles.headerButton} onClick={cancelList}>
-                Cancel Listing
+    <div
+      className={cx(styles.container, isLoggedIn() ? styles.withHeader : '')}
+    >
+      {isLoggedIn() && (
+        <div className={styles.header}>
+          {isMine ? (
+            <>
+              {listing ? (
+                <div className={styles.headerButton} onClick={cancelList}>
+                  Cancel Listing
+                </div>
+              ) : null}
+              <div
+                className={styles.headerButton}
+                onClick={() => setSellModalVisible(true)}
+              >
+                {listing ? 'Update Listing' : 'Sell'}
               </div>
-            ) : null}
-            <div
-              className={styles.headerButton}
-              onClick={() => setSellModalVisible(true)}
-            >
-              {listing ? 'Update Listing' : 'Sell'}
-            </div>
-          </>
-        ) : (
-          <>
-            <div
-              className={styles.headerButton}
-              onClick={
-                hasMyOffer
-                  ? handleCancelOffer
-                  : () => setOfferModalVisible(true)
-              }
-            >
-              {hasMyOffer ? 'Cancel Offer' : 'Make Offer'}
-            </div>
-          </>
-        )}
-      </div>
+            </>
+          ) : (
+            <>
+              <div
+                className={styles.headerButton}
+                onClick={
+                  hasMyOffer
+                    ? handleCancelOffer
+                    : () => setOfferModalVisible(true)
+                }
+              >
+                {hasMyOffer ? 'Cancel Offer' : 'Make Offer'}
+              </div>
+            </>
+          )}
+        </div>
+      )}
       <div className={styles.inner}>
         <div className={styles.topContainer}>
           <div className={styles.itemSummary}>
