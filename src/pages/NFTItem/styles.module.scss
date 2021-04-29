@@ -2,12 +2,16 @@
   width: 100%;
   height: 100vh;
   overflow-y: auto;
-  padding-top: 128px;
+  padding-top: 64px;
   padding-bottom: 48px;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
   align-items: center;
+
+  &.withHeader {
+    padding-top: 128px;
+  }
 }
 
 .header {
@@ -165,11 +169,6 @@
   }
 }
 
-.fakeBody {
-  width: 100%;
-  height: 200px;
-}
-
 .listings,
 .offers {
   margin-bottom: -1px;
@@ -213,6 +212,54 @@
   &:hover {
     box-shadow: 0 0 4px rgba(0, 0, 0, 0.4);
   }
+}
+
+.bids {
+  padding: 20px 16px;
+}
+
+.bidtitle {
+  font-size: 18px;
+}
+
+.bidAmount {
+  font-size: 20px;
+  font-weight: bold;
+  margin-top: 10px;
+}
+
+.placeBid,
+.withdrawBid {
+  min-width: 120px;
+  width: fit-content;
+  height: 40px;
+  padding: 0 15px;
+  box-sizing: border-box;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 16px;
+  letter-spacing: 1px;
+  user-select: none;
+  margin-top: 15px;
+
+  &:hover {
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.4);
+  }
+}
+
+.placeBid {
+  background-color: #007BFF;
+  color: #FFF;
+}
+
+.withdrawBid {
+  background-color: #FFF;
+  color: #007BFF;
+  border: 1px solid #007BFF;
 }
 
 .from,

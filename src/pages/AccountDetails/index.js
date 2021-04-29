@@ -36,6 +36,7 @@ const AccountDetails = () => {
   let connectedChainId = useSelector(state => state.ConnectWallet.chainId);
   const address = useSelector(state => state.ConnectWallet.address); //connected address
   const { collections } = useSelector(state => state.Filter);
+  const { user: me } = useSelector(state => state.Auth);
 
   const [collectionName, setCollectionName] = useState('');
   const [collectionDescription, setCollectionDescription] = useState('');
@@ -78,6 +79,12 @@ const AccountDetails = () => {
   useEffect(() => {
     getUserDetails(uid);
   }, [uid]);
+
+  useEffect(() => {
+    if (address === uid && me.alias) {
+      setUser(me);
+    }
+  }, [me]);
 
   const handleScroll = e => {
     if (fetching) return;

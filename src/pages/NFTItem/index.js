@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { Chart } from 'react-charts';
+import cx from 'classnames';
 import axios from 'axios';
 import { ethers } from 'ethers';
 import TimelineIcon from '@material-ui/icons/Timeline';
@@ -11,6 +12,9 @@ import LabelIcon from '@material-ui/icons/Label';
 import VerticalSplitIcon from '@material-ui/icons/VerticalSplit';
 import BallotIcon from '@material-ui/icons/Ballot';
 import SwapVertIcon from '@material-ui/icons/SwapVert';
+import AccessTimeIcon from '@material-ui/icons/AccessTime';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faEye } from '@fortawesome/free-solid-svg-icons';
 
 import Panel from '../../components/Panel';
 import ResizableBox from '../../components/ResizableBox';
@@ -35,14 +39,22 @@ import {
   createOffer,
   cancelOffer,
   acceptOffer,
+  getAuction,
+  createAuction,
+  cancelAuction,
+  updateAuctionEndTime,
+  getHighestBidder,
+  placeBid,
+  withdrawBid,
   SALES_CONTRACT_ADDRESS,
   WFTM_ADDRESS,
+  AUCTION_CONTRACT_ADDRESS,
 } from 'contracts';
 import { abbrAddress } from 'utils';
 import SellModal from 'components/SellModal';
 import OfferModal from 'components/OfferModal';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEye } from '@fortawesome/free-solid-svg-icons';
+import AuctionModal from 'components/AuctionModal';
+import BidModal from 'components/BidModal';
 
 import webIcon from 'assets/svgs/web.svg';
 import discordIcon from 'assets/imgs/discord.png';
@@ -59,16 +71,27 @@ const NFTItem = () => {
   const [owner, setOwner] = useState();
   const [sellModalVisible, setSellModalVisible] = useState(false);
   const [offerModalVisible, setOfferModalVisible] = useState(false);
+  const [auctionModalVisible, setAuctionModalVisible] = useState(false);
+  const [bidModalVisible, setBidModalVisible] = useState(false);
   const [listing, setListing] = useState(null);
   const [offers, setOffers] = useState([]);
   const [tradeHistory, setTradeHistory] = useState([]);
+  const [auction, setAuction] = useState(null);
+  const [bid, setBid] = useState(null);
   const [views, setViews] = useState();
   const [now, setNow] = useState(new Date());
 
   const collections = useSelector(state => state.Collections);
   const myAddress = useSelector(state => state.ConnectWallet.address);
+  const { isConnected: isWalletConnected, chainId } = useSelector(
+    state => state.ConnectWallet
+  );
 
   const collection = collections.find(col => col.address === address);
+
+  const isLoggedIn = () => {
+    return isWalletConnected && chainId === 250;
+  };
 
   const getTokenURI = async () => {
     try {
@@ -112,6 +135,28 @@ const NFTItem = () => {
     try {
       const { data } = await getTradeHistory(address, tokenID);
       setTradeHistory(data);
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  const getAuctions = async () => {
+    try {
+      const auction = await getAuction(address, tokenID);
+      if (auction.endTime !== 0) {
+        setAuction(auction);
+      }
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  const getBid = async () => {
+    try {
+      const bid = await getHighestBidder(address, tokenID);
+      if (bid.bid !== 0) {
+        setBid(bid);
+      }
     } catch (e) {
       console.log(e);
     }
@@ -222,6 +267,8 @@ const NFTItem = () => {
     getItemListings();
     getCurrentOffers();
     getItemTradeHistory();
+    getAuctions();
+    getBid();
 
     increaseViewCount(address, tokenID).then(({ data }) => {
       setViews(data);
@@ -365,6 +412,82 @@ const NFTItem = () => {
     await provider.waitForTransaction(tx.hash);
   };
 
+  const handleStartAuction = async (_price, _startTime, _endTime) => {
+    const [contract, provider] = await getNFTContract(address);
+    const approved = await contract.isApprovedForAll(
+      myAddress,
+      AUCTION_CONTRACT_ADDRESS
+    );
+
+    if (!approved) {
+      const approveTx = await contract.setApprovalForAll(
+        AUCTION_CONTRACT_ADDRESS,
+        true
+      );
+      await provider.waitForTransaction(approveTx.hash);
+    }
+
+    const price = ethers.utils.parseEther(_price);
+    const startTime = Math.floor(_startTime.getTime() / 1000);
+    const endTime = Math.floor(_endTime.getTime() / 1000);
+    const tx = createAuction(
+      address,
+      ethers.BigNumber.from(tokenID),
+      price,
+      ethers.BigNumber.from(startTime),
+      ethers.BigNumber.from(endTime)
+    );
+    setAuctionModalVisible(false);
+
+    await provider.waitForTransaction(tx.hash);
+  };
+
+  const handleUpdateAuction = async (_price, _startTime, _endTime) => {
+    const endTime = Math.floor(_endTime.getTime() / 1000);
+    updateAuctionEndTime(
+      address,
+      ethers.BigNumber.from(tokenID),
+      ethers.BigNumber.from(endTime)
+    );
+    setAuctionModalVisible(false);
+  };
+
+  const cancelCurrentAuction = async () => {
+    await cancelAuction(address, tokenID);
+    setAuction(null);
+  };
+
+  const handlePlaceBid = async _price => {
+    const [contract, provider] = await getNFTContract(address);
+    const approved = await contract.isApprovedForAll(
+      myAddress,
+      AUCTION_CONTRACT_ADDRESS
+    );
+
+    if (!approved) {
+      const approveTx = await contract.setApprovalForAll(
+        AUCTION_CONTRACT_ADDRESS,
+        true
+      );
+      await provider.waitForTransaction(approveTx.hash);
+    }
+
+    const price = ethers.utils.parseEther(_price);
+    const tx = await placeBid(
+      address,
+      ethers.BigNumber.from(tokenID),
+      price,
+      myAddress
+    );
+    setBidModalVisible(false);
+
+    await provider.waitForTransaction(tx.hash);
+  };
+
+  const handleWithdrawBid = async () => {
+    await withdrawBid(address, ethers.BigNumber.from(tokenID));
+  };
+
   const hasMyOffer = useMemo(() => {
     return offers.findIndex(offer => offer.creator === myAddress) > -1;
   }, [offers]);
@@ -421,37 +544,55 @@ const NFTItem = () => {
   };
 
   return (
-    <div className={styles.container}>
-      <div className={styles.header}>
-        {isMine ? (
-          <>
-            {listing ? (
-              <div className={styles.headerButton} onClick={cancelList}>
-                Cancel Listing
+    <div
+      className={cx(styles.container, isLoggedIn() ? styles.withHeader : '')}
+    >
+      {isLoggedIn() && (
+        <div className={styles.header}>
+          {isMine ? (
+            <>
+              {auction ? (
+                <div
+                  className={styles.headerButton}
+                  onClick={cancelCurrentAuction}
+                >
+                  Cancel Auction
+                </div>
+              ) : null}
+              <div
+                className={styles.headerButton}
+                onClick={() => setAuctionModalVisible(true)}
+              >
+                {auction ? 'Update Auction' : 'Start Auction'}
               </div>
-            ) : null}
-            <div
-              className={styles.headerButton}
-              onClick={() => setSellModalVisible(true)}
-            >
-              {listing ? 'Update Listing' : 'Sell'}
-            </div>
-          </>
-        ) : (
-          <>
-            <div
-              className={styles.headerButton}
-              onClick={
-                hasMyOffer
-                  ? handleCancelOffer
-                  : () => setOfferModalVisible(true)
-              }
-            >
-              {hasMyOffer ? 'Cancel Offer' : 'Make Offer'}
-            </div>
-          </>
-        )}
-      </div>
+              {listing ? (
+                <div className={styles.headerButton} onClick={cancelList}>
+                  Cancel Listing
+                </div>
+              ) : null}
+              <div
+                className={styles.headerButton}
+                onClick={() => setSellModalVisible(true)}
+              >
+                {listing ? 'Update Listing' : 'Sell'}
+              </div>
+            </>
+          ) : (
+            <>
+              <div
+                className={styles.headerButton}
+                onClick={
+                  hasMyOffer
+                    ? handleCancelOffer
+                    : () => setOfferModalVisible(true)
+                }
+              >
+                {hasMyOffer ? 'Cancel Offer' : 'Make Offer'}
+              </div>
+            </>
+          )}
+        </div>
+      )}
       <div className={styles.inner}>
         <div className={styles.topContainer}>
           <div className={styles.itemSummary}>
@@ -461,7 +602,7 @@ const NFTItem = () => {
             <div className={styles.itemInfoCont}>
               {info?.properties && (
                 <Panel icon={LabelIcon} title="Properties">
-                  <div className={styles.fakeBody} />
+                  <div />
                 </Panel>
               )}
               <Panel
@@ -474,7 +615,7 @@ const NFTItem = () => {
                     {collection?.description || 'Unverified Collection'}
                   </div>
 
-                  {collection.isVerified && (
+                  {collection?.isVerified && (
                     <div className={styles.socialLinks}>
                       {collection.siteUrl?.length > 0 && (
                         <a
@@ -566,6 +707,49 @@ const NFTItem = () => {
                 &nbsp;{views} Views
               </div>
             </div>
+            {auction && (
+              <div className={styles.panelWrapper}>
+                <Panel
+                  icon={AccessTimeIcon}
+                  title={`Sale ends in 8 days (${new Date(
+                    auction.endTime * 1000
+                  ).toLocaleString()})`}
+                  fixed
+                >
+                  <div className={styles.bids}>
+                    {bid ? (
+                      <>
+                        <div className={styles.bidtitle}>
+                          Highest Bid
+                          {bid.bid < auction.reservePrice
+                            ? ' -- Reserve price not met.'
+                            : ''}
+                        </div>
+                        <div className={styles.bidAmount}>{bid.bid} FTM</div>
+                      </>
+                    ) : (
+                      <div className={styles.bidtitle}>No bids yet</div>
+                    )}
+                    {!isMine &&
+                      (bid?.bidder === myAddress ? (
+                        <div
+                          className={styles.withdrawBid}
+                          onClick={() => handleWithdrawBid()}
+                        >
+                          Withdraw Bid
+                        </div>
+                      ) : (
+                        <div
+                          className={styles.placeBid}
+                          onClick={() => setBidModalVisible(true)}
+                        >
+                          Place Bid
+                        </div>
+                      ))}
+                  </div>
+                </Panel>
+              </div>
+            )}
             <div className={styles.panelWrapper}>
               <Panel icon={TimelineIcon} title="Price History">
                 <div className={styles.chartWrapper}>
@@ -692,6 +876,17 @@ const NFTItem = () => {
         visible={offerModalVisible}
         onClose={() => setOfferModalVisible(false)}
         onMakeOffer={handleMakeOffer}
+      />
+      <AuctionModal
+        visible={auctionModalVisible}
+        onClose={() => setAuctionModalVisible(false)}
+        onStartAuction={auction ? handleUpdateAuction : handleStartAuction}
+        auction={auction}
+      />
+      <BidModal
+        visible={bidModalVisible}
+        onClose={() => setBidModalVisible(false)}
+        onPlaceBid={handlePlaceBid}
       />
     </div>
   );
