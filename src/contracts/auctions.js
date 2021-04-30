@@ -3,7 +3,7 @@ import { ethers } from 'ethers';
 import { AUCTION_CONTRACT_ADDRESS, AUCTION_CONTRACT_ABI } from './abi';
 import { calculateGasMargin } from './sales';
 
-const getAuctionContract = async () => {
+export const getAuctionContract = async () => {
   await window.ethereum.enable();
   const provider = new ethers.providers.Web3Provider(window.ethereum);
   const signer = provider.getSigner();

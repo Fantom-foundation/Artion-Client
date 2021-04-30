@@ -3,11 +3,11 @@ import cx from 'classnames';
 
 import styles from './styles.module.scss';
 
-const BidModal = ({ visible, onClose, onPlaceBid }) => {
+const BidModal = ({ visible, onClose, onPlaceBid, minBidAmount }) => {
   const [price, setPrice] = useState('');
 
   useEffect(() => {
-    setPrice('');
+    setPrice(minBidAmount);
   }, [visible]);
 
   const handleClick = e => {
