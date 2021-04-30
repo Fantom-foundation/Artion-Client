@@ -54,6 +54,12 @@
   &:last-child {
     margin-right: 0;
   }
+
+  &.disabled {
+    cursor: not-allowed;
+    box-shadow: none;
+    opacity: 0.7;
+  }
 }
 
 .inner {
@@ -218,6 +224,11 @@
   padding: 20px 16px;
 }
 
+.result {
+  font-size: 20px;
+  font-weight: bold;
+}
+
 .bidtitle {
   font-size: 18px;
 }
@@ -260,6 +271,12 @@
   background-color: #FFF;
   color: #007BFF;
   border: 1px solid #007BFF;
+
+  &.disabled {
+    cursor: not-allowed;
+    box-shadow: none;
+    opacity: 0.7;
+  }
 }
 
 .from,

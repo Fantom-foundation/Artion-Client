@@ -995,6 +995,26 @@ export const AUCTION_CONTRACT_ABI = [
 
 export const NFT_CONTRACT_ABI = [
   {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: 'address',
+        name: 'owner',
+        type: 'address',
+      },
+      {
+        indexed: true,
+        internalType: 'address',
+        name: 'operator',
+        type: 'address',
+      },
+      { indexed: false, internalType: 'bool', name: 'approved', type: 'bool' },
+    ],
+    name: 'ApprovalForAll',
+    type: 'event',
+  },
+  {
     inputs: [{ internalType: 'address', name: 'owner', type: 'address' }],
     name: 'balanceOf',
     outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
@@ -1054,6 +1074,13 @@ export const NFT_CONTRACT_ABI = [
     name: 'setApprovalForAll',
     outputs: [],
     stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [{ internalType: 'uint256', name: 'tokenId', type: 'uint256' }],
+    name: 'tokenURI',
+    outputs: [{ internalType: 'string', name: '', type: 'string' }],
+    stateMutability: 'view',
     type: 'function',
   },
 ];

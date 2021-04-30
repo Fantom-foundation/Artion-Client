@@ -1,13 +1,23 @@
 import React, { useEffect, useState } from 'react';
 import cx from 'classnames';
+import { ClipLoader } from 'react-spinners';
 
 import styles from './styles.module.scss';
 
-const BidModal = ({ visible, onClose, onPlaceBid }) => {
+const BidModal = ({
+  visible,
+  onClose,
+  onPlaceBid,
+  minBidAmount,
+  confirming,
+  approveContract,
+  contractApproving,
+  contractApproved,
+}) => {
   const [price, setPrice] = useState('');
 
   useEffect(() => {
-    setPrice('');
+    setPrice(minBidAmount);
   }, [visible]);
 
   const handleClick = e => {
@@ -36,8 +46,28 @@ const BidModal = ({ visible, onClose, onPlaceBid }) => {
           </div>
         </div>
         <div className={styles.footer}>
-          <div className={styles.listButton} onClick={() => onPlaceBid(price)}>
-            Place
+          <div
+            className={cx(
+              styles.listButton,
+              (contractApproving || confirming) && styles.disabled
+            )}
+            onClick={() =>
+              contractApproved
+                ? !confirming && onPlaceBid(price)
+                : approveContract()
+            }
+          >
+            {contractApproved ? (
+              confirming ? (
+                <ClipLoader color="#FFF" size={16} />
+              ) : (
+                'Place'
+              )
+            ) : contractApproving ? (
+              'Approving Contract'
+            ) : (
+              'Appove Contract'
+            )}
           </div>
           <div className={styles.cancelButton} onClick={onClose}>
             Cancel

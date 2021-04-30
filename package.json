@@ -121,7 +121,6 @@
     "start": "react-app-rewired start",
     "build": "react-app-rewired build"
   },
-  "proxy": "https://fmarket.fantom.network/api",
   "eslintConfig": {
     "extends": "react-app"
   },
