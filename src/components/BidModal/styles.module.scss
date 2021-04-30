@@ -77,8 +77,9 @@
 
 .listButton,
 .cancelButton {
-  width: 120px;
+  min-width: 120px;
   height: 40px;
+  padding: 0 12px;
   border-radius: 4px;
   display: flex;
   align-items: center;

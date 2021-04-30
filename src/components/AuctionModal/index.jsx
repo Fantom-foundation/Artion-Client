@@ -2,10 +2,20 @@ import React, { useEffect, useState } from 'react';
 import cx from 'classnames';
 import Datetime from 'react-datetime';
 import 'react-datetime/css/react-datetime.css';
+import { ClipLoader } from 'react-spinners';
 
 import styles from './styles.module.scss';
 
-const AuctionModal = ({ visible, onClose, onStartAuction, auction }) => {
+const AuctionModal = ({
+  visible,
+  onClose,
+  onStartAuction,
+  auction,
+  confirming,
+  approveContract,
+  contractApproving,
+  contractApproved,
+}) => {
   const [reservePrice, setReservePrice] = useState('');
   const [startTime, setStartTime] = useState(new Date());
   const [endTime, setEndTime] = useState(new Date());
@@ -67,10 +77,30 @@ const AuctionModal = ({ visible, onClose, onStartAuction, auction }) => {
         </div>
         <div className={styles.footer}>
           <div
-            className={styles.listButton}
-            onClick={() => onStartAuction(reservePrice, startTime, endTime)}
+            className={cx(
+              styles.listButton,
+              (contractApproving || confirming) && styles.disabled
+            )}
+            onClick={() =>
+              contractApproved
+                ? !confirming &&
+                  onStartAuction(reservePrice, startTime, endTime)
+                : approveContract()
+            }
           >
-            {auction ? 'Update Auction' : 'Start Auction'}
+            {contractApproved ? (
+              confirming ? (
+                <ClipLoader color="#FFF" size={16} />
+              ) : auction ? (
+                'Update Auction'
+              ) : (
+                'Start Auction'
+              )
+            ) : contractApproving ? (
+              'Approving Contract'
+            ) : (
+              'Appove Contract'
+            )}
           </div>
           <div className={styles.cancelButton} onClick={onClose}>
             Cancel

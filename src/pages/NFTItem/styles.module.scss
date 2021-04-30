@@ -54,6 +54,12 @@
   &:last-child {
     margin-right: 0;
   }
+
+  &.disabled {
+    cursor: not-allowed;
+    box-shadow: none;
+    opacity: 0.7;
+  }
 }
 
 .inner {

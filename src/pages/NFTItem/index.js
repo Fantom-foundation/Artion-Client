@@ -71,14 +71,30 @@ import styles from './styles.module.scss';
 const NFTItem = () => {
   const { addr: address, id: tokenID } = useParams();
 
+  const [salesContractApproved, setSalesContractApproved] = useState(false);
+  const [salesContractApproving, setSalesContractApproving] = useState(false);
+  const [auctionContractApproved, setAuctionContractApproved] = useState(false);
+  const [auctionContractApproving, setAuctionContractApproving] = useState(
+    false
+  );
+
   const [minBidIncrement, setMinBidIncrement] = useState(0);
   const [withdrawLockTime, setWithdrawLockTime] = useState(0);
   const [info, setInfo] = useState();
   const [owner, setOwner] = useState();
+
   const [sellModalVisible, setSellModalVisible] = useState(false);
   const [offerModalVisible, setOfferModalVisible] = useState(false);
   const [auctionModalVisible, setAuctionModalVisible] = useState(false);
   const [bidModalVisible, setBidModalVisible] = useState(false);
+
+  const [itemListing, setItemListing] = useState(false);
+  const [priceUpdating, setPriceUpdating] = useState(false);
+  const [offerPlacing, setOfferPlacing] = useState(false);
+  const [offerCancelling, setOfferCancelling] = useState(false);
+  const [auctionStarting, setAuctionStarting] = useState(false);
+  const [bidPlacing, setBidPlacing] = useState(false);
+
   const [listing, setListing] = useState(null);
   const [offers, setOffers] = useState([]);
   const [tradeHistory, setTradeHistory] = useState([]);
@@ -151,7 +167,7 @@ const NFTItem = () => {
   const getAuctions = async () => {
     try {
       const auction = await getAuction(address, tokenID);
-      if (auction.endTime !== 0 && auction.endTime > now.getTime() / 1000) {
+      if (auction.endTime !== 0) {
         setAuction(auction);
       }
     } catch (e) {
@@ -378,23 +394,91 @@ const NFTItem = () => {
     });
   }, [address, tokenID]);
 
-  const isMine = owner === myAddress;
-
-  const handleListItem = async _price => {
+  const getSalesContractStatus = async () => {
+    const [contract] = await getNFTContract(address);
     try {
-      const [contract, provider] = await getNFTContract(address);
       const approved = await contract.isApprovedForAll(
         myAddress,
         SALES_CONTRACT_ADDRESS
       );
+      setSalesContractApproved(approved);
+    } catch (e) {
+      console.log(e);
+    }
+  };
 
-      if (!approved) {
-        const approveTx = await contract.setApprovalForAll(
-          SALES_CONTRACT_ADDRESS,
-          true
-        );
-        await provider.waitForTransaction(approveTx.hash);
+  const getAuctionContractStatus = async () => {
+    const [contract] = await getNFTContract(address);
+    try {
+      const approved = await contract.isApprovedForAll(
+        myAddress,
+        AUCTION_CONTRACT_ADDRESS
+      );
+      setAuctionContractApproved(approved);
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  const addNFTContractEventListeners = async () => {
+    const [contract] = await getNFTContract(address);
+
+    contract.on('ApprovalForAll', (owner, operator, approved) => {
+      if (myAddress === owner) {
+        if (operator === AUCTION_CONTRACT_ADDRESS) {
+          setAuctionContractApproved(approved);
+        } else if (operator === SALES_CONTRACT_ADDRESS) {
+          setSalesContractApproved(approved);
+        }
       }
+    });
+  };
+
+  useEffect(() => {
+    getSalesContractStatus();
+    getAuctionContractStatus();
+  }, [address, myAddress]);
+
+  useEffect(() => {
+    addNFTContractEventListeners();
+  }, [address]);
+
+  const handleApproveSalesContract = async () => {
+    setSalesContractApproving(true);
+    try {
+      const [contract, provider] = await getNFTContract(address);
+      const tx = await contract.setApprovalForAll(SALES_CONTRACT_ADDRESS, true);
+      await provider.waitForTransaction(tx.hash);
+      setSalesContractApproved(true);
+    } catch (e) {
+      console.log(e);
+    } finally {
+      setSalesContractApproving(false);
+    }
+  };
+
+  const handleApproveAuctionContract = async () => {
+    setAuctionContractApproving(true);
+    try {
+      const [contract, provider] = await getNFTContract(address);
+      const tx = await contract.setApprovalForAll(
+        AUCTION_CONTRACT_ADDRESS,
+        true
+      );
+      await provider.waitForTransaction(tx.hash);
+      setAuctionContractApproved(true);
+    } catch (e) {
+      console.log(e);
+    } finally {
+      setAuctionContractApproving(false);
+    }
+  };
+
+  const isMine = owner === myAddress;
+
+  const handleListItem = async _price => {
+    try {
+      setItemListing(true);
 
       const price = ethers.utils.parseEther(_price);
       const tx = await listItem(
@@ -408,14 +492,19 @@ const NFTItem = () => {
 
       setSellModalVisible(false);
 
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
       await provider.waitForTransaction(tx.hash);
-    } catch (e) {
-      console.log('Error while listing item', e);
+
+      setItemListing(false);
+    } catch {
+      setItemListing(false);
     }
   };
 
   const handleUpdatePrice = async _price => {
     try {
+      setPriceUpdating(true);
+
       const price = ethers.utils.parseEther(_price);
       const tx = await updateListing(address, tokenID, price);
 
@@ -423,8 +512,10 @@ const NFTItem = () => {
 
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       await provider.waitForTransaction(tx.hash);
+
+      setPriceUpdating(false);
     } catch (e) {
-      console.log('Error while updating listing price', e);
+      setPriceUpdating(false);
     }
   };
 
@@ -434,20 +525,6 @@ const NFTItem = () => {
   };
 
   const handleBuyItem = async _price => {
-    const [contract, provider] = await getNFTContract(address);
-    const approved = await contract.isApprovedForAll(
-      myAddress,
-      SALES_CONTRACT_ADDRESS
-    );
-
-    if (!approved) {
-      const approveTx = await contract.setApprovalForAll(
-        SALES_CONTRACT_ADDRESS,
-        true
-      );
-      await provider.waitForTransaction(approveTx.hash);
-    }
-
     const price = ethers.utils.parseEther(_price.toString());
     const tx = await buyItem(
       address,
@@ -455,50 +532,45 @@ const NFTItem = () => {
       price,
       myAddress
     );
+
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
     await provider.waitForTransaction(tx.hash);
   };
 
   const handleMakeOffer = async (_price, endTime) => {
-    const [contract, provider] = await getNFTContract(address);
-    const approved = await contract.isApprovedForAll(
-      myAddress,
-      SALES_CONTRACT_ADDRESS
-    );
+    try {
+      setOfferPlacing(true);
+      const price = ethers.utils.parseEther(_price.toString());
+      const deadline = Math.floor(endTime.getTime() / 1000);
 
-    if (!approved) {
-      const approveTx = await contract.setApprovalForAll(
-        SALES_CONTRACT_ADDRESS,
-        true
+      const balance = await getWFTMBalance(myAddress);
+
+      if (balance.lt(price)) {
+        await wrapFTM(price, myAddress);
+      }
+
+      const allowance = await getAllowance(myAddress, SALES_CONTRACT_ADDRESS);
+      if (allowance.lt(price)) {
+        await approve(SALES_CONTRACT_ADDRESS, price);
+      }
+
+      const tx = await createOffer(
+        address,
+        ethers.BigNumber.from(tokenID),
+        WFTM_ADDRESS,
+        ethers.BigNumber.from(1),
+        price,
+        ethers.BigNumber.from(deadline)
       );
-      await provider.waitForTransaction(approveTx.hash);
+
+      setOfferModalVisible(false);
+
+      console.log('Transaction submitted: ', tx.hash);
+    } catch (e) {
+      console.log(e);
+    } finally {
+      setOfferPlacing(false);
     }
-
-    const price = ethers.utils.parseEther(_price.toString());
-    const deadline = Math.floor(endTime.getTime() / 1000);
-
-    const balance = await getWFTMBalance(myAddress);
-
-    if (balance.lt(price)) {
-      await wrapFTM(price, myAddress);
-    }
-
-    const allowance = await getAllowance(myAddress, SALES_CONTRACT_ADDRESS);
-    if (allowance.lt(price)) {
-      await approve(SALES_CONTRACT_ADDRESS, price);
-    }
-
-    const tx = await createOffer(
-      address,
-      ethers.BigNumber.from(tokenID),
-      WFTM_ADDRESS,
-      ethers.BigNumber.from(1),
-      price,
-      ethers.BigNumber.from(deadline)
-    );
-
-    setOfferModalVisible(false);
-
-    await provider.waitForTransaction(tx.hash);
   };
 
   const handleAcceptOffer = async offer => {
@@ -509,41 +581,43 @@ const NFTItem = () => {
   };
 
   const handleCancelOffer = async () => {
-    const tx = await cancelOffer(address, tokenID);
+    try {
+      setOfferCancelling(true);
 
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    await provider.waitForTransaction(tx.hash);
+      const tx = await cancelOffer(address, tokenID);
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      await provider.waitForTransaction(tx.hash);
+
+      setOfferCancelling(false);
+    } catch {
+      setOfferCancelling(false);
+    }
   };
 
   const handleStartAuction = async (_price, _startTime, _endTime) => {
-    const [contract, provider] = await getNFTContract(address);
-    const approved = await contract.isApprovedForAll(
-      myAddress,
-      AUCTION_CONTRACT_ADDRESS
-    );
+    try {
+      setAuctionStarting(true);
 
-    if (!approved) {
-      const approveTx = await contract.setApprovalForAll(
-        AUCTION_CONTRACT_ADDRESS,
-        true
+      const price = ethers.utils.parseEther(_price);
+      const startTime = Math.floor(_startTime.getTime() / 1000);
+      const endTime = Math.floor(_endTime.getTime() / 1000);
+
+      const tx = await createAuction(
+        address,
+        ethers.BigNumber.from(tokenID),
+        price,
+        ethers.BigNumber.from(startTime),
+        ethers.BigNumber.from(endTime)
       );
-      await provider.waitForTransaction(approveTx.hash);
+      setAuctionModalVisible(false);
+
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      await provider.waitForTransaction(tx.hash);
+
+      setAuctionStarting(false);
+    } catch {
+      setAuctionStarting(false);
     }
-
-    const price = ethers.utils.parseEther(_price);
-    const startTime = Math.floor(_startTime.getTime() / 1000);
-    const endTime = Math.floor(_endTime.getTime() / 1000);
-
-    const tx = await createAuction(
-      address,
-      ethers.BigNumber.from(tokenID),
-      price,
-      ethers.BigNumber.from(startTime),
-      ethers.BigNumber.from(endTime)
-    );
-    setAuctionModalVisible(false);
-
-    await provider.waitForTransaction(tx.hash);
   };
 
   const handleUpdateAuction = async (_price, _startTime, _endTime) => {
@@ -589,30 +663,25 @@ const NFTItem = () => {
   };
 
   const handlePlaceBid = async _price => {
-    const [contract, provider] = await getNFTContract(address);
-    const approved = await contract.isApprovedForAll(
-      myAddress,
-      AUCTION_CONTRACT_ADDRESS
-    );
+    try {
+      setBidPlacing(true);
 
-    if (!approved) {
-      const approveTx = await contract.setApprovalForAll(
-        AUCTION_CONTRACT_ADDRESS,
-        true
+      const price = ethers.utils.parseEther(_price);
+      const tx = await placeBid(
+        address,
+        ethers.BigNumber.from(tokenID),
+        price,
+        myAddress
       );
-      await provider.waitForTransaction(approveTx.hash);
+      setBidModalVisible(false);
+
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      await provider.waitForTransaction(tx.hash);
+
+      setBidPlacing(false);
+    } catch {
+      setBidPlacing(false);
     }
-
-    const price = ethers.utils.parseEther(_price);
-    const tx = await placeBid(
-      address,
-      ethers.BigNumber.from(tokenID),
-      price,
-      myAddress
-    );
-    setBidModalVisible(false);
-
-    await provider.waitForTransaction(tx.hash);
   };
 
   const handleWithdrawBid = async () => {
@@ -707,7 +776,7 @@ const NFTItem = () => {
         <div className={styles.header}>
           {isMine ? (
             <>
-              {auction ? (
+              {auction?.resulted === false ? (
                 <div
                   className={styles.headerButton}
                   onClick={cancelCurrentAuction}
@@ -715,20 +784,27 @@ const NFTItem = () => {
                   Cancel Auction
                 </div>
               ) : null}
-              <div
-                className={styles.headerButton}
-                onClick={() => setAuctionModalVisible(true)}
-              >
-                {auction ? 'Update Auction' : 'Start Auction'}
-              </div>
+              {(!auction || auction.endTime > now.getTime() / 1000) && (
+                <div
+                  className={styles.headerButton}
+                  onClick={() => setAuctionModalVisible(true)}
+                >
+                  {auction ? 'Update Auction' : 'Start Auction'}
+                </div>
+              )}
               {listing ? (
                 <div className={styles.headerButton} onClick={cancelList}>
                   Cancel Listing
                 </div>
               ) : null}
               <div
-                className={styles.headerButton}
-                onClick={() => setSellModalVisible(true)}
+                className={cx(
+                  styles.headerButton,
+                  (itemListing || priceUpdating) && styles.disabled
+                )}
+                onClick={() =>
+                  !(itemListing || priceUpdating) && setSellModalVisible(true)
+                }
               >
                 {listing ? 'Update Listing' : 'Sell'}
               </div>
@@ -736,14 +812,21 @@ const NFTItem = () => {
           ) : (
             <>
               <div
-                className={styles.headerButton}
+                className={cx(
+                  styles.headerButton,
+                  (offerPlacing || offerCancelling) && styles.disabled
+                )}
                 onClick={
                   hasMyOffer
                     ? handleCancelOffer
                     : () => setOfferModalVisible(true)
                 }
               >
-                {hasMyOffer ? 'Cancel Offer' : 'Make Offer'}
+                {hasMyOffer
+                  ? offerCancelling
+                    ? 'Cancelling...'
+                    : 'Cancel Offer'
+                  : 'Make Offer'}
               </div>
             </>
           )}
@@ -863,7 +946,7 @@ const NFTItem = () => {
                 &nbsp;{views} Views
               </div>
             </div>
-            {auction && (
+            {(winner || auction?.resulted === false) && (
               <div className={styles.panelWrapper}>
                 <Panel
                   icon={AccessTimeIcon}
@@ -1009,10 +1092,13 @@ const NFTItem = () => {
                       )}
                       {offer.creator === myAddress && (
                         <div
-                          className={styles.buyButton}
+                          className={cx(
+                            styles.buyButton,
+                            offerCancelling && styles.disabled
+                          )}
                           onClick={() => handleCancelOffer()}
                         >
-                          Withdraw
+                          {offerCancelling ? 'Withdrawing...' : 'Withdraw'}
                         </div>
                       )}
                     </div>
@@ -1063,23 +1149,39 @@ const NFTItem = () => {
         onClose={() => setSellModalVisible(false)}
         onSell={listing ? handleUpdatePrice : handleListItem}
         startPrice={listing?.pricePerItem || 0}
+        confirming={itemListing || priceUpdating}
+        approveContract={handleApproveSalesContract}
+        contractApproving={salesContractApproving}
+        contractApproved={salesContractApproved}
       />
       <OfferModal
         visible={offerModalVisible}
         onClose={() => setOfferModalVisible(false)}
         onMakeOffer={handleMakeOffer}
+        confirming={offerPlacing}
+        approveContract={handleApproveSalesContract}
+        contractApproving={salesContractApproving}
+        contractApproved={salesContractApproved}
       />
       <AuctionModal
         visible={auctionModalVisible}
         onClose={() => setAuctionModalVisible(false)}
         onStartAuction={auction ? handleUpdateAuction : handleStartAuction}
         auction={auction}
+        confirming={auctionStarting}
+        approveContract={handleApproveAuctionContract}
+        contractApproving={auctionContractApproving}
+        contractApproved={auctionContractApproved}
       />
       <BidModal
         visible={bidModalVisible}
         onClose={() => setBidModalVisible(false)}
         onPlaceBid={handlePlaceBid}
         minBidAmount={(bid?.bid || 0) + minBidIncrement}
+        confirming={bidPlacing}
+        approveContract={handleApproveAuctionContract}
+        contractApproving={auctionContractApproving}
+        contractApproved={auctionContractApproved}
       />
     </div>
   );

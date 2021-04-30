@@ -2,10 +2,19 @@ import React, { useEffect, useState } from 'react';
 import cx from 'classnames';
 import Datetime from 'react-datetime';
 import 'react-datetime/css/react-datetime.css';
+import { ClipLoader } from 'react-spinners';
 
 import styles from './styles.module.scss';
 
-const OfferModal = ({ visible, onClose, onMakeOffer }) => {
+const OfferModal = ({
+  visible,
+  onClose,
+  onMakeOffer,
+  confirming,
+  approveContract,
+  contractApproving,
+  contractApproved,
+}) => {
   const [price, setPrice] = useState('');
   const [endTime, setEndTime] = useState(new Date());
 
@@ -51,10 +60,27 @@ const OfferModal = ({ visible, onClose, onMakeOffer }) => {
         </div>
         <div className={styles.footer}>
           <div
-            className={styles.listButton}
-            onClick={() => onMakeOffer(price, endTime)}
+            className={cx(
+              styles.listButton,
+              (contractApproving || confirming) && styles.disabled
+            )}
+            onClick={() =>
+              contractApproved
+                ? !confirming && onMakeOffer(price, endTime)
+                : approveContract()
+            }
           >
-            Place Offer
+            {contractApproved ? (
+              confirming ? (
+                <ClipLoader color="#FFF" size={16} />
+              ) : (
+                'Place Offer'
+              )
+            ) : contractApproving ? (
+              'Approving Contract'
+            ) : (
+              'Appove Contract'
+            )}
           </div>
           <div className={styles.cancelButton} onClick={onClose}>
             Cancel
