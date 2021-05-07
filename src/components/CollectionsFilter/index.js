@@ -169,7 +169,7 @@ const ExploreCollections = () => {
   const filteredCollections = () => {
     return collectionItems.filter(
       item =>
-        (item.name || item.collectionName)
+        (item.name || item.collectionName || '')
           .toLowerCase()
           .indexOf(filter.toLowerCase()) > -1
     );

@@ -56,7 +56,7 @@ export const updateAccountDetails = async (
 };
 
 export const fetchCollections = async () => {
-  const res = await axios.get(`${BASE_URL}/api/info/geterc721contracts`);
+  const res = await axios.get(`${BASE_URL}/api/info/getcollections`);
   return res.data;
 };
 
@@ -70,7 +70,7 @@ export const fetchTokens = async (step, collections = [], address = null) => {
   }
   const res = await axios({
     method: 'post',
-    url: `${BASE_URL}/api/erc721token/fetchTokens`,
+    url: `${BASE_URL}/api/nftitems/fetchTokens`,
     data: JSON.stringify(data),
     headers: {
       'Content-Type': 'application/json',
@@ -83,7 +83,7 @@ export const fetchTokenURI = async (contractAddress, tokenID) => {
   const data = { contractAddress, tokenID };
   const res = await axios({
     method: 'post',
-    url: `${BASE_URL}/api/erc721token/getTokenURI`,
+    url: `${BASE_URL}/api/nftitems/getTokenURI`,
     data: JSON.stringify(data),
     headers: {
       'Content-Type': 'application/json',
@@ -96,7 +96,7 @@ export const increaseViewCount = async (contractAddress, tokenID) => {
   const data = { contractAddress, tokenID };
   const res = await axios({
     method: 'post',
-    url: `${BASE_URL}/api/erc721token/increaseViews`,
+    url: `${BASE_URL}/api/nftitems/increaseViews`,
     data: JSON.stringify(data),
     headers: {
       'Content-Type': 'application/json',

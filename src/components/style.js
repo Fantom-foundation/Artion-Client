@@ -15,25 +15,24 @@ const setDimensions = (full, isMobile) => {
       `;
     default:
       return css`
-        height: calc((100vh - 112px) * 0.95);
-        width: calc((100vh - 112px) * 0.95);
+        height: calc((100vh - 149px) * 0.95);
+        width: calc((100vh - 149px) * 0.95);
         position: relative;
         margin-right: 200px;
-        box-shadow: 0 0 15px rgba(0, 0, 0, 0.4);
-        cursor: url(http://www.javascriptkit.com/dhtmltutors/cursor-hand.gif),
-          auto;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
       `;
   }
 };
 
 export const Container = styled.div`
   position: absolute;
+  padding-top: 149px;
   display: flex;
   flex-direction: row;
   align-items: center;
-  top: calc(50% + 10px);
+  top: 0;
   left: 50%;
-  transform: translate(-50%, -50%);
+  transform: translateX(-50%);
 `;
 
 export const Board = styled.div`

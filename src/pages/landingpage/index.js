@@ -35,9 +35,9 @@ const LandingPage = () => {
           <Link to="/exploreall" className={styles.exploreButton}>
             Explore
           </Link>
-          <a hrf="/create" className={styles.createButton}>
+          <Link to="/create" className={styles.createButton}>
             Create
-          </a>
+          </Link>
         </div>
       </div>
 

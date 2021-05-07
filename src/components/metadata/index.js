@@ -298,20 +298,22 @@ const Metadata = () => {
         let minterAddress = confirmedTnx.to;
         let mintedTkId = BigNumber.from(evtCaught[3]);
         setLastMintedTkId(mintedTkId.toNumber());
-        let erc721tk = new FormData();
-        erc721tk.append('contractAddress', minterAddress);
-        erc721tk.append('tokenID', mintedTkId);
-        erc721tk.append('symbol', symbol);
-        erc721tk.append('royalty', royalty);
-        erc721tk.append('category', category);
-        erc721tk.append('imageHash', fileHash);
-        erc721tk.append('jsonHash', jsonHash);
+        let formdata = new FormData();
+        formdata.append('contractAddress', minterAddress);
+        formdata.append('tokenID', mintedTkId);
+        formdata.append('symbol', symbol);
+        formdata.append('royalty', royalty);
+        formdata.append('category', category);
+        formdata.append('imageHash', fileHash);
+        formdata.append('jsonHash', jsonHash);
+        formdata.append('tokenType', 721);
+        formdata.append('account', account);
 
         try {
           let saveNewTKResult = await axios({
             method: 'post',
-            url: 'https://fmarket.fantom.network/api/erc721token/savenewtoken',
-            data: erc721tk,
+            url: 'https://fmarket.fantom.network/api/nftitems/savenewtoken',
+            data: formdata,
             headers: {
               'Content-Type': 'multipart/form-data',
               Authorization: 'Bearer ' + authToken,
@@ -468,10 +470,7 @@ const Metadata = () => {
             className={classes.tnxAnchor}
             target="_blank"
             rel="noopener noreferrer"
-            href={
-              'https://explorer.testnet.fantom.network/transactions/' +
-              lastMintedTnxId
-            }
+            href={`https://ftmscan.com/tx/${lastMintedTnxId}`}
           >
             You can track the last transaction here ...
           </a>

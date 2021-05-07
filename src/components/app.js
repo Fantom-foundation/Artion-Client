@@ -2,6 +2,7 @@ import React, { useRef, useEffect } from 'react';
 import { observer, inject } from 'mobx-react';
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 
+import Header from './header';
 import Layout from './layout';
 import Toolbar from './toolbar';
 import Metadata from './metadata';
@@ -35,6 +36,7 @@ const App = ({ paintStore }) => {
     return (
       <>
         <Layout>
+          <Header light />
           <Container>
             <Board isMobile={isMobile}>
               <Canvas
