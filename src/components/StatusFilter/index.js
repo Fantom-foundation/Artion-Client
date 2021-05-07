@@ -20,27 +20,30 @@ const useStyles = makeStyles(() => ({
   },
   wrapper: {
     boxShadow: 'none',
+    borderRadius: '10px !important',
+    border: '1px solid #2479FA',
+    overflow: 'hidden',
   },
   header: {
-    height: 48,
-    minHeight: '48px !important',
-    borderRadius: 5,
+    height: 60,
+    minHeight: '60px !important',
     backgroundColor: '#fff',
-    boxShadow: '0px 0px 5px 2px rgba(0, 0, 0, 0.1)',
+    boxShadow: 'none',
   },
   heading: {
     fontWeight: 500,
-    fontSize: 18,
+    fontSize: 22,
     paddingLeft: 20,
     flexShrink: 0,
     color: '#007BFF',
   },
   icon: {
+    width: 26,
+    height: 26,
     color: '#007BFF',
   },
   body: {
-    backgroundColor: '#f8f8f8',
-    padding: '14px 20px',
+    padding: '6px 16px 20px',
   },
   statusFormGroup: {
     display: 'flex',

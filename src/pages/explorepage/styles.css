@@ -1,21 +1,20 @@
 .exploreAllPageContainer {
-    padding-top: 64px;
-    padding-bottom: 48px;
+    padding-top: 149px;
     height: 100vh;
     box-sizing: border-box;
     display: flex;
+    padding-left: 50px;
+    padding-right: 90px;
 }
 
 .exploreSideBar {
-    flex: 0 0 290px;
-    font-family: proxima-nova;
-    font-size: x-large;
-    background-color: #fbfbfb;
-    box-shadow: 0px 0px 8px 0px rgba(0, 0, 0, 0.3);
-    z-index: 1;
+    flex: 0 0 320px;
+    display: flex;
+    flex-direction: column;
 }
 
 .exploreWithHeader {
+    margin-left: 48px;
     flex-grow: 1;
     display: flex;
     flex-direction: column;
@@ -26,27 +25,15 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: #F7F7F7;
+    border-bottom: 1px solid rgba(0, 0, 0, .1);
     overflow-x: auto;
-    box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.3);
 }
 .exploreAllPannel {
     height: 92%;
     overflow-y: auto;
-}
-
-.sidebarHeader {
-    height: 90px;
-    justify-content: center;
-    align-items: center;
-    display: flex;
-}
-.sidebarBody {
-    height: calc(100% - 90px);
-    box-sizing: border-box;
-    padding: 10px 20px;
-    display: flex;
-    flex-direction: column;
+    margin-left: -40px;
+    padding-left: 40px;
+    padding-right: 10px;
 }
 
 .MuiCheckbox-colorSecondary.Mui-checked {
@@ -57,17 +44,10 @@
     box-shadow: 0px 0px 8px 0px rgb(156, 146, 146);
 }
 
-
-
 .exploreBodyFilterHeader {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    height: 72px;
     box-sizing: border-box;
-    border-bottom: 2px dotted rgb(156, 146, 146);
-}
-
-.exploreBodyInfiniteLoaderContainer {
-    height: calc(100% - 72px);
+    margin: 20px 0;
 }

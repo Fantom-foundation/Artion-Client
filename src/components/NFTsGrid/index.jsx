@@ -1,6 +1,6 @@
 import React from 'react';
 
-import Card from '../Card';
+import Card from '../NFTCard';
 
 import styles from './styles.module.scss';
 

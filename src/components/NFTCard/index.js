@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
+import cx from 'classnames';
 import { makeStyles } from '@material-ui/core/styles';
 import Box from '@material-ui/core/Box';
 import Card from '@material-ui/core/Card';
@@ -16,63 +17,71 @@ const useStyles = makeStyles({
     boxSizing: 'border-box',
     display: 'flex',
     flexDirection: 'column',
+    height: '100%',
   },
   card: {
-    margin: '10px 12px',
     flexGrow: 1,
     cursor: 'pointer',
-    boxShadow: 'none',
-    border: '1px solid #ddd',
+    borderRadius: 10,
     transition: 'transform ease 0.1s',
-
-    '&:hover': {
-      boxShadow: '0 0 8px rgba(0, 0, 0, 0.2)',
-      transform: 'translateY(-2px)',
-    },
+    boxShadow: '0 4px 40px rgba(0, 0, 0, 0.1)',
+    display: 'flex',
+    flexDirection: 'column',
   },
   link: {
+    height: '100%',
     display: 'flex',
     flexDirection: 'column',
     textDecoration: 'inherit',
   },
   label: {
+    fontWeight: 500,
     fontSize: 14,
+    lineHeight: '14px',
     margin: 0,
-    color: '#999',
-  },
-  name: {
-    fontSize: 16,
-    margin: 0,
-    color: '#333',
+    color: 'rgba(61, 61, 61, .56)',
   },
   price: {
-    fontSize: 16,
-    fontWeight: '600',
+    marginTop: 9,
+  },
+  name: {
+    flex: 1,
+    fontWeight: 700,
+    fontSize: 18,
+    lineHeight: '18px',
     margin: 0,
     color: '#333',
   },
+  mediaBox: {
+    position: 'relative',
+    paddingBottom: '100%',
+  },
   media: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
     width: '100%',
-    height: 200,
+    height: '100%',
+    borderRadius: 10,
     backgroundSize: 'contain',
   },
   mediaMissing: {
-    width: '100%',
-    height: 200,
     backgroundSize: 'cover',
   },
   content: {
-    borderTop: '1px solid #ddd',
-    padding: '12px !important',
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    marginTop: 'auto',
+    padding: '32px 24px 24px !important',
   },
-  alignLeft: {
+  collection: {
+    fontSize: 16,
+    lineHeight: '16px',
+    color: 'rgba(0, 0, 0, .56)',
+  },
+  alignBottom: {
     display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'flex-start',
+    alignItems: 'flex-end',
+    justifyContent: 'space-between',
+    marginTop: 12,
   },
   alignRight: {
     display: 'flex',
@@ -112,27 +121,35 @@ const BaseCard = ({ item, style }) => {
           to={`/explore/${item.contractAddress}/${item.tokenID}`}
           className={classes.link}
         >
-          <CardMedia
-            className={info?.image ? classes.media : classes.mediaMissing}
-            image={info?.image || PLACEHOLDER}
-            title={info?.name}
-          />
+          <div className={classes.mediaBox}>
+            <CardMedia
+              className={cx(classes.media, info?.image && classes.mediaMissing)}
+              image={info?.image || PLACEHOLDER}
+              title={info?.name}
+            />
+          </div>
           <CardContent className={classes.content}>
-            <div className={classes.alignLeft}>
+            <Typography component="h4" className={classes.collection}>
+              {collection?.name}
+            </Typography>
+            <Typography component="h4" className={classes.name}>
+              {info?.name}
+            </Typography>
+            <div className={classes.alignBottom}>
               <Typography component="h4" className={classes.label}>
-                {collection?.name || ''}
+                1 of 5
               </Typography>
-              <Typography component="h4" className={classes.name}>
-                {info?.name}
-              </Typography>
-            </div>
-            <div className={classes.alignRight}>
-              <Typography component="h4" className={classes.label}>
-                Price
-              </Typography>
-              <Typography component="h4" className={classes.price}>
-                Ξ {item.price}
-              </Typography>
+              <div className={classes.alignRight}>
+                <Typography component="h4" className={classes.label}>
+                  Price
+                </Typography>
+                <Typography
+                  component="h4"
+                  className={cx(classes.label, classes.price)}
+                >
+                  Ξ {item.price}
+                </Typography>
+              </div>
             </div>
           </CardContent>
         </Link>

@@ -4,6 +4,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import Autocomplete from '@material-ui/lab/Autocomplete';
+import { useWeb3React } from '@web3-react/core';
 
 import Stepper from '@material-ui/core/Stepper';
 import Step from '@material-ui/core/Step';
@@ -113,6 +114,8 @@ const mintSteps = [
 const Metadata = () => {
   const classes = useStyles();
 
+  const { account, chainId } = useWeb3React();
+
   const [name, setName] = useState('fAsset');
   const [symbol, setSymbol] = useState('newnft');
   const [royalty, setRoyalty] = useState(0);
@@ -126,9 +129,7 @@ const Metadata = () => {
   const [lastMintedTnxId, setLastMintedTnxId] = useState('');
 
   let isWalletConnected = useSelector(state => state.ConnectWallet.isConnected);
-  let connectedChainId = useSelector(state => state.ConnectWallet.chainId);
   let authToken = useSelector(state => state.ConnectWallet.authToken);
-  const address = useSelector(state => state.ConnectWallet.address); //connected address
 
   const createNotification = (type, msgContent) => {
     switch (type) {
@@ -202,7 +203,7 @@ const Metadata = () => {
       name != '' &&
       symbol != '' &&
       royalty < 30 &&
-      (category != '') & (address != '')
+      (category != '') & (account != '')
     );
   };
 
@@ -218,7 +219,7 @@ const Metadata = () => {
       createNotification('custom', 'Connect your wallet first');
       return;
     }
-    if (connectedChainId != 250) {
+    if (chainId != 250) {
       createNotification(
         'custom',
         'You are not connected to Fantom Opera Network'
@@ -226,7 +227,7 @@ const Metadata = () => {
       return;
     }
     // only when the user has more than 1k ftms on the wallet
-    let balance = await WalletUtils.checkBalance(address);
+    let balance = await WalletUtils.checkBalance(account);
 
     if (balance < SystemConstants.FMT_BALANCE_LIMIT) {
       createNotification(
@@ -240,7 +241,7 @@ const Metadata = () => {
     setLastMintedTnxId('');
     // show stepper
     setIsMinting(true);
-    console.log('created from ', address);
+    console.log('created from ', account);
     if (!validateMetadata()) {
       resetMintingStatus();
       return;
@@ -250,7 +251,7 @@ const Metadata = () => {
     formData.append('image', canvas.toDataURL());
     formData.append('name', name);
     formData.append('royalty', royalty);
-    formData.append('address', address);
+    formData.append('account', account);
     formData.append('description', description);
     formData.append('category', category);
     formData.append('symbol', symbol);
@@ -282,7 +283,7 @@ const Metadata = () => {
       fnft_sc = fnft_sc[0];
 
       try {
-        let tx = await fnft_sc.mint(address, jsonHash, {
+        let tx = await fnft_sc.mint(account, jsonHash, {
           gasLimit: 3000000,
         });
         setCurrentMintingStep(1);

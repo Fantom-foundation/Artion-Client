@@ -1,14 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import StatusFilter from '../../components/StatusFilter';
-import CollectionsFilter from '../../components/CollectionsFilter';
+import StatusFilter from 'components/StatusFilter';
+import CollectionsFilter from 'components/CollectionsFilter';
 import ExploreHeader from './Header';
 import ExploreFilterHeader from './Body/FilterHeader';
-import NFTsGrid from '../../components/NFTsGrid';
-import { fetchCollections, fetchTokens } from '../../api';
-import CollectionsActions from '../../actions/collections.actions';
-import TokensActions from '../../actions/tokens.actions';
+import NFTsGrid from 'components/NFTsGrid';
+import Header from 'components/header';
+import { fetchCollections, fetchTokens } from 'api';
+import CollectionsActions from 'actions/collections.actions';
+import TokensActions from 'actions/tokens.actions';
+import HeaderActions from 'actions/header.actions';
 
 import './styles.css';
 
@@ -20,6 +22,10 @@ const ExploreAllPage = () => {
 
   const { fetching, tokens } = useSelector(state => state.Tokens);
   const { collections } = useSelector(state => state.Filter);
+
+  useEffect(() => {
+    dispatch(HeaderActions.toggleSearchbar(true));
+  }, []);
 
   const updateCollections = async () => {
     try {
@@ -80,28 +86,26 @@ const ExploreAllPage = () => {
   }, [collections]);
 
   return (
-    <div className="exploreAllPageContainer">
-      <div className="exploreSideBar">
-        <div className="sidebarHeader">NFT MarketPlace</div>
-        <div className="sidebarBody">
+    <>
+      <Header light />
+      <div className="exploreAllPageContainer">
+        <div className="exploreSideBar">
           <StatusFilter />
           <CollectionsFilter />
         </div>
-      </div>
-      <div className="exploreWithHeader">
-        <div className="exploreHeader">
-          <ExploreHeader></ExploreHeader>
-        </div>
-        <div className="exploreAllPannel" onScroll={handleScroll}>
-          <div className="exploreBodyFilterHeader">
-            <ExploreFilterHeader></ExploreFilterHeader>
+        <div className="exploreWithHeader">
+          <div className="exploreHeader">
+            <ExploreHeader />
           </div>
-          <div className="exploreBodyInfiniteLoaderContainer">
+          <div className="exploreBodyFilterHeader">
+            <ExploreFilterHeader />
+          </div>
+          <div className="exploreAllPannel" onScroll={handleScroll}>
             <NFTsGrid items={tokens} />
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

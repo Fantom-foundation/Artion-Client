@@ -1,8 +1,8 @@
 .container {
   position: absolute;
   width: 100%;
-  top: 64px;
-  bottom: 48px;
+  top: 0;
+  padding-top: 149px;
 }
 
 .background {
@@ -12,74 +12,67 @@
   bottom: 0;
   right: 0;
   overflow: hidden;
+  z-index: -1;
 }
 
 .bg {
   position: absolute;
   width: 100%;
-  min-width: 1800px;
   height: auto;
-  top: -100px;
+  top: 0;
   left: 0;
 }
 
-.illustration {
-  position: absolute;
-  width: 40%;
-  max-height: 600px;
-  // right: 100px;
-  left: calc(max(60% - 100px, 750px));
-  top: 150px;
-}
-
-.graphics {
-  position: absolute;
-  top: 0;
-  right: 0;
-  height: 90%;
-}
-
 .body {
-  position: absolute;
-  top: 200px;
-  left: 60px;
-  width: 700px;
+  width: 1200px;
+  max-width: 90%;
+  margin-left: auto;
+  margin-right: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  padding-top: 146px;
+  padding-bottom: 400px;
 }
 
 .title {
-  font-weight: 700;
-  font-size: 60px;
-  line-height: 73px;
+  font-weight: 900;
+  font-size: 54px;
+  line-height: 65px;
+  text-align: center;
   color: #FFF;
 }
 
 .subtitle {
-  margin-top: 24px;
-  font-weight: 400;
-  font-size: 35px;
-  line-height: 46.67px;
+  margin-top: 18px;
+  font-weight: 700;
+  font-size: 24px;
+  line-height: 38px;
+  text-align: center;
   color: #FFF;
 }
 
 .buttonsContainer {
-  margin-top: 60px;
+  margin-top: 40px;
   display: flex;
 }
 
 .exploreButton,
 .createButton {
-  width: 165px;
-  height: 48px;
+  width: 280px;
+  height: 56px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-right: 28px;
   font-weight: 700;
   font-size: 18px;
-  line-height: 21px;
+  line-height: 18px;
   box-shadow: none;
-  border-radius: 4px;
+  border-radius: 10px;
+  box-sizing: border-box;
   cursor: pointer;
+  text-decoration: none;
 
   &:hover {
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
@@ -89,6 +82,7 @@
 .exploreButton {
   background-color: #FFF;
   color: #007BFF;
+  margin-right: 40px;
 
   &:hover {
     background-color: #FFF;
@@ -98,9 +92,21 @@
 .createButton {
   background-color: transparent;
   color: #FFF;
-  border: 1px solid #FFF;
+  border: 2px solid #FFF;
 
   &:hover {
     background-color: transparent;
   }
+}
+
+.section {
+  padding: 0 60px;
+}
+
+.sectiontitle {
+  font-weight: 700;
+  font-size: 24px;
+  padding-bottom: 12px;
+  margin-bottom: 25px;
+  border-bottom: 1px solid #DDD;
 }

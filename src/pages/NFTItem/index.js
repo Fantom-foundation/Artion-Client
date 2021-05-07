@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { Chart } from 'react-charts';
 import cx from 'classnames';
@@ -15,6 +15,7 @@ import SwapVertIcon from '@material-ui/icons/SwapVert';
 import AccessTimeIcon from '@material-ui/icons/AccessTime';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye } from '@fortawesome/free-solid-svg-icons';
+import { useWeb3React } from '@web3-react/core';
 
 import Panel from '../../components/Panel';
 import ResizableBox from '../../components/ResizableBox';
@@ -54,7 +55,7 @@ import {
   WFTM_ADDRESS,
   AUCTION_CONTRACT_ADDRESS,
 } from 'contracts';
-import { abbrAddress } from 'utils';
+import { shortenAddress } from 'utils';
 import SellModal from 'components/SellModal';
 import OfferModal from 'components/OfferModal';
 import AuctionModal from 'components/AuctionModal';
@@ -70,6 +71,8 @@ import styles from './styles.module.scss';
 
 const NFTItem = () => {
   const { addr: address, id: tokenID } = useParams();
+
+  const { account, chainId } = useWeb3React();
 
   const [salesContractApproved, setSalesContractApproved] = useState(false);
   const [salesContractApproving, setSalesContractApproving] = useState(false);
@@ -106,8 +109,7 @@ const NFTItem = () => {
   const [now, setNow] = useState(new Date());
 
   const collections = useSelector(state => state.Collections);
-  const myAddress = useSelector(state => state.ConnectWallet.address);
-  const { isConnected: isWalletConnected, chainId } = useSelector(
+  const { isConnected: isWalletConnected } = useSelector(
     state => state.ConnectWallet
   );
 
@@ -398,7 +400,7 @@ const NFTItem = () => {
     const [contract] = await getNFTContract(address);
     try {
       const approved = await contract.isApprovedForAll(
-        myAddress,
+        account,
         SALES_CONTRACT_ADDRESS
       );
       setSalesContractApproved(approved);
@@ -411,7 +413,7 @@ const NFTItem = () => {
     const [contract] = await getNFTContract(address);
     try {
       const approved = await contract.isApprovedForAll(
-        myAddress,
+        account,
         AUCTION_CONTRACT_ADDRESS
       );
       setAuctionContractApproved(approved);
@@ -424,7 +426,7 @@ const NFTItem = () => {
     const [contract] = await getNFTContract(address);
 
     contract.on('ApprovalForAll', (owner, operator, approved) => {
-      if (myAddress === owner) {
+      if (account === owner) {
         if (operator === AUCTION_CONTRACT_ADDRESS) {
           setAuctionContractApproved(approved);
         } else if (operator === SALES_CONTRACT_ADDRESS) {
@@ -437,7 +439,7 @@ const NFTItem = () => {
   useEffect(() => {
     getSalesContractStatus();
     getAuctionContractStatus();
-  }, [address, myAddress]);
+  }, [address, account]);
 
   useEffect(() => {
     addNFTContractEventListeners();
@@ -474,7 +476,7 @@ const NFTItem = () => {
     }
   };
 
-  const isMine = owner === myAddress;
+  const isMine = owner === account;
 
   const handleListItem = async _price => {
     try {
@@ -530,7 +532,7 @@ const NFTItem = () => {
       address,
       ethers.BigNumber.from(tokenID),
       price,
-      myAddress
+      account
     );
 
     const provider = new ethers.providers.Web3Provider(window.ethereum);
@@ -543,13 +545,13 @@ const NFTItem = () => {
       const price = ethers.utils.parseEther(_price.toString());
       const deadline = Math.floor(endTime.getTime() / 1000);
 
-      const balance = await getWFTMBalance(myAddress);
+      const balance = await getWFTMBalance(account);
 
       if (balance.lt(price)) {
-        await wrapFTM(price, myAddress);
+        await wrapFTM(price, account);
       }
 
-      const allowance = await getAllowance(myAddress, SALES_CONTRACT_ADDRESS);
+      const allowance = await getAllowance(account, SALES_CONTRACT_ADDRESS);
       if (allowance.lt(price)) {
         await approve(SALES_CONTRACT_ADDRESS, price);
       }
@@ -671,7 +673,7 @@ const NFTItem = () => {
         address,
         ethers.BigNumber.from(tokenID),
         price,
-        myAddress
+        account
       );
       setBidModalVisible(false);
 
@@ -689,7 +691,7 @@ const NFTItem = () => {
   };
 
   const hasMyOffer = useMemo(() => {
-    return offers.findIndex(offer => offer.creator === myAddress) > -1;
+    return offers.findIndex(offer => offer.creator === account) > -1;
   }, [offers]);
 
   const series = useMemo(
@@ -765,7 +767,7 @@ const NFTItem = () => {
   const auctionActive = () => auctionStarted() && !auctionEnded();
 
   const canWithdraw = () =>
-    bid?.bidder === myAddress &&
+    bid?.bidder === account &&
     bid.lastBidTime + withdrawLockTime < now.getTime() / 1000;
 
   return (
@@ -920,7 +922,7 @@ const NFTItem = () => {
                       rel="noopener noreferrer"
                       className={styles.panelValue}
                     >
-                      {abbrAddress(address)}
+                      {shortenAddress(address)}
                     </a>
                   </div>
                   <div className={styles.panelLine}>
@@ -969,11 +971,11 @@ const NFTItem = () => {
                         {auction.resulted ? (
                           <>
                             {'Winner: '}
-                            <a href={`/account/${winner}`}>
-                              {winner === myAddress
+                            <Link to={`/account/${winner}`}>
+                              {winner === account
                                 ? 'Me'
-                                : abbrAddress(winner)}
-                            </a>
+                                : shortenAddress(winner)}
+                            </Link>
                             {` (${winningBid} FTM)`}
                           </>
                         ) : (
@@ -995,7 +997,7 @@ const NFTItem = () => {
                     )}
                     {!isMine &&
                       auctionActive() &&
-                      (bid?.bidder === myAddress ? (
+                      (bid?.bidder === account ? (
                         <div
                           className={cx(
                             styles.withdrawBid,
@@ -1045,7 +1047,7 @@ const NFTItem = () => {
                   {listing && (
                     <div className={styles.listing}>
                       <div className={styles.owner}>
-                        {abbrAddress(listing.owner)}
+                        {shortenAddress(listing.owner)}
                       </div>
                       <div className={styles.price}>
                         {listing.pricePerItem} FTM
@@ -1074,7 +1076,7 @@ const NFTItem = () => {
                   {offers.map((offer, idx) => (
                     <div className={styles.offer} key={idx}>
                       <div className={styles.owner}>
-                        {abbrAddress(offer.creator)}
+                        {shortenAddress(offer.creator)}
                       </div>
                       <div className={styles.price}>
                         {offer.pricePerItem} FTM
@@ -1090,7 +1092,7 @@ const NFTItem = () => {
                           Accept
                         </div>
                       )}
-                      {offer.creator === myAddress && (
+                      {offer.creator === account && (
                         <div
                           className={cx(
                             styles.buyButton,
@@ -1121,15 +1123,15 @@ const NFTItem = () => {
                 const saleDate = new Date(history.saleDate);
                 return (
                   <div className={styles.listing} key={idx}>
-                    <a
-                      href={`/account/${history.from}`}
+                    <Link
+                      to={`/account/${history.from}`}
                       className={styles.from}
                     >
                       {history.from}
-                    </a>
-                    <a href={`/account/${history.to}`} className={styles.to}>
+                    </Link>
+                    <Link to={`/account/${history.to}`} className={styles.to}>
                       {history.to}
-                    </a>
+                    </Link>
                     <div className={styles.historyPrice}>
                       {history.price} FTM
                     </div>

@@ -1,5 +1,5 @@
-import React, { useRef, useState } from 'react';
-import { useSelector } from 'react-redux';
+import React, { useRef, useState, useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import { useHistory } from 'react-router';
 import cx from 'classnames';
 import axios from 'axios';
@@ -7,18 +7,21 @@ import { Menu, MenuItem, Button } from '@material-ui/core';
 import PublishIcon from '@material-ui/icons/Publish';
 import CloseIcon from '@material-ui/icons/Close';
 
-import webIcon from '../../../assets/svgs/web.svg';
-import discordIcon from '../../../assets/imgs/discord.png';
-import telegramIcon from '../../../assets/imgs/telegram.png';
-import twitterIcon from '../../../assets/imgs/twitter.png';
-import instagramIcon from '../../../assets/imgs/instagram.png';
-import mediumIcon from '../../../assets/svgs/medium.svg';
-import nftIcon from '../../../assets/svgs/nft_active.svg';
-import { Categories } from '../../../constants/filter.constants';
+import { Categories } from 'constants/filter.constants';
+import HeaderActions from 'actions/header.actions';
+
+import webIcon from 'assets/svgs/web.svg';
+import discordIcon from 'assets/imgs/discord.png';
+import telegramIcon from 'assets/imgs/telegram.png';
+import twitterIcon from 'assets/imgs/twitter.png';
+import instagramIcon from 'assets/imgs/instagram.png';
+import mediumIcon from 'assets/svgs/medium.svg';
+import nftIcon from 'assets/svgs/nft_active.svg';
 
 import styles from './styles.module.scss';
 
 const CollectionCreate = () => {
+  const dispatch = useDispatch();
   const history = useHistory();
 
   const inputRef = useRef(null);
@@ -40,6 +43,10 @@ const CollectionCreate = () => {
   const [telegram, setTelegram] = useState('');
 
   const isMenuOpen = Boolean(anchorEl);
+
+  useEffect(() => {
+    dispatch(HeaderActions.toggleSearchbar(false));
+  }, []);
 
   const options = Categories.filter(cat => selected.indexOf(cat.id) === -1);
   const selectedCategories = Categories.filter(
