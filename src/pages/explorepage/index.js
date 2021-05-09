@@ -20,8 +20,8 @@ const ExploreAllPage = () => {
   const [page, setPage] = useState(0);
   const [fetchInterval, setFetchInterval] = useState(null);
 
-  const { fetching, tokens } = useSelector(state => state.Tokens);
-  const { collections } = useSelector(state => state.Filter);
+  const { fetching, tokens, count } = useSelector(state => state.Tokens);
+  const { collections, category } = useSelector(state => state.Filter);
 
   useEffect(() => {
     dispatch(HeaderActions.toggleSearchbar(true));
@@ -50,10 +50,8 @@ const ExploreAllPage = () => {
     dispatch(TokensActions.startFetching());
 
     try {
-      const { data } = await fetchTokens(step, collections);
-      dispatch(
-        TokensActions.fetchingSuccess(data.totalTokenCounts, data.tokens)
-      );
+      const { data } = await fetchTokens(step, collections, category);
+      dispatch(TokensActions.fetchingSuccess(data.total, data.tokens));
       setPage(step);
     } catch {
       dispatch(TokensActions.fetchingFailed());
@@ -73,6 +71,7 @@ const ExploreAllPage = () => {
 
   const handleScroll = e => {
     if (fetching) return;
+    if (tokens.length === count) return;
 
     const obj = e.currentTarget;
     if (obj.scrollHeight - obj.clientHeight - obj.scrollTop < 50) {
@@ -83,7 +82,7 @@ const ExploreAllPage = () => {
   useEffect(() => {
     dispatch(TokensActions.resetTokens());
     fetchNFTs(0);
-  }, [collections]);
+  }, [collections, category]);
 
   return (
     <>
@@ -101,7 +100,7 @@ const ExploreAllPage = () => {
             <ExploreFilterHeader />
           </div>
           <div className="exploreAllPannel" onScroll={handleScroll}>
-            <NFTsGrid items={tokens} />
+            <NFTsGrid items={tokens} loading={fetching} />
           </div>
         </div>
       </div>

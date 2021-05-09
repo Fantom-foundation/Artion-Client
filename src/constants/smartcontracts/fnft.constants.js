@@ -2,7 +2,7 @@ export const FantomNFTConstants = {
   TESTNETADDRESS: '0x6B85eD452756094e45Be1E305EE91cA5a51064c5',
   MAINNETADDRESS: '0x76b03166c8ab1462b046d7745c77eaa83e656a8c',
   PRIVATEKEY: '',
-  MAINNETRPC: 'https://rpcapi.fantom.network',
+  MAINNETRPC: 'https://rpc3.fantom.network',
   MAINNETCHAINID: 250,
   TESTNETRPC: 'https://xapi.testnet.fantom.network/lachesis',
   TESTNETCHAINID: 4002,

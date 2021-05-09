@@ -15,8 +15,8 @@ const setDimensions = (full, isMobile) => {
       `;
     default:
       return css`
-        height: calc((100vh - 149px) * 0.95);
-        width: calc((100vh - 149px) * 0.95);
+        height: calc((100vh - 109px) * 0.95);
+        width: calc((100vh - 109px) * 0.95);
         position: relative;
         margin-right: 200px;
         box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
@@ -26,7 +26,7 @@ const setDimensions = (full, isMobile) => {
 
 export const Container = styled.div`
   position: absolute;
-  padding-top: 149px;
+  padding-top: 109px;
   display: flex;
   flex-direction: row;
   align-items: center;
