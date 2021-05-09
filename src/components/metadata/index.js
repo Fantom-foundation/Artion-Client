@@ -4,6 +4,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import Autocomplete from '@material-ui/lab/Autocomplete';
+import { useWeb3React } from '@web3-react/core';
 
 import Stepper from '@material-ui/core/Stepper';
 import Step from '@material-ui/core/Step';
@@ -113,6 +114,8 @@ const mintSteps = [
 const Metadata = () => {
   const classes = useStyles();
 
+  const { account, chainId } = useWeb3React();
+
   const [name, setName] = useState('fAsset');
   const [symbol, setSymbol] = useState('newnft');
   const [royalty, setRoyalty] = useState(0);
@@ -126,9 +129,7 @@ const Metadata = () => {
   const [lastMintedTnxId, setLastMintedTnxId] = useState('');
 
   let isWalletConnected = useSelector(state => state.ConnectWallet.isConnected);
-  let connectedChainId = useSelector(state => state.ConnectWallet.chainId);
   let authToken = useSelector(state => state.ConnectWallet.authToken);
-  const address = useSelector(state => state.ConnectWallet.address); //connected address
 
   const createNotification = (type, msgContent) => {
     switch (type) {
@@ -202,7 +203,7 @@ const Metadata = () => {
       name != '' &&
       symbol != '' &&
       royalty < 30 &&
-      (category != '') & (address != '')
+      (category != '') & (account != '')
     );
   };
 
@@ -218,7 +219,7 @@ const Metadata = () => {
       createNotification('custom', 'Connect your wallet first');
       return;
     }
-    if (connectedChainId != 250) {
+    if (chainId != 250) {
       createNotification(
         'custom',
         'You are not connected to Fantom Opera Network'
@@ -226,7 +227,7 @@ const Metadata = () => {
       return;
     }
     // only when the user has more than 1k ftms on the wallet
-    let balance = await WalletUtils.checkBalance(address);
+    let balance = await WalletUtils.checkBalance(account);
 
     if (balance < SystemConstants.FMT_BALANCE_LIMIT) {
       createNotification(
@@ -240,7 +241,7 @@ const Metadata = () => {
     setLastMintedTnxId('');
     // show stepper
     setIsMinting(true);
-    console.log('created from ', address);
+    console.log('created from ', account);
     if (!validateMetadata()) {
       resetMintingStatus();
       return;
@@ -250,7 +251,7 @@ const Metadata = () => {
     formData.append('image', canvas.toDataURL());
     formData.append('name', name);
     formData.append('royalty', royalty);
-    formData.append('address', address);
+    formData.append('account', account);
     formData.append('description', description);
     formData.append('category', category);
     formData.append('symbol', symbol);
@@ -282,7 +283,7 @@ const Metadata = () => {
       fnft_sc = fnft_sc[0];
 
       try {
-        let tx = await fnft_sc.mint(address, jsonHash, {
+        let tx = await fnft_sc.mint(account, jsonHash, {
           gasLimit: 3000000,
         });
         setCurrentMintingStep(1);
@@ -297,20 +298,22 @@ const Metadata = () => {
         let minterAddress = confirmedTnx.to;
         let mintedTkId = BigNumber.from(evtCaught[3]);
         setLastMintedTkId(mintedTkId.toNumber());
-        let erc721tk = new FormData();
-        erc721tk.append('contractAddress', minterAddress);
-        erc721tk.append('tokenID', mintedTkId);
-        erc721tk.append('symbol', symbol);
-        erc721tk.append('royalty', royalty);
-        erc721tk.append('category', category);
-        erc721tk.append('imageHash', fileHash);
-        erc721tk.append('jsonHash', jsonHash);
+        let formdata = new FormData();
+        formdata.append('contractAddress', minterAddress);
+        formdata.append('tokenID', mintedTkId);
+        formdata.append('symbol', symbol);
+        formdata.append('royalty', royalty);
+        formdata.append('category', category);
+        formdata.append('imageHash', fileHash);
+        formdata.append('jsonHash', jsonHash);
+        formdata.append('tokenType', 721);
+        formdata.append('account', account);
 
         try {
           let saveNewTKResult = await axios({
             method: 'post',
-            url: 'https://fmarket.fantom.network/api/erc721token/savenewtoken',
-            data: erc721tk,
+            url: 'https://fmarket.fantom.network/api/nftitems/savenewtoken',
+            data: formdata,
             headers: {
               'Content-Type': 'multipart/form-data',
               Authorization: 'Bearer ' + authToken,
@@ -467,10 +470,7 @@ const Metadata = () => {
             className={classes.tnxAnchor}
             target="_blank"
             rel="noopener noreferrer"
-            href={
-              'https://explorer.testnet.fantom.network/transactions/' +
-              lastMintedTnxId
-            }
+            href={`https://ftmscan.com/tx/${lastMintedTnxId}`}
           >
             You can track the last transaction here ...
           </a>

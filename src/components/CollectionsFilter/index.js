@@ -8,7 +8,6 @@ import AccordionSummary from '@material-ui/core/AccordionSummary';
 import Tooltip from '@material-ui/core/Tooltip';
 
 import InputBase from '@material-ui/core/InputBase';
-import IconButton from '@material-ui/core/IconButton';
 
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import PlaylistPlayIcon from '@material-ui/icons/PlaylistPlay';
@@ -18,6 +17,8 @@ import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import FilterActions from '../../actions/filter.actions';
 import nftIcon from '../../assets/svgs/nft.svg';
 import nftActiveIcon from '../../assets/svgs/nft_active.svg';
+
+import './styles.scss';
 
 const useStylesBootstrap = makeStyles(theme => ({
   arrow: {
@@ -40,33 +41,43 @@ const useStyles = makeStyles(() => ({
   root: {
     flexGrow: 1,
     width: '100%',
+    marginBottom: 20,
+    overflow: 'hidden',
   },
   wrapper: {
     boxShadow: 'none',
+    borderRadius: '10px !important',
+    border: '1px solid #2479FA',
+    overflow: 'hidden',
+    maxHeight: '100%',
+    boxSizing: 'border-box',
+    display: 'flex',
+    flexDirection: 'column',
   },
   header: {
-    height: 48,
-    minHeight: '48px !important',
-    borderRadius: 5,
+    height: 60,
+    minHeight: '60px !important',
     backgroundColor: '#fff',
-    boxShadow: '0px 0px 5px 2px rgba(0, 0, 0, 0.1)',
+    boxShadow: 'none',
   },
   heading: {
     fontWeight: 500,
-    fontSize: 18,
+    fontSize: 22,
     paddingLeft: 20,
     flexShrink: 0,
     color: '#007BFF',
   },
   icon: {
+    width: 26,
+    height: 26,
     color: '#007BFF',
   },
   body: {
-    backgroundColor: '#f8f8f8',
-    padding: '14px 20px',
+    padding: '6px 16px 20px',
+    boxSizing: 'border-box',
     display: 'flex',
     flexDirection: 'column',
-    flexGrow: 1,
+    height: '100%',
   },
   collectionSvgDiv: {
     display: 'flex',
@@ -75,9 +86,9 @@ const useStyles = makeStyles(() => ({
   collectionExpandDiv: {
     borderRadius: 5,
     width: '100%',
-    height: 40,
-    backgroundColor: '#ECECEC',
-    padding: '9px 12px',
+    flex: '0 0 50px',
+    backgroundColor: 'rgba(190, 190, 190, .1)',
+    padding: '0 14px',
     boxSizing: 'border-box',
     display: 'flex',
     flexDirection: 'row',
@@ -87,10 +98,12 @@ const useStyles = makeStyles(() => ({
     flexGrow: 1,
   },
   iconButton: {
-    padding: 10,
+    width: 22,
+    height: 22,
+    marginRight: 10,
+    color: 'rgba(0, 0, 0, 0.5)',
   },
   collectionsList: {
-    maxHeight: 300,
     overflowY: 'auto',
     marginTop: 20,
     flexGrow: 1,
@@ -98,7 +111,7 @@ const useStyles = makeStyles(() => ({
   collection: {
     height: 40,
     padding: 4,
-    margin: '4px 0',
+    margin: '14px 0',
     boxSizing: 'border-box',
     display: 'flex',
     flexDirection: 'row',
@@ -106,15 +119,21 @@ const useStyles = makeStyles(() => ({
     cursor: 'pointer',
   },
   selected: {
-    color: '#007bff',
+    color: '#007bff !important',
+    opacity: '1 !important',
   },
   logo: {
-    width: 24,
-    height: 24,
-    marginRight: 8,
+    width: 40,
+    height: 40,
+    borderRadius: '50%',
+    marginRight: 14,
   },
   name: {
-    fontSize: 18,
+    fontWeight: 700,
+    fontSize: 16,
+    color: '#000',
+    opacity: 0.6,
+    marginRight: 4,
   },
   checkIcon: {
     fontSize: 18,
@@ -150,14 +169,14 @@ const ExploreCollections = () => {
   const filteredCollections = () => {
     return collectionItems.filter(
       item =>
-        (item.name || item.collectionName)
+        (item.name || item.collectionName || '')
           .toLowerCase()
           .indexOf(filter.toLowerCase()) > -1
     );
   };
 
   return (
-    <div className={classes.root}>
+    <div className={cx(classes.root, 'filter-root')}>
       <Accordion
         className={classes.wrapper}
         expanded={expanded}
@@ -174,6 +193,7 @@ const ExploreCollections = () => {
         </AccordionSummary>
         <AccordionDetails className={classes.body}>
           <div className={classes.collectionExpandDiv}>
+            <SearchIcon className={classes.iconButton} />
             <InputBase
               className={classes.input}
               placeholder="Filter"
@@ -181,23 +201,12 @@ const ExploreCollections = () => {
               value={filter}
               onChange={e => setFilter(e.target.value)}
             />
-            <IconButton
-              type="submit"
-              className={classes.iconButton}
-              aria-label="search"
-            >
-              <SearchIcon />
-            </IconButton>
           </div>
-
           <div className={classes.collectionsList}>
             {filteredCollections().map((item, idx) => (
               <div
                 key={idx}
-                className={cx(
-                  classes.collection,
-                  collections.includes(item.address) ? classes.selected : null
-                )}
+                className={classes.collection}
                 onClick={() => handleSelectCollection(item.address)}
               >
                 <img
@@ -210,7 +219,12 @@ const ExploreCollections = () => {
                       : nftIcon
                   }
                 />
-                <span className={classes.name}>
+                <span
+                  className={cx(
+                    classes.name,
+                    collections.includes(item.address) ? classes.selected : null
+                  )}
+                >
                   {item.name || item.collectionName}
                 </span>
                 {item.isVerified && (

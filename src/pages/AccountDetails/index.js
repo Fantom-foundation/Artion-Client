@@ -15,12 +15,13 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogActions from '@material-ui/core/DialogActions';
 import Dialog from '@material-ui/core/Dialog';
 import PublishIcon from '@material-ui/icons/Publish';
+import { useWeb3React } from '@web3-react/core';
 
 import NFTsGrid from '../../components/NFTsGrid';
 import StatusFilter from '../../components/StatusFilter';
 import CollectionsFilter from '../../components/CollectionsFilter';
 import SCHandlers from '../../utils/sc.interaction';
-import { abbrAddress } from 'utils';
+import { shortenAddress } from 'utils';
 import { getUserAccountDetails, fetchTokens } from 'api';
 import TokensActions from 'actions/tokens.actions';
 
@@ -29,12 +30,12 @@ import styles from './styles.module.scss';
 const AccountDetails = () => {
   const dispatch = useDispatch();
 
+  const { account, chainId } = useWeb3React();
+
   const { uid } = useParams();
 
   const { fetching, tokens } = useSelector(state => state.Tokens);
   let isWalletConnected = useSelector(state => state.ConnectWallet.isConnected);
-  let connectedChainId = useSelector(state => state.ConnectWallet.chainId);
-  const address = useSelector(state => state.ConnectWallet.address); //connected address
   const { collections } = useSelector(state => state.Filter);
   const { user: me } = useSelector(state => state.Auth);
 
@@ -53,9 +54,9 @@ const AccountDetails = () => {
   const [page, setPage] = useState(0);
   const [user, setUser] = useState({});
 
-  const getUserDetails = async address => {
+  const getUserDetails = async account => {
     try {
-      const { data } = await getUserAccountDetails(address);
+      const { data } = await getUserAccountDetails(account);
       setUser(data);
     } catch {
       setUser({});
@@ -81,7 +82,7 @@ const AccountDetails = () => {
   }, [uid]);
 
   useEffect(() => {
-    if (address === uid && me.alias) {
+    if (account === uid && me.alias) {
       setUser(me);
     }
   }, [me]);
@@ -178,13 +179,13 @@ const AccountDetails = () => {
   };
 
   const openCreateBundleModal = async () => {
-    let balance = await SCHandlers.getAccountBalance(address);
-    console.log(`total balance of ${address} is ${balance}`);
+    let balance = await SCHandlers.getAccountBalance(account);
+    console.log(`total balance of ${account} is ${balance}`);
     if (!isWalletConnected) {
       createNotification('custom', 'Connect your wallet first');
       return;
     }
-    if (connectedChainId != 4002) {
+    if (chainId != 4002) {
       createNotification('custom', 'You are not connected to Opera Testnet');
       return;
     }
@@ -203,7 +204,7 @@ const AccountDetails = () => {
     let formData = new FormData();
     formData.append('name', collectionName);
     formData.append('description', collectionDescription);
-    formData.append('address', address);
+    formData.append('account', account);
     formData.append('imgData', collectionImgData);
     try {
       let result = await axios({
@@ -239,12 +240,12 @@ const AccountDetails = () => {
           />
           <div className={styles.username}>{user.alias || ''}</div>
           <a
-            href={`https://ftmscan.com/address/${uid}`}
+            href={`https://ftmscan.com/account/${uid}`}
             target="_blank"
             rel="noopener noreferrer"
-            className={styles.address}
+            className={styles.account}
           >
-            {abbrAddress(uid)}
+            {shortenAddress(uid)}
           </a>
           <div className={styles.bio}>{user.bio || ''}</div>
         </div>

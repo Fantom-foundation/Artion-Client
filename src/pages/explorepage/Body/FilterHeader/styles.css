@@ -3,15 +3,12 @@
     justify-content: space-between;
     align-items: center;
     width: 100%;
-    
 }
 
 .filterResultLabel {
-    margin-left : 24px;
-}
-
-.filterSelectGroup {
-    margin-right: 24px;
+    font-weight: 500;
+    font-size: 20px;
+    color: rgba(61, 61, 61, .6);
 }
 
 .MuiSelect-outlined.MuiSelect-outlined {
@@ -25,13 +22,24 @@
     top : unset !important;
 }
 
+.filterHeaderFormControl:last-child {
+    margin-right: 0 !important;
+}
+
 .selectBox {
     padding: 16px 19px;
     box-sizing: border-box;
     border-radius: 10px !important;
     outline: none !important;
     background-color: #FFF !important;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.05) !important;
+    border: 1px solid rgba(36, 121, 250, .5);
+    color: #3D3D3D !important;
+    font-size: 18px !important;
+}
+
+.selectBox::before,
+.selectBox::after {
+    display: none;
 }
 
 .selectInner {

@@ -7,7 +7,7 @@ import InfiniteLoader from 'react-window-infinite-loader';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
-import Card from '../Card';
+import NFTCard from '../NFTCard';
 
 const useStyles = makeStyles({
   container: {
@@ -72,7 +72,7 @@ const FInfiniteLoader = () => {
               onItemsRendered={onItemsRendered}
               ref={ref}
             >
-              {Card}
+              {NFTCard}
             </Grid>
           )}
         </InfiniteLoader>

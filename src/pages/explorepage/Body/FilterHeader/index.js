@@ -34,7 +34,6 @@ const ExploreFilterHeader = () => {
       <label className="filterResultLabel">{count} results</label>
       <div className="filterSelectGroup">
         <FormControl className="filterHeaderFormControl">
-          {/* <label>Group</label> */}
           <Select
             value={groupType}
             onChange={handleGroupTypeChange}

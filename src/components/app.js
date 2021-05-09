@@ -2,10 +2,9 @@ import React, { useRef, useEffect } from 'react';
 import { observer, inject } from 'mobx-react';
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 
+import Header from './header';
 import Layout from './layout';
 import Toolbar from './toolbar';
-import NiftyHeader from './header';
-import NiftyFooter from './footer';
 import Metadata from './metadata';
 import AccountModal from './AccountModal';
 import { Container, Board, Canvas } from './style';
@@ -37,6 +36,7 @@ const App = ({ paintStore }) => {
     return (
       <>
         <Layout>
+          <Header light />
           <Container>
             <Board isMobile={isMobile}>
               <Canvas
@@ -63,7 +63,6 @@ const App = ({ paintStore }) => {
   return (
     <div>
       <Router>
-        <NiftyHeader></NiftyHeader>
         <Switch>
           <Route exact path="/" component={LandingPage} />
           <Route exact path="/exploreall" component={ExploreAllPage} />
@@ -72,7 +71,6 @@ const App = ({ paintStore }) => {
           <Route path="/account/:uid" component={AccountDetails} />
           <Route path="/collection/create" component={CollectionCreate} />
         </Switch>
-        <NiftyFooter></NiftyFooter>
         <AccountModal />
       </Router>
     </div>
