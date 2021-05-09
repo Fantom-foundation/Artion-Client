@@ -14310,7 +14310,7 @@
     "strip-ansi" "5.2.0"
     "text-table" "0.2.0"
 
-"react-dom@^16.9.0":
+"react-dom@*", "react-dom@^16.9.0":
   "integrity" "sha512-1gCeQXDLoIqMgqD3IO2Ah9bnf0w9kzhwN5q4FGnHZ67hBm9yePzB5JJAIQCc8x3pFnNlwFq4RidZggNAAkzWWw=="
   "resolved" "https://registry.npmjs.org/react-dom/-/react-dom-16.14.0.tgz"
   "version" "16.14.0"
@@ -14361,6 +14361,13 @@
   "integrity" "sha512-WVPpP9ENdIAdnSeixpyB1tFRtL5hTJaYC/cTQRrIy1vQD+a5qV49YufEKxlmhyWF8oOuutFD8ggoqXwjRgAnzw=="
   "resolved" "https://registry.npmjs.org/react-list-drag-and-drop/-/react-list-drag-and-drop-0.9.1.tgz"
   "version" "0.9.1"
+
+"react-loader-spinner@^4.0.0":
+  "integrity" "sha512-RU2vpEej6G4ECei0h3q6bgLU10of9Lw5O+4AwF/mtkrX5oY20Sh/AxoPJ7etbrs/7Q3u4jN5qwCwGLRKCHpk6g=="
+  "resolved" "https://registry.npmjs.org/react-loader-spinner/-/react-loader-spinner-4.0.0.tgz"
+  "version" "4.0.0"
+  dependencies:
+    "prop-types" "^15.7.2"
 
 "react-modal@^3.8.1":
   "integrity" "sha512-8uN744Yq0X2lbfSLxsEEc2UV3RjSRb4yDVxRQ1aGzPo86QjNOwhQSukDb8U8kR+636TRTvfMren10fgOjAy9eA=="
@@ -14613,7 +14620,7 @@
     "@babel/runtime" "^7.0.0"
     "memoize-one" ">=3.1.1 <6"
 
-"react@^16.5.0", "react@^16.8.6", "react@^16.9.0", "react@>=16.8":
+"react@*", "react@^16.5.0", "react@^16.8.6", "react@^16.9.0", "react@>=16.8":
   "integrity" "sha512-0X2CImDkJGApiAlcf0ODKIneSwBPhqJawOa5wCtKbu7ZECrmS26NvtSILynQ66cgkT/RJ4LidJOc3bUESwmU8g=="
   "resolved" "https://registry.npmjs.org/react/-/react-16.14.0.tgz"
   "version" "16.14.0"

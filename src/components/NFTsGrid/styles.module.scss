@@ -1,7 +1,18 @@
 .container {
   width: 100%;
+  box-sizing: border-box;
+}
+
+.grid {
+  width: 100%;
   display: grid;
   grid-template-columns: repeat( auto-fit, minmax(220px, 1fr) );
   grid-gap: 32px;
   box-sizing: border-box;
+}
+
+.spinner {
+  padding: 10px 0;
+  display: flex;
+  justify-content: center;
 }

@@ -60,10 +60,18 @@ export const fetchCollections = async () => {
   return res.data;
 };
 
-export const fetchTokens = async (step, collections = [], address = null) => {
+export const fetchTokens = async (
+  step,
+  collections = [],
+  category = null,
+  address = null
+) => {
   const data = { step };
   if (collections.length > 0) {
-    data.contractAddress = collections;
+    data.collectionAddresses = collections;
+  }
+  if (category) {
+    data.category = category;
   }
   if (address) {
     data.address = address;

@@ -34,9 +34,9 @@ const AccountDetails = () => {
 
   const { uid } = useParams();
 
-  const { fetching, tokens } = useSelector(state => state.Tokens);
+  const { fetching, tokens, count } = useSelector(state => state.Tokens);
   let isWalletConnected = useSelector(state => state.ConnectWallet.isConnected);
-  const { collections } = useSelector(state => state.Filter);
+  const { collections, category } = useSelector(state => state.Filter);
   const { user: me } = useSelector(state => state.Auth);
 
   const [collectionName, setCollectionName] = useState('');
@@ -67,10 +67,8 @@ const AccountDetails = () => {
     dispatch(TokensActions.startFetching());
 
     try {
-      const { data } = await fetchTokens(step, collections, uid);
-      dispatch(
-        TokensActions.fetchingSuccess(data.totalTokenCounts, data.tokens)
-      );
+      const { data } = await fetchTokens(step, collections, category, uid);
+      dispatch(TokensActions.fetchingSuccess(data.total, data.tokens));
       setPage(step);
     } catch {
       dispatch(TokensActions.fetchingFailed());
@@ -89,6 +87,7 @@ const AccountDetails = () => {
 
   const handleScroll = e => {
     if (fetching) return;
+    if (tokens.length === count) return;
 
     const obj = e.currentTarget;
     if (obj.scrollHeight - obj.clientHeight - obj.scrollTop < 50) {
@@ -99,7 +98,7 @@ const AccountDetails = () => {
   useEffect(() => {
     dispatch(TokensActions.resetTokens());
     fetchNFTs(0);
-  }, [collections, uid]);
+  }, [collections, category, uid]);
 
   useEffect(() => {
     let _fileSelector = document.createElement('input');
@@ -274,7 +273,7 @@ const AccountDetails = () => {
             </div>
           </div>
         </div>
-        <NFTsGrid items={tokens} />
+        <NFTsGrid items={tokens} loading={fetching} />
       </div>
 
       {isCreateCollectionShown && (
