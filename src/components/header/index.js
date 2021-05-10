@@ -19,6 +19,7 @@ import { shortenAddress } from 'utils';
 import { injected } from 'connectors';
 import { getAccountDetails } from 'api';
 import { NETWORK_LABEL } from 'constants/networks';
+import WFTMModal from 'components/WFTMModal';
 
 import logoWhite from 'assets/svgs/fantom_logo_white.svg';
 import logoBlue from 'assets/svgs/fantom_logo.svg';
@@ -41,6 +42,7 @@ const NiftyHeader = ({ light }) => {
     state => state.ConnectWallet
   );
 
+  const [stationModalVisible, setStationModalVisible] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
 
   const isMenuOpen = Boolean(anchorEl);
@@ -133,6 +135,11 @@ const NiftyHeader = ({ light }) => {
     handleMenuClose();
   };
 
+  const openWrapStation = () => {
+    setStationModalVisible(true);
+    handleMenuClose();
+  };
+
   const renderMenu = (
     <Menu
       anchorEl={anchorEl}
@@ -168,6 +175,10 @@ const NiftyHeader = ({ light }) => {
       >
         <img src={iconAdd} className={styles.menuIcon} />
         Create Collection
+      </MenuItem>
+      <MenuItem classes={{ root: styles.menuItem }} onClick={openWrapStation}>
+        <img src={iconAdd} className={styles.menuIcon} />
+        FTM / WFTM Station
       </MenuItem>
       <div className={styles.menuSeparator} />
       <MenuItem classes={{ root: styles.menuItem }} onClick={handleSignOut}>
@@ -245,6 +256,10 @@ const NiftyHeader = ({ light }) => {
         )}
       </div>
       {renderMenu}
+      <WFTMModal
+        visible={stationModalVisible}
+        onClose={() => setStationModalVisible(false)}
+      />
     </div>
   );
 };

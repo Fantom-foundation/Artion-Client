@@ -30,6 +30,13 @@ export const wrapFTM = async (value, from) => {
   await provider.waitForTransaction(tx.hash);
 };
 
+export const unwrapFTM = async value => {
+  const [contract, provider] = await getWFTMContract();
+
+  const tx = await contract.withdraw(value);
+  await provider.waitForTransaction(tx.hash);
+};
+
 export const getAllowance = async (owner, spender) => {
   const [contract] = await getWFTMContract();
   return await contract.allowance(owner, spender);

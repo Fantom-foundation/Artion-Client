@@ -103,6 +103,10 @@
   padding: 11px 18px;
   border-radius: 10px;
   border: 1px solid #FFF;
+
+  &:hover {
+    box-shadow: 0 0 6px rgba(0, 0, 0, 0.3);
+  }
 }
 
 .expand {
@@ -133,10 +137,7 @@
   margin-bottom: 25px !important;
   display: flex;
   align-items: center;
-
-  &:hover {
-    background-color: transparent !important;
-  }
+  background-color: transparent !important;
 
   &:last-child {
     margin-bottom: 0 !important;

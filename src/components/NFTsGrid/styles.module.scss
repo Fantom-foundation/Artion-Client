@@ -9,6 +9,7 @@
   grid-template-columns: repeat( auto-fit, minmax(220px, 1fr) );
   grid-gap: 32px;
   box-sizing: border-box;
+  padding-bottom: 32px;
 }
 
 .spinner {

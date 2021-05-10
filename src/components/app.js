@@ -7,6 +7,7 @@ import Layout from './layout';
 import Toolbar from './toolbar';
 import Metadata from './metadata';
 import AccountModal from './AccountModal';
+import WFTMModal from './WFTMModal';
 import { Container, Board, Canvas } from './style';
 import { isMobile } from 'utils/userAgent';
 import LandingPage from '../pages/landingpage';
@@ -72,6 +73,7 @@ const App = ({ paintStore }) => {
           <Route path="/collection/create" component={CollectionCreate} />
         </Switch>
         <AccountModal />
+        <WFTMModal />
       </Router>
     </div>
   );

@@ -1460,7 +1460,7 @@
     "@emotion/utils" "0.11.3"
     "@emotion/weak-memoize" "0.2.5"
 
-"@emotion/core@^10.0.15", "@emotion/core@^10.0.35":
+"@emotion/core@^10.0.15", "@emotion/core@^10.0.22", "@emotion/core@^10.0.35":
   "integrity" "sha512-ZMLG6qpXR8x031NXD8HJqugy/AZSkAuMxxqB46pmAR7ze47MhNJ56cdoX243QPZdGctrdfo+s08yZTiwaUcRKA=="
   "resolved" "https://registry.npmjs.org/@emotion/core/-/core-10.1.1.tgz"
   "version" "10.1.1"
@@ -14369,6 +14369,13 @@
   dependencies:
     "prop-types" "^15.7.2"
 
+"react-loading-skeleton@^2.2.0":
+  "integrity" "sha512-HH37uj9aobrUJSqFglHqO9KQt5zGQe+Svutv8LIq7Iq6gpJqCwIzJOsEVfkQy7ReirbI2uLhCtKloBGQIDP0BQ=="
+  "resolved" "https://registry.npmjs.org/react-loading-skeleton/-/react-loading-skeleton-2.2.0.tgz"
+  "version" "2.2.0"
+  dependencies:
+    "@emotion/core" "^10.0.22"
+
 "react-modal@^3.8.1":
   "integrity" "sha512-8uN744Yq0X2lbfSLxsEEc2UV3RjSRb4yDVxRQ1aGzPo86QjNOwhQSukDb8U8kR+636TRTvfMren10fgOjAy9eA=="
   "resolved" "https://registry.npmjs.org/react-modal/-/react-modal-3.11.1.tgz"
@@ -14620,7 +14627,7 @@
     "@babel/runtime" "^7.0.0"
     "memoize-one" ">=3.1.1 <6"
 
-"react@*", "react@^16.5.0", "react@^16.8.6", "react@^16.9.0", "react@>=16.8":
+"react@*", "react@^15.6.1 || ^16.0.0 || ^17.0.0", "react@^16.5.0", "react@^16.8.6", "react@^16.9.0", "react@>=16.8":
   "integrity" "sha512-0X2CImDkJGApiAlcf0ODKIneSwBPhqJawOa5wCtKbu7ZECrmS26NvtSILynQ66cgkT/RJ4LidJOc3bUESwmU8g=="
   "resolved" "https://registry.npmjs.org/react/-/react-16.14.0.tgz"
   "version" "16.14.0"
