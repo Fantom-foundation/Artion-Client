@@ -9,21 +9,26 @@ import axios from 'axios';
 import cx from 'classnames';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
-import AddIcon from '@material-ui/icons/Add';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogActions from '@material-ui/core/DialogActions';
 import Dialog from '@material-ui/core/Dialog';
-import PublishIcon from '@material-ui/icons/Publish';
+import {
+  Add as AddIcon,
+  AccountCircle,
+  Publish as PublishIcon,
+} from '@material-ui/icons';
 import { useWeb3React } from '@web3-react/core';
 
-import NFTsGrid from '../../components/NFTsGrid';
-import StatusFilter from '../../components/StatusFilter';
-import CollectionsFilter from '../../components/CollectionsFilter';
-import SCHandlers from '../../utils/sc.interaction';
+import NFTsGrid from 'components/NFTsGrid';
+import StatusFilter from 'components/StatusFilter';
+import CollectionsFilter from 'components/CollectionsFilter';
+import Header from 'components/header';
+import SCHandlers from 'utils/sc.interaction';
 import { shortenAddress } from 'utils';
 import { getUserAccountDetails, fetchTokens } from 'api';
 import TokensActions from 'actions/tokens.actions';
+import HeaderActions from 'actions/header.actions';
 
 import styles from './styles.module.scss';
 
@@ -84,6 +89,14 @@ const AccountDetails = () => {
       setUser(me);
     }
   }, [me]);
+
+  useEffect(() => {
+    dispatch(HeaderActions.toggleSearchbar(true));
+
+    return () => {
+      dispatch(HeaderActions.toggleSearchbar(false));
+    };
+  }, []);
 
   const handleScroll = e => {
     if (fetching) return;
@@ -226,20 +239,21 @@ const AccountDetails = () => {
 
   return (
     <div className={styles.container}>
+      <Header light />
       <NotificationContainer />
       <div className={styles.sidebar}>
         <div className={styles.profileWrapper}>
-          <img
-            src={
-              user.imageHash
-                ? `https://gateway.pinata.cloud/ipfs/${user.imageHash}`
-                : 'https://lh3.googleusercontent.com/ojVpeYTZbASHsP-9z385kSIQSAHYaNFZkVMgiU4j6djSmRDtyc0psef3vy1LVoyREFDHSY7VzqQKiqYoJo9teMOxcvoCdlkatucflw=s0'
-            }
-            className={styles.avatar}
-          />
+          {user.imageHash ? (
+            <img
+              src={`https://gateway.pinata.cloud/ipfs/${user.imageHash}`}
+              className={styles.avatar}
+            />
+          ) : (
+            <AccountCircle className={styles.avatar} />
+          )}
           <div className={styles.username}>{user.alias || ''}</div>
           <a
-            href={`https://ftmscan.com/account/${uid}`}
+            href={`https://ftmscan.com/address/${uid}`}
             target="_blank"
             rel="noopener noreferrer"
             className={styles.account}
