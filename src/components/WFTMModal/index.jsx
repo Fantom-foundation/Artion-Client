@@ -107,7 +107,7 @@ const WFTMModal = ({ visible, onClose }) => {
                   ) : (
                     parseBalance(balance)
                   )}
-                  {wrap && !isMax() && (
+                  {wrap && !isMax() && !loading && balance > 0 && (
                     <div className={styles.max} onClick={onMax}>
                       (Max)
                     </div>
@@ -135,7 +135,7 @@ const WFTMModal = ({ visible, onClose }) => {
                   ) : (
                     parseBalance(wrappedBalance)
                   )}
-                  {!wrap && !isMax() && (
+                  {!wrap && !isMax() && !loading && balance > 0 && (
                     <div className={styles.max} onClick={onMax}>
                       (Max)
                     </div>
