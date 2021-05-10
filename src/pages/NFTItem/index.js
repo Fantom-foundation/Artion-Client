@@ -60,6 +60,7 @@ import SellModal from 'components/SellModal';
 import OfferModal from 'components/OfferModal';
 import AuctionModal from 'components/AuctionModal';
 import BidModal from 'components/BidModal';
+import Header from 'components/header';
 
 import webIcon from 'assets/svgs/web.svg';
 import discordIcon from 'assets/imgs/discord.png';
@@ -774,6 +775,7 @@ const NFTItem = () => {
     <div
       className={cx(styles.container, isLoggedIn() ? styles.withHeader : '')}
     >
+      <Header light />
       {isLoggedIn() && (
         <div className={styles.header}>
           {isMine ? (
@@ -971,7 +973,7 @@ const NFTItem = () => {
                         {auction.resulted ? (
                           <>
                             {'Winner: '}
-                            <Link to={`/account/${winner}`}>
+                            <Link to={`/address/${winner}`}>
                               {winner === account
                                 ? 'Me'
                                 : shortenAddress(winner)}
@@ -1124,12 +1126,12 @@ const NFTItem = () => {
                 return (
                   <div className={styles.listing} key={idx}>
                     <Link
-                      to={`/account/${history.from}`}
+                      to={`/address/${history.from}`}
                       className={styles.from}
                     >
                       {history.from}
                     </Link>
-                    <Link to={`/account/${history.to}`} className={styles.to}>
+                    <Link to={`/address/${history.to}`} className={styles.to}>
                       {history.to}
                     </Link>
                     <div className={styles.historyPrice}>
