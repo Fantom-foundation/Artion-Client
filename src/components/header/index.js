@@ -71,7 +71,7 @@ const NiftyHeader = ({ light }) => {
         symbol: 'FTM',
         decimals: 18,
       },
-      rpcUrls: ['https://rpcapi.fantom.network'],
+      rpcUrls: ['https://rpc.fantom.network'],
       blockExplorerUrls: ['https://ftmscan.com'],
     };
 
@@ -90,21 +90,23 @@ const NiftyHeader = ({ light }) => {
   useEffect(() => {
     if (account) {
       changeNetwork();
+      login();
     }
   }, [account]);
 
   const handleConnectWallet = () => {
     activate(injected, undefined, true)
-      .then(() => {
-        login();
-      })
+      .then(() => {})
       .catch(async error => {
         if (error instanceof UnsupportedChainIdError) {
           await activate(injected);
-          login();
         }
       });
   };
+
+  useEffect(() => {
+    handleConnectWallet();
+  }, []);
 
   const handleSignOut = () => {
     dispatch(WalletConnectActions.disconnectWallet());

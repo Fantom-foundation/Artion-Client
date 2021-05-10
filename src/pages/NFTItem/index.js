@@ -769,7 +769,7 @@ const NFTItem = () => {
 
   const canWithdraw = () =>
     bid?.bidder === account &&
-    bid.lastBidTime + withdrawLockTime < now.getTime() / 1000;
+    bid?.lastBidTime + withdrawLockTime < now.getTime() / 1000;
 
   return (
     <div
