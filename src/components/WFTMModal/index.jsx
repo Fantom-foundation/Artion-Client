@@ -74,14 +74,19 @@ const WFTMModal = ({ visible, onClose }) => {
     if (confirming || loading) return;
 
     setConfirming(true);
-    const price = ethers.utils.parseEther(amount);
-    if (wrap) {
-      await wrapFTM(price, account);
-    } else {
-      await unwrapFTM(price);
+    try {
+      const price = ethers.utils.parseEther(amount);
+      if (wrap) {
+        await wrapFTM(price, account);
+      } else {
+        await unwrapFTM(price);
+      }
+      setAmount('');
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setConfirming(false);
     }
-    setAmount('');
-    setConfirming(false);
     getBalances();
   };
 
@@ -156,10 +161,20 @@ const WFTMModal = ({ visible, onClose }) => {
           <div
             className={cx(
               styles.listButton,
-              styles.disabled,
-              (confirming || loading) && styles.disabled
+              (confirming ||
+                loading ||
+                amount.length === 0 ||
+                parseFloat(amount) === 0 ||
+                parseFloat(amount) >
+                  (wrap ? balance - 0.01 : wrappedBalance)) &&
+                styles.disabled
             )}
-            onClick={() => handleWrapFTM()}
+            onClick={() =>
+              amount.length &&
+              parseFloat(amount) > 0 &&
+              parseFloat(amount) < (wrap ? balance - 0.01 : wrappedBalance) &&
+              handleWrapFTM()
+            }
           >
             {confirming || loading ? (
               <ClipLoader color="#FFF" size={16} />

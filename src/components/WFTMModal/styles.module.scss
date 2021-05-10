@@ -146,3 +146,13 @@
   color: #007BFF;
   border: 1px solid #007BFF;
 }
+
+.disabled {
+  cursor: not-allowed;
+  box-shadow: none;
+  opacity: 0.7;
+
+  &:hover {
+    box-shadow: none;
+  }
+}
