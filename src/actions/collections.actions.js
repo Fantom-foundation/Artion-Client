@@ -1,20 +1,38 @@
 import CollectionsConstants from '../constants/collections.constants';
 
 const CollectionsActions = {
-  updateCollections,
+  fetchStart,
+  fetchSuccess,
+  fetchFailed,
 };
 
-function updateCollections(collections) {
+function fetchStart() {
   return dispatch => {
-    dispatch(_updateCollections(collections));
+    dispatch({
+      type: CollectionsConstants.FETCH_COLLECTIONS_START,
+    });
   };
 }
 
-const _updateCollections = collections => {
+function fetchSuccess(collections) {
+  return dispatch => {
+    dispatch(_fetchSuccess(collections));
+  };
+}
+
+const _fetchSuccess = collections => {
   return {
-    type: CollectionsConstants.UPDATE_COLLECTIONS,
+    type: CollectionsConstants.FETCH_COLLECTIONS_SUCCESS,
     collections,
   };
 };
+
+function fetchFailed() {
+  return dispatch => {
+    dispatch({
+      type: CollectionsConstants.FETCH_COLLECTIONS_FAILED,
+    });
+  };
+}
 
 export default CollectionsActions;

@@ -29,6 +29,7 @@ const ExploreAllPage = () => {
 
   const updateCollections = async () => {
     try {
+      dispatch(CollectionsActions.fetchStart());
       const res = await fetchCollections();
       if (res.status === 'success') {
         const verified = [];
@@ -37,12 +38,10 @@ const ExploreAllPage = () => {
           if (item.isVerified) verified.push(item);
           else unverified.push(item);
         });
-        dispatch(
-          CollectionsActions.updateCollections([...verified, ...unverified])
-        );
+        dispatch(CollectionsActions.fetchSuccess([...verified, ...unverified]));
       }
     } catch {
-      CollectionsActions.updateCollections([]);
+      dispatch(CollectionsActions.fetchFailed());
     }
   };
 

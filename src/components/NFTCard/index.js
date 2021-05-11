@@ -95,7 +95,7 @@ const BaseCard = ({ item, style }) => {
 
   const [info, setInfo] = useState(null);
 
-  const collections = useSelector(state => state.Collections);
+  const { collections } = useSelector(state => state.Collections);
 
   const collection = collections.find(
     col => col.address === item.contractAddress

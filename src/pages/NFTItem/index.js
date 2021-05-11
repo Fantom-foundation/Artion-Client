@@ -109,7 +109,7 @@ const NFTItem = () => {
   const [views, setViews] = useState();
   const [now, setNow] = useState(new Date());
 
-  const collections = useSelector(state => state.Collections);
+  const { collections } = useSelector(state => state.Collections);
   const { isConnected: isWalletConnected } = useSelector(
     state => state.ConnectWallet
   );

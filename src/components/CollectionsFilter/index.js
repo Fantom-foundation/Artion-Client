@@ -2,12 +2,15 @@ import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import cx from 'classnames';
 import { makeStyles } from '@material-ui/core/styles';
-import Accordion from '@material-ui/core/Accordion';
-import AccordionDetails from '@material-ui/core/AccordionDetails';
-import AccordionSummary from '@material-ui/core/AccordionSummary';
-import Tooltip from '@material-ui/core/Tooltip';
+import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Tooltip,
+  InputBase,
+} from '@material-ui/core';
 
-import InputBase from '@material-ui/core/InputBase';
+import Skeleton from 'react-loading-skeleton';
 
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import PlaylistPlayIcon from '@material-ui/icons/PlaylistPlay';
@@ -149,7 +152,9 @@ const ExploreCollections = () => {
   const [expanded, setExpanded] = useState(true);
   const [filter, setFilter] = useState('');
 
-  const collectionItems = useSelector(state => state.Collections);
+  const { collections: collectionItems, collectionsLoading } = useSelector(
+    state => state.Collections
+  );
   const { collections } = useSelector(state => state.Filter);
 
   const handleChange = (_, isExpanded) => {
@@ -203,6 +208,17 @@ const ExploreCollections = () => {
             />
           </div>
           <div className={classes.collectionsList}>
+            {collectionsLoading &&
+              new Array(8)
+                .fill(0)
+                .map((_, idx) => (
+                  <Skeleton
+                    key={idx}
+                    width="100%"
+                    height={40}
+                    className={classes.collection}
+                  />
+                ))}
             {filteredCollections().map((item, idx) => (
               <div
                 key={idx}
