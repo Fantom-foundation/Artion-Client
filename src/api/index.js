@@ -70,7 +70,7 @@ export const fetchTokens = async (
   if (collections.length > 0) {
     data.collectionAddresses = collections;
   }
-  if (category) {
+  if (category !== null) {
     data.category = category;
   }
   if (address) {

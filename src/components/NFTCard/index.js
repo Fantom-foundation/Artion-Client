@@ -94,6 +94,7 @@ const useStyles = makeStyles({
 const BaseCard = ({ item, loading, style }) => {
   const classes = useStyles();
 
+  const [fetching, setFetching] = useState(false);
   const [info, setInfo] = useState(null);
 
   const { collections } = useSelector(state => state.Collections);
@@ -103,12 +104,14 @@ const BaseCard = ({ item, loading, style }) => {
   );
 
   const getTokenURI = async tokenURI => {
+    setFetching(true);
     try {
       const res = await axios.get(tokenURI);
       setInfo(res.data);
     } catch {
       setInfo(null);
     }
+    setFetching(false);
   };
 
   useEffect(() => {
@@ -121,13 +124,8 @@ const BaseCard = ({ item, loading, style }) => {
     return (
       <>
         <div className={classes.mediaBox}>
-          {loading ? (
-            <Skeleton
-              width="100%"
-              height="100%"
-              className={classes.media}
-              // style={{ position: 'absolute' }}
-            />
+          {loading || fetching ? (
+            <Skeleton width="100%" height="100%" className={classes.media} />
           ) : (
             <CardMedia
               className={cx(classes.media, info?.image && classes.mediaMissing)}
@@ -137,14 +135,14 @@ const BaseCard = ({ item, loading, style }) => {
           )}
         </div>
         <CardContent className={classes.content}>
-          {loading ? (
+          {loading || fetching ? (
             <Skeleton width="100%" height={20} />
           ) : (
             <Typography component="h4" className={classes.collection}>
               {collection?.name}
             </Typography>
           )}
-          {loading ? (
+          {loading || fetching ? (
             <Skeleton width="100%" height={20} />
           ) : (
             <Typography component="h4" className={classes.name}>
@@ -152,7 +150,7 @@ const BaseCard = ({ item, loading, style }) => {
             </Typography>
           )}
           <div className={classes.alignBottom}>
-            {loading ? (
+            {loading || fetching ? (
               <Skeleton width={80} height={20} />
             ) : (
               <Typography component="h4" className={classes.label}>
@@ -160,12 +158,12 @@ const BaseCard = ({ item, loading, style }) => {
               </Typography>
             )}
             <div className={classes.alignRight}>
-              {!loading && (
+              {!(loading || fetching) && (
                 <Typography component="h4" className={classes.label}>
                   Price
                 </Typography>
               )}
-              {loading ? (
+              {loading || fetching ? (
                 <Skeleton width={80} height={20} />
               ) : (
                 <Typography

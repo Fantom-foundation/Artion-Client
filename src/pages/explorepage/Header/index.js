@@ -32,7 +32,7 @@ const ExploreHeader = () => {
             styles.button,
             cat.id === category ? styles.selected : null
           )}
-          startIcon={<cat.icon />}
+          startIcon={<img src={cat.icon} />}
           onClick={() => handleSelectCategory(cat.id)}
         >
           {cat.label}
