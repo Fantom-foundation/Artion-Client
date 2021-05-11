@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import cx from 'classnames';
+import Skeleton from 'react-loading-skeleton';
 import { makeStyles } from '@material-ui/core/styles';
 import Box from '@material-ui/core/Box';
 import Card from '@material-ui/core/Card';
@@ -62,7 +63,7 @@ const useStyles = makeStyles({
     left: 0,
     width: '100%',
     height: '100%',
-    borderRadius: 10,
+    borderRadius: '10px !important',
     backgroundSize: 'contain',
   },
   mediaMissing: {
@@ -90,7 +91,7 @@ const useStyles = makeStyles({
   },
 });
 
-const BaseCard = ({ item, style }) => {
+const BaseCard = ({ item, loading, style }) => {
   const classes = useStyles();
 
   const [info, setInfo] = useState(null);
@@ -98,7 +99,7 @@ const BaseCard = ({ item, style }) => {
   const { collections } = useSelector(state => state.Collections);
 
   const collection = collections.find(
-    col => col.address === item.contractAddress
+    col => col.address === item?.contractAddress
   );
 
   const getTokenURI = async tokenURI => {
@@ -111,48 +112,89 @@ const BaseCard = ({ item, style }) => {
   };
 
   useEffect(() => {
-    getTokenURI(item.tokenURI);
+    if (item) {
+      getTokenURI(item.tokenURI);
+    }
   }, [item]);
 
-  return (
-    <Box style={style} className={classes.root}>
-      <Card className={classes.card}>
-        <Link
-          to={`/explore/${item.contractAddress}/${item.tokenID}`}
-          className={classes.link}
-        >
-          <div className={classes.mediaBox}>
+  const renderContent = () => {
+    return (
+      <>
+        <div className={classes.mediaBox}>
+          {loading ? (
+            <Skeleton
+              width="100%"
+              height="100%"
+              className={classes.media}
+              // style={{ position: 'absolute' }}
+            />
+          ) : (
             <CardMedia
               className={cx(classes.media, info?.image && classes.mediaMissing)}
               image={info?.image || PLACEHOLDER}
               title={info?.name}
             />
-          </div>
-          <CardContent className={classes.content}>
+          )}
+        </div>
+        <CardContent className={classes.content}>
+          {loading ? (
+            <Skeleton width="100%" height={20} />
+          ) : (
             <Typography component="h4" className={classes.collection}>
               {collection?.name}
             </Typography>
+          )}
+          {loading ? (
+            <Skeleton width="100%" height={20} />
+          ) : (
             <Typography component="h4" className={classes.name}>
               {info?.name}
             </Typography>
-            <div className={classes.alignBottom}>
+          )}
+          <div className={classes.alignBottom}>
+            {loading ? (
+              <Skeleton width={80} height={20} />
+            ) : (
               <Typography component="h4" className={classes.label}>
                 1 of 5
               </Typography>
-              <div className={classes.alignRight}>
+            )}
+            <div className={classes.alignRight}>
+              {!loading && (
                 <Typography component="h4" className={classes.label}>
                   Price
                 </Typography>
+              )}
+              {loading ? (
+                <Skeleton width={80} height={20} />
+              ) : (
                 <Typography
                   component="h4"
                   className={cx(classes.label, classes.price)}
                 >
-                  Ξ {item.price}
+                  Ξ {item?.price}
                 </Typography>
-              </div>
+              )}
             </div>
-          </CardContent>
-        </Link>
+          </div>
+        </CardContent>
+      </>
+    );
+  };
+
+  return (
+    <Box style={style} className={classes.root}>
+      <Card className={classes.card}>
+        {item ? (
+          <Link
+            to={`/explore/${item.contractAddress}/${item.tokenID}`}
+            className={classes.link}
+          >
+            {renderContent()}
+          </Link>
+        ) : (
+          renderContent()
+        )}
       </Card>
     </Box>
   );

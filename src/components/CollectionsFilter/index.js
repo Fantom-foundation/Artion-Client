@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import cx from 'classnames';
+import Skeleton from 'react-loading-skeleton';
 import { makeStyles } from '@material-ui/core/styles';
 import {
   Accordion,
@@ -9,13 +10,12 @@ import {
   Tooltip,
   InputBase,
 } from '@material-ui/core';
-
-import Skeleton from 'react-loading-skeleton';
-
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import PlaylistPlayIcon from '@material-ui/icons/PlaylistPlay';
-import SearchIcon from '@material-ui/icons/Search';
-import CheckCircleIcon from '@material-ui/icons/CheckCircle';
+import {
+  ExpandMore as ExpandMoreIcon,
+  PlaylistPlay as PlaylistPlayIcon,
+  Search as SearchIcon,
+  CheckCircle as CheckCircleIcon,
+} from '@material-ui/icons';
 
 import FilterActions from '../../actions/filter.actions';
 import nftIcon from '../../assets/svgs/nft.svg';
