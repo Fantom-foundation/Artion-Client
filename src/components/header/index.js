@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useHistory, withRouter, NavLink, Link } from 'react-router-dom';
 import cx from 'classnames';
+import Skeleton from 'react-loading-skeleton';
 import MenuItem from '@material-ui/core/MenuItem';
 import Menu from '@material-ui/core/Menu';
 import { UnsupportedChainIdError, useWeb3React } from '@web3-react/core';
@@ -44,6 +45,7 @@ const NiftyHeader = ({ light }) => {
 
   const [stationModalVisible, setStationModalVisible] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const isMenuOpen = Boolean(anchorEl);
 
@@ -53,11 +55,13 @@ const NiftyHeader = ({ light }) => {
     dispatch(WalletConnectActions.connectWallet(token));
     dispatch(AuthActions.fetchStart());
     try {
+      setLoading(true);
       const { data } = await getAccountDetails(token);
       dispatch(AuthActions.fetchSuccess(data));
     } catch {
       dispatch(AuthActions.fetchFailed());
     }
+    setLoading(false);
   };
 
   const changeNetwork = async () => {
@@ -87,24 +91,37 @@ const NiftyHeader = ({ light }) => {
     }
   };
 
+  const init = () => {
+    if (isWalletConnected) return;
+
+    changeNetwork();
+    login();
+  };
+
   useEffect(() => {
     if (account) {
-      changeNetwork();
-      login();
+      init();
+    } else {
+      handleSignOut();
     }
   }, [account]);
 
   const handleConnectWallet = () => {
     activate(injected, undefined, true)
-      .then(() => {})
+      .then(() => {
+        if (account) login();
+      })
       .catch(async error => {
         if (error instanceof UnsupportedChainIdError) {
           await activate(injected);
+          if (account) login();
         }
       });
   };
 
   useEffect(() => {
+    if (isWalletConnected) return;
+
     handleConnectWallet();
   }, []);
 
@@ -227,7 +244,9 @@ const NiftyHeader = ({ light }) => {
             className={cx(styles.account, styles.menuLink)}
             onClick={handleProfileMenuOpen}
           >
-            {user.imageHash ? (
+            {loading ? (
+              <Skeleton className={styles.avatar} />
+            ) : user.imageHash ? (
               <img
                 src={`https://gateway.pinata.cloud/ipfs/${user.imageHash}`}
                 width="24"
@@ -239,9 +258,15 @@ const NiftyHeader = ({ light }) => {
             )}
             <div className={styles.profile}>
               <div className={styles.address}>
-                {user.alias || shortenAddress(account)}
+                {loading ? (
+                  <Skeleton width={120} />
+                ) : (
+                  user.alias || shortenAddress(account)
+                )}
               </div>
-              <div className={styles.network}>{NETWORK_LABEL[chainId]}</div>
+              <div className={styles.network}>
+                {loading ? <Skeleton width={80} /> : NETWORK_LABEL[chainId]}
+              </div>
             </div>
 
             <ExpandMore
