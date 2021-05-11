@@ -15,6 +15,12 @@ const NFTsGrid = ({ items, loading }) => {
             <Card item={item} />
           </div>
         ))}
+        {loading &&
+          new Array(20).fill(0).map((_, idx) => (
+            <div className={styles.nft} key={idx}>
+              <Card loading />
+            </div>
+          ))}
       </div>
       {loading && (
         <div className={styles.spinner}>

@@ -1,47 +1,47 @@
-import ImageIcon from '@material-ui/icons/Image';
-import DnsIcon from '@material-ui/icons/Dns';
-import PublicIcon from '@material-ui/icons/Public';
-import CardGiftcardIcon from '@material-ui/icons/CardGiftcard';
-import CollectionsIcon from '@material-ui/icons/Collections';
-import SportsTennisIcon from '@material-ui/icons/SportsTennis';
-import BuildIcon from '@material-ui/icons/Build';
+import iconArt from 'assets/svgs/art.svg';
+import iconCollectibles from 'assets/svgs/collectibles.svg';
+import iconSports from 'assets/svgs/sports.svg';
+import iconUtility from 'assets/svgs/utility.svg';
+import iconTrading from 'assets/svgs/trading.svg';
+import iconVirtual from 'assets/svgs/virtual.svg';
+import iconDomain from 'assets/svgs/domain.svg';
 
 export const GroupFilters = ['All Items', 'Single Items', 'Bundles'];
 
 export const Categories = [
   {
     id: 0,
-    icon: ImageIcon,
+    icon: iconArt,
     label: 'Art',
   },
   {
     id: 1,
-    icon: CollectionsIcon,
+    icon: iconCollectibles,
     label: 'Collectibles',
   },
   {
     id: 2,
-    icon: SportsTennisIcon,
+    icon: iconSports,
     label: 'Sports',
   },
   {
     id: 3,
-    icon: BuildIcon,
+    icon: iconUtility,
     label: 'Utility',
   },
   {
     id: 4,
-    icon: CardGiftcardIcon,
+    icon: iconTrading,
     label: 'Trading Cards',
   },
   {
     id: 5,
-    icon: PublicIcon,
+    icon: iconVirtual,
     label: 'Virtual Worlds',
   },
   {
     id: 6,
-    icon: DnsIcon,
+    icon: iconDomain,
     label: 'Domain Names',
   },
 ];

@@ -5,6 +5,7 @@ import { Chart } from 'react-charts';
 import cx from 'classnames';
 import axios from 'axios';
 import { ethers } from 'ethers';
+import Loader from 'react-loader-spinner';
 import TimelineIcon from '@material-ui/icons/Timeline';
 import LocalOfferIcon from '@material-ui/icons/LocalOffer';
 import TocIcon from '@material-ui/icons/Toc';
@@ -108,8 +109,9 @@ const NFTItem = () => {
   const [winningBid, setWinningBid] = useState(null);
   const [views, setViews] = useState();
   const [now, setNow] = useState(new Date());
+  const [loading, setLoading] = useState(false);
 
-  const collections = useSelector(state => state.Collections);
+  const { collections } = useSelector(state => state.Collections);
   const { isConnected: isWalletConnected } = useSelector(
     state => state.ConnectWallet
   );
@@ -121,6 +123,7 @@ const NFTItem = () => {
   };
 
   const getTokenURI = async () => {
+    setLoading(true);
     try {
       const { data: tokenURI } = await fetchTokenURI(address, tokenID);
       const { data } = await axios.get(tokenURI);
@@ -128,6 +131,7 @@ const NFTItem = () => {
     } catch {
       console.log('Token URI not available');
     }
+    setLoading(false);
   };
 
   const getTokenOwner = async () => {
@@ -769,7 +773,7 @@ const NFTItem = () => {
 
   const canWithdraw = () =>
     bid?.bidder === account &&
-    bid.lastBidTime + withdrawLockTime < now.getTime() / 1000;
+    bid?.lastBidTime + withdrawLockTime < now.getTime() / 1000;
 
   return (
     <div
@@ -840,7 +844,19 @@ const NFTItem = () => {
         <div className={styles.topContainer}>
           <div className={styles.itemSummary}>
             <div className={styles.itemMedia}>
-              <img src={info?.image} />
+              <div className={styles.media}>
+                {loading ? (
+                  <Loader
+                    type="Oval"
+                    color="#007BFF"
+                    height={32}
+                    width={32}
+                    className={styles.loader}
+                  />
+                ) : (
+                  <img src={info?.image} />
+                )}
+              </div>
             </div>
             <div className={styles.itemInfoCont}>
               {info?.properties && (

@@ -103,7 +103,7 @@ const AccountDetails = () => {
     if (tokens.length === count) return;
 
     const obj = e.currentTarget;
-    if (obj.scrollHeight - obj.clientHeight - obj.scrollTop < 50) {
+    if (obj.scrollHeight - obj.clientHeight - obj.scrollTop < 100) {
       fetchNFTs(page + 1);
     }
   };

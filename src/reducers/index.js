@@ -1,6 +1,4 @@
 import { combineReducers } from 'redux';
-import { persistReducer } from 'redux-persist';
-import storage from 'redux-persist/lib/storage';
 
 import { Auth } from './auth.reducers';
 import { ConnectWallet } from './connectwallet.reducers';
@@ -9,12 +7,6 @@ import { Modal } from './modal.reducers';
 import { Filter } from './filter.reducers';
 import { Collections } from './collections.reducers';
 import { Tokens } from './tokens.reducers';
-
-const persistConfig = {
-  key: 'collections',
-  storage,
-  whitelist: ['Collections'],
-};
 
 const rootReducer = combineReducers({
   Auth,
@@ -26,4 +18,4 @@ const rootReducer = combineReducers({
   Tokens,
 });
 
-export default persistReducer(persistConfig, rootReducer);
+export default rootReducer;
