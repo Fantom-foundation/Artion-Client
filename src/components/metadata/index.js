@@ -270,9 +270,6 @@ const Metadata = () => {
       console.log(result);
 
       const jsonHash = result.data.jsonHash;
-      const fileHash = result.data.fileHash;
-
-      // let status = result.data.status;
 
       let fnft_sc = await SCHandlers.loadContract(
         FantomNFTConstants.MAINNETADDRESS,
@@ -295,63 +292,15 @@ const Metadata = () => {
         setCurrentMintingStep(3);
         // console.log('confirmed tnx is ', confirmedTnx);
         let evtCaught = confirmedTnx.logs[0].topics;
-        let minterAddress = confirmedTnx.to;
         let mintedTkId = BigNumber.from(evtCaught[3]);
         setLastMintedTkId(mintedTkId.toNumber());
-        let formdata = new FormData();
-        formdata.append('contractAddress', minterAddress);
-        formdata.append('tokenID', mintedTkId);
-        formdata.append('symbol', symbol);
-        formdata.append('royalty', royalty);
-        formdata.append('category', category);
-        formdata.append('imageHash', fileHash);
-        formdata.append('jsonHash', jsonHash);
-        formdata.append('tokenType', 721);
-        formdata.append('account', account);
-
-        try {
-          let saveNewTKResult = await axios({
-            method: 'post',
-            url: 'https://fmarket.fantom.network/api/nftitems/savenewtoken',
-            data: formdata,
-            headers: {
-              'Content-Type': 'multipart/form-data',
-              Authorization: 'Bearer ' + authToken,
-            },
-          });
-          console.log('save token result is ');
-          console.log(saveNewTKResult);
-          let status = saveNewTKResult.status;
-          switch (status) {
-            case 'success':
-              {
-                resetMintingStatus();
-                createNotification('info');
-              }
-              break;
-            case 'failed':
-              {
-                resetMintingStatus();
-                createNotification('error');
-              }
-              break;
-            default: {
-              resetMintingStatus();
-              console.log('default status');
-            }
-          }
-        } catch (error) {
-          resetMintingStatus();
-          createNotification('error');
-        }
       } catch (error) {
-        resetMintingStatus();
         createNotification('error');
       }
     } catch (error) {
-      resetMintingStatus();
       createNotification('error');
     }
+    resetMintingStatus();
   };
 
   return (
