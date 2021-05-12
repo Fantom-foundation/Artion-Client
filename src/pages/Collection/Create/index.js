@@ -3,12 +3,13 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useHistory } from 'react-router';
 import cx from 'classnames';
 import axios from 'axios';
-import { Menu, MenuItem, Button } from '@material-ui/core';
+import { Menu, MenuItem } from '@material-ui/core';
 import PublishIcon from '@material-ui/icons/Publish';
 import CloseIcon from '@material-ui/icons/Close';
 
 import { Categories } from 'constants/filter.constants';
 import HeaderActions from 'actions/header.actions';
+import Header from 'components/header';
 
 import webIcon from 'assets/svgs/web.svg';
 import discordIcon from 'assets/imgs/discord.png';
@@ -197,6 +198,7 @@ const CollectionCreate = () => {
 
   return (
     <div className={styles.container}>
+      <Header light />
       <div className={styles.inner}>
         <div className={styles.title}>Create Collection</div>
 
@@ -370,9 +372,9 @@ const CollectionCreate = () => {
         </div>
 
         <div className={styles.buttonsWrapper}>
-          <Button className={styles.createButton} onClick={handleSave}>
+          <div className={styles.createButton} onClick={handleSave}>
             Create
-          </Button>
+          </div>
         </div>
       </div>
       {renderMenu}
