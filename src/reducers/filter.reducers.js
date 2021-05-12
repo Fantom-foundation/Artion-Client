@@ -1,7 +1,6 @@
 import FilterConstants, { SortByOptions } from '../constants/filter.constants';
 
 const initialState = {
-  statusNew: false,
   statusBuyNow: false,
   statusHasOffers: false,
   statusOnAuction: false,

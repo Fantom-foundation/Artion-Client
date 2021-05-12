@@ -27,6 +27,7 @@ import logoBlue from 'assets/svgs/fantom_logo.svg';
 import iconUser from 'assets/svgs/user.svg';
 import iconSettings from 'assets/svgs/settings.svg';
 import iconAdd from 'assets/svgs/add.svg';
+import iconSwap from 'assets/svgs/swap.svg';
 import iconExit from 'assets/svgs/exit.svg';
 
 import styles from './styles.module.scss';
@@ -85,7 +86,7 @@ const NiftyHeader = ({ light }) => {
         method: 'wallet_addEthereumChain',
         params: [params],
       });
-      handleConnectWallet();
+      setTimeout(handleConnectWallet, 100);
     } catch (error) {
       console.log(error);
     }
@@ -196,7 +197,7 @@ const NiftyHeader = ({ light }) => {
         Create Collection
       </MenuItem>
       <MenuItem classes={{ root: styles.menuItem }} onClick={openWrapStation}>
-        <img src={iconAdd} className={styles.menuIcon} />
+        <img src={iconSwap} className={styles.menuIcon} />
         FTM / WFTM Station
       </MenuItem>
       <div className={styles.menuSeparator} />

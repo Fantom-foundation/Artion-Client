@@ -68,12 +68,9 @@ const ExploreStatus = () => {
   const classes = useStyles();
   const [expanded, setExpanded] = useState(false);
 
-  const {
-    statusNew,
-    statusBuyNow,
-    statusHasOffers,
-    statusOnAuction,
-  } = useSelector(state => state.Filter);
+  const { statusBuyNow, statusHasOffers, statusOnAuction } = useSelector(
+    state => state.Filter
+  );
 
   const handleStatusChange = (field, selected) => {
     dispatch(FilterActions.updateStatusFilter(field, selected));
@@ -88,9 +85,6 @@ const ExploreStatus = () => {
     switch (name) {
       case 'buynow':
         handleStatusChange('statusBuyNow', !statusBuyNow);
-        break;
-      case 'new':
-        handleStatusChange('statusNew', !statusNew);
         break;
       case 'hasOffers':
         handleStatusChange('statusHasOffers', !statusHasOffers);
@@ -122,20 +116,6 @@ const ExploreStatus = () => {
         </AccordionSummary>
         <AccordionDetails className={classes.body}>
           <FormGroup className={classes.statusFormGroup}>
-            <FormControlLabel
-              className={cx(
-                classes.formControl,
-                statusNew ? classes.selected : null
-              )}
-              control={
-                <Checkbox
-                  checked={statusNew}
-                  onChange={handleCheckgroupChanges}
-                  name="new"
-                />
-              }
-              label="New"
-            />
             <FormControlLabel
               className={cx(
                 classes.formControl,
