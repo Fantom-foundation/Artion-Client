@@ -154,7 +154,7 @@ const BaseCard = ({ item, loading, style }) => {
               <Skeleton width={80} height={20} />
             ) : (
               <Typography component="h4" className={classes.label}>
-                1 of 5
+                1 of 1
               </Typography>
             )}
             <div className={classes.alignRight}>

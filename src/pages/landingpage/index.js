@@ -1,14 +1,19 @@
 import React, { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
-import Slider from 'react-slick';
 
 import HeaderActions from 'actions/header.actions';
-import NFTCard from 'components/NFTCard';
 import Header from 'components/header';
+import FakeCard from 'components/FakeCard';
 
 import bg1 from 'assets/svgs/bg1.svg';
 import bg2 from 'assets/svgs/bg2.svg';
+
+import card1 from 'assets/imgs/cards/1.gif';
+import card2 from 'assets/imgs/cards/2.png';
+import card3 from 'assets/imgs/cards/3.png';
+import card4 from 'assets/imgs/cards/4.png';
+import card5 from 'assets/imgs/cards/5.png';
 
 import styles from './styles.module.scss';
 
@@ -22,8 +27,8 @@ const LandingPage = () => {
   return (
     <div className={styles.container}>
       <div className={styles.background}>
-        <img src={bg1} className={styles.bg} />
-        <img src={bg2} className={styles.bg} />
+        <img src={bg1} className={styles.bg1} />
+        <img src={bg2} className={styles.bg2} />
       </div>
       <Header />
       <div className={styles.body}>
@@ -41,21 +46,57 @@ const LandingPage = () => {
         </div>
       </div>
 
-      <div className={styles.section}>
-        <div className={styles.sectiontitle}>Current Auctions</div>
-        <Slider dots={false} infinite slidesToScroll={1}>
-          {Array.from({ length: 10 }, (_, i) => i).map((_, idx) => (
-            <div key={idx}>
-              <NFTCard
-                item={{
-                  contractAddress: '0x76b03166c8ab1462b046d7745c77eaa83e656a8c',
-                  tokenURI:
-                    'https://gateway.pinata.cloud/ipfs/QmeeXHcqEtMj3sJCvrreTTAZnWBeEsTq2gv89ThKBwQFNJ',
-                }}
-              />
-            </div>
-          ))}
-        </Slider>
+      <div className={styles.cardsGroup}>
+        <div className={styles.card1}>
+          <FakeCard
+            item={{
+              image: card1,
+              category: 'Anonymous',
+              name: 'Bitcoin Doge',
+              price: 600,
+            }}
+          />
+        </div>
+        <div className={styles.card2}>
+          <FakeCard
+            item={{
+              image: card2,
+              category: 'Anonymous',
+              name: 'C-Princess',
+              price: 150,
+            }}
+          />
+        </div>
+        <div className={styles.card3}>
+          <FakeCard
+            item={{
+              image: card3,
+              category: 'Anonymous',
+              name: 'PunkG',
+              price: 300,
+            }}
+          />
+        </div>
+        <div className={styles.card4}>
+          <FakeCard
+            item={{
+              image: card4,
+              category: 'Anonymous',
+              name: 'TradingCard',
+              price: 50,
+            }}
+          />
+        </div>
+        <div className={styles.card5}>
+          <FakeCard
+            item={{
+              image: card5,
+              category: 'Anonymous',
+              name: 'fUni',
+              price: 1000,
+            }}
+          />
+        </div>
       </div>
     </div>
   );

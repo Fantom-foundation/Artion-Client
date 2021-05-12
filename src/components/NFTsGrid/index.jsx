@@ -1,6 +1,4 @@
 import React from 'react';
-import Loader from 'react-loader-spinner';
-import 'react-loader-spinner/dist/loader/css/react-spinner-loader.css';
 
 import Card from '../NFTCard';
 
@@ -22,11 +20,6 @@ const NFTsGrid = ({ items, loading }) => {
             </div>
           ))}
       </div>
-      {loading && (
-        <div className={styles.spinner}>
-          <Loader type="ThreeDots" color="#007BFF" height={32} width={32} />
-        </div>
-      )}
     </div>
   );
 };

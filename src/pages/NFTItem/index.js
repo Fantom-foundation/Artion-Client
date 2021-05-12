@@ -6,6 +6,7 @@ import cx from 'classnames';
 import axios from 'axios';
 import { ethers } from 'ethers';
 import Loader from 'react-loader-spinner';
+import 'react-loader-spinner/dist/loader/css/react-spinner-loader.css';
 import TimelineIcon from '@material-ui/icons/Timeline';
 import LocalOfferIcon from '@material-ui/icons/LocalOffer';
 import TocIcon from '@material-ui/icons/Toc';

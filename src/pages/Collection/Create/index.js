@@ -188,7 +188,7 @@ const CollectionCreate = () => {
           className={styles.category}
           onClick={() => selectCategory(cat.id)}
         >
-          <cat.icon />
+          <img src={cat.icon} />
           <span className={styles.categoryLabel}>{cat.label}</span>
         </MenuItem>
       ))}
@@ -267,7 +267,7 @@ const CollectionCreate = () => {
                 key={idx}
                 onClick={() => deselectCategory(cat.id)}
               >
-                <cat.icon className={styles.categoryIcon} />
+                <img src={cat.icon} className={styles.categoryIcon} />
                 <span className={styles.categoryLabel}>{cat.label}</span>
                 <CloseIcon className={styles.closeIcon} />
               </div>
