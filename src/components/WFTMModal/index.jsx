@@ -172,7 +172,7 @@ const WFTMModal = ({ visible, onClose }) => {
             onClick={() =>
               amount.length &&
               parseFloat(amount) > 0 &&
-              parseFloat(amount) < (wrap ? balance - 0.01 : wrappedBalance) &&
+              parseFloat(amount) <= (wrap ? balance - 0.01 : wrappedBalance) &&
               handleWrapFTM()
             }
           >
