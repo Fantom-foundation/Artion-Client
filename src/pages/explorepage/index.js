@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useParams } from 'react-router-dom';
+import { AccountCircle } from '@material-ui/icons';
 
 import StatusFilter from 'components/StatusFilter';
 import CollectionsFilter from 'components/CollectionsFilter';
@@ -7,21 +9,39 @@ import ExploreHeader from './Header';
 import ExploreFilterHeader from './Body/FilterHeader';
 import NFTsGrid from 'components/NFTsGrid';
 import Header from 'components/header';
-import { fetchCollections, fetchTokens } from 'api';
+import { getUserAccountDetails, fetchCollections, fetchTokens } from 'api';
 import CollectionsActions from 'actions/collections.actions';
 import TokensActions from 'actions/tokens.actions';
 import HeaderActions from 'actions/header.actions';
+import { shortenAddress } from 'utils';
 
-import './styles.css';
+import styles from './styles.module.scss';
 
 const ExploreAllPage = () => {
   const dispatch = useDispatch();
 
+  const { uid } = useParams();
+
   const [page, setPage] = useState(0);
+  const [user, setUser] = useState({});
   const [fetchInterval, setFetchInterval] = useState(null);
 
   const { fetching, tokens, count } = useSelector(state => state.Tokens);
   const { collections, category } = useSelector(state => state.Filter);
+  // const { user: me } = useSelector(state => state.Auth);
+
+  const getUserDetails = async account => {
+    try {
+      const { data } = await getUserAccountDetails(account);
+      setUser(data);
+    } catch {
+      setUser({});
+    }
+  };
+
+  useEffect(() => {
+    getUserDetails(uid);
+  }, [uid]);
 
   useEffect(() => {
     dispatch(HeaderActions.toggleSearchbar(true));
@@ -49,7 +69,7 @@ const ExploreAllPage = () => {
     dispatch(TokensActions.startFetching());
 
     try {
-      const { data } = await fetchTokens(step, collections, category);
+      const { data } = await fetchTokens(step, collections, category, uid);
       dispatch(TokensActions.fetchingSuccess(data.total, data.tokens));
       setPage(step);
     } catch {
@@ -81,24 +101,46 @@ const ExploreAllPage = () => {
   useEffect(() => {
     dispatch(TokensActions.resetTokens());
     fetchNFTs(0);
-  }, [collections, category]);
+  }, [collections, category, uid]);
 
   return (
     <>
       <Header light />
-      <div className="exploreAllPageContainer">
-        <div className="exploreSideBar">
+      <div className={styles.container}>
+        <div className={styles.sidebar}>
+          {uid && (
+            <div className={styles.profileWrapper}>
+              {user.imageHash ? (
+                <img
+                  src={`https://gateway.pinata.cloud/ipfs/${user.imageHash}`}
+                  className={styles.avatar}
+                />
+              ) : (
+                <AccountCircle className={styles.avatar} />
+              )}
+              <div className={styles.username}>{user.alias || ''}</div>
+              <a
+                href={`https://ftmscan.com/address/${uid}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={styles.account}
+              >
+                {shortenAddress(uid)}
+              </a>
+              <div className={styles.bio}>{user.bio || ''}</div>
+            </div>
+          )}
           <StatusFilter />
           <CollectionsFilter />
         </div>
-        <div className="exploreWithHeader">
-          <div className="exploreHeader">
+        <div className={styles.body}>
+          <div className={styles.header}>
             <ExploreHeader />
           </div>
-          <div className="exploreBodyFilterHeader">
+          <div className={styles.filterHeader}>
             <ExploreFilterHeader />
           </div>
-          <div className="exploreAllPannel" onScroll={handleScroll}>
+          <div className={styles.exploreAll} onScroll={handleScroll}>
             <NFTsGrid items={tokens} loading={fetching} />
           </div>
         </div>
