@@ -28,7 +28,7 @@ const AuctionModal = ({
     setEndTime(
       auction?.endTime ? new Date(auction.endTime * 1000) : new Date()
     );
-  }, [visible]);
+  }, [visible, auction]);
 
   const handleClick = e => {
     e.preventDefault();

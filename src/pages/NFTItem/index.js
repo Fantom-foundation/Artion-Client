@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { Chart } from 'react-charts';
@@ -108,13 +108,13 @@ const NFTItem = () => {
   const [listing, setListing] = useState(null);
   const [offers, setOffers] = useState([]);
   const [tradeHistory, setTradeHistory] = useState([]);
-  const [auction, setAuction] = useState(null);
   const [bid, setBid] = useState(null);
   const [winner, setWinner] = useState(null);
   const [winningBid, setWinningBid] = useState(null);
   const [views, setViews] = useState();
   const [now, setNow] = useState(new Date());
   const [loading, setLoading] = useState(false);
+  const auction = useRef(null);
 
   const { isConnected: isWalletConnected } = useSelector(
     state => state.ConnectWallet
@@ -175,9 +175,9 @@ const NFTItem = () => {
 
   const getAuctions = async () => {
     try {
-      const auction = await getAuction(address, tokenID);
-      if (auction.endTime !== 0) {
-        setAuction(auction);
+      const _auction = await getAuction(address, tokenID);
+      if (_auction.endTime !== 0) {
+        auction.current = _auction;
       }
     } catch (e) {
       console.log(e);
@@ -297,9 +297,9 @@ const NFTItem = () => {
     auctionContract.on('UpdateAuctionEndTime', (nft, id, _endTime) => {
       if (eventMatches(nft, id)) {
         const endTime = parseFloat(_endTime.toString());
-        if (auction) {
-          const newAuction = { ...auction, endTime };
-          setAuction(newAuction);
+        if (auction.current) {
+          const newAuction = { ...auction.current, endTime };
+          auction.current = newAuction;
         }
       }
     });
@@ -307,9 +307,9 @@ const NFTItem = () => {
     auctionContract.on('UpdateAuctionStartTime', (nft, id, _startTime) => {
       if (eventMatches(nft, id)) {
         const startTime = parseFloat(_startTime.toString());
-        if (auction) {
-          const newAuction = { ...auction, startTime };
-          setAuction(newAuction);
+        if (auction.current) {
+          const newAuction = { ...auction.current, startTime };
+          auction.current = newAuction;
         }
       }
     });
@@ -317,9 +317,9 @@ const NFTItem = () => {
     auctionContract.on('UpdateAuctionReservePrice', (nft, id, _price) => {
       if (eventMatches(nft, id)) {
         const price = parseFloat(_price.toString()) / 10 ** 18;
-        if (auction) {
-          const newAuction = { ...auction, reservePrice: price };
-          setAuction(newAuction);
+        if (auction.current) {
+          const newAuction = { ...auction.current, reservePrice: price };
+          auction.current = newAuction;
         }
       }
     });
@@ -353,15 +353,15 @@ const NFTItem = () => {
 
     auctionContract.on('AuctionCancelled', (nft, id) => {
       if (eventMatches(nft, id)) {
-        setAuction(null);
+        auction.current = null;
         setBid(null);
       }
     });
 
     auctionContract.on('AuctionResulted', (nft, id, winner, _winningBid) => {
       if (eventMatches(nft, id)) {
-        const newAuction = { ...auction, resulted: true };
-        setAuction(newAuction);
+        const newAuction = { ...auction.current, resulted: true };
+        auction.current = newAuction;
         setWinner(winner);
         const winningBid = parseFloat(_winningBid.toString()) / 10 ** 18;
         setWinningBid(winningBid);
@@ -455,8 +455,10 @@ const NFTItem = () => {
   };
 
   useEffect(() => {
-    getSalesContractStatus();
-    getAuctionContractStatus();
+    if (account) {
+      getSalesContractStatus();
+      getAuctionContractStatus();
+    }
   }, [address, account]);
 
   useEffect(() => {
@@ -642,9 +644,9 @@ const NFTItem = () => {
   };
 
   const handleUpdateAuction = async (_price, _startTime, _endTime) => {
-    if (!auction) return;
+    if (!auction.current) return;
 
-    if (parseFloat(_price) !== auction.reservePrice) {
+    if (parseFloat(_price) !== auction.current.reservePrice) {
       const price = ethers.utils.parseEther(_price);
       await updateAuctionReservePrice(
         address,
@@ -654,7 +656,7 @@ const NFTItem = () => {
     }
 
     const startTime = Math.floor(_startTime.getTime() / 1000);
-    if (startTime !== auction.startTime) {
+    if (startTime !== auction.current.startTime) {
       await updateAuctionStartTime(
         address,
         ethers.BigNumber.from(tokenID),
@@ -663,7 +665,7 @@ const NFTItem = () => {
     }
 
     const endTime = Math.floor(_endTime.getTime() / 1000);
-    if (endTime !== auction.endTime) {
+    if (endTime !== auction.current.endTime) {
       await updateAuctionEndTime(
         address,
         ethers.BigNumber.from(tokenID),
@@ -676,7 +678,7 @@ const NFTItem = () => {
 
   const cancelCurrentAuction = async () => {
     await cancelAuction(address, tokenID);
-    setAuction(null);
+    auction.current = null;
   };
 
   const handleResultAuction = async () => {
@@ -779,9 +781,10 @@ const NFTItem = () => {
     return `${s} seconds`;
   };
 
-  const auctionStarted = () => now.getTime() / 1000 >= auction?.startTime;
+  const auctionStarted = () =>
+    now.getTime() / 1000 >= auction.current?.startTime;
 
-  const auctionEnded = () => auction?.endTime <= now.getTime() / 1000;
+  const auctionEnded = () => auction.current?.endTime <= now.getTime() / 1000;
 
   const auctionActive = () => auctionStarted() && !auctionEnded();
 
@@ -798,7 +801,7 @@ const NFTItem = () => {
         <div className={styles.header}>
           {isMine ? (
             <>
-              {auction?.resulted === false ? (
+              {auction.current?.resulted === false ? (
                 <div
                   className={styles.headerButton}
                   onClick={cancelCurrentAuction}
@@ -806,12 +809,13 @@ const NFTItem = () => {
                   Cancel Auction
                 </div>
               ) : null}
-              {(!auction || auction.endTime > now.getTime() / 1000) && (
+              {(!auction.current ||
+                auction.current.endTime > now.getTime() / 1000) && (
                 <div
                   className={styles.headerButton}
                   onClick={() => setAuctionModalVisible(true)}
                 >
-                  {auction ? 'Update Auction' : 'Start Auction'}
+                  {auction.current ? 'Update Auction' : 'Start Auction'}
                 </div>
               )}
               {listing ? (
@@ -986,7 +990,7 @@ const NFTItem = () => {
                 &nbsp;{views} Views
               </div>
             </div>
-            {(winner || auction?.resulted === false) && (
+            {(winner || auction.current?.resulted === false) && (
               <div className={styles.panelWrapper}>
                 <Panel
                   icon={AccessTimeIcon}
@@ -995,18 +999,20 @@ const NFTItem = () => {
                       ? auctionEnded()
                         ? 'Sale ended'
                         : `Sale ends in ${formatDiff(
-                            auction.endTime
+                            auction.current.endTime
                           )} (${new Date(
-                            auction.endTime * 1000
+                            auction.current.endTime * 1000
                           ).toLocaleString()})`
-                      : `Sale starts in ${formatDiff(auction.startTime)}`
+                      : `Sale starts in ${formatDiff(
+                          auction.current.startTime
+                        )}`
                   }
                   fixed
                 >
                   <div className={styles.bids}>
                     {auctionEnded() ? (
                       <div className={styles.result}>
-                        {auction.resulted ? (
+                        {auction.current.resulted ? (
                           <>
                             {'Winner: '}
                             <Link to={`/address/${winner}`}>
@@ -1024,7 +1030,7 @@ const NFTItem = () => {
                       <div>
                         <div className={styles.bidtitle}>
                           Highest Bid
-                          {bid.bid < auction.reservePrice
+                          {bid.bid < auction.current.reservePrice
                             ? ' -- Reserve price not met.'
                             : ''}
                         </div>
@@ -1053,7 +1059,7 @@ const NFTItem = () => {
                           Place Bid
                         </div>
                       ))}
-                    {isMine && auctionEnded() && !auction.resulted && (
+                    {isMine && auctionEnded() && !auction.current.resulted && (
                       <div
                         className={styles.placeBid}
                         onClick={handleResultAuction}
@@ -1206,8 +1212,10 @@ const NFTItem = () => {
       <AuctionModal
         visible={auctionModalVisible}
         onClose={() => setAuctionModalVisible(false)}
-        onStartAuction={auction ? handleUpdateAuction : handleStartAuction}
-        auction={auction}
+        onStartAuction={
+          auction.current ? handleUpdateAuction : handleStartAuction
+        }
+        auction={auction.current}
         confirming={auctionStarting}
         approveContract={handleApproveAuctionContract}
         contractApproving={auctionContractApproving}
