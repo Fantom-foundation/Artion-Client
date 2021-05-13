@@ -48,41 +48,39 @@
 }
 
 .body {
-    margin-left: 20px;
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
+  margin-left: 20px;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .header {
-    height: 64px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border-bottom: 1px solid rgba(0, 0, 0, .1);
-    overflow-x: auto;
+  height: 64px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-bottom: 1px solid rgba(0, 0, 0, .1);
+  overflow-x: auto;
 }
 
 .exploreAll {
-    height: 92%;
-    overflow-y: auto;
-    margin-left: -40px;
-    padding-left: 40px;
-    padding-right: 10px;
+  height: 92%;
+  overflow-y: auto;
+  margin-left: -40px;
+  padding-left: 40px;
+  padding-right: 10px;
 }
 
-.MuiCheckbox-colorSecondary.Mui-checked {
+:global {
+  .MuiCheckbox-colorSecondary.Mui-checked {
     color: #007bff !important;
-}
-
-.MuiAccordionSummary-root {
-    box-shadow: 0px 0px 8px 0px rgb(156, 146, 146);
+  }
 }
 
 .filterHeader {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    box-sizing: border-box;
-    margin: 20px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-sizing: border-box;
+  margin: 20px 0;
 }

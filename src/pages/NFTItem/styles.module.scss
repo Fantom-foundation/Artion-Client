@@ -150,6 +150,11 @@
   }
 }
 
+.panelTitle {
+  display: flex;
+  align-items: center;
+}
+
 .itemInfoCont {
   margin: 20px;
   border-radius: 4px;

@@ -27,8 +27,14 @@ const ExploreAllPage = () => {
   const [fetchInterval, setFetchInterval] = useState(null);
 
   const { fetching, tokens, count } = useSelector(state => state.Tokens);
-  const { collections, category } = useSelector(state => state.Filter);
-  // const { user: me } = useSelector(state => state.Auth);
+  const {
+    collections,
+    category,
+    sortBy,
+    statusBuyNow,
+    statusHasOffers,
+    statusOnAuction,
+  } = useSelector(state => state.Filter);
 
   const getUserDetails = async account => {
     try {
@@ -69,7 +75,18 @@ const ExploreAllPage = () => {
     dispatch(TokensActions.startFetching());
 
     try {
-      const { data } = await fetchTokens(step, collections, category, uid);
+      const filterBy = [];
+      if (statusBuyNow) filterBy.push('listed');
+      if (statusHasOffers) filterBy.push('offer');
+      if (statusOnAuction) filterBy.push('hadBid');
+      const { data } = await fetchTokens(
+        step,
+        collections,
+        category,
+        sortBy,
+        filterBy,
+        uid
+      );
       dispatch(TokensActions.fetchingSuccess(data.total, data.tokens));
       setPage(step);
     } catch {
@@ -101,7 +118,15 @@ const ExploreAllPage = () => {
   useEffect(() => {
     dispatch(TokensActions.resetTokens());
     fetchNFTs(0);
-  }, [collections, category, uid]);
+  }, [
+    collections,
+    category,
+    sortBy,
+    statusBuyNow,
+    statusHasOffers,
+    statusOnAuction,
+    uid,
+  ]);
 
   return (
     <>
@@ -138,7 +163,7 @@ const ExploreAllPage = () => {
             <ExploreHeader />
           </div>
           <div className={styles.filterHeader}>
-            <ExploreFilterHeader />
+            <ExploreFilterHeader loading={fetching} />
           </div>
           <div className={styles.exploreAll} onScroll={handleScroll}>
             <NFTsGrid items={tokens} loading={fetching} />

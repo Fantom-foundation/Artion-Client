@@ -1,4 +1,4 @@
-import FilterConstants, { SortByOptions } from '../constants/filter.constants';
+import FilterConstants from '../constants/filter.constants';
 
 const initialState = {
   statusBuyNow: false,
@@ -7,7 +7,7 @@ const initialState = {
   collections: [],
   category: null,
   groupType: 0, // 0: All, 1: Single, 2: Bundles
-  sortBy: SortByOptions[0].id,
+  sortBy: 'viewed',
 };
 
 export function Filter(state = initialState, action) {
@@ -42,10 +42,7 @@ export function Filter(state = initialState, action) {
       };
     }
     default: {
-      return {
-        ...state,
-        sortBy: 1,
-      };
+      return state;
     }
   }
 }
