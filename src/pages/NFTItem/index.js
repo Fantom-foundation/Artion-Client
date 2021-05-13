@@ -455,8 +455,10 @@ const NFTItem = () => {
   };
 
   useEffect(() => {
-    getSalesContractStatus();
-    getAuctionContractStatus();
+    if (account) {
+      getSalesContractStatus();
+      getAuctionContractStatus();
+    }
   }, [address, account]);
 
   useEffect(() => {

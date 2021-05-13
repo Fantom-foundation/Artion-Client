@@ -115,7 +115,7 @@ export const updateAuctionReservePrice = async (
   reservePrice
 ) => {
   const contract = await getAuctionContract();
-  await contract.updateAuctionEndTime(nftAddress, tokenId, reservePrice);
+  await contract.updateAuctionReservePrice(nftAddress, tokenId, reservePrice);
 };
 
 export const withdrawBid = async (nftAddress, tokenId) => {
