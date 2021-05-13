@@ -179,7 +179,7 @@ const NiftyHeader = ({ light }) => {
           onClick={goToMyProfile}
         >
           <img src={iconUser} className={styles.menuIcon} />
-          My Profile
+          My Items
         </MenuItem>
       )}
       <MenuItem

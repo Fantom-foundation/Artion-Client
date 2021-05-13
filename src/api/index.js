@@ -60,10 +60,24 @@ export const fetchCollections = async () => {
   return res.data;
 };
 
+export const fetchCollection = async contractAddress => {
+  const res = await axios({
+    method: 'post',
+    url: `${BASE_URL}/api/collection/getCollectionInfo`,
+    data: JSON.stringify({ contractAddress }),
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+  return res.data;
+};
+
 export const fetchTokens = async (
   step,
   collections = [],
   category = null,
+  sortBy = 'listedAt',
+  filterBy = [],
   address = null
 ) => {
   const data = { step };
@@ -76,6 +90,10 @@ export const fetchTokens = async (
   if (address) {
     data.address = address;
   }
+  if (filterBy.length) {
+    data.filterby = filterBy;
+  }
+  data.sortby = sortBy;
   const res = await axios({
     method: 'post',
     url: `${BASE_URL}/api/nftitems/fetchTokens`,

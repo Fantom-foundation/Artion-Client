@@ -48,36 +48,28 @@ export const Categories = [
 
 export const SortByOptions = [
   {
-    id: 0,
+    id: 'listedAt',
     label: 'Recently Listed',
   },
   {
-    id: 1,
-    label: 'Recently Created',
-  },
-  {
-    id: 2,
+    id: 'soldAt',
     label: 'Recently Sold',
   },
   {
-    id: 3,
+    id: 'saleEndsAt',
     label: 'Ending Soon',
   },
   {
-    id: 4,
+    id: 'price',
     label: 'Cheapest',
   },
   {
-    id: 5,
+    id: 'lastSalePrice',
     label: 'Highest Last Sale',
   },
   {
-    id: 6,
+    id: 'viewed',
     label: 'Most Viewed',
-  },
-  {
-    id: 7,
-    label: 'Oldest',
   },
 ];
 

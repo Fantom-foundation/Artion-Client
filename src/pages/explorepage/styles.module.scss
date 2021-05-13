@@ -1,0 +1,86 @@
+.container {
+    padding-top: 109px;
+    height: 100vh;
+    box-sizing: border-box;
+    display: flex;
+    padding-left: 20px;
+}
+
+.sidebar {
+    flex: 0 0 320px;
+    display: flex;
+    flex-direction: column;
+}
+
+.profileWrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.avatar {
+  width: 100px !important;
+  height: 100px !important;
+  border-radius: 50px;
+}
+
+.username {
+  margin-top: 8px;
+  font-size: 24px;
+  font-weight: 600;
+  color: #333;
+}
+
+.address {
+  margin-top: 8px;
+  font-size: 18px;
+  font-weight: 500;
+  color: #333;
+}
+
+.bio {
+  margin-top: 8px;
+  font-size: 16px;
+  font-weight: 400;
+  color: #555;
+  text-align: center;
+}
+
+.body {
+  margin-left: 20px;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  height: 64px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-bottom: 1px solid rgba(0, 0, 0, .1);
+  overflow-x: auto;
+}
+
+.exploreAll {
+  height: 92%;
+  overflow-y: auto;
+  margin-left: -40px;
+  padding-left: 40px;
+  padding-right: 10px;
+}
+
+:global {
+  .MuiCheckbox-colorSecondary.Mui-checked {
+    color: #007bff !important;
+  }
+}
+
+.filterHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-sizing: border-box;
+  margin: 20px 0;
+}

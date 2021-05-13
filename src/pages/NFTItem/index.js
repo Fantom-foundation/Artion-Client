@@ -7,6 +7,7 @@ import axios from 'axios';
 import { ethers } from 'ethers';
 import Loader from 'react-loader-spinner';
 import 'react-loader-spinner/dist/loader/css/react-spinner-loader.css';
+import Skeleton from 'react-loading-skeleton';
 import TimelineIcon from '@material-ui/icons/Timeline';
 import LocalOfferIcon from '@material-ui/icons/LocalOffer';
 import TocIcon from '@material-ui/icons/Toc';
@@ -26,6 +27,7 @@ import {
   increaseViewCount,
   getOffers,
   getTradeHistory,
+  fetchCollection,
 } from '../../api';
 import {
   getSalesContract,
@@ -88,6 +90,8 @@ const NFTItem = () => {
   const [withdrawLockTime, setWithdrawLockTime] = useState(0);
   const [info, setInfo] = useState();
   const [owner, setOwner] = useState();
+  const [collection, setCollection] = useState();
+  const [collectionLoading, setCollectionLoading] = useState(false);
 
   const [sellModalVisible, setSellModalVisible] = useState(false);
   const [offerModalVisible, setOfferModalVisible] = useState(false);
@@ -112,12 +116,9 @@ const NFTItem = () => {
   const [now, setNow] = useState(new Date());
   const [loading, setLoading] = useState(false);
 
-  const { collections } = useSelector(state => state.Collections);
   const { isConnected: isWalletConnected } = useSelector(
     state => state.ConnectWallet
   );
-
-  const collection = collections.find(col => col.address === address);
 
   const isLoggedIn = () => {
     return isWalletConnected && chainId === 250;
@@ -380,6 +381,17 @@ const NFTItem = () => {
     setWithdrawLockTime(lockTime);
   };
 
+  const getCollection = async () => {
+    setCollectionLoading(true);
+    try {
+      const { data } = await fetchCollection(address);
+      setCollection(data);
+    } catch (err) {
+      console.log(err);
+    }
+    setCollectionLoading(false);
+  };
+
   useEffect(() => {
     addEventListeners();
     getAuctionConfiguration();
@@ -449,6 +461,7 @@ const NFTItem = () => {
 
   useEffect(() => {
     addNFTContractEventListeners();
+    getCollection();
   }, [address]);
 
   const handleApproveSalesContract = async () => {
@@ -867,68 +880,74 @@ const NFTItem = () => {
               )}
               <Panel
                 icon={VerticalSplitIcon}
-                title={`About ${collection?.collectionName ||
-                  collection?.name}`}
+                title={
+                  <div className={styles.panelTitle}>
+                    About&nbsp;
+                    {collectionLoading ? (
+                      <Skeleton width={80} height={20} />
+                    ) : (
+                      collection?.collectionName || collection?.name
+                    )}
+                  </div>
+                }
               >
                 <div className={styles.panelBody}>
                   <div className={styles.collectionDescription}>
                     {collection?.description || 'Unverified Collection'}
                   </div>
 
-                  {collection?.isVerified && (
-                    <div className={styles.socialLinks}>
-                      {collection.siteUrl?.length > 0 && (
-                        <a
-                          href={collection.siteUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className={styles.socialLink}
-                        >
-                          <img src={webIcon} />
-                        </a>
-                      )}
-                      {collection.twitterHandle?.length > 0 && (
-                        <a
-                          href={`https://twitter.com/${collection.twitterHandle}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className={styles.socialLink}
-                        >
-                          <img src={twitterIcon} />
-                        </a>
-                      )}
-                      {collection.mediumHandle?.length > 0 && (
-                        <a
-                          href={`https://medium.com/${collection.mediumHandle}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className={styles.socialLink}
-                        >
-                          <img src={mediumIcon} />
-                        </a>
-                      )}
-                      {collection.telegram?.length > 0 && (
-                        <a
-                          href={`https://t.me/${collection.telegram}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className={styles.socialLink}
-                        >
-                          <img src={telegramIcon} />
-                        </a>
-                      )}
-                      {collection.discord?.length > 0 && (
-                        <a
-                          href={`https://discord.gg/${collection.discord}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className={styles.socialLink}
-                        >
-                          <img src={discordIcon} />
-                        </a>
-                      )}
-                    </div>
-                  )}
+                  <div className={styles.socialLinks}>
+                    {collection?.siteUrl?.length > 0 && (
+                      <a
+                        href={collection?.siteUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={styles.socialLink}
+                      >
+                        <img src={webIcon} />
+                      </a>
+                    )}
+                    {collection?.twitterHandle?.length > 0 && (
+                      <a
+                        href={`https://twitter.com/${collection?.twitterHandle}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={styles.socialLink}
+                      >
+                        <img src={twitterIcon} />
+                      </a>
+                    )}
+                    {collection?.mediumHandle?.length > 0 && (
+                      <a
+                        href={`https://medium.com/${collection?.mediumHandle}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={styles.socialLink}
+                      >
+                        <img src={mediumIcon} />
+                      </a>
+                    )}
+                    {collection?.telegram?.length > 0 && (
+                      <a
+                        href={`https://t.me/${collection?.telegram}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={styles.socialLink}
+                      >
+                        <img src={telegramIcon} />
+                      </a>
+                    )}
+                    {collection?.discord?.length > 0 && (
+                      <a
+                        href={`https://discord.gg/${collection?.discord}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={styles.socialLink}
+                      >
+                        <img src={discordIcon} />
+                      </a>
+                    )}
+                  </div>
                 </div>
               </Panel>
               <Panel icon={BallotIcon} title="Chain Info">
