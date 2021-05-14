@@ -3,7 +3,7 @@
   width: 100%;
   height: 100vh;
   overflow-y: auto;
-  padding-top: 109px;
+  padding-top: 100px;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -19,7 +19,7 @@
   width: 100%;
   height: 64px;
   left: 0;
-  top: 109px;
+  top: 100px;
   padding: 12px 24px;
   box-sizing: border-box;
   background-color: #FFF;
@@ -115,6 +115,27 @@
       height: 100%;
       object-fit: contain;
     }
+  }
+}
+
+.property {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+  font-weight: 400;
+  font-size: 18px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.propertyLabel {
+  font-weight: 700;
+  margin-right: 12px;
+
+  &::first-letter {
+    text-transform: capitalize;
   }
 }
 

@@ -16,8 +16,12 @@
 }
 
 .logo {
-  height: 64px;
+  height: 48px;
   cursor: pointer;
+
+  img {
+    height: 100%;
+  }
 }
 
 .searchbar {

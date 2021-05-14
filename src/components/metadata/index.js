@@ -258,7 +258,7 @@ const Metadata = () => {
     try {
       let result = await axios({
         method: 'post',
-        url: 'https://fmarket.fantom.network/api/ipfs/uploadImage2Server',
+        url: 'https://fmarket.fantom.network/ipfs/uploadImage2Server',
         data: formData,
         headers: {
           'Content-Type': 'multipart/form-data',
