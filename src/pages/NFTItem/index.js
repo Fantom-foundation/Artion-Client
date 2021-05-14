@@ -105,9 +105,6 @@ const NFTItem = () => {
   const [auctionStarting, setAuctionStarting] = useState(false);
   const [bidPlacing, setBidPlacing] = useState(false);
 
-  const [listing, setListing] = useState(null);
-  const [offers, setOffers] = useState([]);
-  const [tradeHistory, setTradeHistory] = useState([]);
   const [bid, setBid] = useState(null);
   const [winner, setWinner] = useState(null);
   const [winningBid, setWinningBid] = useState(null);
@@ -115,6 +112,9 @@ const NFTItem = () => {
   const [now, setNow] = useState(new Date());
   const [loading, setLoading] = useState(false);
   const auction = useRef(null);
+  const listing = useRef(null);
+  const offers = useRef([]);
+  const tradeHistory = useRef([]);
 
   const { isConnected: isWalletConnected } = useSelector(
     state => state.ConnectWallet
@@ -148,8 +148,8 @@ const NFTItem = () => {
 
   const getItemListings = async () => {
     try {
-      const listing = await getListing(address, tokenID);
-      setListing(listing);
+      const _listing = await getListing(address, tokenID);
+      listing.current = _listing;
     } catch (e) {
       console.log(e);
     }
@@ -158,7 +158,7 @@ const NFTItem = () => {
   const getCurrentOffers = async () => {
     try {
       const { data } = await getOffers(address, tokenID);
-      setOffers(data);
+      offers.current = data;
     } catch (e) {
       console.log(e);
     }
@@ -167,7 +167,7 @@ const NFTItem = () => {
   const getItemTradeHistory = async () => {
     try {
       const { data } = await getTradeHistory(address, tokenID);
-      setTradeHistory(data);
+      tradeHistory.current = data;
     } catch (e) {
       console.log(e);
     }
@@ -218,13 +218,13 @@ const NFTItem = () => {
         allowedAddress
       ) => {
         if (eventMatches(nft, id)) {
-          setListing({
+          listing.current = {
             owner,
             quantity: parseFloat(quantity.toString()),
             pricePerItem: parseFloat(pricePerItem.toString()) / 10 ** 18,
             startingTime: parseFloat(startingTime.toString()),
             allowedAddress,
-          });
+          };
         }
       }
     );
@@ -232,31 +232,31 @@ const NFTItem = () => {
     salesContract.on('ItemUpdated', (owner, nft, id, newPrice) => {
       if (eventMatches(nft, id)) {
         const newListing = {
-          ...listing,
+          ...listing.current,
           pricePerItem: parseFloat(newPrice.toString()) / 10 ** 18,
         };
-        setListing(newListing);
+        listing.current = newListing;
       }
     });
 
     salesContract.on('ItemCanceled', (owner, nft, id) => {
       if (eventMatches(nft, id)) {
-        setListing(null);
+        listing.current = null;
       }
     });
 
     salesContract.on('ItemSold', (seller, buyer, nft, id, price) => {
       if (eventMatches(nft, id)) {
-        setListing(null);
+        listing.current = null;
         setOwner(buyer);
-        const newTradeHistory = [...tradeHistory];
+        const newTradeHistory = [...tradeHistory.current];
         newTradeHistory.push({
           from: seller,
           to: buyer,
           price: parseFloat(price.toString()) / 10 ** 18,
           saleDate: new Date().toISOString(),
         });
-        setTradeHistory(newTradeHistory);
+        tradeHistory.current = newTradeHistory;
       }
     });
 
@@ -264,7 +264,7 @@ const NFTItem = () => {
       'OfferCreated',
       (creator, nft, id, payToken, quantity, pricePerItem, deadline) => {
         if (eventMatches(nft, id)) {
-          const newOffers = [...offers];
+          const newOffers = [...offers.current];
           newOffers.push({
             creator,
             deadline: parseFloat(deadline.toString()),
@@ -272,17 +272,17 @@ const NFTItem = () => {
             pricePerItem: parseFloat(pricePerItem.toString()) / 10 ** 18,
             quantity: parseFloat(quantity.toString()),
           });
-          setOffers(newOffers);
+          offers.current = newOffers;
         }
       }
     );
 
     salesContract.on('OfferCanceled', (creator, nft, id) => {
       if (eventMatches(nft, id)) {
-        const newOffers = offers.filter(
+        const newOffers = offers.current.filter(
           offer => offer.creator.toLowerCase() === creator.toLowerCase()
         );
-        setOffers(newOffers);
+        offers.current = newOffers;
       }
     });
 
@@ -544,7 +544,7 @@ const NFTItem = () => {
 
   const cancelList = async () => {
     await cancelListing(address, tokenID);
-    setListing(null);
+    listing.current = null;
   };
 
   const handleBuyItem = async _price => {
@@ -712,8 +712,8 @@ const NFTItem = () => {
   };
 
   const hasMyOffer = useMemo(() => {
-    return offers.findIndex(offer => offer.creator === account) > -1;
-  }, [offers]);
+    return offers.current.findIndex(offer => offer.creator === account) > -1;
+  }, [offers.current]);
 
   const series = useMemo(
     () => ({
@@ -735,7 +735,7 @@ const NFTItem = () => {
     []
   );
 
-  const data = tradeHistory.map(history => {
+  const data = tradeHistory.current.map(history => {
     const saleDate = new Date(history.saleDate);
     return {
       primary: saleDate,
@@ -836,7 +836,7 @@ const NFTItem = () => {
                   {auction.current ? 'Update Auction' : 'Start Auction'}
                 </div>
               )}
-              {listing ? (
+              {listing.current ? (
                 <div className={styles.headerButton} onClick={cancelList}>
                   Cancel Listing
                 </div>
@@ -850,7 +850,7 @@ const NFTItem = () => {
                   !(itemListing || priceUpdating) && setSellModalVisible(true)
                 }
               >
-                {listing ? 'Update Listing' : 'Sell'}
+                {listing.current ? 'Update Listing' : 'Sell'}
               </div>
             </>
           ) : (
@@ -1108,18 +1108,20 @@ const NFTItem = () => {
             <div className={styles.panelWrapper}>
               <Panel icon={LocalOfferIcon} title="Listings">
                 <div className={styles.listings}>
-                  {listing && (
+                  {listing.current && (
                     <div className={styles.listing}>
                       <div className={styles.owner}>
-                        {shortenAddress(listing.owner)}
+                        {shortenAddress(listing.current.owner)}
                       </div>
                       <div className={styles.price}>
-                        {listing.pricePerItem} FTM
+                        {listing.current.pricePerItem} FTM
                       </div>
                       {!isMine && (
                         <div
                           className={styles.buyButton}
-                          onClick={() => handleBuyItem(listing.pricePerItem)}
+                          onClick={() =>
+                            handleBuyItem(listing.current.pricePerItem)
+                          }
                         >
                           Buy
                         </div>
@@ -1137,7 +1139,7 @@ const NFTItem = () => {
                     <div className={styles.price}>Price</div>
                     <div className={styles.deadline}>Expires In</div>
                   </div>
-                  {offers.map((offer, idx) => (
+                  {offers.current.map((offer, idx) => (
                     <div className={styles.offer} key={idx}>
                       <div className={styles.owner}>
                         {shortenAddress(offer.creator)}
@@ -1183,7 +1185,7 @@ const NFTItem = () => {
                 <div className={styles.historyPrice}>Price</div>
                 <div className={styles.saleDate}>Date</div>
               </div>
-              {tradeHistory.map((history, idx) => {
+              {tradeHistory.current.map((history, idx) => {
                 const saleDate = new Date(history.saleDate);
                 return (
                   <div className={styles.listing} key={idx}>
@@ -1213,8 +1215,8 @@ const NFTItem = () => {
       <SellModal
         visible={sellModalVisible}
         onClose={() => setSellModalVisible(false)}
-        onSell={listing ? handleUpdatePrice : handleListItem}
-        startPrice={listing?.pricePerItem || 0}
+        onSell={listing.current ? handleUpdatePrice : handleListItem}
+        startPrice={listing.current?.pricePerItem || 0}
         confirming={itemListing || priceUpdating}
         approveContract={handleApproveSalesContract}
         contractApproving={salesContractApproving}

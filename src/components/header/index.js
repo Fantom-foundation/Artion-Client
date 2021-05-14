@@ -46,6 +46,7 @@ const NiftyHeader = ({ light }) => {
   const [stationModalVisible, setStationModalVisible] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [searchBarActive, setSearchBarActive] = useState(false);
 
   const isMenuOpen = Boolean(anchorEl);
 
@@ -214,9 +215,69 @@ const NiftyHeader = ({ light }) => {
           <img src={light ? logoBlue : logoWhite} alt="logo" />
         </Link>
         {isSearchbarShown && (
-          <div className={styles.searchbar}>
-            <SearchIcon className={styles.searchicon} />
-            <input placeholder="Search" className={styles.searchinput} />
+          <div
+            className={cx(styles.searchcont, searchBarActive && styles.active)}
+          >
+            <div className={styles.searchcontinner}>
+              <div className={styles.searchbar}>
+                <SearchIcon className={styles.searchicon} />
+                <input
+                  placeholder="Search"
+                  className={styles.searchinput}
+                  onFocus={() => setSearchBarActive(true)}
+                  onBlur={() => setSearchBarActive(false)}
+                />
+              </div>
+              {searchBarActive && (
+                <div className={styles.resultcont}>
+                  <div className={styles.resultsection}>
+                    <div className={styles.resultsectiontitle}>Collections</div>
+                    <div className={styles.separator} />
+                    <div className={styles.resultlist}>
+                      {new Array(3).fill(0).map((_, idx) => (
+                        <div key={idx} className={styles.result}>
+                          <img
+                            className={styles.resultimg}
+                            src="https://gateway.pinata.cloud/ipfs/QmSrHp7nzX5agJNGnrmEJE9MrY7t27fSRV9a27GzgkkbqM"
+                          />
+                          <div className={styles.resulttitle}>Bull Ther</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className={styles.resultsection}>
+                    <div className={styles.resultsectiontitle}>Account</div>
+                    <div className={styles.separator} />
+                    <div className={styles.resultlist}>
+                      {new Array(3).fill(0).map((_, idx) => (
+                        <div key={idx} className={styles.result}>
+                          <img
+                            className={styles.resultimg}
+                            src="https://gateway.pinata.cloud/ipfs/QmSrHp7nzX5agJNGnrmEJE9MrY7t27fSRV9a27GzgkkbqM"
+                          />
+                          <div className={styles.resulttitle}>Bull Ther</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className={styles.resultsection}>
+                    <div className={styles.resultsectiontitle}>Items</div>
+                    <div className={styles.separator} />
+                    <div className={styles.resultlist}>
+                      {new Array(3).fill(0).map((_, idx) => (
+                        <div key={idx} className={styles.result}>
+                          <img
+                            className={styles.resultimg}
+                            src="https://gateway.pinata.cloud/ipfs/QmSrHp7nzX5agJNGnrmEJE9MrY7t27fSRV9a27GzgkkbqM"
+                          />
+                          <div className={styles.resulttitle}>Bull Ther</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         )}
       </div>

@@ -105,8 +105,8 @@ const BaseCard = ({ item, loading, style }) => {
   const getTokenURI = async tokenURI => {
     setFetching(true);
     try {
-      const res = await axios.get(tokenURI);
-      setInfo(res.data);
+      const { data } = await axios.get(tokenURI);
+      setInfo(data);
     } catch {
       setInfo(null);
     }
@@ -169,7 +169,7 @@ const BaseCard = ({ item, loading, style }) => {
                   component="h4"
                   className={cx(classes.label, classes.price)}
                 >
-                  Ξ {item?.price}
+                  {item?.price} FTM
                 </Typography>
               )}
             </div>
