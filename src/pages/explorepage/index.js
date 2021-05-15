@@ -51,6 +51,9 @@ const ExploreAllPage = () => {
 
   useEffect(() => {
     dispatch(HeaderActions.toggleSearchbar(true));
+    return () => {
+      dispatch(HeaderActions.toggleSearchbar(false));
+    };
   }, []);
 
   const updateCollections = async () => {

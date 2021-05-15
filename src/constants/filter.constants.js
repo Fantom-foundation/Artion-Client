@@ -61,7 +61,7 @@ export const SortByOptions = [
   },
   {
     id: 'price',
-    label: 'Cheapest',
+    label: 'Most expensive',
   },
   {
     id: 'lastSalePrice',
@@ -69,7 +69,7 @@ export const SortByOptions = [
   },
   {
     id: 'viewed',
-    label: 'Most Viewed',
+    label: 'Mostly Viewed',
   },
 ];
 
