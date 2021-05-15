@@ -2,10 +2,24 @@ import axios from 'axios';
 
 const BASE_URL = 'https://fmarket.fantom.network';
 
+export const getAuthToken = async address => {
+  let result = await axios({
+    method: 'post',
+    url: `${BASE_URL}/auth/getToken`,
+    data: JSON.stringify({ address: address }),
+    headers: { 'Content-Type': 'application/json' },
+  });
+  if (result.data.status == 'success') {
+    let token = result.data.token;
+    return token;
+  }
+  return null;
+};
+
 export const getAccountDetails = async authToken => {
   const res = await axios({
     method: 'get',
-    url: `${BASE_URL}/api/account/getaccountinfo`,
+    url: `${BASE_URL}/account/getaccountinfo`,
     headers: {
       Authorization: `Bearer ${authToken}`,
     },
@@ -18,7 +32,7 @@ export const getUserAccountDetails = async address => {
   const data = { address };
   const res = await axios({
     method: 'post',
-    url: `${BASE_URL}/api/account/getuseraccountinfo`,
+    url: `${BASE_URL}/account/getuseraccountinfo`,
     data: JSON.stringify(data),
     headers: {
       'Content-Type': 'application/json',
@@ -45,7 +59,7 @@ export const updateAccountDetails = async (
 
   const res = await axios({
     method: 'post',
-    url: `${BASE_URL}/api/account/accountdetails`,
+    url: `${BASE_URL}/account/accountdetails`,
     data: formData,
     headers: {
       'Content-Type': 'multipart/form-data',
@@ -56,14 +70,14 @@ export const updateAccountDetails = async (
 };
 
 export const fetchCollections = async () => {
-  const res = await axios.get(`${BASE_URL}/api/info/getcollections`);
+  const res = await axios.get(`${BASE_URL}/info/getcollections`);
   return res.data;
 };
 
 export const fetchCollection = async contractAddress => {
   const res = await axios({
     method: 'post',
-    url: `${BASE_URL}/api/collection/getCollectionInfo`,
+    url: `${BASE_URL}/collection/getCollectionInfo`,
     data: JSON.stringify({ contractAddress }),
     headers: {
       'Content-Type': 'application/json',
@@ -96,7 +110,7 @@ export const fetchTokens = async (
   data.sortby = sortBy;
   const res = await axios({
     method: 'post',
-    url: `${BASE_URL}/api/nftitems/fetchTokens`,
+    url: `${BASE_URL}/nftitems/fetchTokens`,
     data: JSON.stringify(data),
     headers: {
       'Content-Type': 'application/json',
@@ -109,7 +123,7 @@ export const fetchTokenURI = async (contractAddress, tokenID) => {
   const data = { contractAddress, tokenID };
   const res = await axios({
     method: 'post',
-    url: `${BASE_URL}/api/nftitems/getTokenURI`,
+    url: `${BASE_URL}/nftitems/getTokenURI`,
     data: JSON.stringify(data),
     headers: {
       'Content-Type': 'application/json',
@@ -122,7 +136,7 @@ export const increaseViewCount = async (contractAddress, tokenID) => {
   const data = { contractAddress, tokenID };
   const res = await axios({
     method: 'post',
-    url: `${BASE_URL}/api/nftitems/increaseViews`,
+    url: `${BASE_URL}/nftitems/increaseViews`,
     data: JSON.stringify(data),
     headers: {
       'Content-Type': 'application/json',
@@ -135,7 +149,7 @@ export const getOffers = async (contractAddress, tokenID) => {
   const data = { contractAddress, tokenID };
   const res = await axios({
     method: 'post',
-    url: `${BASE_URL}/api/offer/getOffers`,
+    url: `${BASE_URL}/offer/getOffers`,
     data: JSON.stringify(data),
     headers: {
       'Content-Type': 'application/json',
@@ -148,7 +162,7 @@ export const getTradeHistory = async (contractAddress, tokenID) => {
   const data = { contractAddress, tokenID };
   const res = await axios({
     method: 'post',
-    url: `${BASE_URL}/api/tradehistory/getTradeHistory`,
+    url: `${BASE_URL}/tradehistory/getTradeHistory`,
     data: JSON.stringify(data),
     headers: {
       'Content-Type': 'application/json',

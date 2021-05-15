@@ -15,15 +15,14 @@ import { useDispatch, useSelector } from 'react-redux';
 import WalletConnectActions from 'actions/walletconnect.actions';
 import AuthActions from 'actions/auth.actions';
 import ModalActions from 'actions/modal.actions';
-import General from 'utils/general';
 import { shortenAddress } from 'utils';
 import { injected } from 'connectors';
-import { getAccountDetails } from 'api';
+import { getAuthToken, getAccountDetails } from 'api';
 import { NETWORK_LABEL } from 'constants/networks';
 import WFTMModal from 'components/WFTMModal';
 
-import logoWhite from 'assets/svgs/fantom_logo_white.svg';
-import logoBlue from 'assets/svgs/fantom_logo.svg';
+import logoWhite from 'assets/svgs/logo_white.svg';
+import logoBlue from 'assets/svgs/logo_blue.svg';
 import iconUser from 'assets/svgs/user.svg';
 import iconSettings from 'assets/svgs/settings.svg';
 import iconAdd from 'assets/svgs/add.svg';
@@ -51,7 +50,7 @@ const NiftyHeader = ({ light }) => {
   const isMenuOpen = Boolean(anchorEl);
 
   const login = async () => {
-    const token = await General.getAuthToken(account);
+    const token = await getAuthToken(account);
 
     dispatch(WalletConnectActions.connectWallet(token));
     dispatch(AuthActions.fetchStart());
@@ -211,12 +210,8 @@ const NiftyHeader = ({ light }) => {
   return (
     <div className={cx(styles.header, light && styles.lightBg)}>
       <div className={styles.left}>
-        <Link to="/">
-          <img
-            src={light ? logoBlue : logoWhite}
-            alt="logo"
-            className={styles.logo}
-          />
+        <Link to="/" className={styles.logo}>
+          <img src={light ? logoBlue : logoWhite} alt="logo" />
         </Link>
         {isSearchbarShown && (
           <div className={styles.searchbar}>

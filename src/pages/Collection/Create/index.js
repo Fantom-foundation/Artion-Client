@@ -128,7 +128,7 @@ const CollectionCreate = () => {
         const result = await axios({
           method: 'post',
           url:
-            'https://fmarket.fantom.network/api/ipfs/uploadCollectionImage2Server',
+            'https://fmarket.fantom.network/ipfs/uploadCollectionImage2Server',
           data: formData,
           headers: {
             'Content-Type': 'multipart/form-data',
@@ -153,8 +153,7 @@ const CollectionCreate = () => {
 
         await axios({
           method: 'post',
-          url:
-            'https://fmarket.fantom.network/api/collection/collectiondetails',
+          url: 'https://fmarket.fantom.network/collection/collectiondetails',
           data: JSON.stringify(data),
           headers: {
             'Content-Type': 'application/json',

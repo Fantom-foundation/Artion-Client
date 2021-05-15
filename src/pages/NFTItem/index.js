@@ -792,6 +792,24 @@ const NFTItem = () => {
     bid?.bidder === account &&
     bid?.lastBidTime + withdrawLockTime < now.getTime() / 1000;
 
+  const renderProperties = properties => {
+    const res = [];
+    Object.keys(properties).map((key, idx) => {
+      if (!['address', 'createdAt'].includes(key)) {
+        res.push(
+          <div key={idx} className={styles.property}>
+            <div className={styles.propertyLabel}>{key} : </div>
+            <div className={styles.propertyValue}>
+              {properties[key]}
+              {key === 'royalty' ? '%' : ''}
+            </div>
+          </div>
+        );
+      }
+    });
+    return res;
+  };
+
   return (
     <div
       className={cx(styles.container, isLoggedIn() ? styles.withHeader : '')}
@@ -879,7 +897,9 @@ const NFTItem = () => {
             <div className={styles.itemInfoCont}>
               {info?.properties && (
                 <Panel icon={LabelIcon} title="Properties">
-                  <div />
+                  <div className={styles.panelBody}>
+                    {renderProperties(info.properties)}
+                  </div>
                 </Panel>
               )}
               <Panel

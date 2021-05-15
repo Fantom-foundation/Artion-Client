@@ -1,6 +1,6 @@
 import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import FantomLogo from '../../assets/svgs/fantom_logo_white_new.svg';
+import FantomLogo from '../../assets/svgs/logo_white.svg';
 
 const useStyles = makeStyles(() => ({
   grow: {

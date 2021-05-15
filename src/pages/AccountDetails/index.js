@@ -221,7 +221,7 @@ const AccountDetails = () => {
     try {
       let result = await axios({
         method: 'post',
-        url: 'https://fmarket.fantom.network/api/ipfs/uploadBundleImage2Server',
+        url: 'https://fmarket.fantom.network/ipfs/uploadBundleImage2Server',
         data: formData,
         headers: { 'Content-Type': 'multipart/form-data' },
       });
