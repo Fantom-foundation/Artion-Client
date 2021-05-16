@@ -64,6 +64,7 @@ const useStyles = makeStyles({
     height: '100%',
     borderRadius: '10px !important',
     backgroundSize: 'contain',
+    objectFit: 'cover',
   },
   mediaMissing: {
     backgroundSize: 'cover',

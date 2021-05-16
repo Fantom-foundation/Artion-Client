@@ -280,7 +280,7 @@ const NFTItem = () => {
     salesContract.on('OfferCanceled', (creator, nft, id) => {
       if (eventMatches(nft, id)) {
         const newOffers = offers.current.filter(
-          offer => offer.creator.toLowerCase() === creator.toLowerCase()
+          offer => offer.creator.toLowerCase() !== creator.toLowerCase()
         );
         offers.current = newOffers;
       }
