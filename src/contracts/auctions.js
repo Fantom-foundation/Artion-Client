@@ -1,7 +1,7 @@
 import { ethers } from 'ethers';
 
 import { AUCTION_CONTRACT_ADDRESS, AUCTION_CONTRACT_ABI } from './abi';
-import { calculateGasMargin } from './sales';
+import { calculateGasMargin } from 'utils';
 
 export const getAuctionContract = async () => {
   await window.ethereum.enable();

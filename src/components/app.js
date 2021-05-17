@@ -1,6 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import { observer, inject } from 'mobx-react';
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
 
 import Header from './header';
 import Layout from './layout';
@@ -74,6 +75,17 @@ const App = ({ paintStore }) => {
         </Switch>
         <AccountModal />
         <WFTMModal />
+        <Toaster
+          position="top-right"
+          reverseOrder={false}
+          toastOptions={{
+            style: {
+              padding: 24,
+              borderRadius: 10,
+              boxShadow: '0px 4px 40px rgba(0, 0, 0, 0.1)',
+            },
+          }}
+        />
       </Router>
     </div>
   );

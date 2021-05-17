@@ -11,20 +11,16 @@ import Step from '@material-ui/core/Step';
 import StepLabel from '@material-ui/core/StepLabel';
 import { ClipLoader } from 'react-spinners';
 
-import 'react-notifications/lib/notifications.css';
-import {
-  NotificationContainer,
-  NotificationManager,
-} from 'react-notifications';
-
-import { BigNumber } from 'ethers';
+import { BigNumber, ethers } from 'ethers';
 
 import { FantomNFTConstants } from '../../constants/smartcontracts/fnft.constants';
 import SCHandlers from '../../utils/sc.interaction';
 import SystemConstants from '../../constants/system.constants';
 import { useSelector } from 'react-redux';
 
+import toast from 'utils/toast';
 import WalletUtils from '../../utils/wallet';
+import { calculateGasMargin } from 'utils';
 
 const useStyles = makeStyles(() => ({
   container: {
@@ -131,40 +127,6 @@ const Metadata = () => {
   let isWalletConnected = useSelector(state => state.ConnectWallet.isConnected);
   let authToken = useSelector(state => state.ConnectWallet.authToken);
 
-  const createNotification = (type, msgContent) => {
-    switch (type) {
-      case 'info':
-        NotificationManager.info('Your asset has been successfully created');
-        break;
-      case 'success':
-        NotificationManager.success(
-          'Your asset has been successfully created',
-          'Success'
-        );
-        break;
-      case 'warning':
-        NotificationManager.warning(
-          'Warning message',
-          'Close after 3000ms',
-          3000
-        );
-        break;
-      case 'custom':
-        NotificationManager.info(msgContent);
-        break;
-      case 'error':
-        NotificationManager.error(
-          'Failed to create your asset',
-          'Error',
-          5000,
-          () => {
-            console.log('callback');
-          }
-        );
-        break;
-    }
-  };
-
   const handleInputChange = (value, target) => {
     switch (target) {
       case 'name':
@@ -216,21 +178,18 @@ const Metadata = () => {
 
   const mintNFT = async () => {
     if (!isWalletConnected) {
-      createNotification('custom', 'Connect your wallet first');
+      toast('custom', 'Connect your wallet first');
       return;
     }
     if (chainId != 250) {
-      createNotification(
-        'custom',
-        'You are not connected to Fantom Opera Network'
-      );
+      toast('custom', 'You are not connected to Fantom Opera Network');
       return;
     }
     // only when the user has more than 1k ftms on the wallet
     let balance = await WalletUtils.checkBalance(account);
 
     if (balance < SystemConstants.FMT_BALANCE_LIMIT) {
-      createNotification(
+      toast(
         'custom',
         `Your balance should be at least ${SystemConstants.FMT_BALANCE_LIMIT} ftm to mint an NFT`
       );
@@ -280,32 +239,33 @@ const Metadata = () => {
       fnft_sc = fnft_sc[0];
 
       try {
-        let tx = await fnft_sc.mint(account, jsonHash, {
-          gasLimit: 3000000,
-        });
+        const args = [account, jsonHash];
+        const options = {
+          value: ethers.utils.parseEther('2'),
+        };
+        const gasEstimate = await fnft_sc.estimateGas.mint(...args, options);
+        options.gasLimit = calculateGasMargin(gasEstimate);
+        let tx = await fnft_sc.mint(...args, options);
         setCurrentMintingStep(1);
-        // console.log('tnx is ', tx);
         setLastMintedTnxId(tx.hash);
 
         setCurrentMintingStep(2);
         const confirmedTnx = await provider.waitForTransaction(tx.hash);
         setCurrentMintingStep(3);
-        // console.log('confirmed tnx is ', confirmedTnx);
         let evtCaught = confirmedTnx.logs[0].topics;
         let mintedTkId = BigNumber.from(evtCaught[3]);
         setLastMintedTkId(mintedTkId.toNumber());
       } catch (error) {
-        createNotification('error');
+        toast('error', error.message);
       }
     } catch (error) {
-      createNotification('error');
+      toast('error', error.message);
     }
     resetMintingStatus();
   };
 
   return (
     <div className={classes.container}>
-      <NotificationContainer />
       <div>
         <TextField
           className={classes.inkMetadataInput}

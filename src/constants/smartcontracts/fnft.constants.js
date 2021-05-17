@@ -1,6 +1,6 @@
 export const FantomNFTConstants = {
   TESTNETADDRESS: '0x6B85eD452756094e45Be1E305EE91cA5a51064c5',
-  MAINNETADDRESS: '0x76b03166c8ab1462b046d7745c77eaa83e656a8c',
+  MAINNETADDRESS: '0xF8fC99a352aE3067DEAc7c3A9bf6aa80CFE1d342',
   PRIVATEKEY: '',
   MAINNETRPC: 'https://rpc3.fantom.network',
   MAINNETCHAINID: 250,
@@ -187,7 +187,7 @@ export const FantomNFTConstants = {
       ],
       name: 'mint',
       outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
-      stateMutability: 'nonpayable',
+      stateMutability: 'payable',
       type: 'function',
     },
     {
@@ -205,8 +205,8 @@ export const FantomNFTConstants = {
       type: 'function',
     },
     {
-      inputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
-      name: 'primarySalePrice',
+      inputs: [],
+      name: 'platformFee',
       outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
       stateMutability: 'view',
       type: 'function',

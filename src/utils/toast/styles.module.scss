@@ -1,0 +1,26 @@
+.header {
+  display: flex;
+  align-items: center;
+
+  .icon {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+    margin-right: 14px;
+  }
+
+  span {
+    font-weight: 700;
+    font-size: 20px;
+    line-height: 24.36px;
+    color: #3D3D3D;
+  }
+}
+
+.body {
+  margin-top: 12px;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 25.6px;
+  color: #3D3D3D;
+}

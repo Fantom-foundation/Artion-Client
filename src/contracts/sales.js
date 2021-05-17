@@ -1,5 +1,7 @@
 import { ethers } from 'ethers';
 
+import { calculateGasMargin } from 'utils';
+
 import { SALES_CONTRACT_ADDRESS, SALES_CONTRACT_ABI } from './abi';
 
 export const getSalesContract = async () => {
@@ -14,12 +16,6 @@ export const getSalesContract = async () => {
   );
 
   return contract;
-};
-
-export const calculateGasMargin = value => {
-  return value
-    .mul(ethers.BigNumber.from(10000).add(ethers.BigNumber.from(1000)))
-    .div(ethers.BigNumber.from(10000));
 };
 
 export const getListing = async (nftAddress, tokenId) => {
