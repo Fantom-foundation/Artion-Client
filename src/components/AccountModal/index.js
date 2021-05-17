@@ -6,9 +6,10 @@ import Modal from '@material-ui/core/Modal';
 import Button from '@material-ui/core/Button';
 import CreateIcon from '@material-ui/icons/Create';
 
-import ModalActions from '../../actions/modal.actions';
+import ModalActions from 'actions/modal.actions';
 import AuthActions from 'actions/auth.actions';
 import { updateAccountDetails } from 'api';
+import toast from 'utils/toast';
 
 const useStyles = makeStyles({
   root: {
@@ -243,6 +244,7 @@ const AccountModal = () => {
         authToken
       );
       dispatch(AuthActions.fetchSuccess(res.data));
+      toast('success', 'Account details saved!');
 
       closeModal();
     } else {
@@ -262,6 +264,7 @@ const AccountModal = () => {
             authToken
           );
           dispatch(AuthActions.fetchSuccess(res.data));
+          toast('success', 'Account details saved!');
 
           closeModal();
         });

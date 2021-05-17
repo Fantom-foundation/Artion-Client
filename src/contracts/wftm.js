@@ -1,7 +1,7 @@
 import { ethers } from 'ethers';
 
 import { WFTM_ADDRESS, WFTM_ABI } from './abi';
-import { calculateGasMargin } from './sales';
+import { calculateGasMargin } from 'utils';
 
 const getWFTMContract = async () => {
   await window.ethereum.enable();

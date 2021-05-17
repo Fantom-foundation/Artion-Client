@@ -1,10 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
-import {
-  NotificationContainer,
-  NotificationManager,
-} from 'react-notifications';
 import axios from 'axios';
 import cx from 'classnames';
 import TextField from '@material-ui/core/TextField';
@@ -26,6 +22,7 @@ import CollectionsFilter from 'components/CollectionsFilter';
 import Header from 'components/header';
 import SCHandlers from 'utils/sc.interaction';
 import { shortenAddress } from 'utils';
+import toast from 'utils/toast';
 import { getUserAccountDetails, fetchTokens } from 'api';
 import TokensActions from 'actions/tokens.actions';
 import HeaderActions from 'actions/header.actions';
@@ -156,49 +153,15 @@ const AccountDetails = () => {
     }
   };
 
-  const createNotification = (type, msgContent) => {
-    switch (type) {
-      case 'info':
-        NotificationManager.info('Your asset has been successfully created');
-        break;
-      case 'success':
-        NotificationManager.success(
-          'Your asset has been successfully created',
-          'Success'
-        );
-        break;
-      case 'warning':
-        NotificationManager.warning(
-          'Warning message',
-          'Close after 3000ms',
-          3000
-        );
-        break;
-      case 'custom':
-        NotificationManager.info(msgContent);
-        break;
-      case 'error':
-        NotificationManager.error(
-          'Failed to create your asset',
-          'Error',
-          5000,
-          () => {
-            console.log('callback');
-          }
-        );
-        break;
-    }
-  };
-
   const openCreateBundleModal = async () => {
     let balance = await SCHandlers.getAccountBalance(account);
     console.log(`total balance of ${account} is ${balance}`);
     if (!isWalletConnected) {
-      createNotification('custom', 'Connect your wallet first');
+      toast('info', 'Connect your wallet first');
       return;
     }
     if (chainId != 4002) {
-      createNotification('custom', 'You are not connected to Opera Testnet');
+      toast('info', 'You are not connected to Opera Testnet');
       return;
     }
     setIsCreateCollectionShown(true);
@@ -210,7 +173,7 @@ const AccountDetails = () => {
 
   const handleCreateBundle = async () => {
     if (collectionLogoUrl == '') {
-      createNotification('custom', 'You need to upload the collection logo');
+      toast('info', 'You need to upload the collection logo');
       return;
     }
     let formData = new FormData();
@@ -221,7 +184,7 @@ const AccountDetails = () => {
     try {
       let result = await axios({
         method: 'post',
-        url: 'https://fmarket.fantom.network/ipfs/uploadBundleImage2Server',
+        url: 'https://api1.artion.io/ipfs/uploadBundleImage2Server',
         data: formData,
         headers: { 'Content-Type': 'multipart/form-data' },
       });
@@ -240,7 +203,6 @@ const AccountDetails = () => {
   return (
     <div className={styles.container}>
       <Header light />
-      <NotificationContainer />
       <div className={styles.sidebar}>
         <div className={styles.profileWrapper}>
           {user.imageHash ? (
