@@ -178,11 +178,11 @@ const Metadata = () => {
 
   const mintNFT = async () => {
     if (!isWalletConnected) {
-      toast('custom', 'Connect your wallet first');
+      toast('info', 'Connect your wallet first');
       return;
     }
     if (chainId != 250) {
-      toast('custom', 'You are not connected to Fantom Opera Network');
+      toast('info', 'You are not connected to Fantom Opera Network');
       return;
     }
     // only when the user has more than 1k ftms on the wallet
@@ -217,7 +217,7 @@ const Metadata = () => {
     try {
       let result = await axios({
         method: 'post',
-        url: 'https://fmarket.fantom.network/ipfs/uploadImage2Server',
+        url: 'https://api.artion.io/ipfs/uploadImage2Server',
         data: formData,
         headers: {
           'Content-Type': 'multipart/form-data',

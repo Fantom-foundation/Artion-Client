@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const BASE_URL = 'https://fmarket.fantom.network';
+const BASE_URL = 'https://api.artion.io';
 
 export const getAuthToken = async address => {
   let result = await axios({

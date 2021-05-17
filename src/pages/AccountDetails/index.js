@@ -157,11 +157,11 @@ const AccountDetails = () => {
     let balance = await SCHandlers.getAccountBalance(account);
     console.log(`total balance of ${account} is ${balance}`);
     if (!isWalletConnected) {
-      toast('custom', 'Connect your wallet first');
+      toast('info', 'Connect your wallet first');
       return;
     }
     if (chainId != 4002) {
-      toast('custom', 'You are not connected to Opera Testnet');
+      toast('info', 'You are not connected to Opera Testnet');
       return;
     }
     setIsCreateCollectionShown(true);
@@ -173,7 +173,7 @@ const AccountDetails = () => {
 
   const handleCreateBundle = async () => {
     if (collectionLogoUrl == '') {
-      toast('custom', 'You need to upload the collection logo');
+      toast('info', 'You need to upload the collection logo');
       return;
     }
     let formData = new FormData();
@@ -184,7 +184,7 @@ const AccountDetails = () => {
     try {
       let result = await axios({
         method: 'post',
-        url: 'https://fmarket.fantom.network/ipfs/uploadBundleImage2Server',
+        url: 'https://api.artion.io/ipfs/uploadBundleImage2Server',
         data: formData,
         headers: { 'Content-Type': 'multipart/form-data' },
       });
