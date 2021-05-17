@@ -53,7 +53,8 @@ export const buyItem = async (nftAddress, tokenId, value, from) => {
 
 export const cancelListing = async (nftAddress, tokenId) => {
   const contract = await getSalesContract();
-  await contract.cancelListing(nftAddress, tokenId);
+  const tx = await contract.cancelListing(nftAddress, tokenId);
+  await tx.wait();
 };
 
 export const listItem = async (

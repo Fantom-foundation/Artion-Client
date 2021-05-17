@@ -60,6 +60,7 @@ import {
   AUCTION_CONTRACT_ADDRESS,
 } from 'contracts';
 import { shortenAddress } from 'utils';
+import toast from 'utils/toast';
 import SellModal from 'components/SellModal';
 import OfferModal from 'components/OfferModal';
 import AuctionModal from 'components/AuctionModal';
@@ -202,171 +203,231 @@ const NFTItem = () => {
     );
   };
 
+  const itemListedHandler = (
+    owner,
+    nft,
+    id,
+    quantity,
+    pricePerItem,
+    startingTime,
+    isPrivate,
+    allowedAddress
+  ) => {
+    if (eventMatches(nft, id)) {
+      listing.current = {
+        owner,
+        quantity: parseFloat(quantity.toString()),
+        pricePerItem: parseFloat(pricePerItem.toString()) / 10 ** 18,
+        startingTime: parseFloat(startingTime.toString()),
+        allowedAddress,
+      };
+    }
+  };
+
+  const itemUpdatedHandler = (owner, nft, id, newPrice) => {
+    if (eventMatches(nft, id)) {
+      const newListing = {
+        ...listing.current,
+        pricePerItem: parseFloat(newPrice.toString()) / 10 ** 18,
+      };
+      listing.current = newListing;
+    }
+  };
+
+  const itemCanceledHandler = (owner, nft, id) => {
+    if (eventMatches(nft, id)) {
+      listing.current = null;
+    }
+  };
+
+  const itemSoldHandler = (seller, buyer, nft, id, price) => {
+    if (eventMatches(nft, id)) {
+      listing.current = null;
+      setOwner(buyer);
+      const newTradeHistory = [...tradeHistory.current];
+      newTradeHistory.push({
+        from: seller,
+        to: buyer,
+        price: parseFloat(price.toString()) / 10 ** 18,
+        saleDate: new Date().toISOString(),
+      });
+      tradeHistory.current = newTradeHistory;
+    }
+  };
+
+  const offerCreatedHandler = (
+    creator,
+    nft,
+    id,
+    payToken,
+    quantity,
+    pricePerItem,
+    deadline
+  ) => {
+    if (eventMatches(nft, id)) {
+      const newOffers = [...offers.current];
+      newOffers.push({
+        creator,
+        deadline: parseFloat(deadline.toString()),
+        payToken,
+        pricePerItem: parseFloat(pricePerItem.toString()) / 10 ** 18,
+        quantity: parseFloat(quantity.toString()),
+      });
+      offers.current = newOffers;
+    }
+  };
+
+  const offerCanceledHandler = (creator, nft, id) => {
+    if (eventMatches(nft, id)) {
+      const newOffers = offers.current.filter(
+        offer => offer.creator.toLowerCase() !== creator.toLowerCase()
+      );
+      offers.current = newOffers;
+    }
+  };
+
+  const auctionCreatedHandler = (nft, id) => {
+    if (eventMatches(nft, id)) {
+      getAuctions();
+    }
+  };
+
+  const auctionEndTimeUpdatedHandler = (nft, id, _endTime) => {
+    if (eventMatches(nft, id)) {
+      const endTime = parseFloat(_endTime.toString());
+      if (auction.current) {
+        const newAuction = { ...auction.current, endTime };
+        auction.current = newAuction;
+      }
+    }
+  };
+
+  const auctionStartTimeUpdatedHandler = (nft, id, _startTime) => {
+    if (eventMatches(nft, id)) {
+      const startTime = parseFloat(_startTime.toString());
+      if (auction.current) {
+        const newAuction = { ...auction.current, startTime };
+        auction.current = newAuction;
+      }
+    }
+  };
+
+  const auctionReservePriceUpdatedHandler = (nft, id, _price) => {
+    if (eventMatches(nft, id)) {
+      const price = parseFloat(_price.toString()) / 10 ** 18;
+      if (auction.current) {
+        const newAuction = { ...auction.current, reservePrice: price };
+        auction.current = newAuction;
+      }
+    }
+  };
+
+  const minBidIncrementUpdatedHandler = _minBidIncrement => {
+    const minBidIncrement = parseFloat(_minBidIncrement.toString());
+    setMinBidIncrement(minBidIncrement);
+  };
+
+  const bidWithdrawalLockTimeUpdatedHandler = _lockTime => {
+    const lockTime = parseFloat(_lockTime.toString());
+    setWithdrawLockTime(lockTime);
+  };
+
+  const bidPlacedHandler = (nft, id, bidder, _bid) => {
+    if (eventMatches(nft, id)) {
+      const bid = parseFloat(_bid.toString()) / 10 ** 18;
+      setBid({
+        bidder,
+        bid,
+        lastBidTime: Math.floor(new Date().getTime() / 1000),
+      });
+    }
+  };
+
+  const bidWithdrawnHandler = (nft, id) => {
+    if (eventMatches(nft, id)) {
+      setBid(null);
+    }
+  };
+
+  const auctionCancelledHandler = (nft, id) => {
+    if (eventMatches(nft, id)) {
+      auction.current = null;
+      setBid(null);
+    }
+  };
+
+  const auctionResultedHandler = (nft, id, winner, _winningBid) => {
+    if (eventMatches(nft, id)) {
+      const newAuction = { ...auction.current, resulted: true };
+      auction.current = newAuction;
+      setWinner(winner);
+      const winningBid = parseFloat(_winningBid.toString()) / 10 ** 18;
+      setWinningBid(winningBid);
+    }
+  };
+
   const addEventListeners = async () => {
     const salesContract = await getSalesContract();
-
-    salesContract.on(
-      'ItemListed',
-      (
-        owner,
-        nft,
-        id,
-        quantity,
-        pricePerItem,
-        startingTime,
-        isPrivate,
-        allowedAddress
-      ) => {
-        if (eventMatches(nft, id)) {
-          listing.current = {
-            owner,
-            quantity: parseFloat(quantity.toString()),
-            pricePerItem: parseFloat(pricePerItem.toString()) / 10 ** 18,
-            startingTime: parseFloat(startingTime.toString()),
-            allowedAddress,
-          };
-        }
-      }
-    );
-
-    salesContract.on('ItemUpdated', (owner, nft, id, newPrice) => {
-      if (eventMatches(nft, id)) {
-        const newListing = {
-          ...listing.current,
-          pricePerItem: parseFloat(newPrice.toString()) / 10 ** 18,
-        };
-        listing.current = newListing;
-      }
-    });
-
-    salesContract.on('ItemCanceled', (owner, nft, id) => {
-      if (eventMatches(nft, id)) {
-        listing.current = null;
-      }
-    });
-
-    salesContract.on('ItemSold', (seller, buyer, nft, id, price) => {
-      if (eventMatches(nft, id)) {
-        listing.current = null;
-        setOwner(buyer);
-        const newTradeHistory = [...tradeHistory.current];
-        newTradeHistory.push({
-          from: seller,
-          to: buyer,
-          price: parseFloat(price.toString()) / 10 ** 18,
-          saleDate: new Date().toISOString(),
-        });
-        tradeHistory.current = newTradeHistory;
-      }
-    });
-
-    salesContract.on(
-      'OfferCreated',
-      (creator, nft, id, payToken, quantity, pricePerItem, deadline) => {
-        if (eventMatches(nft, id)) {
-          const newOffers = [...offers.current];
-          newOffers.push({
-            creator,
-            deadline: parseFloat(deadline.toString()),
-            payToken,
-            pricePerItem: parseFloat(pricePerItem.toString()) / 10 ** 18,
-            quantity: parseFloat(quantity.toString()),
-          });
-          offers.current = newOffers;
-        }
-      }
-    );
-
-    salesContract.on('OfferCanceled', (creator, nft, id) => {
-      if (eventMatches(nft, id)) {
-        const newOffers = offers.current.filter(
-          offer => offer.creator.toLowerCase() !== creator.toLowerCase()
-        );
-        offers.current = newOffers;
-      }
-    });
-
     const auctionContract = await getAuctionContract();
 
-    auctionContract.on('AuctionCreated', (nft, id) => {
-      if (eventMatches(nft, id)) {
-        getAuctions();
-      }
-    });
+    salesContract.on('ItemListed', itemListedHandler);
+    salesContract.on('ItemUpdated', itemUpdatedHandler);
+    salesContract.on('ItemCanceled', itemCanceledHandler);
+    salesContract.on('ItemSold', itemSoldHandler);
+    salesContract.on('OfferCreated', offerCreatedHandler);
+    salesContract.on('OfferCanceled', offerCanceledHandler);
 
-    auctionContract.on('UpdateAuctionEndTime', (nft, id, _endTime) => {
-      if (eventMatches(nft, id)) {
-        const endTime = parseFloat(_endTime.toString());
-        if (auction.current) {
-          const newAuction = { ...auction.current, endTime };
-          auction.current = newAuction;
-        }
-      }
-    });
+    auctionContract.on('AuctionCreated', auctionCreatedHandler);
+    auctionContract.on(
+      'UpdateAuctionStartTime',
+      auctionStartTimeUpdatedHandler
+    );
+    auctionContract.on('UpdateAuctionEndTime', auctionEndTimeUpdatedHandler);
+    auctionContract.on(
+      'UpdateAuctionReservePrice',
+      auctionReservePriceUpdatedHandler
+    );
+    auctionContract.on('UpdateMinBidIncrement', minBidIncrementUpdatedHandler);
+    auctionContract.on(
+      'UpdateBidWithdrawalLockTime',
+      bidWithdrawalLockTimeUpdatedHandler
+    );
+    auctionContract.on('BidPlaced', bidPlacedHandler);
+    auctionContract.on('BidWithdrawn', bidWithdrawnHandler);
+    auctionContract.on('AuctionCancelled', auctionCancelledHandler);
+    auctionContract.on('AuctionResulted', auctionResultedHandler);
+  };
 
-    auctionContract.on('UpdateAuctionStartTime', (nft, id, _startTime) => {
-      if (eventMatches(nft, id)) {
-        const startTime = parseFloat(_startTime.toString());
-        if (auction.current) {
-          const newAuction = { ...auction.current, startTime };
-          auction.current = newAuction;
-        }
-      }
-    });
+  const removeEventListeners = async () => {
+    const salesContract = await getSalesContract();
+    const auctionContract = await getAuctionContract();
 
-    auctionContract.on('UpdateAuctionReservePrice', (nft, id, _price) => {
-      if (eventMatches(nft, id)) {
-        const price = parseFloat(_price.toString()) / 10 ** 18;
-        if (auction.current) {
-          const newAuction = { ...auction.current, reservePrice: price };
-          auction.current = newAuction;
-        }
-      }
-    });
+    salesContract.off('ItemListed', itemListedHandler);
+    salesContract.off('ItemUpdated', itemUpdatedHandler);
+    salesContract.off('ItemCanceled', itemCanceledHandler);
+    salesContract.off('ItemSold', itemSoldHandler);
+    salesContract.off('OfferCreated', offerCreatedHandler);
+    salesContract.off('OfferCanceled', offerCanceledHandler);
 
-    auctionContract.on('UpdateMinBidIncrement', _minBidIncrement => {
-      const minBidIncrement = parseFloat(_minBidIncrement.toString());
-      setMinBidIncrement(minBidIncrement);
-    });
-
-    auctionContract.on('UpdateBidWithdrawalLockTime', _lockTime => {
-      const lockTime = parseFloat(_lockTime.toString());
-      setWithdrawLockTime(lockTime);
-    });
-
-    auctionContract.on('BidPlaced', (nft, id, bidder, _bid) => {
-      if (eventMatches(nft, id)) {
-        const bid = parseFloat(_bid.toString()) / 10 ** 18;
-        setBid({
-          bidder,
-          bid,
-          lastBidTime: Math.floor(new Date().getTime() / 1000),
-        });
-      }
-    });
-
-    auctionContract.on('BidWithdrawn', (nft, id) => {
-      if (eventMatches(nft, id)) {
-        setBid(null);
-      }
-    });
-
-    auctionContract.on('AuctionCancelled', (nft, id) => {
-      if (eventMatches(nft, id)) {
-        auction.current = null;
-        setBid(null);
-      }
-    });
-
-    auctionContract.on('AuctionResulted', (nft, id, winner, _winningBid) => {
-      if (eventMatches(nft, id)) {
-        const newAuction = { ...auction.current, resulted: true };
-        auction.current = newAuction;
-        setWinner(winner);
-        const winningBid = parseFloat(_winningBid.toString()) / 10 ** 18;
-        setWinningBid(winningBid);
-      }
-    });
+    auctionContract.off('AuctionCreated', auctionCreatedHandler);
+    auctionContract.off(
+      'UpdateAuctionStartTime',
+      auctionStartTimeUpdatedHandler
+    );
+    auctionContract.off('UpdateAuctionEndTime', auctionEndTimeUpdatedHandler);
+    auctionContract.off(
+      'UpdateAuctionReservePrice',
+      auctionReservePriceUpdatedHandler
+    );
+    auctionContract.off('UpdateMinBidIncrement', minBidIncrementUpdatedHandler);
+    auctionContract.off(
+      'UpdateBidWithdrawalLockTime',
+      bidWithdrawalLockTimeUpdatedHandler
+    );
+    auctionContract.off('BidPlaced', bidPlacedHandler);
+    auctionContract.off('BidWithdrawn', bidWithdrawnHandler);
+    auctionContract.off('AuctionCancelled', auctionCancelledHandler);
+    auctionContract.off('AuctionResulted', auctionResultedHandler);
   };
 
   const getAuctionConfiguration = async () => {
@@ -398,6 +459,10 @@ const NFTItem = () => {
     setInterval(() => {
       setNow(new Date());
     }, 1000);
+
+    return () => {
+      removeEventListeners();
+    };
   }, []);
 
   useEffect(() => {
@@ -518,6 +583,8 @@ const NFTItem = () => {
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       await provider.waitForTransaction(tx.hash);
 
+      toast('success', 'Item listed successfully!');
+
       setItemListing(false);
     } catch {
       setItemListing(false);
@@ -536,6 +603,8 @@ const NFTItem = () => {
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       await provider.waitForTransaction(tx.hash);
 
+      toast('success', 'Price updated successfully!');
+
       setPriceUpdating(false);
     } catch (e) {
       setPriceUpdating(false);
@@ -545,6 +614,8 @@ const NFTItem = () => {
   const cancelList = async () => {
     await cancelListing(address, tokenID);
     listing.current = null;
+
+    toast('success', 'Item unlisted successfully!');
   };
 
   const handleBuyItem = async _price => {
@@ -586,9 +657,11 @@ const NFTItem = () => {
         ethers.BigNumber.from(deadline)
       );
 
+      await tx.wait();
+
       setOfferModalVisible(false);
 
-      console.log('Transaction submitted: ', tx.hash);
+      toast('success', 'Offer placed successfully!');
     } catch (e) {
       console.log(e);
     } finally {

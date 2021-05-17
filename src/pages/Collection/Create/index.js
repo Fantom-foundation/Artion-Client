@@ -127,7 +127,7 @@ const CollectionCreate = () => {
         formData.append('imgData', logodata);
         const result = await axios({
           method: 'post',
-          url: 'https://api.artion.io/ipfs/uploadCollectionImage2Server',
+          url: 'https://api1.artion.io/ipfs/uploadCollectionImage2Server',
           data: formData,
           headers: {
             'Content-Type': 'multipart/form-data',
@@ -152,7 +152,7 @@ const CollectionCreate = () => {
 
         await axios({
           method: 'post',
-          url: 'https://api.artion.io/collection/collectiondetails',
+          url: 'https://api1.artion.io/collection/collectiondetails',
           data: JSON.stringify(data),
           headers: {
             'Content-Type': 'application/json',
