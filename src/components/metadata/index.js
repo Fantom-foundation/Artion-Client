@@ -255,6 +255,8 @@ const Metadata = () => {
         let evtCaught = confirmedTnx.logs[0].topics;
         let mintedTkId = BigNumber.from(evtCaught[3]);
         setLastMintedTkId(mintedTkId.toNumber());
+
+        toast('success', 'New NFT item minted!');
       } catch (error) {
         toast('error', error.message);
       }

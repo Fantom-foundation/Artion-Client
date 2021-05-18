@@ -92,9 +92,9 @@ const useStyles = makeStyles({
     marginRight: 45,
   },
   cancel: {
-    backgroundColor: '#FFF',
-    border: '1px solid #007BFF',
-    color: '#007BFF',
+    backgroundColor: '#FFF !important',
+    border: '1px solid #007BFF !important',
+    color: '#007BFF !important',
   },
   avatarBox: {
     position: 'relative',

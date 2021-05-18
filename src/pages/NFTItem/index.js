@@ -629,6 +629,8 @@ const NFTItem = () => {
 
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     await provider.waitForTransaction(tx.hash);
+
+    toast('success', 'You have bought the item!');
   };
 
   const handleMakeOffer = async (_price, endTime) => {
@@ -674,6 +676,8 @@ const NFTItem = () => {
 
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     await provider.waitForTransaction(tx.hash);
+
+    toast('success', 'Offer accepted!');
   };
 
   const handleCancelOffer = async () => {
@@ -683,6 +687,8 @@ const NFTItem = () => {
       const tx = await cancelOffer(address, tokenID);
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       await provider.waitForTransaction(tx.hash);
+
+      toast('success', 'You have withdrawn your offer!');
 
       setOfferCancelling(false);
     } catch {
@@ -710,6 +716,8 @@ const NFTItem = () => {
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       await provider.waitForTransaction(tx.hash);
 
+      toast('success', 'Auction started!');
+
       setAuctionStarting(false);
     } catch {
       setAuctionStarting(false);
@@ -726,6 +734,8 @@ const NFTItem = () => {
         ethers.BigNumber.from(tokenID),
         ethers.BigNumber.from(price)
       );
+
+      toast('success', 'Auction reserve price successfully!');
     }
 
     const startTime = Math.floor(_startTime.getTime() / 1000);
@@ -735,6 +745,8 @@ const NFTItem = () => {
         ethers.BigNumber.from(tokenID),
         ethers.BigNumber.from(startTime)
       );
+
+      toast('success', 'Auction start time successfully!');
     }
 
     const endTime = Math.floor(_endTime.getTime() / 1000);
@@ -744,6 +756,8 @@ const NFTItem = () => {
         ethers.BigNumber.from(tokenID),
         ethers.BigNumber.from(endTime)
       );
+
+      toast('success', 'Auction end time successfully!');
     }
 
     setAuctionModalVisible(false);
@@ -752,10 +766,14 @@ const NFTItem = () => {
   const cancelCurrentAuction = async () => {
     await cancelAuction(address, tokenID);
     auction.current = null;
+
+    toast('success', 'Auction canceled!');
   };
 
   const handleResultAuction = async () => {
     await resultAuction(address, tokenID);
+
+    toast('success', 'Auction resulted!');
   };
 
   const handlePlaceBid = async _price => {
@@ -774,6 +792,8 @@ const NFTItem = () => {
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       await provider.waitForTransaction(tx.hash);
 
+      toast('success', 'Bid placed successfully!');
+
       setBidPlacing(false);
     } catch {
       setBidPlacing(false);
@@ -782,6 +802,8 @@ const NFTItem = () => {
 
   const handleWithdrawBid = async () => {
     await withdrawBid(address, ethers.BigNumber.from(tokenID));
+
+    toast('success', 'You have withdrawn your bid!');
   };
 
   const hasMyOffer = useMemo(() => {

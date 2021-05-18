@@ -10,6 +10,7 @@ import CloseIcon from '@material-ui/icons/Close';
 import { Categories } from 'constants/filter.constants';
 import HeaderActions from 'actions/header.actions';
 import Header from 'components/header';
+import toast from 'utils/toast';
 
 import webIcon from 'assets/svgs/web.svg';
 import discordIcon from 'assets/imgs/discord.png';
@@ -159,6 +160,8 @@ const CollectionCreate = () => {
             Authorization: `Bearer ${authToken}`,
           },
         });
+
+        toast('success', 'Collection created successfully!');
 
         // TODO: show success notification
         history.push('/exploreall');
