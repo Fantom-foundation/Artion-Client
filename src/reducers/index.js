@@ -7,6 +7,7 @@ import { Modal } from './modal.reducers';
 import { Filter } from './filter.reducers';
 import { Collections } from './collections.reducers';
 import { Tokens } from './tokens.reducers';
+import { Price } from './price.reducers';
 
 const rootReducer = combineReducers({
   Auth,
@@ -16,6 +17,7 @@ const rootReducer = combineReducers({
   Filter,
   Collections,
   Tokens,
+  Price,
 });
 
 export default rootReducer;

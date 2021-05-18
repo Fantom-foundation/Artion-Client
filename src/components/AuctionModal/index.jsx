@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 import cx from 'classnames';
 import Datetime from 'react-datetime';
 import 'react-datetime/css/react-datetime.css';
@@ -19,6 +20,9 @@ const AuctionModal = ({
   const [reservePrice, setReservePrice] = useState('');
   const [startTime, setStartTime] = useState(new Date());
   const [endTime, setEndTime] = useState(new Date());
+  const [focused, setFocused] = useState(false);
+
+  const { price: ftmPrice } = useSelector(state => state.Price);
 
   useEffect(() => {
     setReservePrice(auction?.reservePrice || '');
@@ -47,32 +51,45 @@ const AuctionModal = ({
         <div className={styles.body}>
           <div className={styles.formGroup}>
             <div className={styles.formLabel}>Reserve Price *</div>
-            <input
-              className={styles.formInput}
-              placeholder="0.00"
-              value={reservePrice}
-              onChange={e => setReservePrice(e.target.value)}
-            />
+            <div
+              className={cx(styles.formInputCont, focused && styles.focused)}
+            >
+              <input
+                className={styles.formInput}
+                placeholder="0.00"
+                value={reservePrice}
+                onChange={e => setReservePrice(e.target.value)}
+                onFocus={() => setFocused(true)}
+                onBlur={() => setFocused(false)}
+              />
+              <div className={styles.usdPrice}>
+                ${((parseFloat(reservePrice) || 0) * ftmPrice).toFixed(2)}
+              </div>
+            </div>
           </div>
           <div className={styles.formGroup}>
             <div className={styles.formLabel}>Start Time *</div>
-            <Datetime
-              value={startTime}
-              onChange={val => setStartTime(val.toDate())}
-              inputProps={{
-                className: styles.formInput,
-              }}
-            />
+            <div className={styles.formInputCont}>
+              <Datetime
+                value={startTime}
+                onChange={val => setStartTime(val.toDate())}
+                inputProps={{
+                  className: styles.formInput,
+                }}
+              />
+            </div>
           </div>
           <div className={styles.formGroup}>
             <div className={styles.formLabel}>End Time *</div>
-            <Datetime
-              value={endTime}
-              onChange={val => setEndTime(val.toDate())}
-              inputProps={{
-                className: styles.formInput,
-              }}
-            />
+            <div className={styles.formInputCont}>
+              <Datetime
+                value={endTime}
+                onChange={val => setEndTime(val.toDate())}
+                inputProps={{
+                  className: styles.formInput,
+                }}
+              />
+            </div>
           </div>
         </div>
         <div className={styles.footer}>
