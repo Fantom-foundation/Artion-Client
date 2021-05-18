@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState, useRef } from 'react';
+import React, { useEffect, useMemo, useState, useRef, Suspense } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { Chart } from 'react-charts';
@@ -66,6 +66,7 @@ import OfferModal from 'components/OfferModal';
 import AuctionModal from 'components/AuctionModal';
 import BidModal from 'components/BidModal';
 import Header from 'components/header';
+import SuspenseImg from 'components/SuspenseImg';
 
 import webIcon from 'assets/svgs/web.svg';
 import discordIcon from 'assets/imgs/discord.png';
@@ -985,7 +986,19 @@ const NFTItem = () => {
                     className={styles.loader}
                   />
                 ) : (
-                  <img src={info?.image} />
+                  <Suspense
+                    fallback={
+                      <Loader
+                        type="Oval"
+                        color="#007BFF"
+                        height={32}
+                        width={32}
+                        className={styles.loader}
+                      />
+                    }
+                  >
+                    <SuspenseImg src={info?.image} />
+                  </Suspense>
                 )}
               </div>
             </div>

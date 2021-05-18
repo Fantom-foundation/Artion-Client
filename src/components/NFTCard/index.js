@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, Suspense } from 'react';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import cx from 'classnames';
@@ -9,7 +9,9 @@ import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
 import Typography from '@material-ui/core/Typography';
 import axios from 'axios';
+import Loader from 'react-loader-spinner';
 
+import SuspenseImg from 'components/SuspenseImg';
 import PLACEHOLDER from 'assets/imgs/nft-placeholder.png';
 
 const useStyles = makeStyles({
@@ -55,6 +57,12 @@ const useStyles = makeStyles({
   mediaBox: {
     position: 'relative',
     paddingBottom: '100%',
+  },
+  loader: {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
   },
   media: {
     position: 'absolute',
@@ -127,11 +135,26 @@ const BaseCard = ({ item, loading, style }) => {
           {loading || fetching ? (
             <Skeleton width="100%" height="100%" className={classes.media} />
           ) : (
-            <img
-              src={info?.image || PLACEHOLDER}
-              className={cx(classes.media, info?.image && classes.mediaMissing)}
-              alt={info?.name}
-            />
+            <Suspense
+              fallback={
+                <Loader
+                  type="Oval"
+                  color="#007BFF"
+                  height={32}
+                  width={32}
+                  className={classes.loader}
+                />
+              }
+            >
+              <SuspenseImg
+                src={info?.image || PLACEHOLDER}
+                className={cx(
+                  classes.media,
+                  info?.image && classes.mediaMissing
+                )}
+                alt={info?.name}
+              />
+            </Suspense>
           )}
         </div>
         <CardContent className={classes.content}>
