@@ -1,7 +1,9 @@
 import React, { useRef, useEffect } from 'react';
+import { useDispatch } from 'react-redux';
 import { observer, inject } from 'mobx-react';
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
+import { Client } from '@bandprotocol/bandchain.js';
 
 import Header from './header';
 import Layout from './layout';
@@ -14,8 +16,8 @@ import { isMobile } from 'utils/userAgent';
 import LandingPage from '../pages/landingpage';
 import ExploreAllPage from '../pages/explorepage';
 import NFTItem from '../pages/NFTItem';
-// import AccountDetails from '../pages/AccountDetails';
 import CollectionCreate from '../pages/Collection/Create';
+import PriceActions from 'actions/price.actions';
 
 const App = ({ paintStore }) => {
   const canvasRef = useRef(null);
@@ -61,6 +63,27 @@ const App = ({ paintStore }) => {
       </>
     );
   };
+
+  const dispatch = useDispatch();
+
+  const getPrice = async () => {
+    try {
+      const endpoint = 'https://rpc.bandchain.org';
+      const client = new Client(endpoint);
+      const [{ rate }] = await client.getReferenceData(['FTM/USD']);
+      dispatch(PriceActions.updatePrice(rate));
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setTimeout(() => {
+        getPrice();
+      }, 10 * 1000);
+    }
+  };
+
+  useEffect(() => {
+    getPrice();
+  }, []);
 
   return (
     <div>

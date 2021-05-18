@@ -5,6 +5,7 @@
   "private": true,
   "dependencies": {
     "@babel/core": "7.5.5",
+    "@bandprotocol/bandchain.js": "^1.2.1",
     "@emotion/core": "^10.0.15",
     "@emotion/styled": "^10.0.15",
     "@fortawesome/fontawesome-svg-core": "^1.2.25",

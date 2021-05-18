@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 import cx from 'classnames';
 import Datetime from 'react-datetime';
 import 'react-datetime/css/react-datetime.css';
@@ -17,6 +18,10 @@ const OfferModal = ({
 }) => {
   const [price, setPrice] = useState('');
   const [endTime, setEndTime] = useState(new Date());
+  const [focused1, setFocused1] = useState(false);
+  const [focused2, setFocused2] = useState(false);
+
+  const { price: ftmPrice } = useSelector(state => state.Price);
 
   useEffect(() => {
     setPrice('');
@@ -40,22 +45,37 @@ const OfferModal = ({
         <div className={styles.body}>
           <div className={styles.formGroup}>
             <div className={styles.formLabel}>Price *</div>
-            <input
-              className={styles.formInput}
-              placeholder="0.00"
-              value={price}
-              onChange={e => setPrice(e.target.value)}
-            />
+            <div
+              className={cx(styles.formInputCont, focused1 && styles.focused1)}
+            >
+              <input
+                className={styles.formInput}
+                placeholder="0.00"
+                value={price}
+                onChange={e => setPrice(e.target.value)}
+                onFocus={() => setFocused1(true)}
+                onBlur={() => setFocused1(false)}
+              />
+              <div className={styles.usdPrice}>
+                ${((parseFloat(price) || 0) * ftmPrice).toFixed(2)}
+              </div>
+            </div>
           </div>
           <div className={styles.formGroup}>
             <div className={styles.formLabel}>EndTime *</div>
-            <Datetime
-              value={endTime}
-              onChange={val => setEndTime(val.toDate())}
-              inputProps={{
-                className: styles.formInput,
-              }}
-            />
+            <div
+              className={cx(styles.formInputCont, focused2 && styles.focused1)}
+            >
+              <Datetime
+                value={endTime}
+                onChange={val => setEndTime(val.toDate())}
+                inputProps={{
+                  className: styles.formInput,
+                  onFocus: () => setFocused2(true),
+                  onBlur: () => setFocused2(false),
+                }}
+              />
+            </div>
           </div>
         </div>
         <div className={styles.footer}>

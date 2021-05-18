@@ -7,6 +7,7 @@ import Skeleton from 'react-loading-skeleton';
 import SwapVertIcon from '@material-ui/icons/SwapVert';
 
 import { getWFTMBalance, wrapFTM, unwrapFTM } from 'contracts';
+import toast from 'utils/toast';
 
 import styles from './styles.module.scss';
 
@@ -78,8 +79,10 @@ const WFTMModal = ({ visible, onClose }) => {
       const price = ethers.utils.parseEther(amount);
       if (wrap) {
         await wrapFTM(price, account);
+        toast('success', 'Wrapped FTM successfully!');
       } else {
         await unwrapFTM(price);
+        toast('success', 'Unwrap W-FTM successfully!');
       }
       setAmount('');
     } catch (err) {

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 import cx from 'classnames';
 import { ClipLoader } from 'react-spinners';
 
@@ -15,6 +16,9 @@ const BidModal = ({
   contractApproved,
 }) => {
   const [price, setPrice] = useState('');
+  const [focused, setFocused] = useState(false);
+
+  const { price: ftmPrice } = useSelector(state => state.Price);
 
   useEffect(() => {
     setPrice(minBidAmount);
@@ -37,12 +41,21 @@ const BidModal = ({
         <div className={styles.body}>
           <div className={styles.formGroup}>
             <div className={styles.formLabel}>Price *</div>
-            <input
-              className={styles.formInput}
-              placeholder="0.00"
-              value={price}
-              onChange={e => setPrice(e.target.value)}
-            />
+            <div
+              className={cx(styles.formInputCont, focused && styles.focused)}
+            >
+              <input
+                className={styles.formInput}
+                placeholder="0.00"
+                value={price}
+                onChange={e => setPrice(e.target.value)}
+                onFocus={() => setFocused(true)}
+                onBlur={() => setFocused(false)}
+              />
+              <div className={styles.usdPrice}>
+                ${((parseFloat(price) || 0) * ftmPrice).toFixed(2)}
+              </div>
+            </div>
           </div>
         </div>
         <div className={styles.footer}>
