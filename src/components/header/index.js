@@ -5,12 +5,9 @@ import Skeleton from 'react-loading-skeleton';
 import MenuItem from '@material-ui/core/MenuItem';
 import Menu from '@material-ui/core/Menu';
 import { UnsupportedChainIdError, useWeb3React } from '@web3-react/core';
-import {
-  AccountCircle,
-  ExpandMore,
-  Search as SearchIcon,
-} from '@material-ui/icons';
+import { ExpandMore, Search as SearchIcon } from '@material-ui/icons';
 import { useDispatch, useSelector } from 'react-redux';
+import axios from 'axios';
 
 import WalletConnectActions from 'actions/walletconnect.actions';
 import AuthActions from 'actions/auth.actions';
@@ -20,6 +17,7 @@ import { injected } from 'connectors';
 import { getAuthToken, getAccountDetails } from 'api';
 import { NETWORK_LABEL } from 'constants/networks';
 import WFTMModal from 'components/WFTMModal';
+import Identicon from 'components/Identicon';
 
 import logoWhite from 'assets/svgs/logo_white.svg';
 import logoBlue from 'assets/svgs/logo_blue.svg';
@@ -47,6 +45,12 @@ const NiftyHeader = ({ light }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [loading, setLoading] = useState(false);
   const [searchBarActive, setSearchBarActive] = useState(false);
+
+  const [keyword, setKeyword] = useState('');
+  const [cancelSource, setCancelSource] = useState(null);
+  const [accounts, setAccounts] = useState([]);
+  const [collections, setCollections] = useState([]);
+  const [tokens, setTokens] = useState([]);
 
   const isMenuOpen = Boolean(anchorEl);
 
@@ -125,6 +129,60 @@ const NiftyHeader = ({ light }) => {
 
     handleConnectWallet();
   }, []);
+
+  const resetResults = () => {
+    setAccounts([]);
+    setCollections([]);
+    setTokens([]);
+  };
+
+  useEffect(() => {
+    resetResults();
+  }, [isSearchbarShown]);
+
+  const handleSearch = async word => {
+    setKeyword(word);
+
+    if (cancelSource) {
+      cancelSource.cancel();
+    }
+
+    if (word.length === 0) {
+      resetResults();
+
+      return;
+    }
+
+    try {
+      const cancelTokenSource = axios.CancelToken.source();
+
+      const promise = axios({
+        method: 'post',
+        url: `https://api1.artion.io/info/searchNames`,
+        data: JSON.stringify({ name: word }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        cancelToken: cancelTokenSource.token,
+      });
+
+      setCancelSource(cancelTokenSource);
+
+      const {
+        data: {
+          data: { accounts, collections, tokens },
+        },
+      } = await promise;
+
+      setAccounts(accounts);
+      setCollections(collections);
+      setTokens(tokens);
+
+      setCancelSource(null);
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
   const handleSignOut = () => {
     dispatch(WalletConnectActions.disconnectWallet());
@@ -224,57 +282,82 @@ const NiftyHeader = ({ light }) => {
                 <input
                   placeholder="Search"
                   className={styles.searchinput}
+                  onChange={e => handleSearch(e.target.value)}
                   onFocus={() => setSearchBarActive(true)}
-                  onBlur={() => setSearchBarActive(false)}
+                  onBlur={() =>
+                    setTimeout(() => setSearchBarActive(false), 200)
+                  }
                 />
               </div>
               {searchBarActive && (
                 <div className={styles.resultcont}>
-                  <div className={styles.resultsection}>
-                    <div className={styles.resultsectiontitle}>Collections</div>
-                    <div className={styles.separator} />
-                    <div className={styles.resultlist}>
-                      {new Array(3).fill(0).map((_, idx) => (
-                        <div key={idx} className={styles.result}>
-                          <img
-                            className={styles.resultimg}
-                            src="https://gateway.pinata.cloud/ipfs/QmSrHp7nzX5agJNGnrmEJE9MrY7t27fSRV9a27GzgkkbqM"
-                          />
-                          <div className={styles.resulttitle}>Bull Ther</div>
-                        </div>
-                      ))}
+                  {collections.length > 0 && (
+                    <div className={styles.resultsection}>
+                      <div className={styles.resultsectiontitle}>
+                        Collections
+                      </div>
+                      <div className={styles.separator} />
+                      <div className={styles.resultlist}>
+                        {collections.map((collection, idx) => (
+                          <div key={idx} className={styles.result}>
+                            <img
+                              className={styles.resultimg}
+                              src={`https://gateway.pinata.cloud/ipfs/${collection.logoImageHash}`}
+                            />
+                            <div className={styles.resulttitle}>
+                              {collection.collectionName}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                  <div className={styles.resultsection}>
-                    <div className={styles.resultsectiontitle}>Account</div>
-                    <div className={styles.separator} />
-                    <div className={styles.resultlist}>
-                      {new Array(3).fill(0).map((_, idx) => (
-                        <div key={idx} className={styles.result}>
-                          <img
-                            className={styles.resultimg}
-                            src="https://gateway.pinata.cloud/ipfs/QmSrHp7nzX5agJNGnrmEJE9MrY7t27fSRV9a27GzgkkbqM"
-                          />
-                          <div className={styles.resulttitle}>Bull Ther</div>
-                        </div>
-                      ))}
+                  )}
+                  {accounts.length > 0 && (
+                    <div className={styles.resultsection}>
+                      <div className={styles.resultsectiontitle}>Account</div>
+                      <div className={styles.separator} />
+                      <div className={styles.resultlist}>
+                        {accounts.map((account, idx) => (
+                          <Link
+                            to={`/account/${account.address}`}
+                            key={idx}
+                            className={styles.result}
+                          >
+                            <img
+                              className={styles.resultimg}
+                              src={`https://gateway.pinata.cloud/ipfs/${account.imageHash}`}
+                            />
+                            <div className={styles.resulttitle}>
+                              {account.alias}
+                            </div>
+                          </Link>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                  <div className={styles.resultsection}>
-                    <div className={styles.resultsectiontitle}>Items</div>
-                    <div className={styles.separator} />
-                    <div className={styles.resultlist}>
-                      {new Array(3).fill(0).map((_, idx) => (
-                        <div key={idx} className={styles.result}>
-                          <img
-                            className={styles.resultimg}
-                            src="https://gateway.pinata.cloud/ipfs/QmSrHp7nzX5agJNGnrmEJE9MrY7t27fSRV9a27GzgkkbqM"
-                          />
-                          <div className={styles.resulttitle}>Bull Ther</div>
-                        </div>
-                      ))}
+                  )}
+                  {tokens.length > 0 && (
+                    <div className={styles.resultsection}>
+                      <div className={styles.resultsectiontitle}>Items</div>
+                      <div className={styles.separator} />
+                      <div className={styles.resultlist}>
+                        {tokens.map((_, idx) => (
+                          <div key={idx} className={styles.result}>
+                            <img
+                              className={styles.resultimg}
+                              src="https://gateway.pinata.cloud/ipfs/QmSrHp7nzX5agJNGnrmEJE9MrY7t27fSRV9a27GzgkkbqM"
+                            />
+                            <div className={styles.resulttitle}>Bull Ther</div>
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                  </div>
+                  )}
+                  {keyword.length > 0 &&
+                    collections.length === 0 &&
+                    accounts.length === 0 &&
+                    tokens.length === 0 && (
+                      <div className={styles.noResults}>No Results</div>
+                    )}
                 </div>
               )}
             </div>
@@ -311,7 +394,11 @@ const NiftyHeader = ({ light }) => {
                 className={styles.avatar}
               />
             ) : (
-              <AccountCircle className={styles.avatar} />
+              <Identicon
+                account={account}
+                size={36}
+                className={styles.avatar}
+              />
             )}
             <div className={styles.profile}>
               <div className={styles.address}>

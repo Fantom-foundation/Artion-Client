@@ -22,13 +22,15 @@ import { useWeb3React } from '@web3-react/core';
 
 import Panel from '../../components/Panel';
 import ResizableBox from '../../components/ResizableBox';
+import Identicon from 'components/Identicon';
 import {
   fetchTokenURI,
   increaseViewCount,
   getOffers,
   getTradeHistory,
   fetchCollection,
-} from '../../api';
+  getUserAccountDetails,
+} from 'api';
 import {
   getSalesContract,
   getNFTContract,
@@ -92,6 +94,8 @@ const NFTItem = () => {
   const [withdrawLockTime, setWithdrawLockTime] = useState(0);
   const [info, setInfo] = useState();
   const [owner, setOwner] = useState();
+  const [ownerInfo, setOwnerInfo] = useState();
+  const [ownerInfoLoading, setOwnerInfoLoading] = useState(false);
   const [collection, setCollection] = useState();
   const [collectionLoading, setCollectionLoading] = useState(false);
 
@@ -140,11 +144,20 @@ const NFTItem = () => {
 
   const getTokenOwner = async () => {
     try {
+      setOwnerInfoLoading(true);
       const [contract] = await getNFTContract(address);
       const res = await contract.ownerOf(tokenID);
       setOwner(res);
+      try {
+        const { data } = await getUserAccountDetails(res);
+        setOwnerInfo(data);
+      } catch {
+        setOwnerInfo(null);
+      }
     } catch {
       setOwner(null);
+    } finally {
+      setOwnerInfoLoading(false);
     }
   };
 
@@ -1113,9 +1126,33 @@ const NFTItem = () => {
                 {collection?.name || ''}
               </div>
               <div className={styles.itemName}>{info?.name || ''}</div>
-              <div className={styles.itemViews}>
-                <FontAwesomeIcon icon={faEye} color="#777" />
-                &nbsp;{views} Views
+              <div className={styles.itemStats}>
+                <div className={styles.itemOwner}>
+                  <div className={styles.ownerAvatar}>
+                    {ownerInfoLoading ? (
+                      <Skeleton width={24} height={24} />
+                    ) : ownerInfo?.imageHash ? (
+                      <img
+                        src={`https://gateway.pinata.cloud/ipfs/${ownerInfo.imageHash}`}
+                        className={styles.avatar}
+                      />
+                    ) : (
+                      <Identicon account={owner} size={24} />
+                    )}
+                  </div>
+                  Owned by&nbsp;
+                  {ownerInfoLoading ? (
+                    <Skeleton width={60} height={20} />
+                  ) : (
+                    <Link to={`/account/${owner}`} className={styles.ownerName}>
+                      {ownerInfo?.alias || shortenAddress(owner)}
+                    </Link>
+                  )}
+                </div>
+                <div className={styles.itemViews}>
+                  <FontAwesomeIcon icon={faEye} color="#777" />
+                  &nbsp;{views} Views
+                </div>
               </div>
             </div>
             {(winner || auction.current?.resulted === false) && (
@@ -1143,7 +1180,7 @@ const NFTItem = () => {
                         {auction.current.resulted ? (
                           <>
                             {'Winner: '}
-                            <Link to={`/address/${winner}`}>
+                            <Link to={`/account/${winner}`}>
                               {winner === account
                                 ? 'Me'
                                 : shortenAddress(winner)}
@@ -1298,12 +1335,12 @@ const NFTItem = () => {
                 return (
                   <div className={styles.listing} key={idx}>
                     <Link
-                      to={`/address/${history.from}`}
+                      to={`/account/${history.from}`}
                       className={styles.from}
                     >
                       {history.from}
                     </Link>
-                    <Link to={`/address/${history.to}`} className={styles.to}>
+                    <Link to={`/account/${history.to}`} className={styles.to}>
                       {history.to}
                     </Link>
                     <div className={styles.historyPrice}>

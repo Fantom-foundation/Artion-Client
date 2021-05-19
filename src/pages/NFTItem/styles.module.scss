@@ -196,11 +196,43 @@
   margin-top: 8px;
 }
 
-.itemViews {
+.itemStats {
   margin-top: 8px;
   display: flex;
   align-items: center;
   color: #333;
+}
+
+.itemOwner {
+  display: flex;
+  align-items: center;
+}
+
+.ownerAvatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  margin-right: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+
+  .avatar {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+.ownerName {
+  text-decoration: none;
+  color: rgb(0,89,255);
+}
+
+.itemViews {
+  margin-left: 10px;
+  display: flex;
+  align-items: center;
 }
 
 .panelBody {

@@ -117,6 +117,14 @@
   color: #3D3D3D;
 }
 
+.noResults {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 0 15px;
+  font-style: italic;
+}
+
 .menu {
   display: flex;
   align-items: center;
