@@ -9,17 +9,14 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogActions from '@material-ui/core/DialogActions';
 import Dialog from '@material-ui/core/Dialog';
-import {
-  Add as AddIcon,
-  AccountCircle,
-  Publish as PublishIcon,
-} from '@material-ui/icons';
+import { Add as AddIcon, Publish as PublishIcon } from '@material-ui/icons';
 import { useWeb3React } from '@web3-react/core';
 
 import NFTsGrid from 'components/NFTsGrid';
 import StatusFilter from 'components/StatusFilter';
 import CollectionsFilter from 'components/CollectionsFilter';
 import Header from 'components/header';
+import Identicon from 'components/Identicon';
 import SCHandlers from 'utils/sc.interaction';
 import { shortenAddress } from 'utils';
 import toast from 'utils/toast';
@@ -211,7 +208,7 @@ const AccountDetails = () => {
               className={styles.avatar}
             />
           ) : (
-            <AccountCircle className={styles.avatar} />
+            <Identicon account={uid} size={100} />
           )}
           <div className={styles.username}>{user.alias || ''}</div>
           <a

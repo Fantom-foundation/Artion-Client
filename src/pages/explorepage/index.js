@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
-import { AccountCircle } from '@material-ui/icons';
 
 import StatusFilter from 'components/StatusFilter';
 import CollectionsFilter from 'components/CollectionsFilter';
@@ -14,6 +13,7 @@ import CollectionsActions from 'actions/collections.actions';
 import TokensActions from 'actions/tokens.actions';
 import HeaderActions from 'actions/header.actions';
 import { shortenAddress } from 'utils';
+import Identicon from 'components/Identicon';
 
 import styles from './styles.module.scss';
 
@@ -46,15 +46,13 @@ const ExploreAllPage = () => {
   };
 
   useEffect(() => {
-    getUserDetails(uid);
-  }, [uid]);
-
-  useEffect(() => {
-    dispatch(HeaderActions.toggleSearchbar(true));
-    return () => {
+    if (uid) {
+      getUserDetails(uid);
       dispatch(HeaderActions.toggleSearchbar(false));
-    };
-  }, []);
+    } else {
+      dispatch(HeaderActions.toggleSearchbar(true));
+    }
+  }, [uid]);
 
   const updateCollections = async () => {
     try {
@@ -144,7 +142,7 @@ const ExploreAllPage = () => {
                   className={styles.avatar}
                 />
               ) : (
-                <AccountCircle className={styles.avatar} />
+                <Identicon account={uid} size={100} />
               )}
               <div className={styles.username}>{user.alias || ''}</div>
               <a
