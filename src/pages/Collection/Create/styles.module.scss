@@ -266,3 +266,9 @@
     box-shadow: 0 0 8px rgba(0, 0, 0, 0.4);
   }
 }
+
+.disabled {
+  cursor: not-allowed;
+  box-shadow: none !important;
+  opacity: 0.7;
+}

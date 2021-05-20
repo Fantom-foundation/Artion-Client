@@ -1127,28 +1127,33 @@ const NFTItem = () => {
               </div>
               <div className={styles.itemName}>{info?.name || ''}</div>
               <div className={styles.itemStats}>
-                <div className={styles.itemOwner}>
-                  <div className={styles.ownerAvatar}>
+                {(ownerInfoLoading || owner) && (
+                  <div className={styles.itemOwner}>
+                    <div className={styles.ownerAvatar}>
+                      {ownerInfoLoading ? (
+                        <Skeleton width={24} height={24} />
+                      ) : ownerInfo?.imageHash ? (
+                        <img
+                          src={`https://gateway.pinata.cloud/ipfs/${ownerInfo.imageHash}`}
+                          className={styles.avatar}
+                        />
+                      ) : (
+                        <Identicon account={owner} size={24} />
+                      )}
+                    </div>
+                    Owned by&nbsp;
                     {ownerInfoLoading ? (
-                      <Skeleton width={24} height={24} />
-                    ) : ownerInfo?.imageHash ? (
-                      <img
-                        src={`https://gateway.pinata.cloud/ipfs/${ownerInfo.imageHash}`}
-                        className={styles.avatar}
-                      />
+                      <Skeleton width={60} height={20} />
                     ) : (
-                      <Identicon account={owner} size={24} />
+                      <Link
+                        to={`/account/${owner}`}
+                        className={styles.ownerName}
+                      >
+                        {ownerInfo?.alias || shortenAddress(owner)}
+                      </Link>
                     )}
                   </div>
-                  Owned by&nbsp;
-                  {ownerInfoLoading ? (
-                    <Skeleton width={60} height={20} />
-                  ) : (
-                    <Link to={`/account/${owner}`} className={styles.ownerName}>
-                      {ownerInfo?.alias || shortenAddress(owner)}
-                    </Link>
-                  )}
-                </div>
+                )}
                 <div className={styles.itemViews}>
                   <FontAwesomeIcon icon={faEye} color="#777" />
                   &nbsp;{views} Views

@@ -92,7 +92,8 @@ export const fetchTokens = async (
   category = null,
   sortBy = 'listedAt',
   filterBy = [],
-  address = null
+  address = null,
+  cancelToken
 ) => {
   const data = { step };
   if (collections.length > 0) {
@@ -115,6 +116,7 @@ export const fetchTokens = async (
     headers: {
       'Content-Type': 'application/json',
     },
+    cancelToken,
   });
   return res.data;
 };

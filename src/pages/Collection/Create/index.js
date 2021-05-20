@@ -6,6 +6,7 @@ import axios from 'axios';
 import { Menu, MenuItem } from '@material-ui/core';
 import PublishIcon from '@material-ui/icons/Publish';
 import CloseIcon from '@material-ui/icons/Close';
+import { ClipLoader } from 'react-spinners';
 
 import { Categories } from 'constants/filter.constants';
 import HeaderActions from 'actions/header.actions';
@@ -30,6 +31,7 @@ const CollectionCreate = () => {
 
   const { authToken } = useSelector(state => state.ConnectWallet);
 
+  const [creating, setCreating] = useState(false);
   const [logo, setLogo] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
   const [selected, setSelected] = useState([]);
@@ -78,7 +80,9 @@ const CollectionCreate = () => {
   };
 
   const handleMenuOpen = e => {
-    setAnchorEl(e.currentTarget);
+    if (selected.length < 3) {
+      setAnchorEl(e.currentTarget);
+    }
   };
 
   const handleMenuClose = () => {
@@ -87,6 +91,9 @@ const CollectionCreate = () => {
 
   const selectCategory = catId => {
     setSelected([...selected, catId]);
+    if (selected.length === 2) {
+      setAnchorEl(null);
+    }
   };
 
   const deselectCategory = catId => {
@@ -114,6 +121,10 @@ const CollectionCreate = () => {
   };
 
   const handleSave = async () => {
+    if (creating) return;
+
+    setCreating(true);
+
     const img = new Image();
     img.onload = function() {
       const w = this.width;
@@ -122,49 +133,54 @@ const CollectionCreate = () => {
       const x = (w - size) / 2;
       const y = (h - size) / 2;
       clipImage(img, x, y, size, size, async logodata => {
-        const formData = new FormData();
-        formData.append('collectionName', name);
-        formData.append('erc721Address', address);
-        formData.append('imgData', logodata);
-        const result = await axios({
-          method: 'post',
-          url: 'https://api1.artion.io/ipfs/uploadCollectionImage2Server',
-          data: formData,
-          headers: {
-            'Content-Type': 'multipart/form-data',
-            Authorization: `Bearer ${authToken}`,
-          },
-        });
+        try {
+          const formData = new FormData();
+          formData.append('collectionName', name);
+          formData.append('erc721Address', address);
+          formData.append('imgData', logodata);
+          const result = await axios({
+            method: 'post',
+            url: 'https://api1.artion.io/ipfs/uploadCollectionImage2Server',
+            data: formData,
+            headers: {
+              'Content-Type': 'multipart/form-data',
+              Authorization: `Bearer ${authToken}`,
+            },
+          });
 
-        const logoImageHash = result.data.data;
-        const data = {
-          erc721Address: address,
-          collectionName: name,
-          description,
-          categories: selected.join(','),
-          logoImageHash,
-          siteUrl,
-          discord,
-          twitterHandle,
-          instagramHandle,
-          mediumHandle,
-          telegram,
-        };
+          const logoImageHash = result.data.data;
+          const data = {
+            erc721Address: address,
+            collectionName: name,
+            description,
+            categories: selected.join(','),
+            logoImageHash,
+            siteUrl,
+            discord,
+            twitterHandle,
+            instagramHandle,
+            mediumHandle,
+            telegram,
+          };
+          console.log(data);
 
-        await axios({
-          method: 'post',
-          url: 'https://api1.artion.io/collection/collectiondetails',
-          data: JSON.stringify(data),
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${authToken}`,
-          },
-        });
+          await axios({
+            method: 'post',
+            url: 'https://api1.artion.io/collection/collectiondetails',
+            data: JSON.stringify(data),
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${authToken}`,
+            },
+          });
 
-        toast('success', 'Collection created successfully!');
+          toast('success', 'Collection created successfully!');
 
-        // TODO: show success notification
-        history.push('/exploreall');
+          history.push('/exploreall');
+        } catch {
+          toast('error', 'Failed to create collection!');
+          setCreating(false);
+        }
       });
     };
     img.src = logo;
@@ -261,7 +277,13 @@ const CollectionCreate = () => {
             Adding a category will help make your item discoverable on Fantom.
           </div>
           <div className={cx(styles.inputWrapper, styles.categoryList)}>
-            <div className={styles.categoryButton} onClick={handleMenuOpen}>
+            <div
+              className={cx(
+                styles.categoryButton,
+                selected.length === 3 && styles.disabled
+              )}
+              onClick={handleMenuOpen}
+            >
               Add Category
             </div>
             {selectedCategories.map((cat, idx) => (
@@ -373,8 +395,11 @@ const CollectionCreate = () => {
         </div>
 
         <div className={styles.buttonsWrapper}>
-          <div className={styles.createButton} onClick={handleSave}>
-            Create
+          <div
+            className={cx(styles.createButton, creating && styles.disabled)}
+            onClick={handleSave}
+          >
+            {creating ? <ClipLoader color="#FFF" size={16} /> : 'Create'}
           </div>
         </div>
       </div>

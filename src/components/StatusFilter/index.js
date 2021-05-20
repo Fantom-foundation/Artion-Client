@@ -68,9 +68,12 @@ const ExploreStatus = () => {
   const classes = useStyles();
   const [expanded, setExpanded] = useState(false);
 
-  const { statusBuyNow, statusHasOffers, statusOnAuction } = useSelector(
-    state => state.Filter
-  );
+  const {
+    statusBuyNow,
+    statusHasBids,
+    statusHasOffers,
+    statusOnAuction,
+  } = useSelector(state => state.Filter);
 
   const handleStatusChange = (field, selected) => {
     dispatch(FilterActions.updateStatusFilter(field, selected));
@@ -83,8 +86,11 @@ const ExploreStatus = () => {
   const handleCheckgroupChanges = event => {
     let name = event.target.name;
     switch (name) {
-      case 'buynow':
+      case 'buyNow':
         handleStatusChange('statusBuyNow', !statusBuyNow);
+        break;
+      case 'hasBids':
+        handleStatusChange('statusHasBids', !statusHasBids);
         break;
       case 'hasOffers':
         handleStatusChange('statusHasOffers', !statusHasOffers);
@@ -125,10 +131,24 @@ const ExploreStatus = () => {
                 <Checkbox
                   checked={statusBuyNow}
                   onChange={handleCheckgroupChanges}
-                  name="buynow"
+                  name="buyNow"
                 />
               }
               label="Buy Now"
+            />
+            <FormControlLabel
+              className={cx(
+                classes.formControl,
+                statusHasBids ? classes.selected : null
+              )}
+              control={
+                <Checkbox
+                  checked={statusHasBids}
+                  onChange={handleCheckgroupChanges}
+                  name="hasBids"
+                />
+              }
+              label="Has Bids"
             />
             <FormControlLabel
               className={cx(
