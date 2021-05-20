@@ -32,7 +32,7 @@ const ExploreFilterHeader = ({ loading }) => {
         res[index] = item;
       }
     });
-    return res;
+    return res.filter(item => !!item);
   };
 
   const handleGroupTypeChange = e => {

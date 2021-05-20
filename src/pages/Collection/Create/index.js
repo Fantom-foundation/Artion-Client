@@ -80,7 +80,9 @@ const CollectionCreate = () => {
   };
 
   const handleMenuOpen = e => {
-    setAnchorEl(e.currentTarget);
+    if (selected.length < 3) {
+      setAnchorEl(e.currentTarget);
+    }
   };
 
   const handleMenuClose = () => {
@@ -89,6 +91,9 @@ const CollectionCreate = () => {
 
   const selectCategory = catId => {
     setSelected([...selected, catId]);
+    if (selected.length === 2) {
+      setAnchorEl(null);
+    }
   };
 
   const deselectCategory = catId => {
@@ -272,7 +277,13 @@ const CollectionCreate = () => {
             Adding a category will help make your item discoverable on Fantom.
           </div>
           <div className={cx(styles.inputWrapper, styles.categoryList)}>
-            <div className={styles.categoryButton} onClick={handleMenuOpen}>
+            <div
+              className={cx(
+                styles.categoryButton,
+                selected.length === 3 && styles.disabled
+              )}
+              onClick={handleMenuOpen}
+            >
               Add Category
             </div>
             {selectedCategories.map((cat, idx) => (

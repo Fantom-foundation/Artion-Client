@@ -114,7 +114,7 @@ const useStyles = makeStyles({
   },
 });
 
-const BaseCard = ({ item, loading, multiple, style }) => {
+const BaseCard = ({ item, loading, style }) => {
   const classes = useStyles();
 
   const [fetching, setFetching] = useState(false);
@@ -192,7 +192,7 @@ const BaseCard = ({ item, loading, multiple, style }) => {
               <Skeleton width={80} height={20} />
             ) : (
               <Typography component="h4" className={classes.label}>
-                1 of 1
+                {item?.supply || 1} of {item?.supply || 1}
               </Typography>
             )}
             <div className={classes.alignRight}>
@@ -232,7 +232,7 @@ const BaseCard = ({ item, loading, multiple, style }) => {
           renderContent()
         )}
       </div>
-      {multiple && (
+      {item?.supply && (
         <>
           <div className={classes.card} />
           <div className={classes.card} />
