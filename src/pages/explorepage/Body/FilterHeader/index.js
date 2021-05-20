@@ -4,21 +4,36 @@ import Skeleton from 'react-loading-skeleton';
 import MenuItem from '@material-ui/core/MenuItem';
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-
 import {
-  GroupFilters,
-  SortByOptions,
-} from '../../../../constants/filter.constants';
-import FilterActions from '../../../../actions/filter.actions';
+  ExpandMore as ExpandMoreIcon,
+  Close as CloseIcon,
+} from '@material-ui/icons';
+
+import { GroupFilters, SortByOptions } from 'constants/filter.constants';
+import FilterActions from 'actions/filter.actions';
+import nftActiveIcon from 'assets/svgs/nft_active.svg';
 
 import './styles.css';
 
 const ExploreFilterHeader = ({ loading }) => {
   const dispatch = useDispatch();
 
+  const { collections: collectionItems } = useSelector(
+    state => state.Collections
+  );
   const { count } = useSelector(state => state.Tokens);
-  const { groupType, sortBy } = useSelector(state => state.Filter);
+  const { groupType, sortBy, collections } = useSelector(state => state.Filter);
+
+  const selectedCollections = () => {
+    const res = new Array(collections.length).fill(null);
+    collectionItems.map(item => {
+      const index = collections.findIndex(_item => _item === item.address);
+      if (index > -1) {
+        res[index] = item;
+      }
+    });
+    return res;
+  };
 
   const handleGroupTypeChange = e => {
     const newGroupType = e.target.value;
@@ -30,11 +45,38 @@ const ExploreFilterHeader = ({ loading }) => {
     dispatch(FilterActions.updateSortByFilter(newSortBy));
   };
 
+  const handleDeselectCollection = addr => {
+    let newCollections = [];
+    newCollections = collections.filter(item => item !== addr);
+    dispatch(FilterActions.updateCollectionsFilter(newCollections));
+  };
+
   return (
     <div className="filterHeaderRoot">
-      <label className="filterResultLabel">
-        {loading ? <Skeleton width={100} height={24} /> : `${count} results`}
-      </label>
+      <div className="filterHeaderLeft">
+        <label className="filterResultLabel">
+          {loading ? <Skeleton width={100} height={24} /> : `${count} results`}
+        </label>
+        {selectedCollections().map((item, idx) => (
+          <div key={idx} className="filterCollectionItem">
+            <img
+              className="filterCollectionItemLogo"
+              src={
+                item.isVerified
+                  ? `https://gateway.pinata.cloud/ipfs/${item.logoImageHash}`
+                  : nftActiveIcon
+              }
+            />
+            <span className="filterCollectionItemName">
+              {item.name || item.collectionName}
+            </span>
+            <CloseIcon
+              className="filterCollectionRemoveItem"
+              onClick={() => handleDeselectCollection(item.address)}
+            />
+          </div>
+        ))}
+      </div>
       <div className="filterSelectGroup">
         <FormControl className="filterHeaderFormControl">
           <Select

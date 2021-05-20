@@ -138,6 +138,7 @@ const ExploreAllPage = () => {
     category,
     sortBy,
     statusBuyNow,
+    statusHasBids,
     statusHasOffers,
     statusOnAuction,
     uid,
