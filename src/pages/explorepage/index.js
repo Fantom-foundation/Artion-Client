@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
+import axios from 'axios';
 
 import StatusFilter from 'components/StatusFilter';
 import CollectionsFilter from 'components/CollectionsFilter';
@@ -25,6 +26,7 @@ const ExploreAllPage = () => {
   const [page, setPage] = useState(0);
   const [user, setUser] = useState({});
   const [fetchInterval, setFetchInterval] = useState(null);
+  const [cancelSource, setCancelSource] = useState(null);
 
   const { fetching, tokens, count } = useSelector(state => state.Tokens);
   const {
@@ -32,6 +34,7 @@ const ExploreAllPage = () => {
     category,
     sortBy,
     statusBuyNow,
+    statusHasBids,
     statusHasOffers,
     statusOnAuction,
   } = useSelector(state => state.Filter);
@@ -73,25 +76,36 @@ const ExploreAllPage = () => {
   };
 
   const fetchNFTs = async step => {
+    if (cancelSource) {
+      cancelSource.cancel();
+    }
+
     dispatch(TokensActions.startFetching());
 
     try {
       const filterBy = [];
-      if (statusBuyNow) filterBy.push('listed');
-      if (statusHasOffers) filterBy.push('offer');
-      if (statusOnAuction) filterBy.push('hadBid');
+      if (statusBuyNow) filterBy.push('buyNow');
+      if (statusHasBids) filterBy.push('hasBids');
+      if (statusHasOffers) filterBy.push('hasOffers');
+      if (statusOnAuction) filterBy.push('onAuction');
+
+      const cancelTokenSource = axios.CancelToken.source();
+      setCancelSource(cancelTokenSource);
       const { data } = await fetchTokens(
         step,
         collections,
         category,
         sortBy,
         filterBy,
-        uid
+        uid,
+        cancelTokenSource.token
       );
       dispatch(TokensActions.fetchingSuccess(data.total, data.tokens));
       setPage(step);
     } catch {
       dispatch(TokensActions.fetchingFailed());
+    } finally {
+      setCancelSource(null);
     }
   };
 

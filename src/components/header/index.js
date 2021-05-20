@@ -155,8 +155,13 @@ const NiftyHeader = ({ light }) => {
 
     try {
       const cancelTokenSource = axios.CancelToken.source();
+      setCancelSource(cancelTokenSource);
 
-      const promise = axios({
+      const {
+        data: {
+          data: { accounts, collections, tokens },
+        },
+      } = await axios({
         method: 'post',
         url: `https://api1.artion.io/info/searchNames`,
         data: JSON.stringify({ name: word }),
@@ -166,21 +171,13 @@ const NiftyHeader = ({ light }) => {
         cancelToken: cancelTokenSource.token,
       });
 
-      setCancelSource(cancelTokenSource);
-
-      const {
-        data: {
-          data: { accounts, collections, tokens },
-        },
-      } = await promise;
-
       setAccounts(accounts);
       setCollections(collections);
       setTokens(tokens);
-
-      setCancelSource(null);
     } catch (err) {
       console.log(err);
+    } finally {
+      setCancelSource(null);
     }
   };
 

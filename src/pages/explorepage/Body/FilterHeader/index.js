@@ -33,7 +33,7 @@ const ExploreFilterHeader = ({ loading }) => {
   return (
     <div className="filterHeaderRoot">
       <label className="filterResultLabel">
-        {loading ? <Skeleton width={60} height={20} /> : count} results
+        {loading ? <Skeleton width={100} height={24} /> : `${count} results`}
       </label>
       <div className="filterSelectGroup">
         <FormControl className="filterHeaderFormControl">

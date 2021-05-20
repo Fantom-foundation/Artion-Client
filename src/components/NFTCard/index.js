@@ -4,9 +4,6 @@ import { Link } from 'react-router-dom';
 import cx from 'classnames';
 import Skeleton from 'react-loading-skeleton';
 import { makeStyles } from '@material-ui/core/styles';
-import Box from '@material-ui/core/Box';
-import Card from '@material-ui/core/Card';
-import CardContent from '@material-ui/core/CardContent';
 import Typography from '@material-ui/core/Typography';
 import axios from 'axios';
 import Loader from 'react-loader-spinner';
@@ -20,15 +17,33 @@ const useStyles = makeStyles({
     display: 'flex',
     flexDirection: 'column',
     height: '100%',
+    position: 'relative',
   },
   card: {
     flexGrow: 1,
     cursor: 'pointer',
     borderRadius: 10,
     transition: 'transform ease 0.1s',
-    boxShadow: '0 4px 40px rgba(0, 0, 0, 0.1)',
+    border: '1px solid rgba(0, 0, 0, 0.1)',
     display: 'flex',
     flexDirection: 'column',
+    backgroundColor: 'white',
+
+    '&:nth-child(n+2)': {
+      position: 'absolute',
+      height: '100%',
+      left: '50%',
+      transform: 'translateX(-50%)',
+      zIndex: -1,
+    },
+    '&:nth-child(2)': {
+      width: '93%',
+      top: 4,
+    },
+    '&:nth-child(3)': {
+      width: '96%',
+      top: 1,
+    },
   },
   link: {
     height: '100%',
@@ -99,7 +114,7 @@ const useStyles = makeStyles({
   },
 });
 
-const BaseCard = ({ item, loading, style }) => {
+const BaseCard = ({ item, loading, multiple, style }) => {
   const classes = useStyles();
 
   const [fetching, setFetching] = useState(false);
@@ -157,7 +172,7 @@ const BaseCard = ({ item, loading, style }) => {
             </Suspense>
           )}
         </div>
-        <CardContent className={classes.content}>
+        <div className={classes.content}>
           {loading || fetching ? (
             <Skeleton width="100%" height={20} />
           ) : (
@@ -198,14 +213,14 @@ const BaseCard = ({ item, loading, style }) => {
               )}
             </div>
           </div>
-        </CardContent>
+        </div>
       </>
     );
   };
 
   return (
-    <Box style={style} className={classes.root}>
-      <Card className={classes.card}>
+    <div style={style} className={classes.root}>
+      <div className={classes.card}>
         {item ? (
           <Link
             to={`/explore/${item.contractAddress}/${item.tokenID}`}
@@ -216,8 +231,14 @@ const BaseCard = ({ item, loading, style }) => {
         ) : (
           renderContent()
         )}
-      </Card>
-    </Box>
+      </div>
+      {multiple && (
+        <>
+          <div className={classes.card} />
+          <div className={classes.card} />
+        </>
+      )}
+    </div>
   );
 };
 
