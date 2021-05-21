@@ -1308,7 +1308,8 @@ const NFTItem = () => {
                           Accept
                         </div>
                       )}
-                      {offer.creator === account && (
+                      {offer.creator.toLowerCase() ===
+                        account.toLowerCase() && (
                         <div
                           className={cx(
                             styles.buyButton,
