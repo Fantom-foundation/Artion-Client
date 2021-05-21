@@ -212,7 +212,7 @@ const NFTItem = () => {
 
   const eventMatches = (nft, id) => {
     return (
-      address.toLowerCase() === nft.toLowerCase() &&
+      address?.toLowerCase() === nft?.toLowerCase() &&
       parseFloat(tokenID) === parseFloat(id.toString())
     );
   };
@@ -294,7 +294,7 @@ const NFTItem = () => {
   const offerCanceledHandler = (creator, nft, id) => {
     if (eventMatches(nft, id)) {
       const newOffers = offers.current.filter(
-        offer => offer.creator.toLowerCase() !== creator.toLowerCase()
+        offer => offer.creator?.toLowerCase() !== creator?.toLowerCase()
       );
       offers.current = newOffers;
     }
@@ -523,7 +523,7 @@ const NFTItem = () => {
     const [contract] = await getNFTContract(address);
 
     contract.on('ApprovalForAll', (owner, operator, approved) => {
-      if (account?.toLowerCase() === owner.toLowerCase()) {
+      if (account?.toLowerCase() === owner?.toLowerCase()) {
         if (operator === AUCTION_CONTRACT_ADDRESS) {
           setAuctionContractApproved(approved);
         } else if (operator === SALES_CONTRACT_ADDRESS) {
@@ -576,7 +576,7 @@ const NFTItem = () => {
     }
   };
 
-  const isMine = owner.toLowerCase() === account?.toLowerCase();
+  const isMine = owner?.toLowerCase() === account?.toLowerCase();
 
   const handleListItem = async _price => {
     try {
@@ -823,7 +823,7 @@ const NFTItem = () => {
   const hasMyOffer = useMemo(() => {
     return (
       offers.current.findIndex(
-        offer => offer.creator.toLowerCase() === account?.toLowerCase()
+        offer => offer.creator?.toLowerCase() === account?.toLowerCase()
       ) > -1
     );
   }, [offers.current]);
@@ -902,7 +902,7 @@ const NFTItem = () => {
   const auctionActive = () => auctionStarted() && !auctionEnded();
 
   const canWithdraw = () =>
-    bid?.bidder.toLowerCase() === account?.toLowerCase() &&
+    bid?.bidder?.toLowerCase() === account?.toLowerCase() &&
     bid?.lastBidTime + withdrawLockTime < now.getTime() / 1000;
 
   const renderProperties = properties => {
@@ -1190,7 +1190,7 @@ const NFTItem = () => {
                           <>
                             {'Winner: '}
                             <Link to={`/account/${winner}`}>
-                              {winner.toLowerCase() === account?.toLowerCase()
+                              {winner?.toLowerCase() === account?.toLowerCase()
                                 ? 'Me'
                                 : shortenAddress(winner)}
                             </Link>
@@ -1215,7 +1215,7 @@ const NFTItem = () => {
                     )}
                     {!isMine &&
                       auctionActive() &&
-                      (bid?.bidder.toLowerCase() === account?.toLowerCase() ? (
+                      (bid?.bidder?.toLowerCase() === account?.toLowerCase() ? (
                         <div
                           className={cx(
                             styles.withdrawBid,
@@ -1312,7 +1312,7 @@ const NFTItem = () => {
                           Accept
                         </div>
                       )}
-                      {offer.creator.toLowerCase() ===
+                      {offer.creator?.toLowerCase() ===
                         account?.toLowerCase() && (
                         <div
                           className={cx(
