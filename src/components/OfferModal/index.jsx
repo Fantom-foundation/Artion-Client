@@ -17,7 +17,9 @@ const OfferModal = ({
   contractApproved,
 }) => {
   const [price, setPrice] = useState('');
-  const [endTime, setEndTime] = useState(new Date());
+  const [endTime, setEndTime] = useState(
+    new Date(new Date().getTime() + 24 * 60 * 60 * 1000)
+  );
   const [focused1, setFocused1] = useState(false);
   const [focused2, setFocused2] = useState(false);
 
@@ -25,7 +27,7 @@ const OfferModal = ({
 
   useEffect(() => {
     setPrice('');
-    setEndTime(new Date());
+    setEndTime(new Date(new Date().getTime() + 24 * 60 * 60 * 1000));
   }, [visible]);
 
   const handleClick = e => {

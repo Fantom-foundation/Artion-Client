@@ -19,7 +19,9 @@ const AuctionModal = ({
 }) => {
   const [reservePrice, setReservePrice] = useState('');
   const [startTime, setStartTime] = useState(new Date());
-  const [endTime, setEndTime] = useState(new Date());
+  const [endTime, setEndTime] = useState(
+    new Date(new Date().getTime() + 24 * 60 * 60 * 1000)
+  );
   const [focused, setFocused] = useState(false);
 
   const { price: ftmPrice } = useSelector(state => state.Price);
@@ -30,7 +32,9 @@ const AuctionModal = ({
       auction?.startTime ? new Date(auction.startTime * 1000) : new Date()
     );
     setEndTime(
-      auction?.endTime ? new Date(auction.endTime * 1000) : new Date()
+      auction?.endTime
+        ? new Date(auction.endTime * 1000)
+        : new Date(new Date().getTime() + 24 * 60 * 60 * 1000)
     );
   }, [visible, auction]);
 
