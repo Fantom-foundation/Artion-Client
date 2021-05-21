@@ -99,7 +99,7 @@ const App = ({ paintStore }) => {
         <AccountModal />
         <WFTMModal />
         <Toaster
-          position="top-right"
+          position="bottom-right"
           reverseOrder={false}
           toastOptions={{
             style: {
