@@ -79,7 +79,7 @@ const AccountDetails = () => {
   }, [uid]);
 
   useEffect(() => {
-    if (account === uid && me.alias) {
+    if (account.toLowerCase() === uid.toLowerCase() && me.alias) {
       setUser(me);
     }
   }, [me]);
