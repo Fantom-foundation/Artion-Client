@@ -281,8 +281,9 @@
 }
 
 .buyButton {
-  width: 80px;
+  min-width: 80px;
   height: 28px;
+  padding: 0 10px;
   display: flex;
   align-items: center;
   justify-content: center;
