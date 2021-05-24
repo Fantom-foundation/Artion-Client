@@ -1,16 +1,19 @@
 .root {
+  width: 100%;
   display: flex;
-  justify-content: center;
   align-items: center;
 }
 
 .button {
-  margin-left: 8px;
-  margin-right: 8px;
+  padding-left: 20px !important;
+  padding-right: 20px !important;
+  margin-right: 6px !important;
   color: #555 !important;
+  font-weight: 600 !important;
   box-shadow: unset !important;
   background-color: unset !important;
   white-space: nowrap;
+  text-transform: none !important;
 
   &:hover {
     background-color: #e0e0e0 !important;

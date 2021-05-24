@@ -12,7 +12,6 @@ import {
 } from '@material-ui/core';
 import {
   ExpandMore as ExpandMoreIcon,
-  PlaylistPlay as PlaylistPlayIcon,
   Search as SearchIcon,
   CheckCircle as CheckCircleIcon,
 } from '@material-ui/icons';
@@ -20,6 +19,8 @@ import {
 import FilterActions from '../../actions/filter.actions';
 import nftIcon from '../../assets/svgs/nft.svg';
 import nftActiveIcon from '../../assets/svgs/nft_active.svg';
+
+import iconCollections from 'assets/svgs/grid.svg';
 
 import './styles.scss';
 
@@ -68,12 +69,15 @@ const useStyles = makeStyles(() => ({
     fontSize: 18,
     paddingLeft: 20,
     flexShrink: 0,
-    color: '#007BFF',
+    color: '#3D3D3D',
   },
   icon: {
-    width: 24,
-    height: 24,
-    color: '#007BFF',
+    width: 22,
+    height: 22,
+  },
+  arrowIcon: {
+    color: '#3D3D3D',
+    opacity: '0.6',
   },
   body: {
     padding: '6px 16px 20px',
@@ -188,11 +192,11 @@ const ExploreCollections = () => {
         onChange={handleChange}
       >
         <AccordionSummary
-          expandIcon={<ExpandMoreIcon className={classes.icon} />}
+          expandIcon={<ExpandMoreIcon className={classes.arrowIcon} />}
           className={classes.header}
         >
           <div className={classes.collectionSvgDiv}>
-            <PlaylistPlayIcon className={classes.icon} />
+            <img src={iconCollections} className={classes.icon} />
             <span className={classes.heading}>Collections</span>
           </div>
         </AccordionSummary>
