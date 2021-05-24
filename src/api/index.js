@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const BASE_URL = 'https://api1.artion.io';
+const BASE_URL = 'https://api.artion.io';
 
 export const getAuthToken = async address => {
   let result = await axios({
