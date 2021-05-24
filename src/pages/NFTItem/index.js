@@ -857,6 +857,8 @@ const NFTItem = () => {
   });
 
   const formatExpiration = deadline => {
+    if (deadline * 1000 < now.getTime()) return 'Expired';
+
     const duration = new Date(deadline * 1000).getTime() - now.getTime();
     let s = Math.floor(duration / 1000);
     let m = Math.floor(s / 60);
