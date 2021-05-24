@@ -25,21 +25,21 @@ const useStyles = makeStyles(() => ({
     overflow: 'hidden',
   },
   header: {
-    height: 60,
-    minHeight: '60px !important',
+    height: 50,
+    minHeight: '50px !important',
     backgroundColor: '#fff',
     boxShadow: 'none',
   },
   heading: {
     fontWeight: 500,
-    fontSize: 22,
+    fontSize: 18,
     paddingLeft: 20,
     flexShrink: 0,
     color: '#007BFF',
   },
   icon: {
-    width: 26,
-    height: 26,
+    width: 24,
+    height: 24,
     color: '#007BFF',
   },
   body: {

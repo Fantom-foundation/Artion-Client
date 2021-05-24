@@ -48,3 +48,42 @@ body * {
 ::-webkit-scrollbar-thumb:hover {
   background: #555;
 }
+
+@font-face {
+  font-family: 'Proxima Nova';
+  src: local('Proxima Nova'), url('./assets/fonts/Proxima\ Nova\ Reg.ttf') format('truetype');
+  font-weight: normal;
+}
+
+@font-face {
+  font-family: 'Proxima Nova';
+  src: local('Proxima Nova'), url('./assets/fonts/Proxima\ Nova\ Reg\ It.ttf') format('truetype');
+  font-weight: normal;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: 'Proxima Nova';
+  src: local('Proxima Nova'), url('./assets/fonts/Proxima\ Nova\ Bold.ttf') format('truetype');
+  font-weight: bold;
+}
+
+@font-face {
+  font-family: 'Proxima Nova';
+  src: local('Proxima Nova'), url('./assets/fonts/Proxima\ Nova\ Bold\ It.ttf') format('truetype');
+  font-weight: bold;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: 'Proxima Nova';
+  src: local('Proxima Nova'), url('./assets/fonts/Proxima\ Nova\ Light.ttf') format('truetype');
+  font-weight: 400;
+}
+
+@font-face {
+  font-family: 'Proxima Nova';
+  src: local('Proxima Nova'), url('./assets/fonts/Proxima\ Nova\ Light\ It.ttf') format('truetype');
+  font-weight: 400;
+  font-style: italic;
+}
