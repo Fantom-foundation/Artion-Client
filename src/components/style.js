@@ -26,7 +26,7 @@ const setDimensions = (full, isMobile) => {
 
 export const Container = styled.div`
   position: absolute;
-  padding-top: 100px;
+  padding-top: 130px;
   display: flex;
   flex-direction: row;
   align-items: center;

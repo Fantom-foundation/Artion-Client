@@ -60,6 +60,7 @@ const useStyles = makeStyles({
   },
   price: {
     marginTop: 9,
+    color: '#000',
   },
   name: {
     flex: 1,

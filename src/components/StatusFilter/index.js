@@ -22,7 +22,7 @@ const useStyles = makeStyles(() => ({
   wrapper: {
     boxShadow: 'none',
     borderRadius: '10px !important',
-    border: '1px solid #2479FA',
+    border: '1px solid #2479FA77',
     overflow: 'hidden',
   },
   header: {
