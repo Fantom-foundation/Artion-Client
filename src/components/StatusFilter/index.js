@@ -9,9 +9,10 @@ import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import FormGroup from '@material-ui/core/FormGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
-import StarIcon from '@material-ui/icons/Star';
 
-import FilterActions from '../../actions/filter.actions';
+import FilterActions from 'actions/filter.actions';
+
+import iconStar from 'assets/svgs/star.svg';
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -25,22 +26,25 @@ const useStyles = makeStyles(() => ({
     overflow: 'hidden',
   },
   header: {
-    height: 60,
-    minHeight: '60px !important',
+    height: 50,
+    minHeight: '50px !important',
     backgroundColor: '#fff',
     boxShadow: 'none',
   },
   heading: {
     fontWeight: 500,
-    fontSize: 22,
+    fontSize: 18,
     paddingLeft: 20,
     flexShrink: 0,
-    color: '#007BFF',
+    color: '#3D3D3D',
   },
   icon: {
-    width: 26,
-    height: 26,
-    color: '#007BFF',
+    width: 24,
+    height: 24,
+  },
+  arrowIcon: {
+    color: '#3D3D3D',
+    opacity: '0.6',
   },
   body: {
     padding: '6px 16px 20px',
@@ -112,11 +116,11 @@ const ExploreStatus = () => {
         onChange={handleAccordionColElapse('panel1')}
       >
         <AccordionSummary
-          expandIcon={<ExpandMoreIcon className={classes.icon} />}
+          expandIcon={<ExpandMoreIcon className={classes.arrowIcon} />}
           className={classes.header}
         >
           <div className={classes.statusSvgDiv}>
-            <StarIcon className={classes.icon} />
+            <img src={iconStar} className={classes.icon} />
             <span className={classes.heading}>Status</span>
           </div>
         </AccordionSummary>

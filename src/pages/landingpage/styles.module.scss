@@ -30,11 +30,13 @@
 .bg1 {
   min-height: 1007px;
   max-height: 1089px;
+  filter: drop-shadow(0px 8px 8px rgba(132, 136, 175, 0.25)) drop-shadow(0px 20px 40px rgba(41, 50, 131, 0.4));
 }
 
 .bg2 {
   min-height: 574px;
   max-height: 621px;
+  filter: drop-shadow(0px 20px 40px rgba(0, 0, 0, 0.25));
 }
 
 .body {
@@ -46,7 +48,7 @@
   flex-direction: column;
   align-items: center;
   position: relative;
-  padding-top: 146px;
+  padding-top: 180px;
   z-index: 1;
 }
 
@@ -55,7 +57,7 @@
   font-size: 54px;
   line-height: 65px;
   text-align: center;
-  color: #FFF;
+  color: #EFF3FB;
 }
 
 .subtitle {
@@ -65,6 +67,7 @@
   line-height: 38px;
   text-align: center;
   color: #FFF;
+  opacity: 0.8;
 }
 
 .buttonsContainer {
