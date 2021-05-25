@@ -51,7 +51,7 @@ const useStyles = makeStyles(() => ({
   wrapper: {
     boxShadow: 'none',
     borderRadius: '10px !important',
-    border: '1px solid #2479FA',
+    border: '1px solid #2479FA77',
     overflow: 'hidden',
     maxHeight: '100%',
     boxSizing: 'border-box',
@@ -176,12 +176,22 @@ const ExploreCollections = () => {
   };
 
   const filteredCollections = () => {
-    return collectionItems.filter(
+    const selected = [];
+    let unselected = [];
+    collectionItems.map(item => {
+      if (collections.includes(item.address)) {
+        selected.push(item);
+      } else {
+        unselected.push(item);
+      }
+    });
+    unselected = unselected.filter(
       item =>
         (item.name || item.collectionName || '')
           .toLowerCase()
           .indexOf(filter.toLowerCase()) > -1
     );
+    return [...selected, ...unselected];
   };
 
   return (
