@@ -181,7 +181,7 @@ const AccountDetails = () => {
     try {
       let result = await axios({
         method: 'post',
-        url: 'https://api.artion.io/ipfs/uploadBundleImage2Server',
+        url: 'https://api0.artion.io/ipfs/uploadBundleImage2Server',
         data: formData,
         headers: { 'Content-Type': 'multipart/form-data' },
       });

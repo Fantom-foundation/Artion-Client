@@ -3,7 +3,6 @@ import axios from 'axios';
 import { makeStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
-import Autocomplete from '@material-ui/lab/Autocomplete';
 import { useWeb3React } from '@web3-react/core';
 
 import Stepper from '@material-ui/core/Stepper';
@@ -90,17 +89,6 @@ const useStyles = makeStyles(() => ({
   },
 }));
 
-const assetCategories = [
-  'Art',
-  'Domain Names',
-  'Virtual Words',
-  'Trading Cards',
-  'Collectibles',
-  'Sports',
-  'Utility',
-  'New',
-];
-
 const mintSteps = [
   'Uploading to IPFS',
   'Create your NFT',
@@ -114,9 +102,7 @@ const Metadata = () => {
 
   const [name, setName] = useState('fAsset');
   const [symbol, setSymbol] = useState('newnft');
-  const [royalty, setRoyalty] = useState(0);
   const [description, setDescription] = useState('');
-  const [category, setCategory] = useState('Art');
 
   const [currentMintingStep, setCurrentMintingStep] = useState(0);
   const [isMinting, setIsMinting] = useState(false);
@@ -134,19 +120,9 @@ const Metadata = () => {
           setName(value);
         }
         break;
-      case 'royalty':
-        {
-          setRoyalty(value);
-        }
-        break;
       case 'description':
         {
           setDescription(value);
-        }
-        break;
-      case 'category':
-        {
-          setCategory(value);
         }
         break;
       case 'symbol':
@@ -161,12 +137,7 @@ const Metadata = () => {
   };
 
   const validateMetadata = () => {
-    return (
-      name != '' &&
-      symbol != '' &&
-      royalty < 30 &&
-      (category != '') & (account != '')
-    );
+    return name != '' && symbol != '' && account != '';
   };
 
   const resetMintingStatus = () => {
@@ -209,15 +180,13 @@ const Metadata = () => {
     let formData = new FormData();
     formData.append('image', canvas.toDataURL());
     formData.append('name', name);
-    formData.append('royalty', royalty);
     formData.append('account', account);
     formData.append('description', description);
-    formData.append('category', category);
     formData.append('symbol', symbol);
     try {
       let result = await axios({
         method: 'post',
-        url: 'https://api.artion.io/ipfs/uploadImage2Server',
+        url: 'https://api0.artion.io/ipfs/uploadImage2Server',
         data: formData,
         headers: {
           'Content-Type': 'multipart/form-data',
@@ -290,42 +259,6 @@ const Metadata = () => {
           onChange={e => {
             handleInputChange(e.target.value, 'symbol');
           }}
-        />
-        <TextField
-          className={classes.inkMetadataInput}
-          InputLabelProps={{
-            className: classes.inkMetadataInputLabel,
-          }}
-          label="Royalties (%)"
-          type="number"
-          value={royalty}
-          onChange={e => {
-            handleInputChange(e.target.value, 'royalty');
-          }}
-          InputProps={{
-            inputProps: {
-              min: 1,
-            },
-          }}
-        />
-        <Autocomplete
-          options={assetCategories}
-          getOptionLabel={option => {
-            handleInputChange(option, 'category');
-            return option;
-          }}
-          value={category}
-          className={classes.autocomplete}
-          renderInput={params => (
-            <TextField
-              {...params}
-              className={classes.inkMetadataInput}
-              InputLabelProps={{
-                className: classes.inkMetadataInputLabel,
-              }}
-              label="Category"
-            />
-          )}
         />
         <TextField
           className={classes.inkMetadataInput}
