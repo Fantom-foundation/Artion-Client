@@ -581,6 +581,8 @@ const NFTItem = () => {
   const isMine = owner?.toLowerCase() === account?.toLowerCase();
 
   const handleListItem = async _price => {
+    if (itemListing) return;
+
     try {
       setItemListing(true);
 
@@ -593,14 +595,11 @@ const NFTItem = () => {
         ethers.BigNumber.from(Math.floor(new Date().getTime() / 1000)),
         '0x0000000000000000000000000000000000000000'
       );
-
-      setSellModalVisible(false);
-
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      await provider.waitForTransaction(tx.hash);
+      await tx.wait();
 
       toast('success', 'Item listed successfully!');
 
+      setSellModalVisible(false);
       setItemListing(false);
     } catch {
       setItemListing(false);
@@ -608,20 +607,19 @@ const NFTItem = () => {
   };
 
   const handleUpdatePrice = async _price => {
+    if (priceUpdating) return;
+
     try {
       setPriceUpdating(true);
 
       const price = ethers.utils.parseEther(_price);
       const tx = await updateListing(address, tokenID, price);
-
-      setSellModalVisible(false);
-
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      await provider.waitForTransaction(tx.hash);
+      await tx.wait();
 
       toast('success', 'Price updated successfully!');
 
       setPriceUpdating(false);
+      setSellModalVisible(false);
     } catch (e) {
       setPriceUpdating(false);
     }
@@ -1173,7 +1171,9 @@ const NFTItem = () => {
                         to={`/account/${owner}`}
                         className={styles.ownerName}
                       >
-                        {ownerInfo?.alias || shortenAddress(owner)}
+                        {isMine
+                          ? 'Me'
+                          : ownerInfo?.alias || shortenAddress(owner)}
                       </Link>
                     )}
                   </div>
