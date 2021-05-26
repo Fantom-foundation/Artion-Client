@@ -26,6 +26,7 @@ import iconSettings from 'assets/svgs/settings.svg';
 import iconAdd from 'assets/svgs/add.svg';
 import iconSwap from 'assets/svgs/swap.svg';
 import iconExit from 'assets/svgs/exit.svg';
+import PLACEHOLDER from 'assets/imgs/nft-placeholder.png';
 
 import styles from './styles.module.scss';
 
@@ -51,6 +52,7 @@ const NiftyHeader = ({ light }) => {
   const [accounts, setAccounts] = useState([]);
   const [collections, setCollections] = useState([]);
   const [tokens, setTokens] = useState([]);
+  const [tokenDetailsLoading, setTokenDetailsLoading] = useState(false);
 
   const isMenuOpen = Boolean(anchorEl);
 
@@ -163,7 +165,7 @@ const NiftyHeader = ({ light }) => {
         },
       } = await axios({
         method: 'post',
-        url: `https://api.artion.io/info/searchNames`,
+        url: `https://api0.artion.io/info/searchNames`,
         data: JSON.stringify({ name: word }),
         headers: {
           'Content-Type': 'application/json',
@@ -173,7 +175,23 @@ const NiftyHeader = ({ light }) => {
 
       setAccounts(accounts);
       setCollections(collections);
+      setTokenDetailsLoading(true);
       setTokens(tokens);
+      const images = await Promise.all(
+        tokens.map(async token => {
+          try {
+            const { data } = await axios.get(token.tokenURI);
+            return data.image;
+          } catch {
+            return PLACEHOLDER;
+          }
+        })
+      );
+      tokens.map((token, idx) => {
+        token.image = images[idx];
+      });
+      setTokens(tokens);
+      setTokenDetailsLoading(false);
     } catch (err) {
       console.log(err);
     } finally {
@@ -337,13 +355,16 @@ const NiftyHeader = ({ light }) => {
                       <div className={styles.resultsectiontitle}>Items</div>
                       <div className={styles.separator} />
                       <div className={styles.resultlist}>
-                        {tokens.map((_, idx) => (
+                        {tokens.map((tk, idx) => (
                           <div key={idx} className={styles.result}>
-                            <img
-                              className={styles.resultimg}
-                              src="https://gateway.pinata.cloud/ipfs/QmSrHp7nzX5agJNGnrmEJE9MrY7t27fSRV9a27GzgkkbqM"
-                            />
-                            <div className={styles.resulttitle}>Bull Ther</div>
+                            <div className={styles.resultimg}>
+                              {tokenDetailsLoading ? (
+                                <Skeleton width={40} height={40} />
+                              ) : (
+                                <img src={tk.image} />
+                              )}
+                            </div>
+                            <div className={styles.resulttitle}>{tk.name}</div>
                           </div>
                         ))}
                       </div>

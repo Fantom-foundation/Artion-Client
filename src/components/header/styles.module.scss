@@ -106,8 +106,17 @@
 .resultimg {
   width: 40px;
   height: 40px;
-  border-radius: 50%;
+  border-radius: 5px;
   margin-right: 14px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  img {
+    width: 100%;
+    height: 100%;
+  }
 }
 
 .resulttitle {
