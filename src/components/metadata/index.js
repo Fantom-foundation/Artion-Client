@@ -121,6 +121,14 @@ const Metadata = () => {
   let isWalletConnected = useSelector(state => state.ConnectWallet.isConnected);
   let authToken = useSelector(state => state.ConnectWallet.authToken);
 
+  const resetBoard = () => {
+    const canvas = document.getElementById('drawingboard');
+    if (canvas) {
+      const context = canvas.getContext('2d');
+      context.clearRect(0, 0, canvas.width, canvas.height);
+    }
+  };
+
   const handleInputChange = (value, target) => {
     switch (target) {
       case 'name':
@@ -234,6 +242,7 @@ const Metadata = () => {
         setLastMintedTkId(mintedTkId.toNumber());
 
         toast('success', 'New NFT item minted!');
+        resetBoard();
       } catch (error) {
         toast('error', error.message);
       }
