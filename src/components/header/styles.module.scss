@@ -124,6 +124,9 @@
   font-size: 16px;
   line-height: 16px;
   color: #3D3D3D;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .noResults {

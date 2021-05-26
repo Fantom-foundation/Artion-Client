@@ -36,10 +36,7 @@ const OfferModal = ({
   };
 
   return (
-    <div
-      className={cx(styles.container, visible ? styles.visible : null)}
-      onClick={onClose}
-    >
+    <div className={cx(styles.container, visible ? styles.visible : null)}>
       <div className={styles.modal} onClick={handleClick}>
         <div className={styles.header}>
           <div className={styles.title}>Place your offer</div>

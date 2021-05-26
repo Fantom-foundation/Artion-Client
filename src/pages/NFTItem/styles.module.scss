@@ -54,12 +54,6 @@
   &:last-child {
     margin-right: 0;
   }
-
-  &.disabled {
-    cursor: not-allowed;
-    box-shadow: none;
-    opacity: 0.7;
-  }
 }
 
 .inner {
@@ -350,12 +344,6 @@
   background-color: #FFF;
   color: #007BFF;
   border: 1px solid #007BFF;
-
-  &.disabled {
-    cursor: not-allowed;
-    box-shadow: none;
-    opacity: 0.7;
-  }
 }
 
 .from,
@@ -379,4 +367,10 @@
 
 .chartWrapper {
   padding: 20px;
+}
+
+.disabled {
+  cursor: not-allowed;
+  box-shadow: none !important;
+  opacity: 0.7;
 }

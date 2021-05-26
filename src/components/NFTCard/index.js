@@ -69,6 +69,11 @@ const useStyles = makeStyles({
     lineHeight: '18px',
     margin: 0,
     color: '#333',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    display: '-webkit-box',
+    '-webkit-line-clamp': 2,
+    '-webkit-box-orient': 'vertical',
   },
   mediaBox: {
     position: 'relative',
@@ -101,6 +106,11 @@ const useStyles = makeStyles({
     fontSize: 16,
     lineHeight: '16px',
     color: 'rgba(0, 0, 0, .56)',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    display: '-webkit-box',
+    '-webkit-line-clamp': 2,
+    '-webkit-box-orient': 'vertical',
   },
   alignBottom: {
     display: 'flex',

@@ -97,7 +97,12 @@ export const updateAuctionStartTime = async (
   startTime
 ) => {
   const contract = await getAuctionContract();
-  await contract.updateAuctionStartTime(nftAddress, tokenId, startTime);
+  const tx = await contract.updateAuctionStartTime(
+    nftAddress,
+    tokenId,
+    startTime
+  );
+  await tx.wait();
 };
 
 export const updateAuctionEndTime = async (
@@ -106,7 +111,12 @@ export const updateAuctionEndTime = async (
   endTimestamp
 ) => {
   const contract = await getAuctionContract();
-  await contract.updateAuctionEndTime(nftAddress, tokenId, endTimestamp);
+  const tx = await contract.updateAuctionEndTime(
+    nftAddress,
+    tokenId,
+    endTimestamp
+  );
+  await tx.wait();
 };
 
 export const updateAuctionReservePrice = async (
@@ -115,7 +125,12 @@ export const updateAuctionReservePrice = async (
   reservePrice
 ) => {
   const contract = await getAuctionContract();
-  await contract.updateAuctionReservePrice(nftAddress, tokenId, reservePrice);
+  const tx = await contract.updateAuctionReservePrice(
+    nftAddress,
+    tokenId,
+    reservePrice
+  );
+  await tx.wait();
 };
 
 export const withdrawBid = async (nftAddress, tokenId) => {
