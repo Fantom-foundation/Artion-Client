@@ -304,7 +304,7 @@ const NiftyHeader = ({ light }) => {
                   }
                 />
               </div>
-              {true && (
+              {searchBarActive && (
                 <div className={styles.resultcont}>
                   {collections.length > 0 && (
                     <div className={styles.resultsection}>
