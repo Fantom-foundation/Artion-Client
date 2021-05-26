@@ -304,7 +304,7 @@ const NiftyHeader = ({ light }) => {
                   }
                 />
               </div>
-              {searchBarActive && (
+              {true && (
                 <div className={styles.resultcont}>
                   {collections.length > 0 && (
                     <div className={styles.resultsection}>
@@ -356,7 +356,11 @@ const NiftyHeader = ({ light }) => {
                       <div className={styles.separator} />
                       <div className={styles.resultlist}>
                         {tokens.map((tk, idx) => (
-                          <div key={idx} className={styles.result}>
+                          <Link
+                            to={`/explore/${tk.contractAddress}/${tk.tokenID}`}
+                            key={idx}
+                            className={styles.result}
+                          >
                             <div className={styles.resultimg}>
                               {tokenDetailsLoading ? (
                                 <Skeleton width={40} height={40} />
@@ -365,7 +369,7 @@ const NiftyHeader = ({ light }) => {
                               )}
                             </div>
                             <div className={styles.resulttitle}>{tk.name}</div>
-                          </div>
+                          </Link>
                         ))}
                       </div>
                     </div>
