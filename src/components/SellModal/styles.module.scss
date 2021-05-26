@@ -114,16 +114,16 @@
 .listButton {
   background-color: #007BFF;
   color: #FFF;
-
-  &.disabled {
-    cursor: not-allowed;
-    box-shadow: none;
-    opacity: 0.7;
-  }
 }
 
 .cancelButton {
   background-color: #FFF;
   color: #007BFF;
   border: 1px solid #007BFF;
+}
+
+.disabled {
+  cursor: not-allowed;
+  box-shadow: none !important;
+  opacity: 0.7;
 }

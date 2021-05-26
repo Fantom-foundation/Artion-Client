@@ -8,7 +8,7 @@ const initialState = {
   collections: [],
   category: null,
   groupType: 0, // 0: All, 1: Single, 2: Bundles
-  sortBy: 'viewed',
+  sortBy: 'createdAt',
 };
 
 export function Filter(state = initialState, action) {

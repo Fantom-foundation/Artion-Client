@@ -30,10 +30,7 @@ const BidModal = ({
   };
 
   return (
-    <div
-      className={cx(styles.container, visible ? styles.visible : null)}
-      onClick={onClose}
-    >
+    <div className={cx(styles.container, visible ? styles.visible : null)}>
       <div className={styles.modal} onClick={handleClick}>
         <div className={styles.header}>
           <div className={styles.title}>Place Bid</div>
@@ -51,6 +48,7 @@ const BidModal = ({
                 onChange={e => setPrice(e.target.value)}
                 onFocus={() => setFocused(true)}
                 onBlur={() => setFocused(false)}
+                disabled={contractApproving || confirming}
               />
               <div className={styles.usdPrice}>
                 ${((parseFloat(price) || 0) * ftmPrice).toFixed(2)}
@@ -82,7 +80,13 @@ const BidModal = ({
               'Appove Contract'
             )}
           </div>
-          <div className={styles.cancelButton} onClick={onClose}>
+          <div
+            className={cx(
+              styles.cancelButton,
+              (contractApproving || confirming) && styles.disabled
+            )}
+            onClick={!(contractApproving || confirming) && onClose}
+          >
             Cancel
           </div>
         </div>

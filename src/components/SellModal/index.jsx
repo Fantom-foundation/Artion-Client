@@ -30,13 +30,12 @@ const SellModal = ({
   };
 
   return (
-    <div
-      className={cx(styles.container, visible ? styles.visible : null)}
-      onClick={onClose}
-    >
+    <div className={cx(styles.container, visible ? styles.visible : null)}>
       <div className={styles.modal} onClick={handleClick}>
         <div className={styles.header}>
-          <div className={styles.title}>Sell Your Item</div>
+          <div className={styles.title}>
+            {startPrice > 0 ? 'Update Your Listing' : 'Sell Your Item'}
+          </div>
         </div>
         <div className={styles.body}>
           <div className={styles.formGroup}>
@@ -51,6 +50,7 @@ const SellModal = ({
                 onChange={e => setPrice(e.target.value)}
                 onFocus={() => setFocused(true)}
                 onBlur={() => setFocused(false)}
+                disabled={contractApproving || confirming}
               />
               <div className={styles.usdPrice}>
                 ${((parseFloat(price) || 0) * ftmPrice).toFixed(2)}
@@ -84,7 +84,13 @@ const SellModal = ({
               'Appove Contract'
             )}
           </div>
-          <div className={styles.cancelButton} onClick={onClose}>
+          <div
+            className={cx(
+              styles.cancelButton,
+              (contractApproving || confirming) && styles.disabled
+            )}
+            onClick={!(contractApproving || confirming) && onClose}
+          >
             Cancel
           </div>
         </div>

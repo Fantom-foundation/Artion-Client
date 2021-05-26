@@ -48,6 +48,10 @@ export const Categories = [
 
 export const SortByOptions = [
   {
+    id: 'createdAt',
+    label: 'Recently Created',
+  },
+  {
     id: 'listedAt',
     label: 'Recently Listed',
   },

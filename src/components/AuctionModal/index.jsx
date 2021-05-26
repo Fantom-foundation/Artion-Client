@@ -44,13 +44,12 @@ const AuctionModal = ({
   };
 
   return (
-    <div
-      className={cx(styles.container, visible ? styles.visible : null)}
-      onClick={onClose}
-    >
+    <div className={cx(styles.container, visible ? styles.visible : null)}>
       <div className={styles.modal} onClick={handleClick}>
         <div className={styles.header}>
-          <div className={styles.title}>Start Auction</div>
+          <div className={styles.title}>
+            {auction ? 'Update Auction' : 'Start Auction'}
+          </div>
         </div>
         <div className={styles.body}>
           <div className={styles.formGroup}>
@@ -65,6 +64,7 @@ const AuctionModal = ({
                 onChange={e => setReservePrice(e.target.value)}
                 onFocus={() => setFocused(true)}
                 onBlur={() => setFocused(false)}
+                disabled={contractApproving || confirming}
               />
               <div className={styles.usdPrice}>
                 ${((parseFloat(reservePrice) || 0) * ftmPrice).toFixed(2)}
@@ -79,6 +79,7 @@ const AuctionModal = ({
                 onChange={val => setStartTime(val.toDate())}
                 inputProps={{
                   className: styles.formInput,
+                  disabled: contractApproving || confirming,
                 }}
               />
             </div>
@@ -91,6 +92,7 @@ const AuctionModal = ({
                 onChange={val => setEndTime(val.toDate())}
                 inputProps={{
                   className: styles.formInput,
+                  disabled: contractApproving || confirming,
                 }}
               />
             </div>
@@ -123,7 +125,13 @@ const AuctionModal = ({
               'Appove Contract'
             )}
           </div>
-          <div className={styles.cancelButton} onClick={onClose}>
+          <div
+            className={cx(
+              styles.cancelButton,
+              (contractApproving || confirming) && styles.disabled
+            )}
+            onClick={!(contractApproving || confirming) && onClose}
+          >
             Cancel
           </div>
         </div>

@@ -98,7 +98,6 @@ class PaintStore {
                 this.ctx.drawImage(background, x, y, imgW, imgH);
               }
               fileSelector.value = null;
-              localStorage.setItem('background', reader.result);
             };
           };
         } catch (error) {
@@ -152,24 +151,6 @@ class PaintStore {
   redraw = (stack = this.strokeHistory) => {
     this.clear();
     console.log(stack);
-    let filename = localStorage.getItem('background');
-    if (filename) {
-      let background = new Image();
-      background.src = filename;
-      background.onload = () => {
-        this.ctx.drawImage(
-          background,
-          0,
-          0,
-          this.canvas.width,
-          this.canvas.height
-        );
-        localStorage.setItem('background', filename);
-        stack.forEach(entry => {
-          entry.forEach(this.stroke);
-        });
-      };
-    }
     stack.forEach(entry => {
       entry.forEach(this.stroke);
     });

@@ -9,6 +9,7 @@ import Stepper from '@material-ui/core/Stepper';
 import Step from '@material-ui/core/Step';
 import StepLabel from '@material-ui/core/StepLabel';
 import { ClipLoader } from 'react-spinners';
+import InfoIcon from '@material-ui/icons/Info';
 
 import { BigNumber, ethers } from 'ethers';
 
@@ -52,6 +53,13 @@ const useStyles = makeStyles(() => ({
     '&:disabled': {
       color: '#fffa !important',
     },
+  },
+  fee: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    color: '#3D3D3D',
+    opacity: 0.6,
   },
   autocomplete: {
     width: '100%',
@@ -112,6 +120,14 @@ const Metadata = () => {
 
   let isWalletConnected = useSelector(state => state.ConnectWallet.isConnected);
   let authToken = useSelector(state => state.ConnectWallet.authToken);
+
+  const resetBoard = () => {
+    const canvas = document.getElementById('drawingboard');
+    if (canvas) {
+      const context = canvas.getContext('2d');
+      context.clearRect(0, 0, canvas.width, canvas.height);
+    }
+  };
 
   const handleInputChange = (value, target) => {
     switch (target) {
@@ -226,6 +242,7 @@ const Metadata = () => {
         setLastMintedTkId(mintedTkId.toNumber());
 
         toast('success', 'New NFT item minted!');
+        resetBoard();
       } catch (error) {
         toast('error', error.message);
       }
@@ -301,6 +318,10 @@ const Metadata = () => {
             'MINT'
           )}
         </Button>
+        <div className={classes.fee}>
+          <InfoIcon />
+          &nbsp;2 FTMs are charged to create a new NFT.
+        </div>
       </div>
       <div className={classes.mintStatusContainer}>
         {lastMintedTkId !== 0 && (

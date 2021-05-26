@@ -24,12 +24,25 @@ const App = ({ paintStore }) => {
   const { start, draw, stop } = paintStore;
 
   const PaintBoard = () => {
+    const resetBoard = () => {
+      if (canvasRef.current) {
+        const context = canvasRef.current.getContext('2d');
+        context.clearRect(
+          0,
+          0,
+          canvasRef.current.width,
+          canvasRef.current.height
+        );
+      }
+    };
+
     const initPaintStore = () => {
       paintStore.initialize(canvasRef.current);
     };
     useEffect(() => initPaintStore(), [paintStore]);
 
     useEffect(() => {
+      resetBoard();
       window.addEventListener('resize', initPaintStore);
 
       return () => {
