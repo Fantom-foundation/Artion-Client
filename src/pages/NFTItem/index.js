@@ -807,6 +807,8 @@ const NFTItem = () => {
   };
 
   const handlePlaceBid = async _price => {
+    if (bidPlacing) return;
+
     try {
       setBidPlacing(true);
 
@@ -817,14 +819,12 @@ const NFTItem = () => {
         price,
         account
       );
-      setBidModalVisible(false);
-
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      await provider.waitForTransaction(tx.hash);
+      await tx.wait();
 
       toast('success', 'Bid placed successfully!');
 
       setBidPlacing(false);
+      setBidModalVisible(false);
     } catch {
       setBidPlacing(false);
     }
@@ -1001,6 +1001,8 @@ const NFTItem = () => {
                   ? offerCanceling
                     ? 'Withdrawing Offer...'
                     : 'Withdraw Offer'
+                  : offerPlacing
+                  ? 'Making Offer...'
                   : 'Make Offer'}
               </div>
             </>
@@ -1247,7 +1249,10 @@ const NFTItem = () => {
                         </div>
                       ) : (
                         <div
-                          className={styles.placeBid}
+                          className={cx(
+                            styles.placeBid,
+                            bidPlacing && styles.disabled
+                          )}
                           onClick={() => setBidModalVisible(true)}
                         >
                           Place Bid

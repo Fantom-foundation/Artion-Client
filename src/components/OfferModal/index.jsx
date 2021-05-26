@@ -54,6 +54,7 @@ const OfferModal = ({
                 onChange={e => setPrice(e.target.value)}
                 onFocus={() => setFocused1(true)}
                 onBlur={() => setFocused1(false)}
+                disabled={contractApproving || confirming}
               />
               <div className={styles.usdPrice}>
                 ${((parseFloat(price) || 0) * ftmPrice).toFixed(2)}
@@ -72,6 +73,7 @@ const OfferModal = ({
                   className: styles.formInput,
                   onFocus: () => setFocused2(true),
                   onBlur: () => setFocused2(false),
+                  disabled: contractApproving || confirming,
                 }}
               />
             </div>
@@ -101,7 +103,13 @@ const OfferModal = ({
               'Appove Contract'
             )}
           </div>
-          <div className={styles.cancelButton} onClick={onClose}>
+          <div
+            className={cx(
+              styles.cancelButton,
+              (contractApproving || confirming) && styles.disabled
+            )}
+            onClick={!(contractApproving || confirming) && onClose}
+          >
             Cancel
           </div>
         </div>
