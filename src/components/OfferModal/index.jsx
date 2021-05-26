@@ -73,6 +73,7 @@ const OfferModal = ({
                   className: styles.formInput,
                   onFocus: () => setFocused2(true),
                   onBlur: () => setFocused2(false),
+                  onKeyDown: e => e.preventDefault(),
                   disabled: contractApproving || confirming,
                 }}
               />

@@ -79,6 +79,7 @@ const AuctionModal = ({
                 onChange={val => setStartTime(val.toDate())}
                 inputProps={{
                   className: styles.formInput,
+                  onKeyDown: e => e.preventDefault(),
                   disabled: contractApproving || confirming,
                 }}
               />
@@ -92,6 +93,7 @@ const AuctionModal = ({
                 onChange={val => setEndTime(val.toDate())}
                 inputProps={{
                   className: styles.formInput,
+                  onKeyDown: e => e.preventDefault(),
                   disabled: contractApproving || confirming,
                 }}
               />
