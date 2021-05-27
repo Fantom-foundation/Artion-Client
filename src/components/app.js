@@ -11,7 +11,7 @@ import Toolbar from './toolbar';
 import Metadata from './metadata';
 import AccountModal from './AccountModal';
 import WFTMModal from './WFTMModal';
-import { Container, Board, Canvas } from './style';
+import { Container, Board, Canvas, CanvasBg } from './style';
 import { isMobile } from 'utils/userAgent';
 import LandingPage from '../pages/landingpage';
 import ExploreAllPage from '../pages/explorepage';
@@ -21,6 +21,7 @@ import PriceActions from 'actions/price.actions';
 
 const App = ({ paintStore }) => {
   const canvasRef = useRef(null);
+  const canvasBgRef = useRef(null);
   const { start, draw, stop } = paintStore;
 
   const PaintBoard = () => {
@@ -37,7 +38,7 @@ const App = ({ paintStore }) => {
     };
 
     const initPaintStore = () => {
-      paintStore.initialize(canvasRef.current);
+      paintStore.initialize(canvasRef.current, canvasBgRef.current);
     };
     useEffect(() => initPaintStore(), [paintStore]);
 
@@ -56,6 +57,7 @@ const App = ({ paintStore }) => {
           <Header light />
           <Container>
             <Board isMobile={isMobile}>
+              <CanvasBg id="drawingbg" ref={canvasBgRef} />
               <Canvas
                 id="drawingboard"
                 ref={canvasRef}

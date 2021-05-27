@@ -39,8 +39,14 @@ export const Board = styled.div`
   ${({ full, isMobile }) => setDimensions(full, isMobile)}
 `;
 
+export const CanvasBg = styled.canvas`
+  position: absolute;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+`;
+
 export const Canvas = styled.canvas`
-  background-color: white;
   width: 100%;
   height: 100%;
 `;
