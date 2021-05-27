@@ -1318,39 +1318,41 @@ const NFTItem = () => {
                     <div className={styles.price}>Price</div>
                     <div className={styles.deadline}>Expires In</div>
                   </div>
-                  {offers.current.map((offer, idx) => (
-                    <div className={styles.offer} key={idx}>
-                      <div className={styles.owner}>
-                        {shortenAddress(offer.creator)}
-                      </div>
-                      <div className={styles.price}>
-                        {offer.pricePerItem} FTM
-                      </div>
-                      <div className={styles.deadline}>
-                        {formatExpiration(offer.deadline)}
-                      </div>
-                      {isMine && (
-                        <div
-                          className={styles.buyButton}
-                          onClick={() => handleAcceptOffer(offer)}
-                        >
-                          Accept
+                  {offers.current
+                    .filter(offer => offer.deadline * 1000 > now.getTime())
+                    .map((offer, idx) => (
+                      <div className={styles.offer} key={idx}>
+                        <div className={styles.owner}>
+                          {shortenAddress(offer.creator)}
                         </div>
-                      )}
-                      {offer.creator?.toLowerCase() ===
-                        account?.toLowerCase() && (
-                        <div
-                          className={cx(
-                            styles.buyButton,
-                            offerCanceling && styles.disabled
-                          )}
-                          onClick={() => handleCancelOffer()}
-                        >
-                          {offerCanceling ? 'Withdrawing...' : 'Withdraw'}
+                        <div className={styles.price}>
+                          {offer.pricePerItem} FTM
                         </div>
-                      )}
-                    </div>
-                  ))}
+                        <div className={styles.deadline}>
+                          {formatExpiration(offer.deadline)}
+                        </div>
+                        {isMine && (
+                          <div
+                            className={styles.buyButton}
+                            onClick={() => handleAcceptOffer(offer)}
+                          >
+                            Accept
+                          </div>
+                        )}
+                        {offer.creator?.toLowerCase() ===
+                          account?.toLowerCase() && (
+                          <div
+                            className={cx(
+                              styles.buyButton,
+                              offerCanceling && styles.disabled
+                            )}
+                            onClick={() => handleCancelOffer()}
+                          >
+                            {offerCanceling ? 'Withdrawing...' : 'Withdraw'}
+                          </div>
+                        )}
+                      </div>
+                    ))}
                 </div>
               </Panel>
             </div>
