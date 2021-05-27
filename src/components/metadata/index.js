@@ -243,6 +243,9 @@ const Metadata = () => {
 
         toast('success', 'New NFT item minted!');
         resetBoard();
+        setName('fAsset');
+        setSymbol('newnft');
+        setDescription('');
       } catch (error) {
         toast('error', error.message);
       }
@@ -265,6 +268,7 @@ const Metadata = () => {
           onChange={e => {
             handleInputChange(e.target.value, 'name');
           }}
+          disabled={isMinting}
         />
         <TextField
           className={classes.inkMetadataInput}
@@ -276,6 +280,7 @@ const Metadata = () => {
           onChange={e => {
             handleInputChange(e.target.value, 'symbol');
           }}
+          disabled={isMinting}
         />
         <TextField
           className={classes.inkMetadataInput}
@@ -292,6 +297,7 @@ const Metadata = () => {
           onChange={e => {
             handleInputChange(e.target.value, 'description');
           }}
+          disabled={isMinting}
         />
 
         {isMinting && (
