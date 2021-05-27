@@ -290,7 +290,7 @@ const Metadata = () => {
           label="Description(Optional)"
           style={{ textAlign: 'left' }}
           hinttext="Message Field"
-          defaultValue={description}
+          value={description}
           floatinglabeltext="MultiLine and FloatingLabel"
           multiline
           rows={4}
