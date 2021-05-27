@@ -6,8 +6,6 @@ import {
   UndoIcon,
   RedoIcon,
   PaletteIcon,
-  SaveIcon,
-  LoadIcon,
   TrashIcon,
   BGIcon,
   EraserIcon,
@@ -61,25 +59,11 @@ const Toolbar = ({ paintStore }) => {
           tip="Reset"
         />
         <Button
-          id="save"
-          icon={SaveIcon}
-          onClick={paintStore.save}
-          keys="command+s"
-          tip="Save"
-        />
-        <Button
           id="download"
           icon={DownloadIcon}
           onClick={paintStore.saveToFile}
           keys="command+d"
           tip="Download"
-        />
-        <Button
-          id="load"
-          icon={LoadIcon}
-          onClick={paintStore.load}
-          keys="command+l"
-          tip="Load"
         />
         <Button
           id="fileupload"
