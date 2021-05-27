@@ -41,6 +41,7 @@ class PaintStore {
   @action
   setBackgroundColor = color => {
     this.backgroundColor = color;
+    this.ctxBg.clearRect(0, 0, this.canvasBg.width, this.canvasBg.height);
     this.ctxBg.fillStyle = this.backgroundColor;
     this.ctxBg.fillRect(0, 0, this.canvasBg.width, this.canvasBg.height);
   };
@@ -192,6 +193,7 @@ class PaintStore {
   clear = () => {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     this.ctxBg.clearRect(0, 0, this.canvasBg.width, this.canvasBg.height);
+    this.backgroundColor = 'white';
     this.ctxBg.fillStyle = this.backgroundColor;
     this.ctxBg.fillRect(0, 0, this.canvasBg.width, this.canvasBg.height);
   };
@@ -200,7 +202,6 @@ class PaintStore {
     this.strokeHistory = [];
     this.session = [];
     this.redos = [];
-    localStorage.removeItem('background');
     this.clear();
   };
 
