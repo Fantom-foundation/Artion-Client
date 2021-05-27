@@ -13,5 +13,5 @@ export default [
   'violet',
   'brown',
   'saddlebrown',
-  '',
+  'transparent',
 ];

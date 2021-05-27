@@ -127,6 +127,11 @@ const Metadata = () => {
       const context = canvas.getContext('2d');
       context.clearRect(0, 0, canvas.width, canvas.height);
     }
+    const canvasBg = document.getElementById('drawingbg');
+    if (canvasBg) {
+      const context = canvasBg.getContext('2d');
+      context.clearRect(0, 0, canvasBg.width, canvasBg.height);
+    }
   };
 
   const handleInputChange = (value, target) => {
@@ -192,67 +197,88 @@ const Metadata = () => {
       resetMintingStatus();
       return;
     }
-    let canvas = document.getElementById('drawingboard');
-    let formData = new FormData();
-    formData.append('image', canvas.toDataURL());
-    formData.append('name', name);
-    formData.append('account', account);
-    formData.append('description', description);
-    formData.append('symbol', symbol);
-    try {
-      let result = await axios({
-        method: 'post',
-        url: 'https://api0.artion.io/ipfs/uploadImage2Server',
-        data: formData,
-        headers: {
-          'Content-Type': 'multipart/form-data',
-          Authorization: 'Bearer ' + authToken,
-        },
-      });
+    const canvasBg = document.getElementById('drawingbg');
+    const canvas = document.getElementById('drawingboard');
 
-      console.log('upload image result is ');
-      console.log(result);
+    const newcanvas = document.createElement('canvas');
+    newcanvas.width = canvas.clientWidth;
+    newcanvas.height = canvas.clientHeight;
+    const ctx = newcanvas.getContext('2d');
+    const image = new Image();
+    image.onload = function() {
+      ctx.drawImage(image, 0, 0);
 
-      const jsonHash = result.data.jsonHash;
+      const image1 = new Image();
+      image1.onload = async function() {
+        ctx.drawImage(image1, 0, 0);
 
-      let fnft_sc = await SCHandlers.loadContract(
-        FantomNFTConstants.MAINNETADDRESS,
-        FantomNFTConstants.ABI
-      );
+        let formData = new FormData();
+        formData.append('image', newcanvas.toDataURL());
+        formData.append('name', name);
+        formData.append('account', account);
+        formData.append('description', description);
+        formData.append('symbol', symbol);
+        try {
+          let result = await axios({
+            method: 'post',
+            url: 'https://api0.artion.io/ipfs/uploadImage2Server',
+            data: formData,
+            headers: {
+              'Content-Type': 'multipart/form-data',
+              Authorization: 'Bearer ' + authToken,
+            },
+          });
 
-      const provider = fnft_sc[1];
-      fnft_sc = fnft_sc[0];
+          console.log('upload image result is ');
+          console.log(result);
 
-      try {
-        const args = [account, jsonHash];
-        const options = {
-          value: ethers.utils.parseEther('2'),
-        };
-        const gasEstimate = await fnft_sc.estimateGas.mint(...args, options);
-        options.gasLimit = calculateGasMargin(gasEstimate);
-        let tx = await fnft_sc.mint(...args, options);
-        setCurrentMintingStep(1);
-        setLastMintedTnxId(tx.hash);
+          const jsonHash = result.data.jsonHash;
 
-        setCurrentMintingStep(2);
-        const confirmedTnx = await provider.waitForTransaction(tx.hash);
-        setCurrentMintingStep(3);
-        let evtCaught = confirmedTnx.logs[0].topics;
-        let mintedTkId = BigNumber.from(evtCaught[3]);
-        setLastMintedTkId(mintedTkId.toNumber());
+          let fnft_sc = await SCHandlers.loadContract(
+            FantomNFTConstants.MAINNETADDRESS,
+            FantomNFTConstants.ABI
+          );
 
-        toast('success', 'New NFT item minted!');
-        resetBoard();
-        setName('fAsset');
-        setSymbol('newnft');
-        setDescription('');
-      } catch (error) {
-        toast('error', error.message);
-      }
-    } catch (error) {
-      toast('error', error.message);
-    }
-    resetMintingStatus();
+          const provider = fnft_sc[1];
+          fnft_sc = fnft_sc[0];
+
+          try {
+            const args = [account, jsonHash];
+            const options = {
+              value: ethers.utils.parseEther('2'),
+            };
+            const gasEstimate = await fnft_sc.estimateGas.mint(
+              ...args,
+              options
+            );
+            options.gasLimit = calculateGasMargin(gasEstimate);
+            let tx = await fnft_sc.mint(...args, options);
+            setCurrentMintingStep(1);
+            setLastMintedTnxId(tx.hash);
+
+            setCurrentMintingStep(2);
+            const confirmedTnx = await provider.waitForTransaction(tx.hash);
+            setCurrentMintingStep(3);
+            let evtCaught = confirmedTnx.logs[0].topics;
+            let mintedTkId = BigNumber.from(evtCaught[3]);
+            setLastMintedTkId(mintedTkId.toNumber());
+
+            toast('success', 'New NFT item minted!');
+            resetBoard();
+            setName('fAsset');
+            setSymbol('newnft');
+            setDescription('');
+          } catch (error) {
+            toast('error', error.message);
+          }
+        } catch (error) {
+          toast('error', error.message);
+        }
+        resetMintingStatus();
+      };
+      image1.src = canvas.toDataURL();
+    };
+    image.src = canvasBg.toDataURL();
   };
 
   return (

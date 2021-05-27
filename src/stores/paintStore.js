@@ -3,7 +3,9 @@ import { saveAs } from 'file-saver';
 
 class PaintStore {
   canvas;
+  canvasBg;
   ctx;
+  ctxBg;
   lastX;
   lastY;
   hue = 0;
@@ -39,8 +41,9 @@ class PaintStore {
   @action
   setBackgroundColor = color => {
     this.backgroundColor = color;
-    this.ctx.fillStyle = this.backgroundColor;
-    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    this.ctxBg.clearRect(0, 0, this.canvasBg.width, this.canvasBg.height);
+    this.ctxBg.fillStyle = this.backgroundColor;
+    this.ctxBg.fillRect(0, 0, this.canvasBg.width, this.canvasBg.height);
   };
 
   @action
@@ -53,8 +56,8 @@ class PaintStore {
     this.size = size;
   };
 
-  initialize = canvas => {
-    if (canvas) {
+  initialize = (canvas, canvasBg) => {
+    if (canvas && canvasBg) {
       this.canvas = canvas;
       this.canvas.width = canvas.clientWidth;
       this.canvas.height = canvas.clientHeight;
@@ -62,8 +65,12 @@ class PaintStore {
       this.ctx = canvas.getContext('2d');
       this.ctx.lineJoin = 'round';
       this.ctx.lineCap = 'round';
-      this.ctx.fillStyle = this.backgroundColor;
-      this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+      this.canvasBg = canvasBg;
+      this.canvasBg.width = canvasBg.clientWidth;
+      this.canvasBg.height = canvasBg.clientHeight;
+      this.ctxBg = canvasBg.getContext('2d');
+      this.ctxBg.fillStyle = 'red';
+      this.ctxBg.fillRect(0, 0, this.canvasBg.width, this.canvasBg.height);
       const fileSelector = document.createElement('input');
       fileSelector.setAttribute('type', 'file');
       fileSelector.setAttribute('accept', 'image/*');
@@ -185,15 +192,16 @@ class PaintStore {
 
   clear = () => {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    this.ctx.fillStyle = this.backgroundColor;
-    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    this.ctxBg.clearRect(0, 0, this.canvasBg.width, this.canvasBg.height);
+    this.backgroundColor = 'white';
+    this.ctxBg.fillStyle = this.backgroundColor;
+    this.ctxBg.fillRect(0, 0, this.canvasBg.width, this.canvasBg.height);
   };
 
   reset = () => {
     this.strokeHistory = [];
     this.session = [];
     this.redos = [];
-    localStorage.removeItem('background');
     this.clear();
   };
 
