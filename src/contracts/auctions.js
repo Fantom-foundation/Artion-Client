@@ -88,7 +88,8 @@ export const reclaimERC20 = async tokenContract => {
 
 export const resultAuction = async (nftAddress, tokenId) => {
   const contract = await getAuctionContract();
-  await contract.resultAuction(nftAddress, tokenId);
+  const tx = await contract.resultAuction(nftAddress, tokenId);
+  await tx.wait();
 };
 
 export const updateAuctionStartTime = async (
@@ -135,5 +136,6 @@ export const updateAuctionReservePrice = async (
 
 export const withdrawBid = async (nftAddress, tokenId) => {
   const contract = await getAuctionContract();
-  return await contract.withdrawBid(nftAddress, tokenId);
+  const tx = await contract.withdrawBid(nftAddress, tokenId);
+  await tx.wait();
 };

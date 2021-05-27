@@ -112,6 +112,9 @@ const NFTItem = () => {
   const [auctionUpdating, setAuctionUpdating] = useState(false);
   const [auctionCanceling, setAuctionCanceling] = useState(false);
   const [bidPlacing, setBidPlacing] = useState(false);
+  const [bidWithdrawing, setBidWithdrawing] = useState(false);
+  const [resulting, setResulting] = useState(false);
+  const [resulted, setResulted] = useState(false);
 
   const [bid, setBid] = useState(null);
   const [winner, setWinner] = useState(null);
@@ -701,10 +704,11 @@ const NFTItem = () => {
       setOfferCanceling(true);
 
       const tx = await cancelOffer(address, tokenID);
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      await provider.waitForTransaction(tx.hash);
+      await tx.wait();
 
       toast('success', 'You have withdrawn your offer!');
+
+      offerCanceledHandler(account, address, ethers.BigNumber.from(tokenID));
 
       setOfferCanceling(false);
     } catch {
@@ -801,9 +805,17 @@ const NFTItem = () => {
   };
 
   const handleResultAuction = async () => {
-    await resultAuction(address, tokenID);
+    if (resulting) return;
 
-    toast('success', 'Auction resulted!');
+    try {
+      setResulting(true);
+      await resultAuction(address, tokenID);
+      setResulting(false);
+      setResulted(true);
+      toast('success', 'Auction resulted!');
+    } catch {
+      setResulting(false);
+    }
   };
 
   const handlePlaceBid = async _price => {
@@ -831,9 +843,16 @@ const NFTItem = () => {
   };
 
   const handleWithdrawBid = async () => {
-    await withdrawBid(address, ethers.BigNumber.from(tokenID));
+    if (bidWithdrawing) return;
 
-    toast('success', 'You have withdrawn your bid!');
+    try {
+      setBidWithdrawing(true);
+      await withdrawBid(address, ethers.BigNumber.from(tokenID));
+      setBidWithdrawing(false);
+      toast('success', 'You have withdrawn your bid!');
+    } catch {
+      setBidWithdrawing(false);
+    }
   };
 
   const hasMyOffer = useMemo(() => {
@@ -915,7 +934,8 @@ const NFTItem = () => {
   const auctionStarted = () =>
     now.getTime() / 1000 >= auction.current?.startTime;
 
-  const auctionEnded = () => auction.current?.endTime <= now.getTime() / 1000;
+  const auctionEnded = () =>
+    auction.current?.endTime <= now.getTime() / 1000 || resulted;
 
   const auctionActive = () => auctionStarted() && !auctionEnded();
 
@@ -961,31 +981,38 @@ const NFTItem = () => {
                   {auctionCanceling ? 'Canceling Auction...' : 'Cancel Auction'}
                 </div>
               ) : null}
-              <div
-                className={styles.headerButton}
-                onClick={() => setAuctionModalVisible(true)}
-              >
-                {auction.current ? 'Update Auction' : 'Start Auction'}
-              </div>
-              {listing.current ? (
-                <div className={styles.headerButton} onClick={cancelList}>
-                  Cancel Listing
+              {(!auction.current || !auction.current.resulted) && (
+                <div
+                  className={styles.headerButton}
+                  onClick={() => setAuctionModalVisible(true)}
+                >
+                  {auction.current ? 'Update Auction' : 'Start Auction'}
                 </div>
-              ) : null}
-              <div
-                className={cx(
-                  styles.headerButton,
-                  (itemListing || priceUpdating) && styles.disabled
-                )}
-                onClick={() =>
-                  !(itemListing || priceUpdating) && setSellModalVisible(true)
-                }
-              >
-                {listing.current ? 'Update Listing' : 'Sell'}
-              </div>
+              )}
+              {!auction && (
+                <>
+                  {listing.current ? (
+                    <div className={styles.headerButton} onClick={cancelList}>
+                      Cancel Listing
+                    </div>
+                  ) : null}
+                  <div
+                    className={cx(
+                      styles.headerButton,
+                      (itemListing || priceUpdating) && styles.disabled
+                    )}
+                    onClick={() =>
+                      !(itemListing || priceUpdating) &&
+                      setSellModalVisible(true)
+                    }
+                  >
+                    {listing.current ? 'Update Listing' : 'Sell'}
+                  </div>
+                </>
+              )}
             </>
           ) : (
-            <>
+            !auction && (
               <div
                 className={cx(
                   styles.headerButton,
@@ -1005,7 +1032,7 @@ const NFTItem = () => {
                   ? 'Making Offer...'
                   : 'Make Offer'}
               </div>
-            </>
+            )
           )}
         </div>
       )}
@@ -1241,11 +1268,14 @@ const NFTItem = () => {
                         <div
                           className={cx(
                             styles.withdrawBid,
-                            !canWithdraw() && styles.disabled
+                            (!canWithdraw() || bidWithdrawing) &&
+                              styles.disabled
                           )}
                           onClick={() => canWithdraw() && handleWithdrawBid()}
                         >
-                          Withdraw Bid
+                          {bidWithdrawing
+                            ? 'Withdrawing Bid...'
+                            : 'Withdraw Bid'}
                         </div>
                       ) : (
                         <div
@@ -1260,10 +1290,13 @@ const NFTItem = () => {
                       ))}
                     {isMine && auctionEnded() && !auction.current.resulted && (
                       <div
-                        className={styles.placeBid}
+                        className={cx(
+                          styles.placeBid,
+                          resulting && styles.disabled
+                        )}
                         onClick={handleResultAuction}
                       >
-                        Result
+                        {resulting ? 'Resulting...' : 'Result'}
                       </div>
                     )}
                   </div>
@@ -1318,39 +1351,41 @@ const NFTItem = () => {
                     <div className={styles.price}>Price</div>
                     <div className={styles.deadline}>Expires In</div>
                   </div>
-                  {offers.current.map((offer, idx) => (
-                    <div className={styles.offer} key={idx}>
-                      <div className={styles.owner}>
-                        {shortenAddress(offer.creator)}
-                      </div>
-                      <div className={styles.price}>
-                        {offer.pricePerItem} FTM
-                      </div>
-                      <div className={styles.deadline}>
-                        {formatExpiration(offer.deadline)}
-                      </div>
-                      {isMine && (
-                        <div
-                          className={styles.buyButton}
-                          onClick={() => handleAcceptOffer(offer)}
-                        >
-                          Accept
+                  {offers.current
+                    .filter(offer => offer.deadline * 1000 > now.getTime())
+                    .map((offer, idx) => (
+                      <div className={styles.offer} key={idx}>
+                        <div className={styles.owner}>
+                          {shortenAddress(offer.creator)}
                         </div>
-                      )}
-                      {offer.creator?.toLowerCase() ===
-                        account?.toLowerCase() && (
-                        <div
-                          className={cx(
-                            styles.buyButton,
-                            offerCanceling && styles.disabled
-                          )}
-                          onClick={() => handleCancelOffer()}
-                        >
-                          {offerCanceling ? 'Withdrawing...' : 'Withdraw'}
+                        <div className={styles.price}>
+                          {offer.pricePerItem} FTM
                         </div>
-                      )}
-                    </div>
-                  ))}
+                        <div className={styles.deadline}>
+                          {formatExpiration(offer.deadline)}
+                        </div>
+                        {isMine && (
+                          <div
+                            className={styles.buyButton}
+                            onClick={() => handleAcceptOffer(offer)}
+                          >
+                            Accept
+                          </div>
+                        )}
+                        {offer.creator?.toLowerCase() ===
+                          account?.toLowerCase() && (
+                          <div
+                            className={cx(
+                              styles.buyButton,
+                              offerCanceling && styles.disabled
+                            )}
+                            onClick={() => handleCancelOffer()}
+                          >
+                            {offerCanceling ? 'Withdrawing...' : 'Withdraw'}
+                          </div>
+                        )}
+                      </div>
+                    ))}
                 </div>
               </Panel>
             </div>

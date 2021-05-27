@@ -1,5 +1,4 @@
 import { observable, action } from 'mobx';
-import { compress, decompress } from 'utils/stringPress';
 import { saveAs } from 'file-saver';
 
 class PaintStore {
@@ -196,43 +195,6 @@ class PaintStore {
     this.redos = [];
     localStorage.removeItem('background');
     this.clear();
-  };
-
-  save = () => {
-    const history = this.strokeHistory.reduce(
-      (history, entry) =>
-        history.concat(
-          entry.map(step => [
-            step.lastX,
-            step.lastY,
-            step.clientX,
-            step.clientY,
-            step.color,
-            step.size,
-          ])
-        ),
-      []
-    );
-
-    const compressed = compress(JSON.stringify(history));
-    localStorage.setItem('saved', compressed);
-  };
-
-  load = () => {
-    const saved = localStorage.getItem('saved');
-    if (!saved) return;
-
-    try {
-      const parsed = JSON.parse(decompress(saved)).map(entry => {
-        const [lastX, lastY, clientX, clientY, color, size] = entry;
-        return { lastX, lastY, clientX, clientY, color, size };
-      });
-      this.reset();
-      this.strokeHistory.push(parsed);
-      this.redraw();
-    } catch (e) {
-      console.log('removed');
-    }
   };
 
   saveToFile = () => {
