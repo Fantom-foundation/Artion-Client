@@ -967,25 +967,30 @@ const NFTItem = () => {
               >
                 {auction.current ? 'Update Auction' : 'Start Auction'}
               </div>
-              {listing.current ? (
-                <div className={styles.headerButton} onClick={cancelList}>
-                  Cancel Listing
-                </div>
-              ) : null}
-              <div
-                className={cx(
-                  styles.headerButton,
-                  (itemListing || priceUpdating) && styles.disabled
-                )}
-                onClick={() =>
-                  !(itemListing || priceUpdating) && setSellModalVisible(true)
-                }
-              >
-                {listing.current ? 'Update Listing' : 'Sell'}
-              </div>
+              {!auction && (
+                <>
+                  {listing.current ? (
+                    <div className={styles.headerButton} onClick={cancelList}>
+                      Cancel Listing
+                    </div>
+                  ) : null}
+                  <div
+                    className={cx(
+                      styles.headerButton,
+                      (itemListing || priceUpdating) && styles.disabled
+                    )}
+                    onClick={() =>
+                      !(itemListing || priceUpdating) &&
+                      setSellModalVisible(true)
+                    }
+                  >
+                    {listing.current ? 'Update Listing' : 'Sell'}
+                  </div>
+                </>
+              )}
             </>
           ) : (
-            <>
+            !auction && (
               <div
                 className={cx(
                   styles.headerButton,
@@ -1005,7 +1010,7 @@ const NFTItem = () => {
                   ? 'Making Offer...'
                   : 'Make Offer'}
               </div>
-            </>
+            )
           )}
         </div>
       )}
