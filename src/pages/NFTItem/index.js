@@ -64,9 +64,9 @@ import Header from 'components/header';
 import SuspenseImg from 'components/SuspenseImg';
 
 import webIcon from 'assets/svgs/web.svg';
-import discordIcon from 'assets/imgs/discord.png';
-import telegramIcon from 'assets/imgs/telegram.png';
-import twitterIcon from 'assets/imgs/twitter.png';
+import discordIcon from 'assets/svgs/discord.svg';
+import telegramIcon from 'assets/svgs/telegram.svg';
+import twitterIcon from 'assets/svgs/twitter.svg';
 import mediumIcon from 'assets/svgs/medium.svg';
 
 import styles from './styles.module.scss';
