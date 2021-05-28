@@ -197,7 +197,7 @@ const WFTMModal = ({ visible, onClose }) => {
           </div>
           <div
             className={cx(styles.cancelButton, confirming && styles.disabled)}
-            onClick={onClose}
+            onClick={!confirming && onClose}
           >
             Cancel
           </div>

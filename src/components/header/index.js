@@ -329,7 +329,7 @@ const NiftyHeader = ({ light }) => {
                   )}
                   {accounts.length > 0 && (
                     <div className={styles.resultsection}>
-                      <div className={styles.resultsectiontitle}>Account</div>
+                      <div className={styles.resultsectiontitle}>Accounts</div>
                       <div className={styles.separator} />
                       <div className={styles.resultlist}>
                         {accounts.map((account, idx) => (

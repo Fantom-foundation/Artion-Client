@@ -1,9 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import cx from 'classnames';
+import { ClipLoader } from 'react-spinners';
 import { makeStyles } from '@material-ui/core/styles';
 import Modal from '@material-ui/core/Modal';
-import Button from '@material-ui/core/Button';
 import CreateIcon from '@material-ui/icons/Create';
 
 import ModalActions from 'actions/modal.actions';
@@ -27,10 +27,10 @@ const useStyles = makeStyles({
   },
   paper: {
     width: '60%',
-    maxWidth: 800,
+    maxWidth: 600,
     minWidth: 400,
-    padding: 50,
-    borderRadius: 25,
+    padding: 40,
+    borderRadius: 10,
     boxSizing: 'border-box',
     backgroundColor: '#fff',
     outline: 'none',
@@ -38,31 +38,28 @@ const useStyles = makeStyles({
     color: '#333',
   },
   title: {
-    fontSize: 36,
-    margin: '0 0 30px',
+    fontWeight: 900,
+    fontSize: 28,
+    textAlign: 'center',
+    margin: '0 0 40px',
   },
   formGroup: {
     marginBottom: 25,
   },
   formLabel: {
-    margin: '0 0 10px',
+    margin: '0 0 8px',
     fontSize: 18,
-    fontWeight: 500,
+    color: '#3D3D3D',
   },
   formInput: {
     width: '100%',
     outline: 'none',
-    height: 40,
-    borderRadius: 5,
-    border: 'none',
-    backgroundColor: '#FAFAFA',
-    padding: '8px 12px',
+    height: 50,
+    borderRadius: 10,
+    border: '2px solid rgba(0, 0, 0, 0.1)',
+    padding: '8px 16px',
     boxSizing: 'border-box',
     fontSize: 16,
-
-    '&:focus': {
-      boxShadow: '0 0 8px rgba(0, 0, 0, 0.3)',
-    },
   },
   longInput: {
     resize: 'none',
@@ -80,29 +77,35 @@ const useStyles = makeStyles({
     justifyContent: 'center',
   },
   button: {
-    width: '140px',
-    height: '40px',
-    fontSize: 'large',
+    width: '200px',
+    height: '56px',
+    borderRadius: 8,
+    fontWeight: 700,
+    fontSize: 18,
     backgroundColor: '#007bff',
     boxShadow: 'none',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    cursor: 'pointer',
   },
   save: {
-    backgroundColor: '#007BFF',
+    backgroundColor: '#1969FF',
     color: '#FFF',
-    marginRight: 45,
+    marginRight: 40,
   },
   cancel: {
     backgroundColor: '#FFF !important',
-    border: '1px solid #007BFF !important',
-    color: '#007BFF !important',
+    border: '1px solid #1969FF !important',
+    color: '#1969FF !important',
   },
   avatarBox: {
     position: 'relative',
     width: 100,
     height: 100,
-    backgroundColor: '#F7F7F7',
+    backgroundColor: '#FAFAFA',
     borderRadius: 100,
-    border: '1px solid #8C8C8C',
+    border: '1px solid rgba(0, 0, 0, 0.1)',
   },
   avatar: {
     width: '100%',
@@ -116,7 +119,7 @@ const useStyles = makeStyles({
     height: 37,
     bottom: 4,
     right: -4,
-    border: '1px solid #939393',
+    border: '1px solid rgba(0, 0, 0, 0.1)',
     borderRadius: '100%',
     backgroundColor: '#FFF',
     display: 'flex',
@@ -127,7 +130,12 @@ const useStyles = makeStyles({
   uploadIcon: {
     width: 24,
     height: 24,
-    color: '#007BFF',
+    color: '#1969FF',
+  },
+  disabled: {
+    cursor: 'not-allowed',
+    boxShadow: 'none !important',
+    opacity: 0.7,
   },
 });
 
@@ -146,6 +154,7 @@ const AccountModal = () => {
   const [avatar, setAvatar] = useState(null);
   const [aliasError, setAliasError] = useState(null);
   const [emailError, setEmailError] = useState(null);
+  const [saving, setSaving] = useState(false);
 
   const { accountModalVisible } = useSelector(state => state.Modal);
   const { authToken } = useSelector(state => state.ConnectWallet);
@@ -235,41 +244,51 @@ const AccountModal = () => {
   };
 
   const onSave = async () => {
-    if (avatar.startsWith('https')) {
-      const res = await updateAccountDetails(
-        alias,
-        email,
-        bio,
-        avatar,
-        authToken
-      );
-      dispatch(AuthActions.fetchSuccess(res.data));
-      toast('success', 'Account details saved!');
+    if (saving) return;
 
-      closeModal();
-    } else {
-      const img = new Image();
-      img.onload = function() {
-        const w = this.width;
-        const h = this.height;
-        const size = Math.min(w, h);
-        const x = (w - size) / 2;
-        const y = (h - size) / 2;
-        clipImage(img, x, y, size, size, async data => {
-          const res = await updateAccountDetails(
-            alias,
-            email,
-            bio,
-            data,
-            authToken
-          );
-          dispatch(AuthActions.fetchSuccess(res.data));
-          toast('success', 'Account details saved!');
+    try {
+      setSaving(true);
 
-          closeModal();
-        });
-      };
-      img.src = avatar;
+      if (avatar.startsWith('https')) {
+        const res = await updateAccountDetails(
+          alias,
+          email,
+          bio,
+          avatar,
+          authToken
+        );
+        dispatch(AuthActions.fetchSuccess(res.data));
+        toast('success', 'Account details saved!');
+        setSaving(false);
+
+        closeModal();
+      } else {
+        const img = new Image();
+        img.onload = function() {
+          const w = this.width;
+          const h = this.height;
+          const size = Math.min(w, h);
+          const x = (w - size) / 2;
+          const y = (h - size) / 2;
+          clipImage(img, x, y, size, size, async data => {
+            const res = await updateAccountDetails(
+              alias,
+              email,
+              bio,
+              data,
+              authToken
+            );
+            dispatch(AuthActions.fetchSuccess(res.data));
+            toast('success', 'Account details saved!');
+            setSaving(false);
+
+            closeModal();
+          });
+        };
+        img.src = avatar;
+      }
+    } catch {
+      setSaving(false);
     }
   };
 
@@ -351,26 +370,28 @@ const AccountModal = () => {
           </div>
 
           <div className={classes.footer}>
-            <Button
-              variant="contained"
-              color="primary"
-              component="span"
-              className={cx(classes.button, classes.save)}
+            <div
+              className={cx(
+                classes.button,
+                classes.save,
+                saving && classes.disabled
+              )}
               onClick={onSave}
               disabled={!validate()}
             >
-              Save
-            </Button>
+              {saving ? <ClipLoader color="#FFF" size={16} /> : 'Save'}
+            </div>
 
-            <Button
-              variant="contained"
-              color="primary"
-              component="span"
-              className={cx(classes.button, classes.cancel)}
-              onClick={onCancel}
+            <div
+              className={cx(
+                classes.button,
+                classes.cancel,
+                saving && classes.disabled
+              )}
+              onClick={!saving ? onCancel : null}
             >
               Cancel
-            </Button>
+            </div>
           </div>
         </div>
       </Modal>
