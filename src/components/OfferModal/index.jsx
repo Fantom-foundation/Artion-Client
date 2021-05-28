@@ -43,7 +43,7 @@ const OfferModal = ({
         </div>
         <div className={styles.body}>
           <div className={styles.formGroup}>
-            <div className={styles.formLabel}>Price *</div>
+            <div className={styles.formLabel}>Price</div>
             <div
               className={cx(styles.formInputCont, focused1 && styles.focused1)}
             >
@@ -62,7 +62,7 @@ const OfferModal = ({
             </div>
           </div>
           <div className={styles.formGroup}>
-            <div className={styles.formLabel}>EndTime *</div>
+            <div className={styles.formLabel}>EndTime</div>
             <div
               className={cx(styles.formInputCont, focused2 && styles.focused1)}
             >

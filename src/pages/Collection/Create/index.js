@@ -14,10 +14,10 @@ import Header from 'components/header';
 import toast from 'utils/toast';
 
 import webIcon from 'assets/svgs/web.svg';
-import discordIcon from 'assets/imgs/discord.png';
-import telegramIcon from 'assets/imgs/telegram.png';
-import twitterIcon from 'assets/imgs/twitter.png';
-import instagramIcon from 'assets/imgs/instagram.png';
+import discordIcon from 'assets/svgs/discord.svg';
+import telegramIcon from 'assets/svgs/telegram.svg';
+import twitterIcon from 'assets/svgs/twitter.svg';
+import instagramIcon from 'assets/svgs/instagram.svg';
 import mediumIcon from 'assets/svgs/medium.svg';
 import nftIcon from 'assets/svgs/nft_active.svg';
 
@@ -245,10 +245,11 @@ const CollectionCreate = () => {
         </div>
 
         <div className={styles.inputGroup}>
-          <div className={styles.inputTitle}>Name</div>
+          <div className={styles.inputTitle1}>Name</div>
           <div className={styles.inputWrapper}>
             <input
               className={cx(styles.input, nameError && styles.hasError)}
+              placeholder="Type your name here"
               value={name}
               onChange={e => setName(e.target.value)}
               onBlur={validateName}
@@ -258,13 +259,11 @@ const CollectionCreate = () => {
         </div>
 
         <div className={styles.inputGroup}>
-          <div className={styles.inputTitle}>Description</div>
-          <div className={styles.inputSubTitle}>
-            {description.length} of 1000 characters used.
-          </div>
+          <div className={styles.inputTitle1}>Description</div>
           <div className={styles.inputWrapper}>
             <textarea
               className={cx(styles.input, styles.longInput)}
+              placeholder="Provide your description for your collection"
               value={description}
               onChange={e => setDescription(e.target.value)}
             />
@@ -322,7 +321,7 @@ const CollectionCreate = () => {
                 <div className={styles.linkIconWrapper}>
                   <img src={webIcon} className={styles.linkIcon} />
                 </div>
-                <div className={styles.inputPrefix} />
+                <div className={styles.inputPrefix}>https://</div>
                 <input
                   className={styles.linkInput}
                   placeholder="yoursite.io"
@@ -349,7 +348,7 @@ const CollectionCreate = () => {
                 <div className={styles.inputPrefix}>@</div>
                 <input
                   className={styles.linkInput}
-                  placeholder="YourTwitterHandle"
+                  placeholder="yourTwitterHandle"
                   value={twitterHandle}
                   onChange={e => setTwitterHandle(e.target.value)}
                 />
@@ -361,7 +360,7 @@ const CollectionCreate = () => {
                 <div className={styles.inputPrefix}>@</div>
                 <input
                   className={styles.linkInput}
-                  placeholder="YourInstagramHandle"
+                  placeholder="yourInstagramHandle"
                   value={instagramHandle}
                   onChange={e => setInstagramHandle(e.target.value)}
                 />
@@ -373,7 +372,7 @@ const CollectionCreate = () => {
                 <div className={styles.inputPrefix}>@</div>
                 <input
                   className={styles.linkInput}
-                  placeholder="YourMediumHandle"
+                  placeholder="yourMediumHandle"
                   value={mediumHandle}
                   onChange={e => setMediumHandle(e.target.value)}
                 />
