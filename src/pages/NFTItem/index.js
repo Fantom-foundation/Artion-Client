@@ -1450,15 +1450,18 @@ const NFTItem = () => {
           <Panel title="Trade History">
             <div className={styles.listings}>
               <div className={cx(styles.listing, styles.heading)}>
+                <div className={styles.historyPrice}>Price</div>
                 <div className={styles.from}>From</div>
                 <div className={styles.to}>To</div>
-                <div className={styles.historyPrice}>Price</div>
                 <div className={styles.saleDate}>Date</div>
               </div>
               {tradeHistory.current.map((history, idx) => {
                 const saleDate = new Date(history.saleDate);
                 return (
                   <div className={styles.listing} key={idx}>
+                    <div className={styles.historyPrice}>
+                      {history.price} FTM
+                    </div>
                     <Link
                       to={`/account/${history.from}`}
                       className={styles.from}
@@ -1468,9 +1471,6 @@ const NFTItem = () => {
                     <Link to={`/account/${history.to}`} className={styles.to}>
                       {shortenAddress(history.to)}
                     </Link>
-                    <div className={styles.historyPrice}>
-                      {history.price} FTM
-                    </div>
                     <div className={styles.saleDate}>
                       {saleDate.toUTCString()}
                     </div>

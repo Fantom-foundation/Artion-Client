@@ -254,6 +254,7 @@
 
 .listing,
 .offer {
+  padding-left: 14px;
   height: 50px;
   box-sizing: border-box;
   border-bottom: 1px solid #BBB;
@@ -269,7 +270,6 @@
 
 .owner {
   flex: 3;
-  padding-left: 13px;
 }
 
 .price {
@@ -363,10 +363,6 @@
 .from,
 .to {
   flex: 3.5;
-}
-
-.from {
-  padding-left: 14px;
 }
 
 .historyPrice {
