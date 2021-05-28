@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 import cx from 'classnames';
 import { ethers } from 'ethers';
 import { ClipLoader } from 'react-spinners';
@@ -20,6 +21,8 @@ const WFTMModal = ({ visible, onClose }) => {
   const [confirming, setConfirming] = useState(false);
   const [wrap, setWrap] = useState(true);
   const [amount, setAmount] = useState('');
+
+  const { price } = useSelector(state => state.Price);
 
   const getBalances = async () => {
     setLoading(true);
@@ -106,8 +109,8 @@ const WFTMModal = ({ visible, onClose }) => {
         <div className={styles.body}>
           <div className={cx(styles.swapContainer, !wrap && styles.reverse)}>
             <div className={styles.swapBox}>
-              <div>
-                <span className={styles.symbol}>FTM</span>
+              <div className={styles.symbol}>FTM</div>
+              <div className={styles.swapBoxInner}>
                 <div className={styles.balance}>
                   Balance:{' '}
                   {loading ? (
@@ -121,21 +124,23 @@ const WFTMModal = ({ visible, onClose }) => {
                     </div>
                   )}
                 </div>
+                <input
+                  className={styles.input}
+                  placeholder="0.0"
+                  value={amount}
+                  onChange={e => setAmount(e.target.value)}
+                />
+                <div className={styles.usdVal}>
+                  ${((parseFloat(amount) || 0) * price).toFixed(2)}
+                </div>
               </div>
-              <input
-                className={styles.input}
-                placeholder="0.0"
-                value={amount}
-                onChange={e => setAmount(e.target.value)}
-              />
             </div>
-            <div className={styles.separator} />
             <div className={styles.swapbtn} onClick={() => setWrap(!wrap)}>
-              <SwapVertIcon />
+              <SwapVertIcon className={styles.icon} />
             </div>
             <div className={styles.swapBox}>
-              <div>
-                <span className={styles.symbol}>WFTM</span>
+              <div className={styles.symbol}>WFTM</div>
+              <div className={styles.swapBoxInner}>
                 <div className={styles.balance}>
                   Balance:{' '}
                   {loading ? (
@@ -149,13 +154,16 @@ const WFTMModal = ({ visible, onClose }) => {
                     </div>
                   )}
                 </div>
+                <input
+                  className={styles.input}
+                  placeholder="0.0"
+                  value={amount}
+                  onChange={e => setAmount(e.target.value)}
+                />
+                <div className={styles.usdVal}>
+                  ${((parseFloat(amount) || 0) * price).toFixed(2)}
+                </div>
               </div>
-              <input
-                className={styles.input}
-                placeholder="0.0"
-                value={amount}
-                onChange={e => setAmount(e.target.value)}
-              />
             </div>
           </div>
         </div>
@@ -187,8 +195,11 @@ const WFTMModal = ({ visible, onClose }) => {
               'Unwrap'
             )}
           </div>
-          <div className={styles.cancelButton} onClick={onClose}>
-            Close
+          <div
+            className={cx(styles.cancelButton, confirming && styles.disabled)}
+            onClick={!confirming && onClose}
+          >
+            Cancel
           </div>
         </div>
       </div>

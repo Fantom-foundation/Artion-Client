@@ -17,10 +17,10 @@
 
 .modal {
   max-width: 90%;
-  width: 500px;
-  padding: 32px;
+  width: 600px;
+  padding: 40px;
   box-sizing: border-box;
-  border-radius: 20px;
+  border-radius: 10px;
   background-color: #FFF;
   box-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
 }
@@ -30,19 +30,19 @@
 }
 
 .title {
-  font-weight: 600;
-  font-size: 24px;
+  font-weight: 900;
+  font-size: 28px;
   text-align: center;
+  color: #3D3D3D;
 }
 
 .body {
-  margin-bottom: 25px;
+  margin-bottom: 40px;
 }
 
 .swapContainer {
   display: flex;
   flex-direction: column;
-  border: 1px solid rgba(0, 0, 0, 0.2);
   border-radius: 10px;
   position: relative;
 }
@@ -51,46 +51,48 @@
   flex-direction: column-reverse;
 }
 
-.separator {
-  width: 100%;
-  height: 1px;
-  background-color: rgba(0, 0, 0, 0.2);
-}
-
 .swapbtn {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  width: 40px;
-  height: 40px;
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
   background-color: #FFF;
-  box-shadow: 0px 2px 8px rgba(26, 40, 67, 0.18);
+  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.05);
+  align-self: center;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  margin-top: 18px;
 }
 
-.swapBox {
-  padding: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+.icon {
+  width: 26px;
+  height: 26px;
+  color: #3D3D3D;
 }
 
 .symbol {
-  font-weight: 700;
-  font-size: 20px;
+  font-weight: 400;
+  font-size: 22px;
+  line-height: 26.8px;
+  margin-bottom: 7px;
+}
+
+.swapBoxInner {
+  display: flex;
+  align-items: center;
+  border-radius: 10px;
+  border: 2px solid rgba(0, 0, 0, 0.1);
 }
 
 .balance {
-  margin-top: 4px;
   font-weight: 400;
-  font-size: 14px;
+  font-size: 16px;
+  color: #3D3D3D;
   display: flex;
   align-items: center;
+  padding: 16px;
+  white-space: nowrap;
 }
 
 .max {
@@ -100,35 +102,47 @@
 }
 
 .input {
-  margin-left: 10px;
+  margin-right: 10px;
+  width: 50px;
   flex-grow: 1;
-  height: 32px;
-  font-size: 20px;
-  line-height: 32px;
+  font-size: 18px;
+  color: #3D3D3D;
   text-align: right;
   border: none;
   outline: none;
 }
 
+.usdVal {
+  flex: 0 0 120px;
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-left: 1.5px solid rgba(0, 0, 0, 0.1);
+  font-weight: 500;
+  font-size: 16px;
+  color: rgba(0, 0, 0, 0.4);
+}
+
 .footer {
   display: flex;
   align-items: center;
-  justify-content: space-evenly;
+  justify-content: center;
 }
 
 .listButton,
 .cancelButton {
-  min-width: 120px;
-  height: 40px;
+  min-width: 200px;
+  height: 56px;
   padding: 0 12px;
+  box-sizing: border-box;
   border-radius: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  font-size: 16px;
-  font-weight: 600;
-  letter-spacing: 0.5px;
+  font-weight: 700;
+  font-size: 18px;
   user-select: none;
 
   &:hover {
@@ -139,6 +153,7 @@
 .listButton {
   background-color: #007BFF;
   color: #FFF;
+  margin-right: 40px;
 }
 
 .cancelButton {
@@ -149,10 +164,6 @@
 
 .disabled {
   cursor: not-allowed;
-  box-shadow: none;
+  box-shadow: none !important;
   opacity: 0.7;
-
-  &:hover {
-    box-shadow: none;
-  }
 }

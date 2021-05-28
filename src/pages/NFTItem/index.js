@@ -108,6 +108,7 @@ const NFTItem = () => {
   const [priceUpdating, setPriceUpdating] = useState(false);
   const [offerPlacing, setOfferPlacing] = useState(false);
   const [offerCanceling, setOfferCanceling] = useState(false);
+  const [offerAccepting, setOfferAccepting] = useState(false);
   const [auctionStarting, setAuctionStarting] = useState(false);
   const [auctionUpdating, setAuctionUpdating] = useState(false);
   const [auctionCanceling, setAuctionCanceling] = useState(false);
@@ -689,12 +690,18 @@ const NFTItem = () => {
   };
 
   const handleAcceptOffer = async offer => {
-    const tx = await acceptOffer(address, tokenID, offer.creator);
+    if (offerAccepting) return;
 
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    await provider.waitForTransaction(tx.hash);
+    try {
+      setOfferAccepting(true);
+      const tx = await acceptOffer(address, tokenID, offer.creator);
+      await tx.wait();
+      setOfferAccepting(false);
 
-    toast('success', 'Offer accepted!');
+      toast('success', 'Offer accepted!');
+    } catch {
+      setOfferAccepting(false);
+    }
   };
 
   const handleCancelOffer = async () => {
