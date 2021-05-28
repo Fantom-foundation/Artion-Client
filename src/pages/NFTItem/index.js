@@ -1446,39 +1446,33 @@ const NFTItem = () => {
             </div>
           </div>
         </div>
-        <div className={styles.panelWrapper}>
-          <Panel title="Trade History">
-            <div className={styles.listings}>
-              <div className={cx(styles.listing, styles.heading)}>
-                <div className={styles.historyPrice}>Price</div>
-                <div className={styles.from}>From</div>
-                <div className={styles.to}>To</div>
-                <div className={styles.saleDate}>Date</div>
-              </div>
-              {tradeHistory.current.map((history, idx) => {
-                const saleDate = new Date(history.saleDate);
-                return (
-                  <div className={styles.listing} key={idx}>
-                    <div className={styles.historyPrice}>
-                      {history.price} FTM
-                    </div>
-                    <Link
-                      to={`/account/${history.from}`}
-                      className={styles.from}
-                    >
-                      {shortenAddress(history.from)}
-                    </Link>
-                    <Link to={`/account/${history.to}`} className={styles.to}>
-                      {shortenAddress(history.to)}
-                    </Link>
-                    <div className={styles.saleDate}>
-                      {saleDate.toUTCString()}
-                    </div>
-                  </div>
-                );
-              })}
+        <div className={styles.tradeHistoryWrapper}>
+          <div className={styles.tradeHistoryTitle}>Trade History</div>
+          <div className={styles.histories}>
+            <div className={cx(styles.history, styles.heading)}>
+              <div className={styles.historyPrice}>Price</div>
+              <div className={styles.from}>From</div>
+              <div className={styles.to}>To</div>
+              <div className={styles.saleDate}>Date</div>
             </div>
-          </Panel>
+            {tradeHistory.current.map((history, idx) => {
+              const saleDate = new Date(history.saleDate);
+              return (
+                <div className={styles.history} key={idx}>
+                  <div className={styles.historyPrice}>{history.price} FTM</div>
+                  <Link to={`/account/${history.from}`} className={styles.from}>
+                    {shortenAddress(history.from)}
+                  </Link>
+                  <Link to={`/account/${history.to}`} className={styles.to}>
+                    {shortenAddress(history.to)}
+                  </Link>
+                  <div className={styles.saleDate}>
+                    {saleDate.toUTCString()}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
 

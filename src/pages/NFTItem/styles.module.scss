@@ -355,13 +355,53 @@
   border: 1px solid #007BFF;
 }
 
+.tradeHistoryWrapper {
+  margin: 0 40px 40px;
+}
+
+.tradeHistoryTitle {
+  font-weight: 700;
+  font-size: 22px;
+  color: #3D3D3D;
+}
+
+.histories {
+  margin-top: 40px;
+}
+
+.history {
+  height: 58px;
+  display: flex;
+  align-items: center;
+  padding: 0 14px;
+  font-size: 20px;
+  color: #3D3D3D;
+  border-bottom: 1px solid rgba(0, 0, 0, .1);
+
+  &.heading {
+    height: 38px;
+    border-bottom: none;
+
+    .from,
+    .to {
+      color: inherit;
+    }
+  }
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
 .from,
 .to {
-  flex: 3.5;
+  flex: 3;
+  color: #2479FA;
+  text-decoration: none;
 }
 
 .historyPrice {
-  flex: 1.5;
+  flex: 2;
 }
 
 .saleDate {
