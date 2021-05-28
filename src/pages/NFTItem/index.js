@@ -8,17 +8,11 @@ import { ethers } from 'ethers';
 import Loader from 'react-loader-spinner';
 import 'react-loader-spinner/dist/loader/css/react-spinner-loader.css';
 import Skeleton from 'react-loading-skeleton';
-import TimelineIcon from '@material-ui/icons/Timeline';
-import LocalOfferIcon from '@material-ui/icons/LocalOffer';
-import TocIcon from '@material-ui/icons/Toc';
-import LabelIcon from '@material-ui/icons/Label';
-import VerticalSplitIcon from '@material-ui/icons/VerticalSplit';
-import BallotIcon from '@material-ui/icons/Ballot';
-import SwapVertIcon from '@material-ui/icons/SwapVert';
-import AccessTimeIcon from '@material-ui/icons/AccessTime';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye } from '@fortawesome/free-solid-svg-icons';
 import { useWeb3React } from '@web3-react/core';
+import { ClipLoader } from 'react-spinners';
+import Tooltip from '@material-ui/core/Tooltip';
 
 import Panel from '../../components/Panel';
 import ResizableBox from '../../components/ResizableBox';
@@ -40,7 +34,6 @@ import {
   updateListing,
   buyItem,
   getWFTMBalance,
-  wrapFTM,
   getAllowance,
   approve,
   createOffer,
@@ -652,6 +645,8 @@ const NFTItem = () => {
   };
 
   const handleMakeOffer = async (_price, endTime) => {
+    if (offerPlacing) return;
+
     try {
       setOfferPlacing(true);
       const price = ethers.utils.parseEther(_price.toString());
@@ -660,7 +655,13 @@ const NFTItem = () => {
       const balance = await getWFTMBalance(account);
 
       if (balance.lt(price)) {
-        await wrapFTM(price, account);
+        toast(
+          'error',
+          'Insufficient WFTM Balance!',
+          'You can wrap FTM in the WFTM station.'
+        );
+        setOfferPlacing(false);
+        return;
       }
 
       const allowance = await getAllowance(account, SALES_CONTRACT_ADDRESS);
@@ -950,6 +951,18 @@ const NFTItem = () => {
     bid?.bidder?.toLowerCase() === account?.toLowerCase() &&
     bid?.lastBidTime + withdrawLockTime < now.getTime() / 1000;
 
+  const withdrawWaitTime = () => {
+    if (!bid) return '';
+
+    const s = 20 * 60 - Math.floor(now.getTime() / 1000 - bid.lastBidTime);
+    if (s <= 0) return '';
+
+    if (s >= 60) {
+      return `${Math.ceil(s / 60)} mins`;
+    }
+    return `${s} seconds`;
+  };
+
   const renderProperties = properties => {
     const res = [];
     Object.keys(properties).map((key, idx) => {
@@ -1075,14 +1088,13 @@ const NFTItem = () => {
             </div>
             <div className={styles.itemInfoCont}>
               {info?.properties && (
-                <Panel icon={LabelIcon} title="Properties">
+                <Panel title="Properties">
                   <div className={styles.panelBody}>
                     {renderProperties(info.properties)}
                   </div>
                 </Panel>
               )}
               <Panel
-                icon={VerticalSplitIcon}
                 title={
                   <div className={styles.panelTitle}>
                     About&nbsp;
@@ -1153,7 +1165,7 @@ const NFTItem = () => {
                   </div>
                 </div>
               </Panel>
-              <Panel icon={BallotIcon} title="Chain Info">
+              <Panel title="Chain Info">
                 <div className={styles.panelBody}>
                   <div className={styles.panelLine}>
                     <div className={styles.panelLabel}>Collection</div>
@@ -1223,7 +1235,6 @@ const NFTItem = () => {
             {(winner || auction.current?.resulted === false) && (
               <div className={styles.panelWrapper}>
                 <Panel
-                  icon={AccessTimeIcon}
                   title={
                     auctionStarted()
                       ? auctionEnded()
@@ -1272,18 +1283,28 @@ const NFTItem = () => {
                     {!isMine &&
                       auctionActive() &&
                       (bid?.bidder?.toLowerCase() === account?.toLowerCase() ? (
-                        <div
-                          className={cx(
-                            styles.withdrawBid,
-                            (!canWithdraw() || bidWithdrawing) &&
-                              styles.disabled
-                          )}
-                          onClick={() => canWithdraw() && handleWithdrawBid()}
+                        <Tooltip
+                          title={`You can withdraw bid after ${withdrawWaitTime()}.`}
+                          classes={{
+                            tooltip: cx(
+                              styles.tooltip,
+                              withdrawWaitTime().length === 0 && styles.hidden
+                            ),
+                          }}
                         >
-                          {bidWithdrawing
-                            ? 'Withdrawing Bid...'
-                            : 'Withdraw Bid'}
-                        </div>
+                          <div
+                            className={cx(
+                              styles.withdrawBid,
+                              (!canWithdraw() || bidWithdrawing) &&
+                                styles.disabled
+                            )}
+                            onClick={() => canWithdraw() && handleWithdrawBid()}
+                          >
+                            {bidWithdrawing
+                              ? 'Withdrawing Bid...'
+                              : 'Withdraw Bid'}
+                          </div>
+                        </Tooltip>
                       ) : (
                         <div
                           className={cx(
@@ -1311,7 +1332,7 @@ const NFTItem = () => {
               </div>
             )}
             <div className={styles.panelWrapper}>
-              <Panel icon={TimelineIcon} title="Price History">
+              <Panel title="Price History">
                 <div className={styles.chartWrapper}>
                   <ResizableBox width="100%" height={250} resizable={false}>
                     <Chart
@@ -1325,38 +1346,41 @@ const NFTItem = () => {
               </Panel>
             </div>
             <div className={styles.panelWrapper}>
-              <Panel icon={LocalOfferIcon} title="Listings">
+              <Panel title="Listings">
                 <div className={styles.listings}>
                   {listing.current && (
-                    <div className={styles.listing}>
+                    <div className={cx(styles.listing, styles.heading)}>
                       <div className={styles.owner}>
                         {shortenAddress(listing.current.owner)}
                       </div>
                       <div className={styles.price}>
                         {listing.current.pricePerItem} FTM
                       </div>
-                      {!isMine && (
-                        <div
-                          className={styles.buyButton}
-                          onClick={() =>
-                            handleBuyItem(listing.current.pricePerItem)
-                          }
-                        >
-                          Buy
-                        </div>
-                      )}
+                      <div className={styles.buy}>
+                        {!isMine && (
+                          <div
+                            className={styles.buyButton}
+                            onClick={() =>
+                              handleBuyItem(listing.current.pricePerItem)
+                            }
+                          >
+                            Buy
+                          </div>
+                        )}
+                      </div>
                     </div>
                   )}
                 </div>
               </Panel>
             </div>
             <div className={styles.panelWrapper}>
-              <Panel icon={TocIcon} title="Offers">
+              <Panel title="Offers">
                 <div className={styles.offers}>
-                  <div className={styles.offer}>
+                  <div className={cx(styles.offer, styles.heading)}>
                     <div className={styles.owner}>From</div>
                     <div className={styles.price}>Price</div>
                     <div className={styles.deadline}>Expires In</div>
+                    <div className={styles.buy} />
                   </div>
                   {offers.current
                     .filter(offer => offer.deadline * 1000 > now.getTime())
@@ -1371,26 +1395,50 @@ const NFTItem = () => {
                         <div className={styles.deadline}>
                           {formatExpiration(offer.deadline)}
                         </div>
-                        {isMine && (
-                          <div
-                            className={styles.buyButton}
-                            onClick={() => handleAcceptOffer(offer)}
-                          >
-                            Accept
-                          </div>
-                        )}
-                        {offer.creator?.toLowerCase() ===
-                          account?.toLowerCase() && (
-                          <div
-                            className={cx(
-                              styles.buyButton,
-                              offerCanceling && styles.disabled
-                            )}
-                            onClick={() => handleCancelOffer()}
-                          >
-                            {offerCanceling ? 'Withdrawing...' : 'Withdraw'}
-                          </div>
-                        )}
+                        <div className={styles.buy}>
+                          {isMine && (
+                            <div
+                              className={cx(
+                                styles.buyButton,
+                                (salesContractApproving || offerAccepting) &&
+                                  styles.disabled
+                              )}
+                              onClick={
+                                salesContractApproved
+                                  ? () => handleAcceptOffer(offer)
+                                  : handleApproveSalesContract
+                              }
+                            >
+                              {!salesContractApproved ? (
+                                salesContractApproving ? (
+                                  <ClipLoader color="#FFF" size={16} />
+                                ) : (
+                                  'Approve'
+                                )
+                              ) : offerAccepting ? (
+                                <ClipLoader color="#FFF" size={16} />
+                              ) : (
+                                'Accept'
+                              )}
+                            </div>
+                          )}
+                          {offer.creator?.toLowerCase() ===
+                            account?.toLowerCase() && (
+                            <div
+                              className={cx(
+                                styles.buyButton,
+                                offerCanceling && styles.disabled
+                              )}
+                              onClick={() => handleCancelOffer()}
+                            >
+                              {offerCanceling ? (
+                                <ClipLoader color="#FFF" size={16} />
+                              ) : (
+                                'Withdraw'
+                              )}
+                            </div>
+                          )}
+                        </div>
                       </div>
                     ))}
                 </div>
@@ -1399,9 +1447,9 @@ const NFTItem = () => {
           </div>
         </div>
         <div className={styles.panelWrapper}>
-          <Panel icon={SwapVertIcon} title="Trade History">
+          <Panel title="Trade History">
             <div className={styles.listings}>
-              <div className={styles.listing}>
+              <div className={cx(styles.listing, styles.heading)}>
                 <div className={styles.from}>From</div>
                 <div className={styles.to}>To</div>
                 <div className={styles.historyPrice}>Price</div>
@@ -1415,10 +1463,10 @@ const NFTItem = () => {
                       to={`/account/${history.from}`}
                       className={styles.from}
                     >
-                      {history.from}
+                      {shortenAddress(history.from)}
                     </Link>
                     <Link to={`/account/${history.to}`} className={styles.to}>
-                      {history.to}
+                      {shortenAddress(history.to)}
                     </Link>
                     <div className={styles.historyPrice}>
                       {history.price} FTM

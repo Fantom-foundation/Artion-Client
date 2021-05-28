@@ -1,7 +1,7 @@
 .container {
   margin-bottom: -1px;
   margin-top: 1px;
-  border-bottom: 1px solid #bbb;
+  border-bottom: 1px solid #2479FA80;
   overflow: hidden;
 }
 
@@ -16,22 +16,25 @@
   cursor: pointer;
 }
 
-.headerLeft {
-  display: flex;
-  align-items: center;
-}
-
 .icon {
   margin-right: 10px;
 }
 
 .title {
-  font-size: 20px;
-  font-weight: 600;
+  font-size: 22px;
+  font-weight: 500;
+  color: #3D3D3D;
+}
+
+.icon {
+  width: 26px;
+  height: 26px;
+  color: #3D3D3D;
+  opacity: 0.6;
 }
 
 .body {
-  border-top: 1px solid #bbb;
+  border-top: 1px solid #2479FA80;
   max-height: 0;
   transition: max-height 100ms ease;
 
