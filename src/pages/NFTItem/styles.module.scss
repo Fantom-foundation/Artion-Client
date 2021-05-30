@@ -219,9 +219,17 @@
 }
 
 .itemViews {
-  margin-left: 10px;
+  margin-left: 20px;
   display: flex;
   align-items: center;
+
+  &:first-child {
+    margin-left: 0;
+  }
+
+  &.clickable {
+    cursor: pointer;
+  }
 }
 
 .panelBody {
@@ -359,10 +367,25 @@
   margin: 0 40px 40px;
 }
 
+.tradeHistoryHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
 .tradeHistoryTitle {
   font-weight: 700;
   font-size: 22px;
   color: #3D3D3D;
+}
+
+.filter {
+  cursor: pointer;
+}
+
+.filterIcon {
+  width: 24px;
+  height: 24px;
 }
 
 .histories {
