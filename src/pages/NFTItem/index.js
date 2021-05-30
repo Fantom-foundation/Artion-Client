@@ -13,6 +13,10 @@ import { faEye } from '@fortawesome/free-solid-svg-icons';
 import { useWeb3React } from '@web3-react/core';
 import { ClipLoader } from 'react-spinners';
 import Tooltip from '@material-ui/core/Tooltip';
+import {
+  People as PeopleIcon,
+  ViewModule as ViewModuleIcon,
+} from '@material-ui/icons';
 
 import Panel from '../../components/Panel';
 import ResizableBox from '../../components/ResizableBox';
@@ -24,6 +28,8 @@ import {
   getTradeHistory,
   fetchCollection,
   getUserAccountDetails,
+  getTokenType,
+  get1155Info,
 } from 'api';
 import {
   getSalesContract,
@@ -60,6 +66,7 @@ import SellModal from 'components/SellModal';
 import OfferModal from 'components/OfferModal';
 import AuctionModal from 'components/AuctionModal';
 import BidModal from 'components/BidModal';
+import OwnersModal from 'components/OwnersModal';
 import Header from 'components/header';
 import SuspenseImg from 'components/SuspenseImg';
 
@@ -68,6 +75,7 @@ import discordIcon from 'assets/svgs/discord.svg';
 import telegramIcon from 'assets/svgs/telegram.svg';
 import twitterIcon from 'assets/svgs/twitter.svg';
 import mediumIcon from 'assets/svgs/medium.svg';
+import filterIcon from 'assets/svgs/filter.svg';
 
 import styles from './styles.module.scss';
 
@@ -89,6 +97,8 @@ const NFTItem = () => {
   const [owner, setOwner] = useState();
   const [ownerInfo, setOwnerInfo] = useState();
   const [ownerInfoLoading, setOwnerInfoLoading] = useState(false);
+  const [tokenType, setTokenType] = useState();
+  const [tokenInfo, setTokenInfo] = useState();
   const [collection, setCollection] = useState();
   const [collectionLoading, setCollectionLoading] = useState(false);
 
@@ -96,6 +106,7 @@ const NFTItem = () => {
   const [offerModalVisible, setOfferModalVisible] = useState(false);
   const [auctionModalVisible, setAuctionModalVisible] = useState(false);
   const [bidModalVisible, setBidModalVisible] = useState(false);
+  const [ownersModalVisible, setOwnersModalVisible] = useState(false);
 
   const [itemListing, setItemListing] = useState(false);
   const [priceUpdating, setPriceUpdating] = useState(false);
@@ -144,14 +155,21 @@ const NFTItem = () => {
   const getTokenOwner = async () => {
     try {
       setOwnerInfoLoading(true);
-      const [contract] = await getNFTContract(address);
-      const res = await contract.ownerOf(tokenID);
-      setOwner(res);
-      try {
-        const { data } = await getUserAccountDetails(res);
-        setOwnerInfo(data);
-      } catch {
-        setOwnerInfo(null);
+      const type = await getTokenType(address);
+      setTokenType(type);
+      if (type === 721) {
+        const [contract] = await getNFTContract(address);
+        const res = await contract.ownerOf(tokenID);
+        setOwner(res);
+        try {
+          const { data } = await getUserAccountDetails(res);
+          setOwnerInfo(data);
+        } catch {
+          setOwnerInfo(null);
+        }
+      } else if (type === 1155) {
+        const { data: _tokenInfo } = await get1155Info(address, tokenID);
+        setTokenInfo(_tokenInfo);
       }
     } catch {
       setOwner(null);
@@ -1197,37 +1215,51 @@ const NFTItem = () => {
               </div>
               <div className={styles.itemName}>{info?.name || ''}</div>
               <div className={styles.itemStats}>
-                {(ownerInfoLoading || owner) && (
+                {(ownerInfoLoading || owner || tokenInfo) && (
                   <div className={styles.itemOwner}>
-                    <div className={styles.ownerAvatar}>
-                      {ownerInfoLoading ? (
-                        <Skeleton width={24} height={24} />
-                      ) : ownerInfo?.imageHash ? (
-                        <img
-                          src={`https://gateway.pinata.cloud/ipfs/${ownerInfo.imageHash}`}
-                          className={styles.avatar}
-                        />
-                      ) : (
-                        <Identicon account={owner} size={24} />
-                      )}
-                    </div>
-                    Owned by&nbsp;
                     {ownerInfoLoading ? (
-                      <Skeleton width={60} height={20} />
+                      <Skeleton width={180} height={25} />
+                    ) : tokenType === 721 ? (
+                      <>
+                        <div className={styles.ownerAvatar}>
+                          {ownerInfo?.imageHash ? (
+                            <img
+                              src={`https://gateway.pinata.cloud/ipfs/${ownerInfo.imageHash}`}
+                              className={styles.avatar}
+                            />
+                          ) : (
+                            <Identicon account={owner} size={24} />
+                          )}
+                        </div>
+                        Owned by&nbsp;
+                        <Link
+                          to={`/account/${owner}`}
+                          className={styles.ownerName}
+                        >
+                          {isMine
+                            ? 'Me'
+                            : ownerInfo?.alias || shortenAddress(owner)}
+                        </Link>
+                      </>
                     ) : (
-                      <Link
-                        to={`/account/${owner}`}
-                        className={styles.ownerName}
-                      >
-                        {isMine
-                          ? 'Me'
-                          : ownerInfo?.alias || shortenAddress(owner)}
-                      </Link>
+                      <>
+                        <div
+                          className={cx(styles.itemViews, styles.clickable)}
+                          onClick={() => setOwnersModalVisible(true)}
+                        >
+                          <PeopleIcon style={styles.itemIcon} />
+                          &nbsp;{tokenInfo.holders} owners
+                        </div>
+                        <div className={styles.itemViews}>
+                          <ViewModuleIcon style={styles.itemIcon} />
+                          &nbsp;{tokenInfo.totalSupply} total
+                        </div>
+                      </>
                     )}
                   </div>
                 )}
                 <div className={styles.itemViews}>
-                  <FontAwesomeIcon icon={faEye} color="#777" />
+                  <FontAwesomeIcon icon={faEye} color="#00000099" />
                   &nbsp;{views} Views
                 </div>
               </div>
@@ -1446,39 +1478,38 @@ const NFTItem = () => {
             </div>
           </div>
         </div>
-        <div className={styles.panelWrapper}>
-          <Panel title="Trade History">
-            <div className={styles.listings}>
-              <div className={cx(styles.listing, styles.heading)}>
-                <div className={styles.historyPrice}>Price</div>
-                <div className={styles.from}>From</div>
-                <div className={styles.to}>To</div>
-                <div className={styles.saleDate}>Date</div>
-              </div>
-              {tradeHistory.current.map((history, idx) => {
-                const saleDate = new Date(history.saleDate);
-                return (
-                  <div className={styles.listing} key={idx}>
-                    <div className={styles.historyPrice}>
-                      {history.price} FTM
-                    </div>
-                    <Link
-                      to={`/account/${history.from}`}
-                      className={styles.from}
-                    >
-                      {shortenAddress(history.from)}
-                    </Link>
-                    <Link to={`/account/${history.to}`} className={styles.to}>
-                      {shortenAddress(history.to)}
-                    </Link>
-                    <div className={styles.saleDate}>
-                      {saleDate.toUTCString()}
-                    </div>
-                  </div>
-                );
-              })}
+        <div className={styles.tradeHistoryWrapper}>
+          <div className={styles.tradeHistoryHeader}>
+            <div className={styles.tradeHistoryTitle}>Trade History</div>
+            <div className={styles.filter}>
+              <img src={filterIcon} className={styles.filterIcon} />
             </div>
-          </Panel>
+          </div>
+          <div className={styles.histories}>
+            <div className={cx(styles.history, styles.heading)}>
+              <div className={styles.historyPrice}>Price</div>
+              <div className={styles.from}>From</div>
+              <div className={styles.to}>To</div>
+              <div className={styles.saleDate}>Date</div>
+            </div>
+            {tradeHistory.current.map((history, idx) => {
+              const saleDate = new Date(history.saleDate);
+              return (
+                <div className={styles.history} key={idx}>
+                  <div className={styles.historyPrice}>{history.price} FTM</div>
+                  <Link to={`/account/${history.from}`} className={styles.from}>
+                    {shortenAddress(history.from)}
+                  </Link>
+                  <Link to={`/account/${history.to}`} className={styles.to}>
+                    {shortenAddress(history.to)}
+                  </Link>
+                  <div className={styles.saleDate}>
+                    {saleDate.toUTCString()}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
 
@@ -1522,6 +1553,13 @@ const NFTItem = () => {
         approveContract={handleApproveAuctionContract}
         contractApproving={auctionContractApproving}
         contractApproved={auctionContractApproved}
+      />
+      <OwnersModal
+        visible={ownersModalVisible}
+        onClose={() => setOwnersModalVisible(false)}
+        address={address}
+        tokenId={tokenID}
+        holdersCount={tokenInfo?.holders || 0}
       />
     </div>
   );

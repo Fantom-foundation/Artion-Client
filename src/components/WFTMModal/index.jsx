@@ -128,7 +128,9 @@ const WFTMModal = ({ visible, onClose }) => {
                   className={styles.input}
                   placeholder="0.0"
                   value={amount}
-                  onChange={e => setAmount(e.target.value)}
+                  onChange={e =>
+                    setAmount(isNaN(e.target.value) ? amount : e.target.value)
+                  }
                 />
                 <div className={styles.usdVal}>
                   ${((parseFloat(amount) || 0) * price).toFixed(2)}
@@ -158,7 +160,9 @@ const WFTMModal = ({ visible, onClose }) => {
                   className={styles.input}
                   placeholder="0.0"
                   value={amount}
-                  onChange={e => setAmount(e.target.value)}
+                  onChange={e =>
+                    setAmount(isNaN(e.target.value) ? amount : e.target.value)
+                  }
                 />
                 <div className={styles.usdVal}>
                   ${((parseFloat(amount) || 0) * price).toFixed(2)}

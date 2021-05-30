@@ -47,7 +47,9 @@ const SellModal = ({
                 className={styles.formInput}
                 placeholder="0.00"
                 value={price}
-                onChange={e => setPrice(e.target.value)}
+                onChange={e =>
+                  setPrice(isNaN(e.target.value) ? price : e.target.value)
+                }
                 onFocus={() => setFocused(true)}
                 onBlur={() => setFocused(false)}
                 disabled={contractApproving || confirming}

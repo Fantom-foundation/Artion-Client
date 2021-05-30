@@ -69,6 +69,27 @@ export const updateAccountDetails = async (
   return res.data;
 };
 
+export const getTokenType = async contractAddress => {
+  const { data } = await axios.get(
+    `${BASE_URL}/info/getTokenType/${contractAddress}`
+  );
+  return data.data;
+};
+
+export const get1155Info = async (contractAddress, tokenID) => {
+  const { data } = await axios.get(
+    `${BASE_URL}/info/get1155info/${contractAddress}/${tokenID}`
+  );
+  return data;
+};
+
+export const getTokenHolders = async (contractAddress, tokenID) => {
+  const { data } = await axios.get(
+    `${BASE_URL}/info/getOwnership/${contractAddress}/${tokenID}`
+  );
+  return data;
+};
+
 export const fetchCollections = async () => {
   const res = await axios.get(`${BASE_URL}/info/getcollections`);
   return res.data;
