@@ -14,19 +14,43 @@ const SellModal = ({
   approveContract,
   contractApproving,
   contractApproved,
+  totalSupply,
 }) => {
   const [price, setPrice] = useState('');
+  const [quantity, setQuantity] = useState('1');
   const [focused, setFocused] = useState(false);
 
   const { price: ftmPrice } = useSelector(state => state.Price);
 
   useEffect(() => {
     setPrice(startPrice > 0 ? startPrice.toString() : '');
+    setQuantity('1');
   }, [visible]);
 
   const handleClick = e => {
     e.preventDefault();
     e.stopPropagation();
+  };
+
+  const handleQuantityChange = e => {
+    const val = e.target.value;
+    if (!val) {
+      setQuantity('');
+      return;
+    }
+
+    if (isNaN(val)) return;
+
+    const _quantity = parseInt(val);
+    setQuantity(Math.min(_quantity, totalSupply));
+  };
+
+  const handleSellItem = () => {
+    let quant = 1;
+    if (totalSupply > 1) {
+      quant = parseInt(quantity);
+    }
+    onSell(price, quant);
   };
 
   return (
@@ -59,6 +83,20 @@ const SellModal = ({
               </div>
             </div>
           </div>
+          {totalSupply > 1 && (
+            <div className={styles.formGroup}>
+              <div className={styles.formLabel}>Quantity</div>
+              <div className={styles.formInputCont}>
+                <input
+                  className={styles.formInput}
+                  placeholder={totalSupply}
+                  value={quantity}
+                  onChange={handleQuantityChange}
+                  disabled={contractApproving || confirming}
+                />
+              </div>
+            </div>
+          )}
         </div>
         <div className={styles.footer}>
           <div
@@ -68,7 +106,7 @@ const SellModal = ({
             )}
             onClick={() =>
               contractApproved
-                ? !confirming && onSell(price)
+                ? !confirming && handleSellItem()
                 : approveContract()
             }
           >

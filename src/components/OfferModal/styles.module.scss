@@ -60,10 +60,6 @@
   align-items: center;
   border-radius: 10px;
   border: 2px solid rgba(0, 0, 0, .1);
-
-  &.focused {
-    box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
-  }
 }
 
 .formInput {

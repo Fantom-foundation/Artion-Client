@@ -1,9 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import cx from 'classnames';
-import Skeleton from 'react-loading-skeleton';
 import { Link } from 'react-router-dom';
 
-import { getTokenHolders } from 'api';
 import closeIcon from 'assets/svgs/close.svg';
 import { shortenAddress } from 'utils';
 import Identicon from 'components/Identicon';
@@ -20,28 +18,7 @@ const Holder = ({ holder, children }) => {
   );
 };
 
-const OwnersModal = ({ visible, onClose, address, tokenId, holdersCount }) => {
-  const [holders, setHolders] = useState([]);
-
-  const getHolders = async () => {
-    try {
-      const { data } = await getTokenHolders(address, tokenId);
-      setHolders(data);
-    } catch {
-      setHolders([]);
-    }
-  };
-
-  useEffect(() => {
-    if (visible) {
-      getHolders();
-    }
-  }, [visible, address, tokenId]);
-
-  useEffect(() => {
-    setHolders(new Array(holdersCount).fill(null));
-  }, [holdersCount]);
-
+const OwnersModal = ({ visible, onClose, holders }) => {
   const handleClick = e => {
     e.preventDefault();
     e.stopPropagation();
@@ -61,43 +38,27 @@ const OwnersModal = ({ visible, onClose, address, tokenId, holdersCount }) => {
             <Holder key={idx} holder={holder}>
               <div className={styles.holderInfo}>
                 <div className={styles.avatar}>
-                  {holder ? (
-                    holder.imageHash ? (
-                      <img
-                        src={`https://gateway.pinata.cloud/ipfs/${holder.imageHash}`}
-                        width={40}
-                        height={40}
-                      />
-                    ) : (
-                      <Identicon account={holder.address} size={40} />
-                    )
+                  {holder.imageHash ? (
+                    <img
+                      src={`https://gateway.pinata.cloud/ipfs/${holder.imageHash}`}
+                      width={40}
+                      height={40}
+                    />
                   ) : (
-                    <Skeleton width={40} height={40} />
+                    <Identicon account={holder.address} size={40} />
                   )}
                 </div>
                 <div className={styles.info}>
                   <div className={styles.alias}>
-                    {holder ? (
-                      holder.alias || 'Unnamed'
-                    ) : (
-                      <Skeleton width={100} height={20} />
-                    )}
+                    {holder.alias || 'Unnamed'}
                   </div>
                   <div className={styles.address}>
-                    {holder ? (
-                      shortenAddress(holder.address)
-                    ) : (
-                      <Skeleton width={100} height={20} />
-                    )}
+                    {shortenAddress(holder.address)}
                   </div>
                 </div>
               </div>
               <div className={styles.holdCount}>
-                {holder ? (
-                  `${holder.supply} item${holder.supply > 1 ? 's' : ''}`
-                ) : (
-                  <Skeleton width={100} height={20} />
-                )}
+                {`${holder.supply} item${holder.supply > 1 ? 's' : ''}`}
               </div>
             </Holder>
           ))}
