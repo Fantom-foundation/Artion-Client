@@ -1,13 +1,21 @@
 import React, { useEffect, useMemo, useState, useRef, Suspense } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { Chart } from 'react-charts';
 import cx from 'classnames';
 import axios from 'axios';
 import { ethers } from 'ethers';
 import Loader from 'react-loader-spinner';
 import 'react-loader-spinner/dist/loader/css/react-spinner-loader.css';
 import Skeleton from 'react-loading-skeleton';
+import ReactResizeDetector from 'react-resize-detector';
+import {
+  LineChart,
+  XAxis,
+  YAxis,
+  Tooltip as ChartTooltip,
+  CartesianGrid,
+  Line,
+} from 'recharts';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye } from '@fortawesome/free-solid-svg-icons';
 import { useWeb3React } from '@web3-react/core';
@@ -19,7 +27,6 @@ import {
 } from '@material-ui/icons';
 
 import Panel from '../../components/Panel';
-import ResizableBox from '../../components/ResizableBox';
 import Identicon from 'components/Identicon';
 import {
   fetchTokenURI,
@@ -30,6 +37,7 @@ import {
   getUserAccountDetails,
   getTokenType,
   get1155Info,
+  getTokenHolders,
 } from 'api';
 import {
   getSalesContract,
@@ -99,6 +107,7 @@ const NFTItem = () => {
   const [ownerInfoLoading, setOwnerInfoLoading] = useState(false);
   const [tokenType, setTokenType] = useState();
   const [tokenInfo, setTokenInfo] = useState();
+  const [holders, setHolders] = useState([]);
   const [collection, setCollection] = useState();
   const [collectionLoading, setCollectionLoading] = useState(false);
 
@@ -161,21 +170,32 @@ const NFTItem = () => {
         const [contract] = await getNFTContract(address);
         const res = await contract.ownerOf(tokenID);
         setOwner(res);
-        try {
-          const { data } = await getUserAccountDetails(res);
-          setOwnerInfo(data);
-        } catch {
-          setOwnerInfo(null);
-        }
       } else if (type === 1155) {
         const { data: _tokenInfo } = await get1155Info(address, tokenID);
         setTokenInfo(_tokenInfo);
+        try {
+          const { data: _holders } = await getTokenHolders(address, tokenID);
+          setHolders(_holders);
+        } catch {
+          setHolders([]);
+        }
       }
     } catch {
       setOwner(null);
     } finally {
       setOwnerInfoLoading(false);
     }
+  };
+
+  const getOwnerInfo = async () => {
+    setOwnerInfoLoading(true);
+    try {
+      const { data } = await getUserAccountDetails(owner);
+      setOwnerInfo(data);
+    } catch {
+      setOwnerInfo(null);
+    }
+    setOwnerInfoLoading(false);
   };
 
   const getItemListings = async () => {
@@ -510,6 +530,10 @@ const NFTItem = () => {
     });
   }, [address, tokenID]);
 
+  useEffect(() => {
+    getOwnerInfo();
+  }, [owner]);
+
   const getSalesContractStatus = async () => {
     const [contract] = await getNFTContract(address);
     try {
@@ -593,9 +617,14 @@ const NFTItem = () => {
     }
   };
 
-  const isMine = owner?.toLowerCase() === account?.toLowerCase();
+  const isMine =
+    tokenType === 721
+      ? owner?.toLowerCase() === account?.toLowerCase()
+      : holders.findIndex(
+          holder => holder.address.toLowerCase() === account?.toLowerCase()
+        ) > -1;
 
-  const handleListItem = async _price => {
+  const handleListItem = async (_price, quantity) => {
     if (itemListing) return;
 
     try {
@@ -605,7 +634,7 @@ const NFTItem = () => {
       const tx = await listItem(
         address,
         ethers.BigNumber.from(tokenID),
-        ethers.BigNumber.from(1),
+        ethers.BigNumber.from(quantity),
         price,
         ethers.BigNumber.from(Math.floor(new Date().getTime() / 1000)),
         '0x0000000000000000000000000000000000000000'
@@ -621,14 +650,19 @@ const NFTItem = () => {
     }
   };
 
-  const handleUpdatePrice = async _price => {
+  const handleUpdatePrice = async (_price, quantity) => {
     if (priceUpdating) return;
 
     try {
       setPriceUpdating(true);
 
       const price = ethers.utils.parseEther(_price);
-      const tx = await updateListing(address, tokenID, price);
+      const tx = await updateListing(
+        address,
+        tokenID,
+        price,
+        ethers.BigNumber.from(quantity)
+      );
       await tx.wait();
 
       toast('success', 'Price updated successfully!');
@@ -662,17 +696,18 @@ const NFTItem = () => {
     toast('success', 'You have bought the item!');
   };
 
-  const handleMakeOffer = async (_price, endTime) => {
+  const handleMakeOffer = async (_price, quantity, endTime) => {
     if (offerPlacing) return;
 
     try {
       setOfferPlacing(true);
       const price = ethers.utils.parseEther(_price.toString());
       const deadline = Math.floor(endTime.getTime() / 1000);
+      const amount = price.mul(quantity);
 
       const balance = await getWFTMBalance(account);
 
-      if (balance.lt(price)) {
+      if (balance.lt(amount)) {
         toast(
           'error',
           'Insufficient WFTM Balance!',
@@ -683,15 +718,15 @@ const NFTItem = () => {
       }
 
       const allowance = await getAllowance(account, SALES_CONTRACT_ADDRESS);
-      if (allowance.lt(price)) {
-        await approve(SALES_CONTRACT_ADDRESS, price);
+      if (allowance.lt(amount)) {
+        await approve(SALES_CONTRACT_ADDRESS, amount);
       }
 
       const tx = await createOffer(
         address,
         ethers.BigNumber.from(tokenID),
         WFTM_ADDRESS,
-        ethers.BigNumber.from(1),
+        ethers.BigNumber.from(quantity),
         price,
         ethers.BigNumber.from(deadline)
       );
@@ -884,62 +919,44 @@ const NFTItem = () => {
   const hasMyOffer = useMemo(() => {
     return (
       offers.current.findIndex(
-        offer => offer.creator?.toLowerCase() === account?.toLowerCase()
+        offer =>
+          offer.creator?.toLowerCase() === account?.toLowerCase() &&
+          offer.deadline * 1000 >= now.getTime()
       ) > -1
     );
   }, [offers.current]);
 
-  const series = useMemo(
-    () => ({
-      showPoints: false,
-    }),
-    []
-  );
-
-  const axes = useMemo(
-    () => [
-      {
-        primary: true,
-        type: 'time',
-        position: 'bottom',
-        show: [true, false],
-      },
-      { type: 'linear', position: 'left' },
-    ],
-    []
-  );
-
   const data = tradeHistory.current.map(history => {
     const saleDate = new Date(history.saleDate);
     return {
-      primary: saleDate,
-      secondary: history.price,
+      date: saleDate,
+      price: history.price,
     };
   });
 
   const formatExpiration = deadline => {
     if (deadline * 1000 < now.getTime()) return 'Expired';
 
+    const ONE_SEC = 1000;
+    const ONE_MIN = 60 * ONE_SEC;
+    const ONE_HOUR = ONE_MIN * 60;
+    const ONE_DAY = ONE_HOUR * 24;
+
     const duration = new Date(deadline * 1000).getTime() - now.getTime();
-    let s = Math.floor(duration / 1000);
-    let m = Math.floor(s / 60);
-    s %= 60;
-    let h = Math.floor(m / 60);
-    m %= 60;
-    const d = Math.floor(h / 24);
-    h %= 24;
-    const res = [];
-    if (d > 0) {
-      res.push(`${d} days`);
+    if (duration > ONE_DAY) {
+      const d = Math.ceil(duration / ONE_DAY);
+      return `${d} days`;
     }
-    if (d > 0 || h > 0) {
-      res.push(`${h} hours`);
+    if (duration > ONE_HOUR) {
+      const h = Math.ceil(duration / ONE_HOUR);
+      return `${h} hours`;
     }
-    if (d > 0 || h > 0 || m > 0) {
-      res.push(`${m} mins`);
+    if (duration > ONE_MIN) {
+      const m = Math.ceil(duration / ONE_MIN);
+      return `${m} mins`;
     }
-    res.push(`${s}s`);
-    return res.join(' ');
+    const s = Math.ceil(duration / ONE_SEC);
+    return `${s} secs`;
   };
 
   const formatDiff = endTime => {
@@ -1248,7 +1265,8 @@ const NFTItem = () => {
                           onClick={() => setOwnersModalVisible(true)}
                         >
                           <PeopleIcon style={styles.itemIcon} />
-                          &nbsp;{tokenInfo.holders} owners
+                          &nbsp;{tokenInfo.holders}
+                          &nbsp;owner{tokenInfo.holders > 1 && 's'}
                         </div>
                         <div className={styles.itemViews}>
                           <ViewModuleIcon style={styles.itemIcon} />
@@ -1365,16 +1383,29 @@ const NFTItem = () => {
             )}
             <div className={styles.panelWrapper}>
               <Panel title="Price History">
-                <div className={styles.chartWrapper}>
-                  <ResizableBox width="100%" height={250} resizable={false}>
-                    <Chart
-                      data={[{ label: 'Price', data }]}
-                      series={series}
-                      axes={axes}
-                      tooltip
-                    />
-                  </ResizableBox>
-                </div>
+                <ReactResizeDetector>
+                  {({ width }) =>
+                    width > 0 ? (
+                      <div className={styles.chartWrapper}>
+                        <div className={styles.chart}>
+                          <LineChart width={width} height={250} data={data}>
+                            <XAxis dataKey="date" />
+                            <YAxis />
+                            <ChartTooltip />
+                            <CartesianGrid stroke="#eee" />
+                            <Line
+                              type="monotone"
+                              dataKey="price"
+                              stroke="#8884d8"
+                            />
+                          </LineChart>
+                        </div>
+                      </div>
+                    ) : (
+                      <div>{width}</div>
+                    )
+                  }
+                </ReactResizeDetector>
               </Panel>
             </div>
             <div className={styles.panelWrapper}>
@@ -1411,19 +1442,28 @@ const NFTItem = () => {
                   <div className={cx(styles.offer, styles.heading)}>
                     <div className={styles.owner}>From</div>
                     <div className={styles.price}>Price</div>
+                    {tokenInfo?.totalSupply > 1 && (
+                      <div className={styles.quantity}>Quantity</div>
+                    )}
                     <div className={styles.deadline}>Expires In</div>
                     <div className={styles.buy} />
                   </div>
                   {offers.current
                     .filter(offer => offer.deadline * 1000 > now.getTime())
+                    .sort((a, b) => (a.pricePerItem < b.pricePerItem ? 1 : -1))
                     .map((offer, idx) => (
                       <div className={styles.offer} key={idx}>
                         <div className={styles.owner}>
-                          {shortenAddress(offer.creator)}
+                          {offer.creator.substr(0, 6)}
                         </div>
                         <div className={styles.price}>
                           {offer.pricePerItem} FTM
                         </div>
+                        {tokenInfo?.totalSupply > 1 && (
+                          <div className={styles.quantity}>
+                            {offer.quantity}
+                          </div>
+                        )}
                         <div className={styles.deadline}>
                           {formatExpiration(offer.deadline)}
                         </div>
@@ -1522,6 +1562,7 @@ const NFTItem = () => {
         approveContract={handleApproveSalesContract}
         contractApproving={salesContractApproving}
         contractApproved={salesContractApproved}
+        totalSupply={tokenInfo?.totalSupply || 1}
       />
       <OfferModal
         visible={offerModalVisible}
@@ -1531,6 +1572,7 @@ const NFTItem = () => {
         approveContract={handleApproveSalesContract}
         contractApproving={salesContractApproving}
         contractApproved={salesContractApproved}
+        totalSupply={tokenInfo?.totalSupply || 1}
       />
       <AuctionModal
         visible={auctionModalVisible}
@@ -1557,9 +1599,7 @@ const NFTItem = () => {
       <OwnersModal
         visible={ownersModalVisible}
         onClose={() => setOwnersModalVisible(false)}
-        address={address}
-        tokenId={tokenID}
-        holdersCount={tokenInfo?.holders || 0}
+        holders={holders}
       />
     </div>
   );

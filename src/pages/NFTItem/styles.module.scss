@@ -60,20 +60,21 @@
 .topContainer {
   display: flex;
   flex-direction: row;
+  padding: 0 40px;
 }
 
 .itemSummary {
-  flex: 3 0 0%;
-  max-width: 43%;
-  width: 0px;
+  flex: 1 1 0;
+  max-width: 500px;
 }
 
 .itemMain {
-  flex: 4 0 0%;
+  flex: 1 1 0;
+  margin-left: 40px;
 }
 
 .itemMedia {
-  margin: 40px 0 40px 40px;
+  margin: 40px 0;
   overflow: hidden;
   border-radius: 4px;
   border: 1px solid #bbb;
@@ -164,7 +165,7 @@
 }
 
 .itemInfoCont {
-  margin: 40px 0 40px 40px;
+  margin: 40px 0;
   border-radius: 10px;
   border: 1px solid #2479FA80;
   overflow: hidden;
@@ -272,10 +273,14 @@
 }
 
 .owner {
-  flex: 3;
+  flex: 2;
 }
 
 .price {
+  flex: 2;
+}
+
+.quantity {
   flex: 2;
 }
 
@@ -432,11 +437,11 @@
 }
 
 .wrapper {
-  margin: 40px;
+  margin: 40px 0;
 }
 
 .panelWrapper {
-  margin: 40px;
+  margin: 40px 0;
   border-radius: 10px;
   border: 1px solid #2479FA80;
   overflow: hidden;
@@ -444,6 +449,14 @@
 
 .chartWrapper {
   padding: 20px;
+  height: 250px;
+  overflow: hidden;
+  position: relative;
+}
+
+.chart {
+  position: absolute;
+  overflow: hidden;
 }
 
 .disabled {

@@ -15,24 +15,46 @@ const OfferModal = ({
   approveContract,
   contractApproving,
   contractApproved,
+  totalSupply,
 }) => {
   const [price, setPrice] = useState('');
+  const [quantity, setQuantity] = useState('1');
   const [endTime, setEndTime] = useState(
     new Date(new Date().getTime() + 24 * 60 * 60 * 1000)
   );
-  const [focused1, setFocused1] = useState(false);
-  const [focused2, setFocused2] = useState(false);
 
   const { price: ftmPrice } = useSelector(state => state.Price);
 
   useEffect(() => {
     setPrice('');
+    setQuantity('1');
     setEndTime(new Date(new Date().getTime() + 24 * 60 * 60 * 1000));
   }, [visible]);
 
   const handleClick = e => {
     e.preventDefault();
     e.stopPropagation();
+  };
+
+  const handleQuantityChange = e => {
+    const val = e.target.value;
+    if (!val) {
+      setQuantity('');
+      return;
+    }
+
+    if (isNaN(val)) return;
+
+    const _quantity = parseInt(val);
+    setQuantity(Math.min(_quantity, totalSupply));
+  };
+
+  const handleMakeOffer = () => {
+    let quant = 1;
+    if (totalSupply > 1) {
+      quant = parseInt(quantity);
+    }
+    onMakeOffer(price, quant, endTime);
   };
 
   return (
@@ -44,9 +66,7 @@ const OfferModal = ({
         <div className={styles.body}>
           <div className={styles.formGroup}>
             <div className={styles.formLabel}>Price</div>
-            <div
-              className={cx(styles.formInputCont, focused1 && styles.focused1)}
-            >
+            <div className={styles.formInputCont}>
               <input
                 className={styles.formInput}
                 placeholder="0.00"
@@ -54,8 +74,6 @@ const OfferModal = ({
                 onChange={e =>
                   setPrice(isNaN(e.target.value) ? price : e.target.value)
                 }
-                onFocus={() => setFocused1(true)}
-                onBlur={() => setFocused1(false)}
                 disabled={contractApproving || confirming}
               />
               <div className={styles.usdPrice}>
@@ -63,18 +81,28 @@ const OfferModal = ({
               </div>
             </div>
           </div>
+          {totalSupply > 1 && (
+            <div className={styles.formGroup}>
+              <div className={styles.formLabel}>Quantity</div>
+              <div className={styles.formInputCont}>
+                <input
+                  className={styles.formInput}
+                  placeholder={totalSupply}
+                  value={quantity}
+                  onChange={handleQuantityChange}
+                  disabled={contractApproving || confirming}
+                />
+              </div>
+            </div>
+          )}
           <div className={styles.formGroup}>
             <div className={styles.formLabel}>EndTime</div>
-            <div
-              className={cx(styles.formInputCont, focused2 && styles.focused1)}
-            >
+            <div className={styles.formInputCont}>
               <Datetime
                 value={endTime}
                 onChange={val => setEndTime(val.toDate())}
                 inputProps={{
                   className: styles.formInput,
-                  onFocus: () => setFocused2(true),
-                  onBlur: () => setFocused2(false),
                   onKeyDown: e => e.preventDefault(),
                   disabled: contractApproving || confirming,
                 }}
@@ -90,7 +118,7 @@ const OfferModal = ({
             )}
             onClick={() =>
               contractApproved
-                ? !confirming && onMakeOffer(price, endTime)
+                ? !confirming && handleMakeOffer()
                 : approveContract()
             }
           >
