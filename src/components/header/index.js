@@ -252,7 +252,7 @@ const NiftyHeader = ({ light }) => {
           onClick={goToMyProfile}
         >
           <img src={iconUser} className={styles.menuIcon} />
-          My Items
+          My Profile
         </MenuItem>
       )}
       <MenuItem

@@ -15,6 +15,7 @@ import { Container, Board, Canvas, CanvasBg } from './style';
 import { isMobile } from 'utils/userAgent';
 import LandingPage from '../pages/landingpage';
 import ExploreAllPage from '../pages/explorepage';
+import AccountDetails from '../pages/AccountDetails';
 import NFTItem from '../pages/NFTItem';
 import CollectionCreate from '../pages/Collection/Create';
 import PriceActions from 'actions/price.actions';
@@ -108,7 +109,7 @@ const App = ({ paintStore }) => {
           <Route exact path="/exploreall" component={ExploreAllPage} />
           <Route exact path="/create" component={PaintBoard} />
           <Route path="/explore/:addr/:id" component={NFTItem} />
-          <Route path="/account/:uid" component={ExploreAllPage} />
+          <Route path="/account/:uid" component={AccountDetails} />
           <Route path="/collection/create" component={CollectionCreate} />
         </Switch>
         <AccountModal />
