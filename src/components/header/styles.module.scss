@@ -1,9 +1,9 @@
 .header {
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
   right: 0;
-  padding: 20px 20px 50px;
+  padding: 20px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -249,6 +249,7 @@
 }
 
 .lightBg {
+  background-color: #FFF;
   .menuLink {
     color: #3D3D3D;
     opacity: 0.6;

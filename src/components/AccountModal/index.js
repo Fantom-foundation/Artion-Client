@@ -316,7 +316,7 @@ const AccountModal = () => {
               {avatar && <img src={avatar} className={classes.avatar} />}
               <div
                 className={classes.upload}
-                onClick={() => inputRef.current?.click()}
+                onClick={() => fetching && inputRef.current?.click()}
               >
                 <CreateIcon className={classes.uploadIcon} />
               </div>

@@ -11,7 +11,6 @@ import axios from 'axios';
 
 import WalletConnectActions from 'actions/walletconnect.actions';
 import AuthActions from 'actions/auth.actions';
-import ModalActions from 'actions/modal.actions';
 import { shortenAddress } from 'utils';
 import { injected } from 'connectors';
 import { getAuthToken, getAccountDetails } from 'api';
@@ -22,7 +21,6 @@ import Identicon from 'components/Identicon';
 import logoWhite from 'assets/svgs/logo_white.svg';
 import logoBlue from 'assets/svgs/logo_blue.svg';
 import iconUser from 'assets/svgs/user.svg';
-import iconSettings from 'assets/svgs/settings.svg';
 import iconAdd from 'assets/svgs/add.svg';
 import iconSwap from 'assets/svgs/swap.svg';
 import iconExit from 'assets/svgs/exit.svg';
@@ -218,11 +216,6 @@ const NiftyHeader = ({ light }) => {
     handleMenuClose();
   };
 
-  const openAccountSettings = () => {
-    dispatch(ModalActions.showAccountModal());
-    handleMenuClose();
-  };
-
   const handleCreateCollection = () => {
     history.push('/collection/create');
     handleMenuClose();
@@ -252,16 +245,9 @@ const NiftyHeader = ({ light }) => {
           onClick={goToMyProfile}
         >
           <img src={iconUser} className={styles.menuIcon} />
-          My Items
+          My Profile
         </MenuItem>
       )}
-      <MenuItem
-        classes={{ root: cx(styles.menuItem, styles.topItem) }}
-        onClick={openAccountSettings}
-      >
-        <img src={iconSettings} className={styles.menuIcon} />
-        Account Settings
-      </MenuItem>
       <MenuItem
         classes={{ root: styles.menuItem }}
         onClick={handleCreateCollection}

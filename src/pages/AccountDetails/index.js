@@ -1,72 +1,82 @@
-import React, { useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
-import axios from 'axios';
 import cx from 'classnames';
-import TextField from '@material-ui/core/TextField';
-import Button from '@material-ui/core/Button';
-import DialogTitle from '@material-ui/core/DialogTitle';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogActions from '@material-ui/core/DialogActions';
-import Dialog from '@material-ui/core/Dialog';
-import { Add as AddIcon, Publish as PublishIcon } from '@material-ui/icons';
+import { Edit as EditIcon } from '@material-ui/icons';
+import Tooltip from '@material-ui/core/Tooltip';
 import { useWeb3React } from '@web3-react/core';
+import { CopyToClipboard } from 'react-copy-to-clipboard';
+import Skeleton from 'react-loading-skeleton';
 
 import NFTsGrid from 'components/NFTsGrid';
-import StatusFilter from 'components/StatusFilter';
-import CollectionsFilter from 'components/CollectionsFilter';
 import Header from 'components/header';
 import Identicon from 'components/Identicon';
-import SCHandlers from 'utils/sc.interaction';
 import { shortenAddress } from 'utils';
-import toast from 'utils/toast';
-import { getUserAccountDetails, fetchTokens } from 'api';
+import {
+  getUserAccountDetails,
+  fetchTokens,
+  updateBanner,
+  getAccountActivity,
+  getActivityFromOthers,
+} from 'api';
 import TokensActions from 'actions/tokens.actions';
 import HeaderActions from 'actions/header.actions';
+import ModalActions from 'actions/modal.actions';
+
+import iconCopy from 'assets/svgs/copy.svg';
+import iconSettings from 'assets/svgs/settings.svg';
 
 import styles from './styles.module.scss';
+
+const tabs = ['Items', 'Activity', 'Offers'];
 
 const AccountDetails = () => {
   const dispatch = useDispatch();
 
-  const { account, chainId } = useWeb3React();
+  const { account } = useWeb3React();
 
   const { uid } = useParams();
 
   const { fetching, tokens, count } = useSelector(state => state.Tokens);
-  let isWalletConnected = useSelector(state => state.ConnectWallet.isConnected);
   const { collections, category } = useSelector(state => state.Filter);
   const { user: me } = useSelector(state => state.Auth);
+  const { authToken } = useSelector(state => state.ConnectWallet);
 
-  const [collectionName, setCollectionName] = useState('');
-  const [collectionDescription, setCollectionDescription] = useState('');
-  const [isCollectionLogoUploaded, setIsCollectionLogoUploaded] = useState(
-    false
-  );
-  const [collectionLogoUrl, setCollectioLogoUrl] = useState('');
-  const [collectionImgData, setCollectionImgData] = useState(null);
-  const [isCreateCollectionShown, setIsCreateCollectionShown] = useState(false);
-  const [bundleIndex, setBundleIndex] = useState(null);
-
-  const [fileSelector, setFileSelector] = useState();
+  const fileInput = useRef();
 
   const [page, setPage] = useState(0);
+  const [bannerHash, setBannerHash] = useState();
+  const [loading, setLoading] = useState(false);
   const [user, setUser] = useState({});
+  const [copied, setCopied] = useState(false);
+  const [tooltipOpen, setTooltipOpen] = useState(false);
+  const [tab, setTab] = useState(0);
+  const [activityLoading, setActivityLoading] = useState(false);
+  const [activities, setActivities] = useState([]);
 
   const getUserDetails = async account => {
+    setLoading(true);
     try {
       const { data } = await getUserAccountDetails(account);
       setUser(data);
     } catch {
       setUser({});
     }
+    setLoading(false);
   };
 
   const fetchNFTs = async step => {
     dispatch(TokensActions.startFetching());
 
     try {
-      const { data } = await fetchTokens(step, collections, category, uid);
+      const { data } = await fetchTokens(
+        step,
+        collections,
+        category,
+        'createdAt',
+        [],
+        uid
+      );
       dispatch(TokensActions.fetchingSuccess(data.total, data.tokens));
       setPage(step);
     } catch {
@@ -78,8 +88,10 @@ const AccountDetails = () => {
     getUserDetails(uid);
   }, [uid]);
 
+  const isMe = account?.toLowerCase() === uid.toLowerCase();
+
   useEffect(() => {
-    if (account?.toLowerCase() === uid.toLowerCase() && me.alias) {
+    if (isMe && me.alias) {
       setUser(me);
     }
   }, [me]);
@@ -93,6 +105,7 @@ const AccountDetails = () => {
   }, []);
 
   const handleScroll = e => {
+    if (tab) return;
     if (fetching) return;
     if (tokens.length === count) return;
 
@@ -108,230 +121,257 @@ const AccountDetails = () => {
   }, [collections, category, uid]);
 
   useEffect(() => {
-    let _fileSelector = document.createElement('input');
-    _fileSelector.setAttribute('type', 'file');
-    _fileSelector.setAttribute('accept', 'image/*');
-    _fileSelector.addEventListener('change', () => {
-      try {
-        let selected = _fileSelector.files[0];
-        let url = URL.createObjectURL(selected);
-        setCollectioLogoUrl(url);
-        console.log('created url is ', url);
-        let reader = new FileReader();
-        reader.readAsDataURL(selected);
-        reader.onloadend = () => {
-          let background = new Image();
-          background.src = reader.result;
-          background.onload = () => {
-            setCollectionImgData(background.src);
-            console.log(background.src);
-            setIsCollectionLogoUploaded(true);
-            _fileSelector.value = null;
-          };
-        };
-      } catch (error) {
-        console.log('file selection cancelled');
-      }
-    });
-    setFileSelector(_fileSelector);
-  }, []);
-
-  const bundles = Array.from({ length: 10 }, (_, index) => ({
-    logo:
-      'https://lh3.googleusercontent.com/Cl3eJW9mEGZaSF0xxLIM0SzUx9HDi3Tgns5mHEKMtEokOmgtrrqLPZidxvM8BXBjzEWc03BNwzpXqEpc4w0sVOFnDlSeeFsh_ia6zg=s100',
-    name: `Bundle ${index + 1}`,
-  }));
-
-  const onBundleSelect = index => {
-    if (bundleIndex === index) {
-      setBundleIndex(null);
+    if (tab === 0) {
+      dispatch(TokensActions.resetTokens());
+      fetchNFTs(0);
+    } else if (tab === 1) {
+      getActivity();
     } else {
-      setBundleIndex(index);
+      getOffers();
     }
-  };
+  }, [tab, uid]);
 
-  const openCreateBundleModal = async () => {
-    let balance = await SCHandlers.getAccountBalance(account);
-    console.log(`total balance of ${account} is ${balance}`);
-    if (!isWalletConnected) {
-      toast('info', 'Connect your wallet first');
-      return;
-    }
-    if (chainId != 4002) {
-      toast('info', 'You are not connected to Opera Testnet');
-      return;
-    }
-    setIsCreateCollectionShown(true);
-  };
-
-  const uploadImageForCollection = () => {
-    fileSelector.click();
-  };
-
-  const handleCreateBundle = async () => {
-    if (collectionLogoUrl == '') {
-      toast('info', 'You need to upload the collection logo');
-      return;
-    }
-    let formData = new FormData();
-    formData.append('name', collectionName);
-    formData.append('description', collectionDescription);
-    formData.append('account', account);
-    formData.append('imgData', collectionImgData);
+  const getActivity = async () => {
     try {
-      let result = await axios({
-        method: 'post',
-        url: 'https://api0.artion.io/ipfs/uploadBundleImage2Server',
-        data: formData,
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
-      console.log(result);
-    } catch (error) {
-      console.log('failed to upload to the server');
+      setActivityLoading(true);
+      const { data } = await getAccountActivity(uid);
+      const _activities = [];
+      data.bids.map(bid =>
+        _activities.push({
+          event: 'Bid',
+          createdAt: bid.createdAt,
+          name: bid.name,
+          price: bid.price,
+          quantity: 1,
+          from: uid,
+          to: bid.owner,
+        })
+      );
+      data.listings.map(listing =>
+        _activities.push({
+          event: 'Listing',
+          createdAt: listing.createdAt,
+          name: listing.name,
+          price: listing.price,
+          quantity: listing.quantity,
+          from: uid,
+        })
+      );
+      data.offers.map(offer =>
+        _activities.push({
+          event: 'Offer',
+          createdAt: offer.createdAt,
+          name: offer.name,
+          price: offer.price,
+          quantity: offer.quantity,
+          from: uid,
+          to: offer.owner,
+        })
+      );
+      setActivities(_activities);
+      setActivityLoading(false);
+    } catch {
+      setActivityLoading(false);
     }
-    setCollectionName('');
-    setCollectionDescription('');
-    setIsCollectionLogoUploaded(false);
-    setCollectioLogoUrl('');
-    setIsCreateCollectionShown(false);
-    setCollectionImgData(null);
+  };
+
+  const getOffers = async () => {
+    try {
+      setActivityLoading(true);
+      await getActivityFromOthers(uid);
+      setActivityLoading(false);
+    } catch {
+      setActivityLoading(false);
+    }
+  };
+
+  const handleCopyAddress = () => {
+    setCopied(true);
+    setTimeout(() => {
+      setCopied(false);
+    }, 3000);
+  };
+
+  const handleMouseOver = () => {
+    setTooltipOpen(true);
+  };
+
+  const handleMouseLeave = () => {
+    setTooltipOpen(false);
+    setCopied(false);
+  };
+
+  const selectBanner = () => {
+    fileInput.current?.click();
+  };
+
+  const handleSelectFile = e => {
+    if (e.target.files.length > 0) {
+      const file = e.target.files[0];
+
+      const reader = new FileReader();
+
+      reader.onload = async function(e) {
+        const { data } = await updateBanner(e.target.result, authToken);
+        setBannerHash(data);
+      };
+
+      reader.readAsDataURL(file);
+    }
+    e.target.value = null;
+  };
+
+  const openAccountSettings = () => {
+    dispatch(ModalActions.showAccountModal());
   };
 
   return (
     <div className={styles.container}>
       <Header light />
-      <div className={styles.sidebar}>
-        <div className={styles.profileWrapper}>
-          {user.imageHash ? (
+      <div className={styles.profile}>
+        <div className={styles.banner}>
+          {loading ? (
+            <Skeleton width="100%" height={200} />
+          ) : bannerHash || user.bannerHash ? (
+            <img
+              src={`https://gateway.pinata.cloud/ipfs/${bannerHash ||
+                user.bannerHash}`}
+              className={styles.bannerImg}
+            />
+          ) : (
+            <div className={styles.bannerPlaceholder} />
+          )}
+          {isMe && (
+            <div className={styles.editBanner} onClick={selectBanner}>
+              <input
+                ref={fileInput}
+                hidden
+                type="file"
+                onChange={handleSelectFile}
+                accept="image/*"
+              />
+              <EditIcon className={styles.editIcon} />
+            </div>
+          )}
+        </div>
+        <div className={styles.settings} onClick={openAccountSettings}>
+          <img src={iconSettings} className={styles.settingsIcon} />
+        </div>
+        <div className={styles.avatarWrapper}>
+          {loading ? (
+            <Skeleton width={150} height={150} className={styles.avatar} />
+          ) : user.imageHash ? (
             <img
               src={`https://gateway.pinata.cloud/ipfs/${user.imageHash}`}
               className={styles.avatar}
             />
           ) : (
-            <Identicon account={uid} size={100} />
+            <Identicon className={styles.avatar} account={uid} size={150} />
           )}
-          <div className={styles.username}>{user.alias || ''}</div>
-          <a
-            href={`https://ftmscan.com/address/${uid}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.account}
-          >
-            {shortenAddress(uid)}
-          </a>
-          <div className={styles.bio}>{user.bio || ''}</div>
         </div>
-        <StatusFilter />
-        <CollectionsFilter />
+        <div className={styles.username}>
+          {loading ? (
+            <Skeleton width={120} height={24} />
+          ) : (
+            user.alias || 'Unnamed'
+          )}
+        </div>
+        <div className={styles.addressWrapper}>
+          {loading ? (
+            <Skeleton width={160} height={20} />
+          ) : (
+            <Tooltip
+              title={copied ? 'Copied!' : 'Copy'}
+              open={tooltipOpen}
+              arrow
+              classes={{ tooltip: styles.tooltip }}
+            >
+              <div className={styles.address}>{shortenAddress(uid)}</div>
+            </Tooltip>
+          )}
+          <CopyToClipboard text={uid} onCopy={handleCopyAddress}>
+            <img
+              src={iconCopy}
+              onMouseOver={handleMouseOver}
+              onMouseLeave={handleMouseLeave}
+            />
+          </CopyToClipboard>
+        </div>
+        <div className={styles.bio}>{user.bio || ''}</div>
       </div>
-
-      <div className={styles.body} onScroll={handleScroll}>
-        <div className={styles.bundleBox}>
-          <div className={styles.bundleList}>
-            {bundles.map((bundle, idx) => (
-              <div
-                className={cx(
-                  styles.bundle,
-                  idx === bundleIndex ? styles.selected : null
-                )}
-                key={idx}
-                onClick={() => onBundleSelect(idx)}
-              >
-                <img src={bundle.logo} className={styles.bundleLogo} />
-                {bundle.name}
-              </div>
-            ))}
-            <div className={styles.bundle} onClick={openCreateBundleModal}>
-              <AddIcon />
+      <div className={styles.content}>
+        <div className={styles.contentHeader}>
+          {tabs.map((t, idx) => (
+            <div
+              key={idx}
+              className={cx(styles.tab, idx === tab && styles.selected)}
+              onClick={() => setTab(idx)}
+            >
+              {t}
             </div>
-          </div>
+          ))}
         </div>
-        <NFTsGrid items={tokens} loading={fetching} />
-      </div>
-
-      {isCreateCollectionShown && (
-        <div>
-          <Dialog
-            disableBackdropClick
-            disableEscapeKeyDown
-            classes={{
-              paper: styles.createCollectionContainer,
-            }}
-            aria-labelledby="confirmation-dialog-title"
-            open={true}
-          >
-            <DialogTitle id="confirmation-dialog-title">
-              <div className={styles.createCollectionDlgTitle}>
-                Create your bundle
+        <div className={styles.contentBody} onScroll={handleScroll}>
+          {tab === 0 ? (
+            <NFTsGrid items={tokens} loading={fetching} />
+          ) : tab === 1 ? (
+            <>
+              <div className={styles.activityHeader}>
+                <div className={styles.event}>Event</div>
+                <div className={styles.name}>Item</div>
+                <div className={styles.price}>Price</div>
+                <div className={styles.quantity}>Quantity</div>
+                <div className={styles.owner}>Owner</div>
               </div>
-            </DialogTitle>
-            <DialogContent dividers>
-              <div>
-                <div className={styles.createCollectionLogo}>
-                  <p>Logo</p>
-                  <p>(350 x 350 recommended)</p>
-                </div>
-                <div className={styles.createCollectionImgContainer}>
-                  <div className={styles.createCollectionImageBox}>
-                    {isCollectionLogoUploaded ? (
-                      <img
-                        src={collectionLogoUrl}
-                        alt="icon"
-                        className={styles.collectionLogoImage}
-                      ></img>
-                    ) : null}
-                    <div
-                      className={styles.uploadOverlay}
-                      onClick={uploadImageForCollection}
-                    >
-                      <PublishIcon className={styles.uploadIcon} />
+              <div className={styles.activityList}>
+                {(activityLoading ? new Array(5).fill(null) : activities).map(
+                  (activity, idx) => (
+                    <div key={idx} className={styles.activity}>
+                      <div className={styles.event}>
+                        {activity ? (
+                          activity.event
+                        ) : (
+                          <Skeleton width={100} height={20} />
+                        )}
+                      </div>
+                      <div className={styles.name}>
+                        {activity ? (
+                          activity.name
+                        ) : (
+                          <Skeleton width={120} height={20} />
+                        )}
+                      </div>
+                      <div className={styles.price}>
+                        {activity ? (
+                          `${activity.price} FTM`
+                        ) : (
+                          <Skeleton width={100} height={20} />
+                        )}
+                      </div>
+                      <div className={styles.quantity}>
+                        {activity ? (
+                          activity.quantity
+                        ) : (
+                          <Skeleton width={80} height={20} />
+                        )}
+                      </div>
+                      <div className={styles.owner}>
+                        {activity ? (
+                          shortenAddress(activity.to)
+                        ) : (
+                          <Skeleton width={130} height={20} />
+                        )}
+                      </div>
                     </div>
-                  </div>
-                </div>
+                  )
+                )}
               </div>
-              <TextField
-                label="Name"
-                className={styles.createCollectionNameInput}
-                InputLabelProps={{
-                  className: styles.createCollectionNameInputLabel,
-                }}
-                placeholder="e.g.FMT Gems"
-                value={collectionName}
-                onChange={e => setCollectionName(e.target.value)}
-              />
-              <TextField
-                label="Description (Optional)"
-                hinttext="Message Field"
-                value={collectionDescription}
-                placeholder="Provide a description for your collection."
-                floatinglabeltext="MultiLine and FloatingLabel"
-                className={styles.createCollectionNameInput}
-                InputLabelProps={{
-                  className: styles.createCollectionNameInputLabel,
-                }}
-                multiline
-                rows={2}
-                onChange={e => setCollectionDescription(e.target.value)}
-              />
-            </DialogContent>
-            <DialogActions>
-              <Button
-                onClick={handleCreateBundle}
-                className={styles.createButton}
-              >
-                Create
-              </Button>
-              <Button
-                autoFocus
-                onClick={() => setIsCreateCollectionShown(false)}
-                className={styles.cancelButton}
-              >
-                Cancel
-              </Button>
-            </DialogActions>
-          </Dialog>
+            </>
+          ) : (
+            <div></div>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 };

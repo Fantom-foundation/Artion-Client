@@ -2,219 +2,219 @@
   width: 100%;
   height: 100vh;
   overflow-y: auto;
-  padding-top: 130px;
-  padding-left: 20px;
+  padding-top: 100px;
   box-sizing: border-box;
   display: flex;
+  flex-direction: column;
   position: relative;
 }
 
-.sidebar {
-  flex: 0 0 320px;
-  display: flex;
-  flex-direction: column;
-}
-
-.body {
-  margin-left: 20px;
-  flex-grow: 1;
-  height: 100%;
-  overflow-y: auto;
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-}
-
-.profileWrapper {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: 20px;
-}
-
-.avatar {
-  width: 100px !important;
-  height: 100px !important;
-  border-radius: 50px;
-}
-
-.username {
-  margin-top: 8px;
-  font-size: 24px;
-  font-weight: 600;
-  color: #333;
-}
-
-.address {
-  margin-top: 8px;
-  font-size: 18px;
-  font-weight: 500;
-  color: #333;
-}
-
-.bio {
-  margin-top: 8px;
-  font-size: 16px;
-  font-weight: 400;
-  color: #555;
-  text-align: center;
-}
-
-.bundleBox {
+.profile {
   width: 100%;
-  flex: 0 0 72px;
-  overflow-x: scroll;
-}
-
-.bundleList {
-  min-width: 100%;
-  width: fit-content;
-  height: 100%;
-  padding: 12px;
-  box-sizing: border-box;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
+  margin-bottom: 40px;
+  position: relative;
 }
 
-.bundle {
+.banner {
+  width: 100%;
+  height: 200px;
+  position: relative;
+  margin-bottom: -30px;
+}
+
+.bannerImg {
+  width: 100%;
   height: 100%;
-  padding: 8px 12px;
-  box-sizing: border-box;
-  border-radius: 4px;
-  border: 1px solid #EDEDED;
-  margin-right: 10px;
+  object-fit: cover;
+}
+
+.bannerPlaceholder {
+  width: 100%;
+  height: 100%;
+  background-color: rgb(229, 232, 235);
+}
+
+.editBanner {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 40px;
+  height: 40px;
+  border-radius: 6px;
   background-color: #FFF;
   display: flex;
   align-items: center;
+  justify-content: center;
   cursor: pointer;
-  white-space: nowrap;
-  font-size: 16px;
+
+  &:hover {
+    box-shadow: 0 0 4px rgba(0, 0, 0, .1);
+  }
+}
+
+.editIcon {
+  width: 24px;
+  height: 24px;
+  color: rgb(138, 147, 155);
+}
+
+.settings {
+  position: absolute;
+  top: 216px;
+  right: 16px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  background-color: rgba(36, 121, 250, .1);
+}
+
+.settingsIcon {
+  width: 20px;
+  height: 20px;
+}
+
+.avatarWrapper {
+  width: 150px;
+  height: 150px;
+  border-radius: 10px;
+  border: 6px solid #FFF;
+  z-index: 1;
+  overflow: hidden;
+  position: relative;
+}
+
+.avatar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 150px;
+  height: 150px;
+}
+
+.username {
+  margin-top: 16px;
+  font-size: 24px;
+  font-weight: 600;
+  color: #3D3D3D;
+}
+
+.addressWrapper {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+
+  img {
+    margin-left: 6px;
+    cursor: pointer;
+  }
+}
+
+.address {
+  font-size: 18px;
   font-weight: 500;
-  color: #333;
+  color: rgba(0, 0, 0, .6);
+}
+
+.tooltip {
+  font-size: 16px;
+}
+
+.bio {
+  width: 90%;
+  max-width: 700px;
+  text-align: center;
+  margin-top: 8px;
+  font-size: 18px;
+  font-weight: 400;
+  color: rgba(0, 0, 0, .6);
+}
+
+.content {
+  width: 100%;
+  height: calc(100vh - 100px);
+  flex: 0 0 calc(100vh - 100px);
+  box-sizing: border-box;
+  padding: 0 40px 40px;
+  display: flex;
+  flex-direction: column;
+}
+
+.contentHeader {
+  margin-bottom: 40px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.contentBody {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.tab {
+  margin-right: 40px;
+  font-weight: 700;
+  font-size: 22px;
+  line-height: 27px;
+  color: #3D3D3D;
+  opacity: 0.6;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
   user-select: none;
 
   &:last-child {
     margin-right: 0;
   }
 
-  &:hover {
-    box-shadow: 0 0 6px rgba(0, 0, 0, 0.3);
-  }
-
   &.selected {
-    border-color: #007bff;
-    color: #007bff;
-    box-shadow: 0 0 6px rgba(0, 123, 255, 0.7);
+    opacity: 1;
+    border-bottom-color: #1652C3;
   }
 }
 
-.bundleLogo {
-  width: 24px;
-  height: 24px;
-  border-radius: 32px;
-  margin-right: 8px;
-}
-
-.createCollectionContainer {
-  width: 400px;
-}
-
-.createCollectionImgContainer {
-  margin-bottom: 36px;
-}
-
-.createCollectionImageBox {
-  width: 200px;
-  height: 200px;
-  border-radius: 50%;
-  margin: 0 auto;
-  border: 1px solid gray;
-  overflow: hidden;
-  position: relative;
-}
-
-.collectionLogoImage {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.uploadOverlay {
-  position: absolute;
-  border-radius: 50%;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(255, 255, 255, 0.6);
-  opacity: 0;
-  transition: opacity ease 100ms;
+.activityHeader,
+.activity {
   display: flex;
   align-items: center;
-  justify-content: center;
-  cursor: pointer;
-
-  &:hover {
-    opacity: 1;
-  }
+  font-weight: 500;
+  font-size: 20px;
+  line-height: 20px;
+  color: #3D3D3D;
 }
 
-.uploadIcon {
-  width: 40px !important;
-  height: 40px !important;
-  color: #333;
+.activityHeader {
+  padding: 9px 14px;
+  background-color: #F6F7F9;
 }
 
-.createCollectionDlgTitle {
-  text-align: 'center';
+.activity {
+  padding: 14px;
+  border-bottom: 1px solid rgba(0, 0, 0, .1);
 }
 
-.createCollectionLogo {
-  font-size: 18px;
-  margin-bottom: 36px;
+.event {
+  flex: 2 0 0;
 }
 
-.createCollectionNameInputDiv {
-  margin-bottom: 36px;
+.name {
+  flex: 3 0 0;
 }
 
-.createCollectionNameInput {
-  width: 100%;
-  border-radius: 5px;
-  background-color: #F6F6F6;
-  padding: 0 22px 12px;
-  margin-bottom: 20px;
-  box-sizing: border-box;
+.price {
+  flex: 2 0 0;
 }
 
-.createCollectionNameInputLabel {
-  left: 22px;
+.quantity {
+  flex: 2 0 0;
 }
 
-.createButton,
-.cancelButton {
-  width: 100px;
-  height: 36px;
-  border-radius: 5px;
-  margin-right: 10px;
-}
-
-.createButton {
-  background-color: #007bff;
-  color: #FFF;
-
-  &:hover {
-    background-color: #007bff;
-  }
-}
-
-.cancelButton {
-  background-color: #FFF;
-  color: #007bff;
-  border: 1px solid #007bff;
-
-  &:hover {
-    background-color: #FFF;
-  }
+.owner {
+  flex: 3 0 0;
 }

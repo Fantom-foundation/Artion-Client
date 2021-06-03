@@ -69,6 +69,21 @@ export const updateAccountDetails = async (
   return res.data;
 };
 
+export const updateBanner = async (imageData, authToken) => {
+  const formData = new FormData();
+  formData.append('imgData', imageData);
+  const res = await axios({
+    method: 'post',
+    url: `${BASE_URL}/ipfs/uploadBannerImage2Server`,
+    data: formData,
+    headers: {
+      'Content-Type': 'multipart/form-data',
+      Authorization: `Bearer ${authToken}`,
+    },
+  });
+  return res.data;
+};
+
 export const getTokenType = async contractAddress => {
   const { data } = await axios.get(
     `${BASE_URL}/info/getTokenType/${contractAddress}`
@@ -190,6 +205,22 @@ export const getTradeHistory = async (contractAddress, tokenID) => {
     headers: {
       'Content-Type': 'application/json',
     },
+  });
+  return res.data;
+};
+
+export const getAccountActivity = async address => {
+  const res = await axios({
+    method: 'get',
+    url: `${BASE_URL}/info/getAccountActivity/${address}`,
+  });
+  return res.data;
+};
+
+export const getActivityFromOthers = async address => {
+  const res = await axios({
+    method: 'get',
+    url: `${BASE_URL}/info/getActivityFromOthers/${address}`,
   });
   return res.data;
 };

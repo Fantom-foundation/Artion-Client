@@ -1,7 +1,6 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import cx from 'classnames';
-import Button from '@material-ui/core/Button';
 
 import { Categories } from '../../../constants/filter.constants';
 import FilterActions from '../../../actions/filter.actions';
@@ -24,19 +23,17 @@ const ExploreHeader = () => {
   return (
     <div className={styles.root}>
       {Categories.map(cat => (
-        <Button
+        <div
           key={cat.id}
-          variant="contained"
-          color="default"
           className={cx(
             styles.button,
             cat.id === category ? styles.selected : null
           )}
-          startIcon={<img src={cat.icon} />}
           onClick={() => handleSelectCategory(cat.id)}
         >
+          <img src={cat.icon} />
           {cat.label}
-        </Button>
+        </div>
       ))}
     </div>
   );
