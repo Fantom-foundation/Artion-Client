@@ -208,3 +208,19 @@ export const getTradeHistory = async (contractAddress, tokenID) => {
   });
   return res.data;
 };
+
+export const getAccountActivity = async address => {
+  const res = await axios({
+    method: 'get',
+    url: `${BASE_URL}/info/getAccountActivity/${address}`,
+  });
+  return res.data;
+};
+
+export const getActivityFromOthers = async address => {
+  const res = await axios({
+    method: 'get',
+    url: `${BASE_URL}/info/getActivityFromOthers/${address}`,
+  });
+  return res.data;
+};

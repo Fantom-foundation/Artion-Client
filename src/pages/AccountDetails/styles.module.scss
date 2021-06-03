@@ -138,5 +138,83 @@
 
 .content {
   width: 100%;
+  height: calc(100vh - 100px);
   flex: 0 0 calc(100vh - 100px);
+  box-sizing: border-box;
+  padding: 0 40px 40px;
+  display: flex;
+  flex-direction: column;
+}
+
+.contentHeader {
+  margin-bottom: 40px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.contentBody {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.tab {
+  margin-right: 40px;
+  font-weight: 700;
+  font-size: 22px;
+  line-height: 27px;
+  color: #3D3D3D;
+  opacity: 0.6;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  user-select: none;
+
+  &:last-child {
+    margin-right: 0;
+  }
+
+  &.selected {
+    opacity: 1;
+    border-bottom-color: #1652C3;
+  }
+}
+
+.activityHeader,
+.activity {
+  display: flex;
+  align-items: center;
+  font-weight: 500;
+  font-size: 20px;
+  line-height: 20px;
+  color: #3D3D3D;
+}
+
+.activityHeader {
+  padding: 9px 14px;
+  background-color: #F6F7F9;
+}
+
+.activity {
+  padding: 14px;
+  border-bottom: 1px solid rgba(0, 0, 0, .1);
+}
+
+.event {
+  flex: 2 0 0;
+}
+
+.name {
+  flex: 3 0 0;
+}
+
+.price {
+  flex: 2 0 0;
+}
+
+.quantity {
+  flex: 2 0 0;
+}
+
+.owner {
+  flex: 3 0 0;
 }
