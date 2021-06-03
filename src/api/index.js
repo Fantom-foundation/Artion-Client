@@ -69,6 +69,21 @@ export const updateAccountDetails = async (
   return res.data;
 };
 
+export const updateBanner = async (imageData, authToken) => {
+  const formData = new FormData();
+  formData.append('imgData', imageData);
+  const res = await axios({
+    method: 'post',
+    url: `${BASE_URL}/ipfs/uploadBannerImage2Server`,
+    data: formData,
+    headers: {
+      'Content-Type': 'multipart/form-data',
+      Authorization: `Bearer ${authToken}`,
+    },
+  });
+  return res.data;
+};
+
 export const getTokenType = async contractAddress => {
   const { data } = await axios.get(
     `${BASE_URL}/info/getTokenType/${contractAddress}`
