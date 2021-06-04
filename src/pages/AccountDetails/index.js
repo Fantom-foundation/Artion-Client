@@ -74,6 +74,8 @@ const AccountDetails = () => {
   };
 
   const fetchNFTs = async step => {
+    if (fetching) return;
+
     dispatch(TokensActions.startFetching());
 
     try {
@@ -124,11 +126,6 @@ const AccountDetails = () => {
       fetchNFTs(page + 1);
     }
   };
-
-  useEffect(() => {
-    dispatch(TokensActions.resetTokens());
-    fetchNFTs(0);
-  }, [collections, category, uid]);
 
   useEffect(() => {
     if (tab === 0) {
@@ -278,9 +275,11 @@ const AccountDetails = () => {
             </div>
           )}
         </div>
-        <div className={styles.settings} onClick={openAccountSettings}>
-          <img src={iconSettings} className={styles.settingsIcon} />
-        </div>
+        {isMe && (
+          <div className={styles.settings} onClick={openAccountSettings}>
+            <img src={iconSettings} className={styles.settingsIcon} />
+          </div>
+        )}
         <div className={styles.avatarWrapper}>
           {loading ? (
             <Skeleton width={150} height={150} className={styles.avatar} />
