@@ -203,7 +203,7 @@ const BaseCard = ({ item, loading, style }) => {
               <Skeleton width={80} height={20} />
             ) : (
               <Typography component="h4" className={classes.label}>
-                {item?.supply || 1} of {item?.supply || 1}
+                {item?.holderSupply || item?.supply || 1} of {item?.supply || 1}
               </Typography>
             )}
             <div className={classes.alignRight}>
