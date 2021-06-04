@@ -1284,7 +1284,12 @@ const NFTItem = () => {
                 )}
                 <div className={styles.itemViews}>
                   <FontAwesomeIcon icon={faEye} color="#00000099" />
-                  &nbsp;{views} Views
+                  &nbsp;
+                  {isNaN(views) ? (
+                    <Skeleton width={80} height={24} />
+                  ) : (
+                    `${views} View${views > 1 ? 's' : ''}`
+                  )}
                 </div>
               </div>
             </div>
