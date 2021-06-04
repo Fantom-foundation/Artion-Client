@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import cx from 'classnames';
 import { Edit as EditIcon } from '@material-ui/icons';
 import Tooltip from '@material-ui/core/Tooltip';
@@ -28,6 +28,11 @@ import iconSettings from 'assets/svgs/settings.svg';
 
 import styles from './styles.module.scss';
 
+const ONE_MIN = 60;
+const ONE_HOUR = ONE_MIN * 60;
+const ONE_DAY = ONE_HOUR * 24;
+const ONE_MONTH = ONE_DAY * 30;
+
 const tabs = ['Items', 'Activity', 'Offers'];
 
 const AccountDetails = () => {
@@ -44,6 +49,7 @@ const AccountDetails = () => {
 
   const fileInput = useRef();
 
+  const [now, setNow] = useState(new Date());
   const [page, setPage] = useState(0);
   const [bannerHash, setBannerHash] = useState();
   const [loading, setLoading] = useState(false);
@@ -85,6 +91,7 @@ const AccountDetails = () => {
   };
 
   useEffect(() => {
+    setTab(0);
     getUserDetails(uid);
   }, [uid]);
 
@@ -98,6 +105,7 @@ const AccountDetails = () => {
 
   useEffect(() => {
     dispatch(HeaderActions.toggleSearchbar(true));
+    setInterval(() => setNow(new Date()), 1000);
 
     return () => {
       dispatch(HeaderActions.toggleSearchbar(false));
@@ -168,6 +176,7 @@ const AccountDetails = () => {
           to: offer.owner,
         })
       );
+      _activities.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
       setActivities(_activities);
       setActivityLoading(false);
     } catch {
@@ -223,6 +232,28 @@ const AccountDetails = () => {
 
   const openAccountSettings = () => {
     dispatch(ModalActions.showAccountModal());
+  };
+
+  const formatDate = _date => {
+    const date = new Date(_date);
+    const diff = Math.floor((now - date.getTime()) / 1000);
+    if (diff >= ONE_MONTH) {
+      const m = Math.ceil(diff / ONE_MONTH);
+      return `${m} Month${m > 1 ? 's' : ''} Ago`;
+    }
+    if (diff >= ONE_DAY) {
+      const d = Math.ceil(diff / ONE_DAY);
+      return `${d} Day${d > 1 ? 's' : ''} Ago`;
+    }
+    if (diff >= ONE_HOUR) {
+      const h = Math.ceil(diff / ONE_HOUR);
+      return `${h} Hour${h > 1 ? 's' : ''} Ago`;
+    }
+    if (diff >= ONE_MIN) {
+      const h = Math.ceil(diff / ONE_MIN);
+      return `${h} Min${h > 1 ? 's' : ''} Ago`;
+    }
+    return `${diff} Second${diff > 1 ? 's' : ''} Ago`;
   };
 
   return (
@@ -322,6 +353,7 @@ const AccountDetails = () => {
                 <div className={styles.price}>Price</div>
                 <div className={styles.quantity}>Quantity</div>
                 <div className={styles.owner}>Owner</div>
+                <div className={styles.date}>Date</div>
               </div>
               <div className={styles.activityList}>
                 {(activityLoading ? new Array(5).fill(null) : activities).map(
@@ -355,11 +387,23 @@ const AccountDetails = () => {
                           <Skeleton width={80} height={20} />
                         )}
                       </div>
-                      <div className={styles.owner}>
-                        {activity ? (
-                          shortenAddress(activity.to)
-                        ) : (
+                      {activity ? (
+                        <Link
+                          to={`/account/${activity.to}`}
+                          className={styles.owner}
+                        >
+                          {shortenAddress(activity.to)}
+                        </Link>
+                      ) : (
+                        <div className={styles.owner}>
                           <Skeleton width={130} height={20} />
+                        </div>
+                      )}
+                      <div className={styles.date}>
+                        {activity ? (
+                          formatDate(activity.createdAt)
+                        ) : (
+                          <Skeleton width={120} height={20} />
                         )}
                       </div>
                     </div>

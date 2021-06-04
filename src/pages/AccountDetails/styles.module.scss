@@ -197,6 +197,11 @@
 .activity {
   padding: 14px;
   border-bottom: 1px solid rgba(0, 0, 0, .1);
+
+  .owner {
+    color: #2479FA;
+    text-decoration: none;
+  }
 }
 
 .event {
@@ -217,4 +222,8 @@
 
 .owner {
   flex: 3 0 0;
+}
+
+.date {
+  flex: 2 0 0;
 }
