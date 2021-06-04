@@ -87,6 +87,11 @@ import filterIcon from 'assets/svgs/filter.svg';
 
 import styles from './styles.module.scss';
 
+const ONE_MIN = 60;
+const ONE_HOUR = ONE_MIN * 60;
+const ONE_DAY = ONE_HOUR * 24;
+const ONE_MONTH = ONE_DAY * 30;
+
 const NFTItem = () => {
   const { addr: address, id: tokenID } = useParams();
 
@@ -295,13 +300,13 @@ const NFTItem = () => {
     if (eventMatches(nft, id)) {
       listing.current = null;
       setOwner(buyer);
-      const newTradeHistory = [...tradeHistory.current];
-      newTradeHistory.push({
+      const newHistory = {
         from: seller,
         to: buyer,
         price: parseFloat(price.toString()) / 10 ** 18,
-        saleDate: new Date().toISOString(),
-      });
+        createdAt: new Date().toISOString(),
+      };
+      const newTradeHistory = [newHistory, ...tradeHistory.current];
       tradeHistory.current = newTradeHistory;
     }
   };
@@ -926,52 +931,53 @@ const NFTItem = () => {
     );
   }, [offers.current]);
 
-  const data = tradeHistory.current.map(history => {
-    const saleDate = new Date(history.saleDate);
+  const data = [...tradeHistory.current].reverse().map(history => {
+    const saleDate = new Date(history.createdAt);
     return {
-      date: saleDate,
+      date: `${saleDate.getFullYear()}/${saleDate.getMonth() +
+        1}/${saleDate.getDate()}`,
       price: history.price,
+      amt: 2100,
     };
   });
+
+  const formatDiff = diff => {
+    if (diff >= ONE_MONTH) {
+      const m = Math.ceil(diff / ONE_MONTH);
+      return `${m} Month${m > 1 ? 's' : ''}`;
+    }
+    if (diff >= ONE_DAY) {
+      const d = Math.ceil(diff / ONE_DAY);
+      return `${d} Day${d > 1 ? 's' : ''}`;
+    }
+    if (diff >= ONE_HOUR) {
+      const h = Math.ceil(diff / ONE_HOUR);
+      return `${h} Hour${h > 1 ? 's' : ''}`;
+    }
+    if (diff >= ONE_MIN) {
+      const h = Math.ceil(diff / ONE_MIN);
+      return `${h} Min${h > 1 ? 's' : ''}`;
+    }
+    return `${diff} Second${diff > 1 ? 's' : ''}`;
+  };
 
   const formatExpiration = deadline => {
     if (deadline * 1000 < now.getTime()) return 'Expired';
 
-    const ONE_SEC = 1000;
-    const ONE_MIN = 60 * ONE_SEC;
-    const ONE_HOUR = ONE_MIN * 60;
-    const ONE_DAY = ONE_HOUR * 24;
-
-    const duration = new Date(deadline * 1000).getTime() - now.getTime();
-    if (duration > ONE_DAY) {
-      const d = Math.ceil(duration / ONE_DAY);
-      return `${d} days`;
-    }
-    if (duration > ONE_HOUR) {
-      const h = Math.ceil(duration / ONE_HOUR);
-      return `${h} hours`;
-    }
-    if (duration > ONE_MIN) {
-      const m = Math.ceil(duration / ONE_MIN);
-      return `${m} mins`;
-    }
-    const s = Math.ceil(duration / ONE_SEC);
-    return `${s} secs`;
+    let diff = new Date(deadline * 1000).getTime() - now.getTime();
+    diff = Math.floor(diff / 1000);
+    return formatDiff(diff);
   };
 
-  const formatDiff = endTime => {
+  const formatDuration = endTime => {
     const diff = endTime - Math.floor(now.getTime() / 1000);
-    let m = Math.floor(diff / 60);
-    const s = diff % 60;
-    let h = Math.floor(m / 60);
-    m %= 60;
-    const d = Math.floor(h / 24);
-    h %= 24;
+    return formatDiff(diff);
+  };
 
-    if (d) return `${d} days`;
-    if (h) return `${h} hours`;
-    if (m) return `${m} minutes`;
-    return `${s} seconds`;
+  const formatDate = _date => {
+    const date = new Date(_date);
+    const diff = Math.floor((now - date.getTime()) / 1000);
+    return `${formatDiff(diff)} Ago`;
   };
 
   const auctionStarted = () =>
@@ -1289,12 +1295,12 @@ const NFTItem = () => {
                     auctionStarted()
                       ? auctionEnded()
                         ? 'Sale ended'
-                        : `Sale ends in ${formatDiff(
+                        : `Sale ends in ${formatDuration(
                             auction.current.endTime
                           )} (${new Date(
                             auction.current.endTime * 1000
                           ).toLocaleString()})`
-                      : `Sale starts in ${formatDiff(
+                      : `Sale starts in ${formatDuration(
                           auction.current.startTime
                         )}`
                   }
@@ -1388,7 +1394,17 @@ const NFTItem = () => {
                     width > 0 ? (
                       <div className={styles.chartWrapper}>
                         <div className={styles.chart}>
-                          <LineChart width={width} height={250} data={data}>
+                          <LineChart
+                            width={width}
+                            height={250}
+                            data={data}
+                            margin={{
+                              top: 5,
+                              right: 30,
+                              left: 20,
+                              bottom: 5,
+                            }}
+                          >
                             <XAxis dataKey="date" />
                             <YAxis />
                             <ChartTooltip />
@@ -1396,7 +1412,7 @@ const NFTItem = () => {
                             <Line
                               type="monotone"
                               dataKey="price"
-                              stroke="#8884d8"
+                              stroke="#2479FA"
                             />
                           </LineChart>
                         </div>
@@ -1533,7 +1549,7 @@ const NFTItem = () => {
               <div className={styles.saleDate}>Date</div>
             </div>
             {tradeHistory.current.map((history, idx) => {
-              const saleDate = new Date(history.saleDate);
+              const saleDate = new Date(history.createdAt);
               return (
                 <div className={styles.history} key={idx}>
                   <div className={styles.historyPrice}>{history.price} FTM</div>
@@ -1543,9 +1559,7 @@ const NFTItem = () => {
                   <Link to={`/account/${history.to}`} className={styles.to}>
                     {shortenAddress(history.to)}
                   </Link>
-                  <div className={styles.saleDate}>
-                    {saleDate.toUTCString()}
-                  </div>
+                  <div className={styles.saleDate}>{formatDate(saleDate)}</div>
                 </div>
               );
             })}

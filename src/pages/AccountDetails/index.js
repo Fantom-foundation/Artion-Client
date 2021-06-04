@@ -100,12 +100,8 @@ const AccountDetails = () => {
   }, [me]);
 
   useEffect(() => {
-    dispatch(HeaderActions.toggleSearchbar(true));
+    dispatch(HeaderActions.toggleSearchbar(false));
     setInterval(() => setNow(new Date()), 1000);
-
-    return () => {
-      dispatch(HeaderActions.toggleSearchbar(false));
-    };
   }, []);
 
   const handleScroll = e => {

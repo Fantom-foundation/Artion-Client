@@ -90,7 +90,7 @@ const AuctionModal = ({
             </div>
           </div>
           <div className={styles.formGroup}>
-            <div className={styles.formLabel}>End Time</div>
+            <div className={styles.formLabel}>Auction Expiration</div>
             <div className={styles.formInputCont}>
               <Datetime
                 value={endTime}
