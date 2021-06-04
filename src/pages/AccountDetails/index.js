@@ -43,7 +43,6 @@ const AccountDetails = () => {
   const { uid } = useParams();
 
   const { fetching, tokens, count } = useSelector(state => state.Tokens);
-  const { collections, category } = useSelector(state => state.Filter);
   const { user: me } = useSelector(state => state.Auth);
   const { authToken } = useSelector(state => state.ConnectWallet);
 
@@ -79,14 +78,7 @@ const AccountDetails = () => {
     dispatch(TokensActions.startFetching());
 
     try {
-      const { data } = await fetchTokens(
-        step,
-        collections,
-        category,
-        'createdAt',
-        [],
-        uid
-      );
+      const { data } = await fetchTokens(step, [], null, 'createdAt', [], uid);
       dispatch(TokensActions.fetchingSuccess(data.total, data.tokens));
       setPage(step);
     } catch {
