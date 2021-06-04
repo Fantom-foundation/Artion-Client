@@ -19,7 +19,6 @@ import {
   getAccountActivity,
   getActivityFromOthers,
 } from 'api';
-import TokensActions from 'actions/tokens.actions';
 import HeaderActions from 'actions/header.actions';
 import ModalActions from 'actions/modal.actions';
 
@@ -42,12 +41,14 @@ const AccountDetails = () => {
 
   const { uid } = useParams();
 
-  const { fetching, tokens, count } = useSelector(state => state.Tokens);
   const { user: me } = useSelector(state => state.Auth);
   const { authToken } = useSelector(state => state.ConnectWallet);
 
   const fileInput = useRef();
 
+  const [fetching, setFetching] = useState(false);
+  const [tokens, setTokens] = useState([]);
+  const [count, setCount] = useState(0);
   const [now, setNow] = useState(new Date());
   const [page, setPage] = useState(0);
   const [bannerHash, setBannerHash] = useState();
@@ -75,14 +76,17 @@ const AccountDetails = () => {
   const fetchNFTs = async step => {
     if (fetching) return;
 
-    dispatch(TokensActions.startFetching());
+    setFetching(true);
+    setCount(0);
 
     try {
       const { data } = await fetchTokens(step, [], null, 'createdAt', [], uid);
-      dispatch(TokensActions.fetchingSuccess(data.total, data.tokens));
+      setFetching(false);
+      setTokens([...tokens, ...data.tokens]);
+      setCount(data.total);
       setPage(step);
     } catch {
-      dispatch(TokensActions.fetchingFailed());
+      setFetching(false);
     }
   };
 
@@ -117,7 +121,8 @@ const AccountDetails = () => {
 
   useEffect(() => {
     if (tab === 0) {
-      dispatch(TokensActions.resetTokens());
+      setTokens([]);
+      setCount(0);
       fetchNFTs(0);
     } else if (tab === 1) {
       getActivity();
