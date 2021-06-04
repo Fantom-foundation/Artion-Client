@@ -96,7 +96,7 @@ const OfferModal = ({
             </div>
           )}
           <div className={styles.formGroup}>
-            <div className={styles.formLabel}>EndTime</div>
+            <div className={styles.formLabel}>Offer Expiration</div>
             <div className={styles.formInputCont}>
               <Datetime
                 value={endTime}

@@ -19,6 +19,7 @@ import AccountDetails from '../pages/AccountDetails';
 import NFTItem from '../pages/NFTItem';
 import CollectionCreate from '../pages/Collection/Create';
 import PriceActions from 'actions/price.actions';
+import HeaderActions from 'actions/header.actions';
 
 const App = ({ paintStore }) => {
   const canvasRef = useRef(null);
@@ -44,6 +45,7 @@ const App = ({ paintStore }) => {
     useEffect(() => initPaintStore(), [paintStore]);
 
     useEffect(() => {
+      dispatch(HeaderActions.toggleSearchbar(false));
       resetBoard();
       window.addEventListener('resize', initPaintStore);
 
