@@ -58,7 +58,7 @@
     "html-webpack-plugin": "4.0.0-beta.5",
     "identity-obj-proxy": "3.0.0",
     "is-wsl": "^1.1.0",
-    "jazzicon": "git@github.com:Fantom-foundation/jazzicon.git",
+    "jazzicon": "https://github.com/Fantom-foundation/jazzicon.git",
     "jest": "24.8.0",
     "jest-environment-jsdom-fourteen": "0.1.0",
     "jest-resolve": "24.8.0",

@@ -59,6 +59,8 @@ const AccountDetails = () => {
   const [tab, setTab] = useState(0);
   const [activityLoading, setActivityLoading] = useState(false);
   const [activities, setActivities] = useState([]);
+  const [offersLoading, setOffersLoading] = useState(false);
+  const [offers, setOffers] = useState([]);
 
   const getUserDetails = async account => {
     setLoading(true);
@@ -72,6 +74,8 @@ const AccountDetails = () => {
   };
 
   const fetchNFTs = async step => {
+    if (fetching) return;
+
     dispatch(TokensActions.startFetching());
 
     try {
@@ -124,11 +128,6 @@ const AccountDetails = () => {
   };
 
   useEffect(() => {
-    dispatch(TokensActions.resetTokens());
-    fetchNFTs(0);
-  }, [collections, category, uid]);
-
-  useEffect(() => {
     if (tab === 0) {
       dispatch(TokensActions.resetTokens());
       fetchNFTs(0);
@@ -144,36 +143,25 @@ const AccountDetails = () => {
       setActivityLoading(true);
       const { data } = await getAccountActivity(uid);
       const _activities = [];
-      data.bids.map(bid =>
+      data.bids.map(({ owner, ...rest }) =>
         _activities.push({
           event: 'Bid',
-          createdAt: bid.createdAt,
-          name: bid.name,
-          price: bid.price,
+          ...rest,
           quantity: 1,
-          from: uid,
-          to: bid.owner,
+          to: owner,
         })
       );
       data.listings.map(listing =>
         _activities.push({
           event: 'Listing',
-          createdAt: listing.createdAt,
-          name: listing.name,
-          price: listing.price,
-          quantity: listing.quantity,
-          from: uid,
+          ...listing,
         })
       );
-      data.offers.map(offer =>
+      data.offers.map(({ owner, ...rest }) =>
         _activities.push({
           event: 'Offer',
-          createdAt: offer.createdAt,
-          name: offer.name,
-          price: offer.price,
-          quantity: offer.quantity,
-          from: uid,
-          to: offer.owner,
+          ...rest,
+          to: owner,
         })
       );
       _activities.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
@@ -186,11 +174,13 @@ const AccountDetails = () => {
 
   const getOffers = async () => {
     try {
-      setActivityLoading(true);
-      await getActivityFromOthers(uid);
-      setActivityLoading(false);
+      setOffersLoading(true);
+      const { data } = await getActivityFromOthers(uid);
+      data.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
+      setOffers(data);
+      setOffersLoading(false);
     } catch {
-      setActivityLoading(false);
+      setOffersLoading(false);
     }
   };
 
@@ -285,9 +275,11 @@ const AccountDetails = () => {
             </div>
           )}
         </div>
-        <div className={styles.settings} onClick={openAccountSettings}>
-          <img src={iconSettings} className={styles.settingsIcon} />
-        </div>
+        {isMe && (
+          <div className={styles.settings} onClick={openAccountSettings}>
+            <img src={iconSettings} className={styles.settingsIcon} />
+          </div>
+        )}
         <div className={styles.avatarWrapper}>
           {loading ? (
             <Skeleton width={150} height={150} className={styles.avatar} />
@@ -366,13 +358,18 @@ const AccountDetails = () => {
                           <Skeleton width={100} height={20} />
                         )}
                       </div>
-                      <div className={styles.name}>
-                        {activity ? (
-                          activity.name
-                        ) : (
+                      {activity ? (
+                        <Link
+                          to={`/explore/${activity.contractAddress}/${activity.tokenID}`}
+                          className={styles.name}
+                        >
+                          {activity.name}
+                        </Link>
+                      ) : (
+                        <div className={styles.name}>
                           <Skeleton width={120} height={20} />
-                        )}
-                      </div>
+                        </div>
+                      )}
                       <div className={styles.price}>
                         {activity ? (
                           `${activity.price} FTM`
@@ -412,7 +409,55 @@ const AccountDetails = () => {
               </div>
             </>
           ) : (
-            <div></div>
+            <>
+              <div className={styles.activityHeader}>
+                <div className={styles.owner}>From</div>
+                <div className={styles.price}>Price</div>
+                <div className={styles.quantity}>Quantity</div>
+                <div className={styles.date}>Date</div>
+              </div>
+              <div className={styles.activityList}>
+                {(offersLoading ? new Array(5).fill(null) : offers).map(
+                  (offer, idx) => (
+                    <div key={idx} className={styles.activity}>
+                      {offer ? (
+                        <Link
+                          to={`/account/${offer.creator}`}
+                          className={styles.owner}
+                        >
+                          {shortenAddress(offer.creator)}
+                        </Link>
+                      ) : (
+                        <div className={styles.owner}>
+                          <Skeleton width={130} height={20} />
+                        </div>
+                      )}
+                      <div className={styles.price}>
+                        {offer ? (
+                          `${offer.pricePerItem} FTM`
+                        ) : (
+                          <Skeleton width={100} height={20} />
+                        )}
+                      </div>
+                      <div className={styles.quantity}>
+                        {offer ? (
+                          offer.quantity
+                        ) : (
+                          <Skeleton width={80} height={20} />
+                        )}
+                      </div>
+                      <div className={styles.date}>
+                        {offer ? (
+                          formatDate(offer.createdAt)
+                        ) : (
+                          <Skeleton width={120} height={20} />
+                        )}
+                      </div>
+                    </div>
+                  )
+                )}
+              </div>
+            </>
           )}
         </div>
       </div>
