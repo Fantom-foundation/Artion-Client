@@ -124,16 +124,18 @@ const WFTMModal = ({ visible, onClose }) => {
                     </div>
                   )}
                 </div>
-                <input
-                  className={styles.input}
-                  placeholder="0.0"
-                  value={amount}
-                  onChange={e =>
-                    setAmount(isNaN(e.target.value) ? amount : e.target.value)
-                  }
-                />
-                <div className={styles.usdVal}>
-                  ${((parseFloat(amount) || 0) * price).toFixed(2)}
+                <div className={styles.rightBox}>
+                  <input
+                    className={styles.input}
+                    placeholder="0.0"
+                    value={amount}
+                    onChange={e =>
+                      setAmount(isNaN(e.target.value) ? amount : e.target.value)
+                    }
+                  />
+                  <div className={styles.usdVal}>
+                    ${((parseFloat(amount) || 0) * price).toFixed(2)}
+                  </div>
                 </div>
               </div>
             </div>
@@ -156,16 +158,18 @@ const WFTMModal = ({ visible, onClose }) => {
                     </div>
                   )}
                 </div>
-                <input
-                  className={styles.input}
-                  placeholder="0.0"
-                  value={amount}
-                  onChange={e =>
-                    setAmount(isNaN(e.target.value) ? amount : e.target.value)
-                  }
-                />
-                <div className={styles.usdVal}>
-                  ${((parseFloat(amount) || 0) * price).toFixed(2)}
+                <div className={styles.rightBox}>
+                  <input
+                    className={styles.input}
+                    placeholder="0.0"
+                    value={amount}
+                    onChange={e =>
+                      setAmount(isNaN(e.target.value) ? amount : e.target.value)
+                    }
+                  />
+                  <div className={styles.usdVal}>
+                    ${((parseFloat(amount) || 0) * price).toFixed(2)}
+                  </div>
                 </div>
               </div>
             </div>
