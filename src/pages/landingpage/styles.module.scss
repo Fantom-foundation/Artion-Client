@@ -164,3 +164,101 @@
   left: calc(100vw * .12 - 220px);
   transform: rotate(-15deg) scale(.6);
 }
+
+@media only screen and (max-width: 991px) {
+  .body {
+    padding-top: 70px;
+  }
+
+  .buttonsContainer {
+    flex-direction: column;
+  }
+
+  .exploreButton {
+    margin-right: 0;
+    margin-bottom: 30px;
+  }
+
+  .card1 {
+    top: 420px;
+    right: calc(100vw * .2 - 160px);
+    transform: rotate(15deg) scale(0.7);
+  }
+  
+  .card2 {
+    top: 170px;
+    right: calc(100vw * .1 - 120px);
+    transform: rotate(15deg) scale(0.5);
+  }
+  
+  .card3 {
+    top: 480px;
+    left: calc(100vw * .15 - 10px);
+    transform: rotate(-15deg) scale(0.7);
+  }
+  
+  .card4 {
+    top: 180px;
+    left: calc(100vw * .12 - 150px);
+    transform: rotate(-15deg) scale(0.7);
+  }
+  
+  .card5 {
+    top: 430px;
+    left: calc(100vw * .12 - 180px);
+    transform: rotate(-15deg) scale(.42);
+  }
+}
+
+@media only screen and (max-width: 600px) {
+  .title {
+    font-size: 38px;
+    line-height: 46px;
+  }
+
+  .subtitle {
+    font-size: 20px;
+    line-height: 32px;
+  }
+
+  .body {
+    width: calc(100% - 80px);
+    padding-top: 30px;
+  }
+
+  .buttonsContainer,
+  .exploreButton,
+  .createButton {
+    width: 100%;
+  }
+
+  .card1 {
+    top: 400px;
+    right: calc(100vw * .2 - 150px);
+    transform: rotate(15deg) scale(0.5);
+  }
+  
+  .card2 {
+    top: 240px;
+    right: calc(100vw * .1 - 150px);
+    transform: rotate(15deg) scale(0.35);
+  }
+  
+  .card3 {
+    top: 460px;
+    left: calc(100vw * .15 - 100px);
+    transform: rotate(-15deg) scale(0.5);
+  }
+  
+  .card4 {
+    top: 280px;
+    left: calc(100vw * .12 - 170px);
+    transform: rotate(-15deg) scale(0.5);
+  }
+  
+  .card5 {
+    top: 500px;
+    left: calc(100vw * .12 - 200px);
+    transform: rotate(-15deg) scale(.3);
+  }
+}
