@@ -138,8 +138,7 @@
 
 .content {
   width: 100%;
-  height: calc(100vh - 100px);
-  flex: 0 0 calc(100vh - 100px);
+  max-height: calc(100vh - 100px);
   box-sizing: border-box;
   padding: 0 40px 40px;
   display: flex;
@@ -154,8 +153,11 @@
 }
 
 .contentBody {
-  flex: 1;
+  width: 100%;
+  height: fit-content;
+  max-height: 100%;
   overflow-y: auto;
+  overflow-x: auto;
 }
 
 .tab {
@@ -179,8 +181,16 @@
   }
 }
 
+.tableWapper {
+  width: fit-content;
+  min-width: 100%;
+  height: fit-content;
+}
+
 .activityHeader,
 .activity {
+  min-width: 900px;
+  box-sizing: border-box;
   display: flex;
   align-items: center;
   font-weight: 500;
@@ -190,6 +200,7 @@
 }
 
 .activityHeader {
+  width: 100%;
   padding: 9px 14px;
   background-color: #F6F7F9;
 }
@@ -203,6 +214,16 @@
     color: #2479FA;
     text-decoration: none;
   }
+}
+
+.activity * {
+  white-space: nowrap;
+  padding-right: 16px;
+}
+
+.activityList {
+  width: fit-content;
+  min-width: 100%;
 }
 
 .event {
@@ -227,4 +248,10 @@
 
 .date {
   flex: 2 0 0;
+}
+
+@media only screen and (max-width: 600px) {
+  .content {
+    padding: 0 20px 20px;
+  }
 }
