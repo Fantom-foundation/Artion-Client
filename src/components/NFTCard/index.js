@@ -188,7 +188,7 @@ const BaseCard = ({ item, loading, style }) => {
             <Skeleton width="100%" height={20} />
           ) : (
             <Typography component="h4" className={classes.collection}>
-              {collection?.name}
+              {collection?.collectionName || collection?.name}
             </Typography>
           )}
           {loading || fetching ? (
