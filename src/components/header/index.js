@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { useHistory, withRouter, NavLink, Link } from 'react-router-dom';
 import cx from 'classnames';
 import Skeleton from 'react-loading-skeleton';
-import MenuItem from '@material-ui/core/MenuItem';
 import Menu from '@material-ui/core/Menu';
 import { UnsupportedChainIdError, useWeb3React } from '@web3-react/core';
 import { ExpandMore, Search as SearchIcon } from '@material-ui/icons';
@@ -20,6 +19,8 @@ import Identicon from 'components/Identicon';
 
 import logoWhite from 'assets/svgs/logo_white.svg';
 import logoBlue from 'assets/svgs/logo_blue.svg';
+import logoSmallWhite from 'assets/svgs/logo_small_white.svg';
+import logoSmallBlue from 'assets/svgs/logo_small_blue.svg';
 import iconUser from 'assets/svgs/user.svg';
 import iconAdd from 'assets/svgs/add.svg';
 import iconSwap from 'assets/svgs/swap.svg';
@@ -240,30 +241,27 @@ const NiftyHeader = ({ light }) => {
       }}
     >
       {isWalletConnected && (
-        <MenuItem
-          classes={{ root: cx(styles.menuItem, styles.topItem) }}
+        <div
+          className={cx(styles.menuItem, styles.topItem)}
           onClick={goToMyProfile}
         >
           <img src={iconUser} className={styles.menuIcon} />
           My Profile
-        </MenuItem>
+        </div>
       )}
-      <MenuItem
-        classes={{ root: styles.menuItem }}
-        onClick={handleCreateCollection}
-      >
+      <div className={styles.menuItem} onClick={handleCreateCollection}>
         <img src={iconAdd} className={styles.menuIcon} />
         Create Collection
-      </MenuItem>
-      <MenuItem classes={{ root: styles.menuItem }} onClick={openWrapStation}>
+      </div>
+      <div className={styles.menuItem} onClick={openWrapStation}>
         <img src={iconSwap} className={styles.menuIcon} />
         FTM / WFTM Station
-      </MenuItem>
+      </div>
       <div className={styles.menuSeparator} />
-      <MenuItem classes={{ root: styles.menuItem }} onClick={handleSignOut}>
+      <div className={styles.menuItem} onClick={handleSignOut}>
         <img src={iconExit} className={styles.menuIcon} />
         Sign Out
-      </MenuItem>
+      </div>
     </Menu>
   );
 
@@ -271,7 +269,16 @@ const NiftyHeader = ({ light }) => {
     <div className={cx(styles.header, light && styles.lightBg)}>
       <div className={styles.left}>
         <Link to="/" className={styles.logo}>
-          <img src={light ? logoBlue : logoWhite} alt="logo" />
+          <img
+            src={light ? logoBlue : logoWhite}
+            alt="logo"
+            className={styles.logoBig}
+          />
+          <img
+            src={light ? logoSmallBlue : logoSmallWhite}
+            alt="logo"
+            className={styles.logoSmall}
+          />
         </Link>
         {isSearchbarShown && (
           <div
@@ -375,14 +382,14 @@ const NiftyHeader = ({ light }) => {
       <div className={styles.menu}>
         <NavLink
           to="/exploreall"
-          className={styles.menuLink}
+          className={cx(styles.menuLink, styles.link)}
           activeClassName={styles.active}
         >
           Explore
         </NavLink>
         <NavLink
           to="/create"
-          className={styles.menuLink}
+          className={cx(styles.menuLink, styles.link)}
           activeClassName={styles.active}
         >
           Create

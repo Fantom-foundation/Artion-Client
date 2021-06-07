@@ -1050,7 +1050,7 @@ const NFTItem = () => {
                   {auction.current ? 'Update Auction' : 'Start Auction'}
                 </div>
               )}
-              {!auction.current && (
+              {(!auction.current || auction.current.resulted) && (
                 <>
                   {listing.current ? (
                     <div className={styles.headerButton} onClick={cancelList}>
@@ -1073,7 +1073,7 @@ const NFTItem = () => {
               )}
             </>
           ) : (
-            !auction.current && (
+            (!auction.current || auction.current.resulted) && (
               <div
                 className={cx(
                   styles.headerButton,

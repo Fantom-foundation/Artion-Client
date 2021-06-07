@@ -85,6 +85,13 @@
   border: 2px solid rgba(0, 0, 0, 0.1);
 }
 
+.rightBox {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  height: 50px;
+}
+
 .balance {
   font-weight: 400;
   font-size: 16px;
@@ -104,9 +111,11 @@
 .input {
   margin-right: 10px;
   width: 50px;
+  height: 100%;
   flex-grow: 1;
   font-size: 18px;
   color: #3D3D3D;
+  background-color: transparent;
   text-align: right;
   border: none;
   outline: none;
@@ -166,4 +175,38 @@
   cursor: not-allowed;
   box-shadow: none !important;
   opacity: 0.7;
+}
+
+@media only screen and (max-width: 600px) {
+  .modal {
+    padding: 40px 20px;
+  }
+
+  .title {
+    font-size: 20px;
+  }
+
+  .swapBoxInner {
+    flex-direction: column;
+  }
+
+  .rightBox {
+    width: 100%;
+    flex: 0 0 50px;
+    border-top: 1.5px solid rgba(0, 0, 0, 0.1);
+  }
+
+  .footer {
+    flex-direction: column;
+  }
+
+  .listButton,
+  .cancelButton {
+    width: calc(100% - 48px);
+  }
+
+  .listButton {
+    margin-right: 0;
+    margin-bottom: 20px;
+  }
 }

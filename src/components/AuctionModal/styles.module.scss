@@ -132,3 +132,27 @@
   box-shadow: none;
   opacity: 0.7;
 }
+
+@media only screen and (max-width: 600px) {
+  .modal {
+    padding: 40px 20px;
+  }
+
+  .title {
+    font-size: 20px;
+  }
+
+  .footer {
+    flex-direction: column;
+  }
+
+  .listButton,
+  .cancelButton {
+    width: calc(100% - 48px);
+  }
+
+  .listButton {
+    margin-right: 0;
+    margin-bottom: 20px;
+  }
+}

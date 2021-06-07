@@ -331,7 +331,7 @@ const AccountDetails = () => {
           {tab === 0 ? (
             <NFTsGrid items={tokens} loading={fetching} />
           ) : tab === 1 ? (
-            <>
+            <div className={styles.tableWapper}>
               <div className={styles.activityHeader}>
                 <div className={styles.event}>Event</div>
                 <div className={styles.name}>Item</div>
@@ -400,7 +400,7 @@ const AccountDetails = () => {
                   )
                 )}
               </div>
-            </>
+            </div>
           ) : (
             <>
               <div className={styles.activityHeader}>

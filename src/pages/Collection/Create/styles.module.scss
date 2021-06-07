@@ -129,6 +129,7 @@
 .categoryButton {
   flex: 0 0 200px;
   height: 56px;
+  padding: 8px 12px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -213,7 +214,7 @@
 }
 
 .linkIconWrapper {
-  width: 76px;
+  flex: 0 0 76px;
   border-right: 1.5px solid rgba(0, 0, 0, .1);
   display: flex;
   align-items: center;
@@ -244,6 +245,7 @@
   font-size: 16px;
   color: #333;
   background-color: transparent;
+  flex-basis: 0px;
 
   &::placeholder {
     color: #888;
@@ -277,4 +279,37 @@
   cursor: not-allowed;
   box-shadow: none !important;
   opacity: 0.7;
+}
+
+@media only screen and (max-width: 768px) {
+  .inner {
+    margin: 0 auto;
+    padding: 0 40px;
+  }
+
+  .categoryList {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .categoryButton,
+  .selectedCategory {
+    flex: 0 0 56px;
+  }
+
+  .selectedCategory {
+    margin-left: 0;
+    margin-top: 16px;
+  }
+
+  .linkIconWrapper {
+    flex: 0 0 50px;
+  }
+}
+
+@media only screen and (max-width: 600px) {
+  .inner {
+    margin: 0;
+    padding: 0 30px;
+  }
 }

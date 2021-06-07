@@ -24,6 +24,10 @@
   }
 }
 
+.logoSmall {
+  display: none;
+}
+
 .searchcont {
   margin-left: 30px;
   width: 400px;
@@ -229,6 +233,7 @@
   display: flex;
   align-items: center;
   background-color: transparent !important;
+  cursor: pointer;
 
   &:last-child {
     margin-bottom: 0 !important;
@@ -263,5 +268,21 @@
   .account {
     opacity: 1;
     border-color: rgba(0, 0, 0, .2);
+  }
+}
+
+@media only screen and (max-width: 767px) {
+  .link {
+    display: none;
+  }
+}
+
+@media only screen and (max-width: 600px) {
+  .logoBig {
+    display: none;
+  }
+
+  .logoSmall {
+    display: block;
   }
 }
