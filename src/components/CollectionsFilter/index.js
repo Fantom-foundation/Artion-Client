@@ -153,7 +153,7 @@ const ExploreCollections = () => {
   const dispatch = useDispatch();
 
   const classes = useStyles();
-  const [expanded, setExpanded] = useState(true);
+  const [expanded, setExpanded] = useState(false);
   const [filter, setFilter] = useState('');
 
   const { collections: collectionItems, collectionsLoading } = useSelector(

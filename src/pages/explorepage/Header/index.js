@@ -32,7 +32,7 @@ const ExploreHeader = () => {
           onClick={() => handleSelectCategory(cat.id)}
         >
           <img src={cat.icon} />
-          {cat.label}
+          <span>{cat.label}</span>
         </div>
       ))}
     </div>

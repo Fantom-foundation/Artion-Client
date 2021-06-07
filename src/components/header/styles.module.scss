@@ -11,8 +11,10 @@
 }
 
 .left {
+  flex: 1;
   display: flex;
   align-items: center;
+  margin-right: 20px;
 }
 
 .logo {
@@ -30,7 +32,8 @@
 
 .searchcont {
   margin-left: 30px;
-  width: 400px;
+  flex: 1;
+  max-width: 400px;
   height: 50px;
   box-sizing: border-box;
   border-radius: 10px;
@@ -271,13 +274,7 @@
   }
 }
 
-@media only screen and (max-width: 767px) {
-  .link {
-    display: none;
-  }
-}
-
-@media only screen and (max-width: 600px) {
+@media only screen and (max-width: 900px) {
   .logoBig {
     display: none;
   }

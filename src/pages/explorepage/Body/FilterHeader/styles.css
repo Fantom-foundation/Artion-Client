@@ -140,3 +140,15 @@
 .menuItemSelected {
     color: #1665EE !important;
 }
+
+@media only screen and (max-width: 600px) {
+    .filterHeaderRoot {
+        padding-right: 0;
+        flex-direction: column-reverse;
+        align-items: flex-start;
+    }
+
+    .filterHeaderLeft {
+        margin-top: 6px;
+    }
+}
