@@ -46,3 +46,10 @@
     border-top: none;
   }
 }
+
+@media only screen and (max-width: 600px) {
+  .body {
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+}

@@ -1,8 +1,8 @@
 export const SALES_CONTRACT_ADDRESS =
-  '0x428337077749cdf65000671a5c2377ef986a45c6';
+  '0x5597B2a31edd8C87c25427CE5eA464B48529DC40';
 
 export const AUCTION_CONTRACT_ADDRESS =
-  '0xc4baa40a4c286423c74d2dfeee3ac8d616e41b46';
+  '0x754C4BeDA855c64F6D71A60A4D1eF28c26D7fA47';
 
 export const WFTM_ADDRESS = '0x21be370d5312f44cb42ce377bc9b8a0cef1a4c83';
 
@@ -263,9 +263,19 @@ export const SALES_CONTRACT_ABI = [
     type: 'function',
   },
   {
+    inputs: [],
+    name: 'auction',
+    outputs: [
+      { internalType: 'contract IFantomAuction', name: '', type: 'address' },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
     inputs: [
       { internalType: 'address', name: '_nftAddress', type: 'address' },
       { internalType: 'uint256', name: '_tokenId', type: 'uint256' },
+      { internalType: 'address payable', name: '_owner', type: 'address' },
     ],
     name: 'buyItem',
     outputs: [],
@@ -331,10 +341,10 @@ export const SALES_CONTRACT_ABI = [
     inputs: [
       { internalType: 'address', name: '', type: 'address' },
       { internalType: 'uint256', name: '', type: 'uint256' },
+      { internalType: 'address', name: '', type: 'address' },
     ],
     name: 'listings',
     outputs: [
-      { internalType: 'address payable', name: 'owner', type: 'address' },
       { internalType: 'uint256', name: 'quantity', type: 'uint256' },
       { internalType: 'uint256', name: 'pricePerItem', type: 'uint256' },
       { internalType: 'uint256', name: 'startingTime', type: 'uint256' },
@@ -388,6 +398,13 @@ export const SALES_CONTRACT_ABI = [
     type: 'function',
   },
   {
+    inputs: [{ internalType: 'address', name: '_auction', type: 'address' }],
+    name: 'updateAuction',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
     inputs: [
       { internalType: 'address', name: '_nftAddress', type: 'address' },
       { internalType: 'uint256', name: '_tokenId', type: 'uint256' },
@@ -416,6 +433,17 @@ export const SALES_CONTRACT_ABI = [
       },
     ],
     name: 'updatePlatformFeeRecipient',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [
+      { internalType: 'address', name: '_nftAddress', type: 'address' },
+      { internalType: 'uint256', name: '_tokenId', type: 'uint256' },
+      { internalType: 'address', name: '_owner', type: 'address' },
+    ],
+    name: 'validateCancelListing',
     outputs: [],
     stateMutability: 'nonpayable',
     type: 'function',

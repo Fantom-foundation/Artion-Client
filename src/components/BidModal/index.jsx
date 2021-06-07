@@ -87,7 +87,7 @@ const BidModal = ({
               styles.cancelButton,
               (contractApproving || confirming) && styles.disabled
             )}
-            onClick={!(contractApproving || confirming) && onClose}
+            onClick={!(contractApproving || confirming) ? onClose : null}
           >
             Cancel
           </div>

@@ -31,6 +31,7 @@ import Identicon from 'components/Identicon';
 import {
   fetchTokenURI,
   increaseViewCount,
+  getListings,
   getOffers,
   getTradeHistory,
   fetchCollection,
@@ -42,7 +43,6 @@ import {
 import {
   getSalesContract,
   getNFTContract,
-  getListing,
   listItem,
   cancelListing,
   updateListing,
@@ -122,7 +122,7 @@ const NFTItem = () => {
   const [bidModalVisible, setBidModalVisible] = useState(false);
   const [ownersModalVisible, setOwnersModalVisible] = useState(false);
 
-  const [itemListing, setItemListing] = useState(false);
+  const [listingItem, setListingItem] = useState(false);
   const [priceUpdating, setPriceUpdating] = useState(false);
   const [offerPlacing, setOfferPlacing] = useState(false);
   const [offerCanceling, setOfferCanceling] = useState(false);
@@ -142,7 +142,7 @@ const NFTItem = () => {
   const [now, setNow] = useState(new Date());
   const [loading, setLoading] = useState(false);
   const auction = useRef(null);
-  const listing = useRef(null);
+  const listings = useRef([]);
   const offers = useRef([]);
   const tradeHistory = useRef([]);
 
@@ -176,6 +176,7 @@ const NFTItem = () => {
         const res = await contract.ownerOf(tokenID);
         setOwner(res);
       } else if (type === 1155) {
+        setOwner(null);
         const { data: _tokenInfo } = await get1155Info(address, tokenID);
         setTokenInfo(_tokenInfo);
         try {
@@ -205,8 +206,8 @@ const NFTItem = () => {
 
   const getItemListings = async () => {
     try {
-      const _listing = await getListing(address, tokenID);
-      listing.current = _listing;
+      const { data } = await getListings(address, tokenID);
+      listings.current = data;
     } catch (e) {
       console.log(e);
     }
@@ -259,55 +260,102 @@ const NFTItem = () => {
     );
   };
 
-  const itemListedHandler = (
+  const itemListedHandler = async (
     owner,
     nft,
     id,
     quantity,
     pricePerItem,
-    startingTime,
-    isPrivate,
-    allowedAddress
+    startingTime
   ) => {
     if (eventMatches(nft, id)) {
-      listing.current = {
+      const newListing = {
         owner,
         quantity: parseFloat(quantity.toString()),
-        pricePerItem: parseFloat(pricePerItem.toString()) / 10 ** 18,
-        startingTime: parseFloat(startingTime.toString()),
-        allowedAddress,
+        price: parseFloat(pricePerItem.toString()) / 10 ** 18,
+        startTime: parseFloat(startingTime.toString()),
       };
+      try {
+        const { data } = await getUserAccountDetails(owner);
+        newListing.alias = data?.alias;
+        newListing.image = data?.imageHash;
+        listings.current.push(newListing);
+      } catch {
+        listings.current.push(newListing);
+      }
     }
   };
 
   const itemUpdatedHandler = (owner, nft, id, newPrice) => {
     if (eventMatches(nft, id)) {
-      const newListing = {
-        ...listing.current,
-        pricePerItem: parseFloat(newPrice.toString()) / 10 ** 18,
-      };
-      listing.current = newListing;
+      listings.current.map(listing => {
+        if (listing.owner.toLowerCase() === owner.toLowerCase()) {
+          listing.price = parseFloat(newPrice.toString()) / 10 ** 18;
+        }
+      });
     }
   };
 
   const itemCanceledHandler = (owner, nft, id) => {
     if (eventMatches(nft, id)) {
-      listing.current = null;
+      listings.current = listings.current.filter(
+        listing => listing.owner.toLowerCase() !== owner.toLowerCase()
+      );
     }
   };
 
-  const itemSoldHandler = (seller, buyer, nft, id, price) => {
+  const itemSoldHandler = async (seller, buyer, nft, id, price) => {
     if (eventMatches(nft, id)) {
-      listing.current = null;
-      setOwner(buyer);
-      const newHistory = {
+      const listing = listings.current.find(
+        listing => listing.owner.toLowerCase() === seller.toLowerCase()
+      );
+      listings.current = listings.current.filter(
+        listing => listing.owner.toLowerCase() !== seller.toLowerCase()
+      );
+      if (tokenType === 721) {
+        setOwner(buyer);
+      } else {
+        const sellerIndex = holders.findIndex(
+          holder => holder.address.toLowerCase() === seller.toLowerCase()
+        );
+        const buyerIndex = holders.findIndex(
+          holder => holder.address.toLowerCase() === buyer.toLowerCase()
+        );
+        if (sellerIndex > -1) {
+          holders[sellerIndex].supply -= listing.quantity;
+        }
+        if (buyerIndex > -1) {
+          holders[buyerIndex].supply += listing.quantity;
+        }
+        if (holders[sellerIndex].supply === 0) {
+          const newHolders = holders.filter(
+            (holder, idx) => idx !== sellerIndex
+          );
+          setHolders(newHolders);
+        } else {
+          setHolders(holders);
+        }
+      }
+      const newTradeHistory = {
         from: seller,
         to: buyer,
         price: parseFloat(price.toString()) / 10 ** 18,
+        quantity: listing.quantity,
         createdAt: new Date().toISOString(),
       };
-      const newTradeHistory = [newHistory, ...tradeHistory.current];
-      tradeHistory.current = newTradeHistory;
+      try {
+        const [from, to] = await Promise.all([
+          getUserAccountDetails(seller),
+          getUserAccountDetails(buyer),
+        ]);
+        newTradeHistory.fromAlias = from?.data.alias;
+        newTradeHistory.fromImage = from?.data.imageHash;
+        newTradeHistory.toAlias = to?.data.alias;
+        newTradeHistory.toImage = to?.data.imageHash;
+      } catch (e) {
+        console.log(e);
+      }
+      tradeHistory.current.push(newTradeHistory);
     }
   };
 
@@ -630,10 +678,10 @@ const NFTItem = () => {
         ) > -1;
 
   const handleListItem = async (_price, quantity) => {
-    if (itemListing) return;
+    if (listingItem) return;
 
     try {
-      setItemListing(true);
+      setListingItem(true);
 
       const price = ethers.utils.parseEther(_price);
       const tx = await listItem(
@@ -649,9 +697,9 @@ const NFTItem = () => {
       toast('success', 'Item listed successfully!');
 
       setSellModalVisible(false);
-      setItemListing(false);
+      setListingItem(false);
     } catch {
-      setItemListing(false);
+      setListingItem(false);
     }
   };
 
@@ -681,16 +729,21 @@ const NFTItem = () => {
 
   const cancelList = async () => {
     await cancelListing(address, tokenID);
-    listing.current = null;
+    listings.current = listings.current.filter(
+      listing => listing.owner.toLowerCase() !== account.toLowerCase()
+    );
 
     toast('success', 'Item unlisted successfully!');
   };
 
-  const handleBuyItem = async _price => {
+  const handleBuyItem = async listing => {
+    const _price = listing.price * listing.quantity;
     const price = ethers.utils.parseEther(_price.toString());
+    console.log('=====>', address, tokenID, listing.owner);
     const tx = await buyItem(
       address,
       ethers.BigNumber.from(tokenID),
+      listing.owner,
       price,
       account
     );
@@ -1004,6 +1057,16 @@ const NFTItem = () => {
     return `${s} seconds`;
   };
 
+  const myListing = () => {
+    return listings.current.find(
+      listing => listing.owner.toLowerCase() === account.toLowerCase()
+    );
+  };
+
+  const hasListing = () => {
+    return myListing() !== undefined;
+  };
+
   const renderProperties = properties => {
     const res = [];
     Object.keys(properties).map((key, idx) => {
@@ -1021,6 +1084,165 @@ const NFTItem = () => {
     });
     return res;
   };
+
+  const renderItemInfo = () => (
+    <>
+      <div className={styles.itemCategory}>
+        {collection?.collectionName || collection?.name || ''}
+      </div>
+      <div className={styles.itemName}>{info?.name || ''}</div>
+      <div className={styles.itemStats}>
+        {(ownerInfoLoading || owner || tokenInfo) && (
+          <div className={styles.itemOwner}>
+            {ownerInfoLoading ? (
+              <Skeleton width={180} height={25} />
+            ) : tokenType === 721 ? (
+              <>
+                <div className={styles.ownerAvatar}>
+                  {ownerInfo?.imageHash ? (
+                    <img
+                      src={`https://gateway.pinata.cloud/ipfs/${ownerInfo.imageHash}`}
+                      className={styles.avatar}
+                    />
+                  ) : (
+                    <Identicon account={owner} size={24} />
+                  )}
+                </div>
+                Owned by&nbsp;
+                <Link to={`/account/${owner}`} className={styles.ownerName}>
+                  {isMine ? 'Me' : ownerInfo?.alias || shortenAddress(owner)}
+                </Link>
+              </>
+            ) : (
+              <>
+                <div
+                  className={cx(styles.itemViews, styles.clickable)}
+                  onClick={() => setOwnersModalVisible(true)}
+                >
+                  <PeopleIcon style={styles.itemIcon} />
+                  &nbsp;{tokenInfo.holders}
+                  &nbsp;owner{tokenInfo.holders > 1 && 's'}
+                </div>
+                <div className={styles.itemViews}>
+                  <ViewModuleIcon style={styles.itemIcon} />
+                  &nbsp;{tokenInfo.totalSupply} total
+                </div>
+              </>
+            )}
+          </div>
+        )}
+        <div className={styles.itemViews}>
+          <FontAwesomeIcon icon={faEye} color="#00000099" />
+          &nbsp;
+          {isNaN(views) ? (
+            <Skeleton width={80} height={24} />
+          ) : (
+            `${views} View${views > 1 ? 's' : ''}`
+          )}
+        </div>
+      </div>
+    </>
+  );
+
+  const renderAboutPanel = () => (
+    <Panel
+      title={
+        <div className={styles.panelTitle}>
+          About&nbsp;
+          {collectionLoading ? (
+            <Skeleton width={80} height={20} />
+          ) : (
+            collection?.collectionName || collection?.name
+          )}
+        </div>
+      }
+    >
+      <div className={styles.panelBody}>
+        <div className={styles.collectionDescription}>
+          {collection?.description || 'Unverified Collection'}
+        </div>
+
+        <div className={styles.socialLinks}>
+          {collection?.siteUrl?.length > 0 && (
+            <a
+              href={collection?.siteUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={styles.socialLink}
+            >
+              <img src={webIcon} />
+            </a>
+          )}
+          {collection?.twitterHandle?.length > 0 && (
+            <a
+              href={`https://twitter.com/${collection?.twitterHandle}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={styles.socialLink}
+            >
+              <img src={twitterIcon} />
+            </a>
+          )}
+          {collection?.mediumHandle?.length > 0 && (
+            <a
+              href={`https://medium.com/${collection?.mediumHandle}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={styles.socialLink}
+            >
+              <img src={mediumIcon} />
+            </a>
+          )}
+          {collection?.telegram?.length > 0 && (
+            <a
+              href={`https://t.me/${collection?.telegram}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={styles.socialLink}
+            >
+              <img src={telegramIcon} />
+            </a>
+          )}
+          {collection?.discord?.length > 0 && (
+            <a
+              href={`https://discord.gg/${collection?.discord}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={styles.socialLink}
+            >
+              <img src={discordIcon} />
+            </a>
+          )}
+        </div>
+      </div>
+    </Panel>
+  );
+
+  const renderCollectionPanel = () => (
+    <Panel title="Chain Info">
+      <div className={styles.panelBody}>
+        <div className={styles.panelLine}>
+          <div className={styles.panelLabel}>Collection</div>
+          <a
+            href={`https://ftmscan.com/token/${address}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={styles.panelValue}
+          >
+            {shortenAddress(address)}
+          </a>
+        </div>
+        <div className={styles.panelLine}>
+          <div className={styles.panelLabel}>Network</div>
+          <div className={styles.panelValue}>Fantom Opera</div>
+        </div>
+        <div className={styles.panelLine}>
+          <div className={styles.panelLabel}>Chain ID</div>
+          <div className={styles.panelValue}>250</div>
+        </div>
+      </div>
+    </Panel>
+  );
 
   return (
     <div
@@ -1053,7 +1275,7 @@ const NFTItem = () => {
                 )}
               {(!auction.current || auction.current.resulted) && (
                 <>
-                  {listing.current ? (
+                  {hasListing() ? (
                     <div className={styles.headerButton} onClick={cancelList}>
                       Cancel Listing
                     </div>
@@ -1061,14 +1283,15 @@ const NFTItem = () => {
                   <div
                     className={cx(
                       styles.headerButton,
-                      (itemListing || priceUpdating) && styles.disabled
+                      (listingItem || priceUpdating) && styles.disabled
                     )}
                     onClick={() =>
-                      !(itemListing || priceUpdating) &&
-                      setSellModalVisible(true)
+                      !(listingItem || priceUpdating)
+                        ? setSellModalVisible(true)
+                        : null
                     }
                   >
-                    {listing.current ? 'Update Listing' : 'Sell'}
+                    {hasListing() ? 'Update Listing' : 'Sell'}
                   </div>
                 </>
               )}
@@ -1128,6 +1351,7 @@ const NFTItem = () => {
                 )}
               </div>
             </div>
+            <div className={styles.itemInfo}>{renderItemInfo()}</div>
             <div className={styles.itemInfoCont}>
               {info?.properties && (
                 <Panel title="Properties">
@@ -1136,163 +1360,26 @@ const NFTItem = () => {
                   </div>
                 </Panel>
               )}
-              <Panel
-                title={
-                  <div className={styles.panelTitle}>
-                    About&nbsp;
-                    {collectionLoading ? (
-                      <Skeleton width={80} height={20} />
-                    ) : (
-                      collection?.collectionName || collection?.name
-                    )}
-                  </div>
-                }
-              >
-                <div className={styles.panelBody}>
-                  <div className={styles.collectionDescription}>
-                    {collection?.description || 'Unverified Collection'}
-                  </div>
-
-                  <div className={styles.socialLinks}>
-                    {collection?.siteUrl?.length > 0 && (
-                      <a
-                        href={collection?.siteUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={styles.socialLink}
-                      >
-                        <img src={webIcon} />
-                      </a>
-                    )}
-                    {collection?.twitterHandle?.length > 0 && (
-                      <a
-                        href={`https://twitter.com/${collection?.twitterHandle}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={styles.socialLink}
-                      >
-                        <img src={twitterIcon} />
-                      </a>
-                    )}
-                    {collection?.mediumHandle?.length > 0 && (
-                      <a
-                        href={`https://medium.com/${collection?.mediumHandle}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={styles.socialLink}
-                      >
-                        <img src={mediumIcon} />
-                      </a>
-                    )}
-                    {collection?.telegram?.length > 0 && (
-                      <a
-                        href={`https://t.me/${collection?.telegram}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={styles.socialLink}
-                      >
-                        <img src={telegramIcon} />
-                      </a>
-                    )}
-                    {collection?.discord?.length > 0 && (
-                      <a
-                        href={`https://discord.gg/${collection?.discord}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={styles.socialLink}
-                      >
-                        <img src={discordIcon} />
-                      </a>
-                    )}
-                  </div>
-                </div>
-              </Panel>
-              <Panel title="Chain Info">
-                <div className={styles.panelBody}>
-                  <div className={styles.panelLine}>
-                    <div className={styles.panelLabel}>Collection</div>
-                    <a
-                      href={`https://ftmscan.com/token/${address}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={styles.panelValue}
-                    >
-                      {shortenAddress(address)}
-                    </a>
-                  </div>
-                  <div className={styles.panelLine}>
-                    <div className={styles.panelLabel}>Network</div>
-                    <div className={styles.panelValue}>Fantom Opera</div>
-                  </div>
-                  <div className={styles.panelLine}>
-                    <div className={styles.panelLabel}>Chain ID</div>
-                    <div className={styles.panelValue}>250</div>
-                  </div>
-                </div>
-              </Panel>
+              {renderAboutPanel()}
+              {renderCollectionPanel()}
             </div>
           </div>
           <div className={styles.itemMain}>
-            <div className={styles.wrapper}>
-              <div className={styles.itemCategory}>
-                {collection?.name || ''}
-              </div>
-              <div className={styles.itemName}>{info?.name || ''}</div>
-              <div className={styles.itemStats}>
-                {(ownerInfoLoading || owner || tokenInfo) && (
-                  <div className={styles.itemOwner}>
-                    {ownerInfoLoading ? (
-                      <Skeleton width={180} height={25} />
-                    ) : tokenType === 721 ? (
-                      <>
-                        <div className={styles.ownerAvatar}>
-                          {ownerInfo?.imageHash ? (
-                            <img
-                              src={`https://gateway.pinata.cloud/ipfs/${ownerInfo.imageHash}`}
-                              className={styles.avatar}
-                            />
-                          ) : (
-                            <Identicon account={owner} size={24} />
-                          )}
-                        </div>
-                        Owned by&nbsp;
-                        <Link
-                          to={`/account/${owner}`}
-                          className={styles.ownerName}
-                        >
-                          {isMine
-                            ? 'Me'
-                            : ownerInfo?.alias || shortenAddress(owner)}
-                        </Link>
-                      </>
-                    ) : (
-                      <>
-                        <div
-                          className={cx(styles.itemViews, styles.clickable)}
-                          onClick={() => setOwnersModalVisible(true)}
-                        >
-                          <PeopleIcon style={styles.itemIcon} />
-                          &nbsp;{tokenInfo.holders}
-                          &nbsp;owner{tokenInfo.holders > 1 && 's'}
-                        </div>
-                        <div className={styles.itemViews}>
-                          <ViewModuleIcon style={styles.itemIcon} />
-                          &nbsp;{tokenInfo.totalSupply} total
-                        </div>
-                      </>
-                    )}
+            <div className={styles.itemInfoWrapper}>{renderItemInfo()}</div>
+            {info?.properties && (
+              <div className={cx(styles.panelWrapper, styles.infoPanel)}>
+                <Panel title="Properties">
+                  <div className={styles.panelBody}>
+                    {renderProperties(info.properties)}
                   </div>
-                )}
-                <div className={styles.itemViews}>
-                  <FontAwesomeIcon icon={faEye} color="#00000099" />
-                  &nbsp;
-                  {isNaN(views) ? (
-                    <Skeleton width={80} height={24} />
-                  ) : (
-                    `${views} View${views > 1 ? 's' : ''}`
-                  )}
-                </div>
+                </Panel>
               </div>
+            )}
+            <div className={cx(styles.panelWrapper, styles.infoPanel)}>
+              {renderAboutPanel()}
+            </div>
+            <div className={cx(styles.panelWrapper, styles.infoPanel)}>
+              {renderCollectionPanel()}
             </div>
             {(winner || auction.current?.resulted === false) && (
               <div className={styles.panelWrapper}>
@@ -1360,7 +1447,9 @@ const NFTItem = () => {
                               (!canWithdraw() || bidWithdrawing) &&
                                 styles.disabled
                             )}
-                            onClick={() => canWithdraw() && handleWithdrawBid()}
+                            onClick={() =>
+                              canWithdraw() ? handleWithdrawBid() : null
+                            }
                           >
                             {bidWithdrawing
                               ? 'Withdrawing Bid...'
@@ -1433,28 +1522,54 @@ const NFTItem = () => {
             <div className={styles.panelWrapper}>
               <Panel title="Listings">
                 <div className={styles.listings}>
-                  {listing.current && (
-                    <div className={cx(styles.listing, styles.heading)}>
+                  <div className={cx(styles.listing, styles.heading)}>
+                    <div className={styles.owner}>From</div>
+                    <div className={styles.price}>Price</div>
+                    {tokenInfo?.totalSupply > 1 && (
+                      <div className={styles.quantity}>Quantity</div>
+                    )}
+                    <div className={styles.buy} />
+                  </div>
+                  {listings.current.map((listing, idx) => (
+                    <div className={styles.listing} key={idx}>
                       <div className={styles.owner}>
-                        {shortenAddress(listing.current.owner)}
+                        <Link to={`/account/${listing.owner}`}>
+                          <div className={styles.userAvatarWrapper}>
+                            {listing.image ? (
+                              <img
+                                src={`https://gateway.pinata.cloud/ipfs/${listing.image}`}
+                                className={styles.userAvatar}
+                              />
+                            ) : (
+                              <Identicon
+                                account={listing.owner}
+                                size={24}
+                                className={styles.userAvatar}
+                              />
+                            )}
+                          </div>
+                          {listing.alias || listing.owner.substr(0, 6)}
+                        </Link>
                       </div>
-                      <div className={styles.price}>
-                        {listing.current.pricePerItem} FTM
-                      </div>
+                      <div className={styles.price}>{listing.price} FTM</div>
+                      {tokenInfo?.totalSupply > 1 && (
+                        <div className={styles.quantity}>
+                          {listing.quantity}
+                        </div>
+                      )}
                       <div className={styles.buy}>
-                        {!isMine && (
+                        {listing.owner.toLowerCase() !==
+                          account.toLowerCase() && (
                           <div
                             className={styles.buyButton}
-                            onClick={() =>
-                              handleBuyItem(listing.current.pricePerItem)
-                            }
+                            onClick={() => handleBuyItem(listing)}
                           >
                             Buy
                           </div>
                         )}
                       </div>
                     </div>
-                  )}
+                  ))}
                 </div>
               </Panel>
             </div>
@@ -1476,7 +1591,9 @@ const NFTItem = () => {
                     .map((offer, idx) => (
                       <div className={styles.offer} key={idx}>
                         <div className={styles.owner}>
-                          {offer.creator.substr(0, 6)}
+                          <Link to={`/account/${offer.creator}`}>
+                            {offer.creator.substr(0, 6)}
+                          </Link>
                         </div>
                         <div className={styles.price}>
                           {offer.pricePerItem} FTM
@@ -1559,12 +1676,44 @@ const NFTItem = () => {
               return (
                 <div className={styles.history} key={idx}>
                   <div className={styles.historyPrice}>{history.price} FTM</div>
-                  <Link to={`/account/${history.from}`} className={styles.from}>
-                    {shortenAddress(history.from)}
-                  </Link>
-                  <Link to={`/account/${history.to}`} className={styles.to}>
-                    {shortenAddress(history.to)}
-                  </Link>
+                  <div className={styles.from}>
+                    <Link to={`/account/${history.from}`}>
+                      <div className={styles.userAvatarWrapper}>
+                        {history.fromImage ? (
+                          <img
+                            src={`https://gateway.pinata.cloud/ipfs/${history.fromImage}`}
+                            className={styles.userAvatar}
+                          />
+                        ) : (
+                          <Identicon
+                            account={history.from}
+                            size={24}
+                            className={styles.userAvatar}
+                          />
+                        )}
+                      </div>
+                      {history.fromAlias || history.from.substr(0, 6)}
+                    </Link>
+                  </div>
+                  <div className={styles.to}>
+                    <Link to={`/account/${history.to}`}>
+                      <div className={styles.userAvatarWrapper}>
+                        {history.toImage ? (
+                          <img
+                            src={`https://gateway.pinata.cloud/ipfs/${history.toImage}`}
+                            className={styles.userAvatar}
+                          />
+                        ) : (
+                          <Identicon
+                            account={history.to}
+                            size={24}
+                            className={styles.userAvatar}
+                          />
+                        )}
+                      </div>
+                      {history.toAlias || history.to.substr(0, 6)}
+                    </Link>
+                  </div>
                   <div className={styles.saleDate}>{formatDate(saleDate)}</div>
                 </div>
               );
@@ -1576,9 +1725,9 @@ const NFTItem = () => {
       <SellModal
         visible={sellModalVisible}
         onClose={() => setSellModalVisible(false)}
-        onSell={listing.current ? handleUpdatePrice : handleListItem}
-        startPrice={listing.current?.pricePerItem || 0}
-        confirming={itemListing || priceUpdating}
+        onSell={hasListing() ? handleUpdatePrice : handleListItem}
+        startPrice={myListing()?.pricePerItem || 0}
+        confirming={listingItem || priceUpdating}
         approveContract={handleApproveSalesContract}
         contractApproving={salesContractApproving}
         contractApproved={salesContractApproved}
