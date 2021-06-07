@@ -1022,6 +1022,165 @@ const NFTItem = () => {
     return res;
   };
 
+  const renderItemInfo = () => (
+    <>
+      <div className={styles.itemCategory}>
+        {collection?.collectionName || collection?.name || ''}
+      </div>
+      <div className={styles.itemName}>{info?.name || ''}</div>
+      <div className={styles.itemStats}>
+        {(ownerInfoLoading || owner || tokenInfo) && (
+          <div className={styles.itemOwner}>
+            {ownerInfoLoading ? (
+              <Skeleton width={180} height={25} />
+            ) : tokenType === 721 ? (
+              <>
+                <div className={styles.ownerAvatar}>
+                  {ownerInfo?.imageHash ? (
+                    <img
+                      src={`https://gateway.pinata.cloud/ipfs/${ownerInfo.imageHash}`}
+                      className={styles.avatar}
+                    />
+                  ) : (
+                    <Identicon account={owner} size={24} />
+                  )}
+                </div>
+                Owned by&nbsp;
+                <Link to={`/account/${owner}`} className={styles.ownerName}>
+                  {isMine ? 'Me' : ownerInfo?.alias || shortenAddress(owner)}
+                </Link>
+              </>
+            ) : (
+              <>
+                <div
+                  className={cx(styles.itemViews, styles.clickable)}
+                  onClick={() => setOwnersModalVisible(true)}
+                >
+                  <PeopleIcon style={styles.itemIcon} />
+                  &nbsp;{tokenInfo.holders}
+                  &nbsp;owner{tokenInfo.holders > 1 && 's'}
+                </div>
+                <div className={styles.itemViews}>
+                  <ViewModuleIcon style={styles.itemIcon} />
+                  &nbsp;{tokenInfo.totalSupply} total
+                </div>
+              </>
+            )}
+          </div>
+        )}
+        <div className={styles.itemViews}>
+          <FontAwesomeIcon icon={faEye} color="#00000099" />
+          &nbsp;
+          {isNaN(views) ? (
+            <Skeleton width={80} height={24} />
+          ) : (
+            `${views} View${views > 1 ? 's' : ''}`
+          )}
+        </div>
+      </div>
+    </>
+  );
+
+  const renderAboutPanel = () => (
+    <Panel
+      title={
+        <div className={styles.panelTitle}>
+          About&nbsp;
+          {collectionLoading ? (
+            <Skeleton width={80} height={20} />
+          ) : (
+            collection?.collectionName || collection?.name
+          )}
+        </div>
+      }
+    >
+      <div className={styles.panelBody}>
+        <div className={styles.collectionDescription}>
+          {collection?.description || 'Unverified Collection'}
+        </div>
+
+        <div className={styles.socialLinks}>
+          {collection?.siteUrl?.length > 0 && (
+            <a
+              href={collection?.siteUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={styles.socialLink}
+            >
+              <img src={webIcon} />
+            </a>
+          )}
+          {collection?.twitterHandle?.length > 0 && (
+            <a
+              href={`https://twitter.com/${collection?.twitterHandle}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={styles.socialLink}
+            >
+              <img src={twitterIcon} />
+            </a>
+          )}
+          {collection?.mediumHandle?.length > 0 && (
+            <a
+              href={`https://medium.com/${collection?.mediumHandle}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={styles.socialLink}
+            >
+              <img src={mediumIcon} />
+            </a>
+          )}
+          {collection?.telegram?.length > 0 && (
+            <a
+              href={`https://t.me/${collection?.telegram}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={styles.socialLink}
+            >
+              <img src={telegramIcon} />
+            </a>
+          )}
+          {collection?.discord?.length > 0 && (
+            <a
+              href={`https://discord.gg/${collection?.discord}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={styles.socialLink}
+            >
+              <img src={discordIcon} />
+            </a>
+          )}
+        </div>
+      </div>
+    </Panel>
+  );
+
+  const renderCollectionPanel = () => (
+    <Panel title="Chain Info">
+      <div className={styles.panelBody}>
+        <div className={styles.panelLine}>
+          <div className={styles.panelLabel}>Collection</div>
+          <a
+            href={`https://ftmscan.com/token/${address}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={styles.panelValue}
+          >
+            {shortenAddress(address)}
+          </a>
+        </div>
+        <div className={styles.panelLine}>
+          <div className={styles.panelLabel}>Network</div>
+          <div className={styles.panelValue}>Fantom Opera</div>
+        </div>
+        <div className={styles.panelLine}>
+          <div className={styles.panelLabel}>Chain ID</div>
+          <div className={styles.panelValue}>250</div>
+        </div>
+      </div>
+    </Panel>
+  );
+
   return (
     <div
       className={cx(styles.container, isLoggedIn() ? styles.withHeader : '')}
@@ -1128,6 +1287,7 @@ const NFTItem = () => {
                 )}
               </div>
             </div>
+            <div className={styles.itemInfo}>{renderItemInfo()}</div>
             <div className={styles.itemInfoCont}>
               {info?.properties && (
                 <Panel title="Properties">
@@ -1136,163 +1296,26 @@ const NFTItem = () => {
                   </div>
                 </Panel>
               )}
-              <Panel
-                title={
-                  <div className={styles.panelTitle}>
-                    About&nbsp;
-                    {collectionLoading ? (
-                      <Skeleton width={80} height={20} />
-                    ) : (
-                      collection?.collectionName || collection?.name
-                    )}
-                  </div>
-                }
-              >
-                <div className={styles.panelBody}>
-                  <div className={styles.collectionDescription}>
-                    {collection?.description || 'Unverified Collection'}
-                  </div>
-
-                  <div className={styles.socialLinks}>
-                    {collection?.siteUrl?.length > 0 && (
-                      <a
-                        href={collection?.siteUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={styles.socialLink}
-                      >
-                        <img src={webIcon} />
-                      </a>
-                    )}
-                    {collection?.twitterHandle?.length > 0 && (
-                      <a
-                        href={`https://twitter.com/${collection?.twitterHandle}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={styles.socialLink}
-                      >
-                        <img src={twitterIcon} />
-                      </a>
-                    )}
-                    {collection?.mediumHandle?.length > 0 && (
-                      <a
-                        href={`https://medium.com/${collection?.mediumHandle}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={styles.socialLink}
-                      >
-                        <img src={mediumIcon} />
-                      </a>
-                    )}
-                    {collection?.telegram?.length > 0 && (
-                      <a
-                        href={`https://t.me/${collection?.telegram}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={styles.socialLink}
-                      >
-                        <img src={telegramIcon} />
-                      </a>
-                    )}
-                    {collection?.discord?.length > 0 && (
-                      <a
-                        href={`https://discord.gg/${collection?.discord}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={styles.socialLink}
-                      >
-                        <img src={discordIcon} />
-                      </a>
-                    )}
-                  </div>
-                </div>
-              </Panel>
-              <Panel title="Chain Info">
-                <div className={styles.panelBody}>
-                  <div className={styles.panelLine}>
-                    <div className={styles.panelLabel}>Collection</div>
-                    <a
-                      href={`https://ftmscan.com/token/${address}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={styles.panelValue}
-                    >
-                      {shortenAddress(address)}
-                    </a>
-                  </div>
-                  <div className={styles.panelLine}>
-                    <div className={styles.panelLabel}>Network</div>
-                    <div className={styles.panelValue}>Fantom Opera</div>
-                  </div>
-                  <div className={styles.panelLine}>
-                    <div className={styles.panelLabel}>Chain ID</div>
-                    <div className={styles.panelValue}>250</div>
-                  </div>
-                </div>
-              </Panel>
+              {renderAboutPanel()}
+              {renderCollectionPanel()}
             </div>
           </div>
           <div className={styles.itemMain}>
-            <div className={styles.wrapper}>
-              <div className={styles.itemCategory}>
-                {collection?.name || ''}
-              </div>
-              <div className={styles.itemName}>{info?.name || ''}</div>
-              <div className={styles.itemStats}>
-                {(ownerInfoLoading || owner || tokenInfo) && (
-                  <div className={styles.itemOwner}>
-                    {ownerInfoLoading ? (
-                      <Skeleton width={180} height={25} />
-                    ) : tokenType === 721 ? (
-                      <>
-                        <div className={styles.ownerAvatar}>
-                          {ownerInfo?.imageHash ? (
-                            <img
-                              src={`https://gateway.pinata.cloud/ipfs/${ownerInfo.imageHash}`}
-                              className={styles.avatar}
-                            />
-                          ) : (
-                            <Identicon account={owner} size={24} />
-                          )}
-                        </div>
-                        Owned by&nbsp;
-                        <Link
-                          to={`/account/${owner}`}
-                          className={styles.ownerName}
-                        >
-                          {isMine
-                            ? 'Me'
-                            : ownerInfo?.alias || shortenAddress(owner)}
-                        </Link>
-                      </>
-                    ) : (
-                      <>
-                        <div
-                          className={cx(styles.itemViews, styles.clickable)}
-                          onClick={() => setOwnersModalVisible(true)}
-                        >
-                          <PeopleIcon style={styles.itemIcon} />
-                          &nbsp;{tokenInfo.holders}
-                          &nbsp;owner{tokenInfo.holders > 1 && 's'}
-                        </div>
-                        <div className={styles.itemViews}>
-                          <ViewModuleIcon style={styles.itemIcon} />
-                          &nbsp;{tokenInfo.totalSupply} total
-                        </div>
-                      </>
-                    )}
+            <div className={styles.itemInfoWrapper}>{renderItemInfo()}</div>
+            {info?.properties && (
+              <div className={cx(styles.panelWrapper, styles.infoPanel)}>
+                <Panel title="Properties">
+                  <div className={styles.panelBody}>
+                    {renderProperties(info.properties)}
                   </div>
-                )}
-                <div className={styles.itemViews}>
-                  <FontAwesomeIcon icon={faEye} color="#00000099" />
-                  &nbsp;
-                  {isNaN(views) ? (
-                    <Skeleton width={80} height={24} />
-                  ) : (
-                    `${views} View${views > 1 ? 's' : ''}`
-                  )}
-                </div>
+                </Panel>
               </div>
+            )}
+            <div className={cx(styles.panelWrapper, styles.infoPanel)}>
+              {renderAboutPanel()}
+            </div>
+            <div className={cx(styles.panelWrapper, styles.infoPanel)}>
+              {renderCollectionPanel()}
             </div>
             {(winner || auction.current?.resulted === false) && (
               <div className={styles.panelWrapper}>
@@ -1585,12 +1608,12 @@ const NFTItem = () => {
                   <div className={styles.historyPrice}>{history.price} FTM</div>
                   <div className={styles.from}>
                     <Link to={`/account/${history.from}`}>
-                      {shortenAddress(history.from)}
+                      {history.from.substr(0, 6)}
                     </Link>
                   </div>
                   <div className={styles.to}>
                     <Link to={`/account/${history.to}`}>
-                      {shortenAddress(history.to)}
+                      {history.to.substr(0, 6)}
                     </Link>
                   </div>
                   <div className={styles.saleDate}>{formatDate(saleDate)}</div>
