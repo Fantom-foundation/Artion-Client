@@ -214,7 +214,10 @@
   }
 }
 
-.ownerName {
+.ownerName,
+.owner a,
+.from a,
+.to a {
   text-decoration: none;
   color: #2479FA;
 }
@@ -424,8 +427,6 @@
 .from,
 .to {
   flex: 3;
-  color: #2479FA;
-  text-decoration: none;
 }
 
 .historyPrice {

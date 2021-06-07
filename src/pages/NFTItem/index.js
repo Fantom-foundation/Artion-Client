@@ -1433,16 +1433,32 @@ const NFTItem = () => {
             <div className={styles.panelWrapper}>
               <Panel title="Listings">
                 <div className={styles.listings}>
+                  <div className={cx(styles.listing, styles.heading)}>
+                    <div className={styles.owner}>From</div>
+                    <div className={styles.price}>Price</div>
+                    {tokenInfo?.totalSupply > 1 && (
+                      <div className={styles.quantity}>Quantity</div>
+                    )}
+                    <div className={styles.buy} />
+                  </div>
                   {listing.current && (
-                    <div className={cx(styles.listing, styles.heading)}>
+                    <div className={styles.listing}>
                       <div className={styles.owner}>
-                        {shortenAddress(listing.current.owner)}
+                        <Link to={`/account/${listing.current.owner}`}>
+                          {listing.current.owner.substr(0, 6)}
+                        </Link>
                       </div>
                       <div className={styles.price}>
                         {listing.current.pricePerItem} FTM
                       </div>
+                      {tokenInfo?.totalSupply > 1 && (
+                        <div className={styles.quantity}>
+                          {listing.current.quantity}
+                        </div>
+                      )}
                       <div className={styles.buy}>
-                        {!isMine && (
+                        {listing.current.owner.toLowerCase() !==
+                          account.toLowerCase() && (
                           <div
                             className={styles.buyButton}
                             onClick={() =>
@@ -1476,8 +1492,16 @@ const NFTItem = () => {
                     .map((offer, idx) => (
                       <div className={styles.offer} key={idx}>
                         <div className={styles.owner}>
-                          {offer.creator.substr(0, 6)}
+                          <Link to={`/account/${offer.creator}`}>
+                            {offer.creator.substr(0, 6)}
+                          </Link>
                         </div>
+                        {/* <Link
+                          to={`/account/${offer.creator}`}
+                          className={styles.owner}
+                        >
+                          {offer.creator.substr(0, 6)}
+                        </Link> */}
                         <div className={styles.price}>
                           {offer.pricePerItem} FTM
                         </div>
@@ -1559,12 +1583,16 @@ const NFTItem = () => {
               return (
                 <div className={styles.history} key={idx}>
                   <div className={styles.historyPrice}>{history.price} FTM</div>
-                  <Link to={`/account/${history.from}`} className={styles.from}>
-                    {shortenAddress(history.from)}
-                  </Link>
-                  <Link to={`/account/${history.to}`} className={styles.to}>
-                    {shortenAddress(history.to)}
-                  </Link>
+                  <div className={styles.from}>
+                    <Link to={`/account/${history.from}`}>
+                      {shortenAddress(history.from)}
+                    </Link>
+                  </div>
+                  <div className={styles.to}>
+                    <Link to={`/account/${history.to}`}>
+                      {shortenAddress(history.to)}
+                    </Link>
+                  </div>
                   <div className={styles.saleDate}>{formatDate(saleDate)}</div>
                 </div>
               );
