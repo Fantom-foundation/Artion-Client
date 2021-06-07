@@ -739,7 +739,6 @@ const NFTItem = () => {
   const handleBuyItem = async listing => {
     const _price = listing.price * listing.quantity;
     const price = ethers.utils.parseEther(_price.toString());
-    console.log('=====>', address, tokenID, listing.owner);
     const tx = await buyItem(
       address,
       ethers.BigNumber.from(tokenID),
@@ -1105,7 +1104,11 @@ const NFTItem = () => {
                       className={styles.avatar}
                     />
                   ) : (
-                    <Identicon account={owner} size={24} />
+                    <Identicon
+                      account={owner}
+                      size={32}
+                      className={styles.avatar}
+                    />
                   )}
                 </div>
                 Owned by&nbsp;

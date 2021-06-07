@@ -89,6 +89,10 @@
 }
 
 @media only screen and (max-width: 768px) {
+  .container {
+    padding-top: 155px;
+  }
+
   .sidebar {
     flex: 0 0 260px;
   }
