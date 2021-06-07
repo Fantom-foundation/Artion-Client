@@ -10,25 +10,35 @@
   align-items: center;
   padding: 8px 16px;
   border-radius: 4px;
-  margin-right: 6px !important;
-  color: #555 !important;
-  font-weight: 600 !important;
-  box-shadow: unset !important;
-  background-color: unset !important;
+  margin-right: 6px;
+  color: #3D3D3D;
+  font-weight: 600;
   white-space: nowrap;
-  text-transform: none !important;
 
   &:hover {
-    background-color: #e0e0e0 !important;
+    background-color: #e0e0e0;
   }
 
   img {
     width: auto;
     height: 24px;
-    margin-right: 8px;
+  }
+
+  span {
+    margin-left: 8px;
   }
 }
 
 .selected {
-  color: #007bff !important;
+  color: #007bff;
+}
+
+@media only screen and (max-width: 600px) {
+  .button span {
+    display: none;
+  }
+
+  .selected {
+    background-color: rgba(36, 121, 250, .2);
+  }
 }

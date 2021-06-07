@@ -1,15 +1,16 @@
 .container {
-    padding-top: 130px;
-    height: 100vh;
-    box-sizing: border-box;
-    display: flex;
-    padding-left: 20px;
+  padding-top: 130px;
+  height: 100vh;
+  box-sizing: border-box;
+  display: flex;
+  padding-left: 20px;
+  overflow-y: auto;
 }
 
 .sidebar {
-    flex: 0 0 300px;
-    display: flex;
-    flex-direction: column;
+  flex: 0 0 300px;
+  display: flex;
+  flex-direction: column;
 }
 
 .profileWrapper {
@@ -85,4 +86,26 @@
   box-sizing: border-box;
   margin-bottom: 10px;
   padding: 10px 0;
+}
+
+@media only screen and (max-width: 768px) {
+  .sidebar {
+    flex: 0 0 260px;
+  }
+}
+
+@media only screen and (max-width: 600px) {
+  .container {
+    flex-direction: column;
+    padding-left: 30px;
+    padding-right: 30px;
+  }
+
+  .sidebar {
+    flex-basis: 0;
+  }
+
+  .body {
+    margin-left: 0;
+  }
 }

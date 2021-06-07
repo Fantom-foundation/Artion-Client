@@ -288,7 +288,7 @@ const NiftyHeader = ({ light }) => {
               <div className={styles.searchbar}>
                 <SearchIcon className={styles.searchicon} />
                 <input
-                  placeholder="Search items, collections, and accounts"
+                  placeholder="Search"
                   className={styles.searchinput}
                   onChange={e => handleSearch(e.target.value)}
                   onFocus={() => setSearchBarActive(true)}
