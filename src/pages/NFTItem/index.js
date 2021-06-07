@@ -31,6 +31,7 @@ import Identicon from 'components/Identicon';
 import {
   fetchTokenURI,
   increaseViewCount,
+  getListings,
   getOffers,
   getTradeHistory,
   fetchCollection,
@@ -42,7 +43,6 @@ import {
 import {
   getSalesContract,
   getNFTContract,
-  getListing,
   listItem,
   cancelListing,
   updateListing,
@@ -122,7 +122,7 @@ const NFTItem = () => {
   const [bidModalVisible, setBidModalVisible] = useState(false);
   const [ownersModalVisible, setOwnersModalVisible] = useState(false);
 
-  const [itemListing, setItemListing] = useState(false);
+  const [listingItem, setListingItem] = useState(false);
   const [priceUpdating, setPriceUpdating] = useState(false);
   const [offerPlacing, setOfferPlacing] = useState(false);
   const [offerCanceling, setOfferCanceling] = useState(false);
@@ -142,7 +142,7 @@ const NFTItem = () => {
   const [now, setNow] = useState(new Date());
   const [loading, setLoading] = useState(false);
   const auction = useRef(null);
-  const listing = useRef(null);
+  const listings = useRef([]);
   const offers = useRef([]);
   const tradeHistory = useRef([]);
 
@@ -176,6 +176,7 @@ const NFTItem = () => {
         const res = await contract.ownerOf(tokenID);
         setOwner(res);
       } else if (type === 1155) {
+        setOwner(null);
         const { data: _tokenInfo } = await get1155Info(address, tokenID);
         setTokenInfo(_tokenInfo);
         try {
@@ -205,8 +206,8 @@ const NFTItem = () => {
 
   const getItemListings = async () => {
     try {
-      const _listing = await getListing(address, tokenID);
-      listing.current = _listing;
+      const { data } = await getListings(address, tokenID);
+      listings.current = data;
     } catch (e) {
       console.log(e);
     }
@@ -259,55 +260,102 @@ const NFTItem = () => {
     );
   };
 
-  const itemListedHandler = (
+  const itemListedHandler = async (
     owner,
     nft,
     id,
     quantity,
     pricePerItem,
-    startingTime,
-    isPrivate,
-    allowedAddress
+    startingTime
   ) => {
     if (eventMatches(nft, id)) {
-      listing.current = {
+      const newListing = {
         owner,
         quantity: parseFloat(quantity.toString()),
-        pricePerItem: parseFloat(pricePerItem.toString()) / 10 ** 18,
-        startingTime: parseFloat(startingTime.toString()),
-        allowedAddress,
+        price: parseFloat(pricePerItem.toString()) / 10 ** 18,
+        startTime: parseFloat(startingTime.toString()),
       };
+      try {
+        const { data } = await getUserAccountDetails(owner);
+        newListing.alias = data?.alias;
+        newListing.image = data?.imageHash;
+        listings.current.push(newListing);
+      } catch {
+        listings.current.push(newListing);
+      }
     }
   };
 
   const itemUpdatedHandler = (owner, nft, id, newPrice) => {
     if (eventMatches(nft, id)) {
-      const newListing = {
-        ...listing.current,
-        pricePerItem: parseFloat(newPrice.toString()) / 10 ** 18,
-      };
-      listing.current = newListing;
+      listings.current.map(listing => {
+        if (listing.owner.toLowerCase() === owner.toLowerCase()) {
+          listing.price = parseFloat(newPrice.toString()) / 10 ** 18;
+        }
+      });
     }
   };
 
   const itemCanceledHandler = (owner, nft, id) => {
     if (eventMatches(nft, id)) {
-      listing.current = null;
+      listings.current = listings.current.filter(
+        listing => listing.owner.toLowerCase() !== owner.toLowerCase()
+      );
     }
   };
 
-  const itemSoldHandler = (seller, buyer, nft, id, price) => {
+  const itemSoldHandler = async (seller, buyer, nft, id, price) => {
     if (eventMatches(nft, id)) {
-      listing.current = null;
-      setOwner(buyer);
-      const newHistory = {
+      const listing = listings.current.find(
+        listing => listing.owner.toLowerCase() === seller.toLowerCase()
+      );
+      listings.current = listings.current.filter(
+        listing => listing.owner.toLowerCase() !== seller.toLowerCase()
+      );
+      if (tokenType === 721) {
+        setOwner(buyer);
+      } else {
+        const sellerIndex = holders.findIndex(
+          holder => holder.address.toLowerCase() === seller.toLowerCase()
+        );
+        const buyerIndex = holders.findIndex(
+          holder => holder.address.toLowerCase() === buyer.toLowerCase()
+        );
+        if (sellerIndex > -1) {
+          holders[sellerIndex].supply -= listing.quantity;
+        }
+        if (buyerIndex > -1) {
+          holders[buyerIndex].supply += listing.quantity;
+        }
+        if (holders[sellerIndex].supply === 0) {
+          const newHolders = holders.filter(
+            (holder, idx) => idx !== sellerIndex
+          );
+          setHolders(newHolders);
+        } else {
+          setHolders(holders);
+        }
+      }
+      const newTradeHistory = {
         from: seller,
         to: buyer,
         price: parseFloat(price.toString()) / 10 ** 18,
+        quantity: listing.quantity,
         createdAt: new Date().toISOString(),
       };
-      const newTradeHistory = [newHistory, ...tradeHistory.current];
-      tradeHistory.current = newTradeHistory;
+      try {
+        const [from, to] = await Promise.all([
+          getUserAccountDetails(seller),
+          getUserAccountDetails(buyer),
+        ]);
+        newTradeHistory.fromAlias = from?.data.alias;
+        newTradeHistory.fromImage = from?.data.imageHash;
+        newTradeHistory.toAlias = to?.data.alias;
+        newTradeHistory.toImage = to?.data.imageHash;
+      } catch (e) {
+        console.log(e);
+      }
+      tradeHistory.current.push(newTradeHistory);
     }
   };
 
@@ -630,10 +678,10 @@ const NFTItem = () => {
         ) > -1;
 
   const handleListItem = async (_price, quantity) => {
-    if (itemListing) return;
+    if (listingItem) return;
 
     try {
-      setItemListing(true);
+      setListingItem(true);
 
       const price = ethers.utils.parseEther(_price);
       const tx = await listItem(
@@ -649,9 +697,9 @@ const NFTItem = () => {
       toast('success', 'Item listed successfully!');
 
       setSellModalVisible(false);
-      setItemListing(false);
+      setListingItem(false);
     } catch {
-      setItemListing(false);
+      setListingItem(false);
     }
   };
 
@@ -681,16 +729,21 @@ const NFTItem = () => {
 
   const cancelList = async () => {
     await cancelListing(address, tokenID);
-    listing.current = null;
+    listings.current = listings.current.filter(
+      listing => listing.owner.toLowerCase() !== account.toLowerCase()
+    );
 
     toast('success', 'Item unlisted successfully!');
   };
 
-  const handleBuyItem = async _price => {
+  const handleBuyItem = async listing => {
+    const _price = listing.price * listing.quantity;
     const price = ethers.utils.parseEther(_price.toString());
+    console.log('=====>', address, tokenID, listing.owner);
     const tx = await buyItem(
       address,
       ethers.BigNumber.from(tokenID),
+      listing.owner,
       price,
       account
     );
@@ -1004,6 +1057,16 @@ const NFTItem = () => {
     return `${s} seconds`;
   };
 
+  const myListing = () => {
+    return listings.current.find(
+      listing => listing.owner.toLowerCase() === account.toLowerCase()
+    );
+  };
+
+  const hasListing = () => {
+    return myListing() !== undefined;
+  };
+
   const renderProperties = properties => {
     const res = [];
     Object.keys(properties).map((key, idx) => {
@@ -1212,7 +1275,7 @@ const NFTItem = () => {
                 )}
               {(!auction.current || auction.current.resulted) && (
                 <>
-                  {listing.current ? (
+                  {hasListing() ? (
                     <div className={styles.headerButton} onClick={cancelList}>
                       Cancel Listing
                     </div>
@@ -1220,14 +1283,15 @@ const NFTItem = () => {
                   <div
                     className={cx(
                       styles.headerButton,
-                      (itemListing || priceUpdating) && styles.disabled
+                      (listingItem || priceUpdating) && styles.disabled
                     )}
                     onClick={() =>
-                      !(itemListing || priceUpdating) &&
-                      setSellModalVisible(true)
+                      !(listingItem || priceUpdating)
+                        ? setSellModalVisible(true)
+                        : null
                     }
                   >
-                    {listing.current ? 'Update Listing' : 'Sell'}
+                    {hasListing() ? 'Update Listing' : 'Sell'}
                   </div>
                 </>
               )}
@@ -1383,7 +1447,9 @@ const NFTItem = () => {
                               (!canWithdraw() || bidWithdrawing) &&
                                 styles.disabled
                             )}
-                            onClick={() => canWithdraw() && handleWithdrawBid()}
+                            onClick={() =>
+                              canWithdraw() ? handleWithdrawBid() : null
+                            }
                           >
                             {bidWithdrawing
                               ? 'Withdrawing Bid...'
@@ -1464,36 +1530,46 @@ const NFTItem = () => {
                     )}
                     <div className={styles.buy} />
                   </div>
-                  {listing.current && (
-                    <div className={styles.listing}>
+                  {listings.current.map((listing, idx) => (
+                    <div className={styles.listing} key={idx}>
                       <div className={styles.owner}>
-                        <Link to={`/account/${listing.current.owner}`}>
-                          {listing.current.owner.substr(0, 6)}
+                        <Link to={`/account/${listing.owner}`}>
+                          <div className={styles.userAvatarWrapper}>
+                            {listing.image ? (
+                              <img
+                                src={`https://gateway.pinata.cloud/ipfs/${listing.image}`}
+                                className={styles.userAvatar}
+                              />
+                            ) : (
+                              <Identicon
+                                account={listing.owner}
+                                size={24}
+                                className={styles.userAvatar}
+                              />
+                            )}
+                          </div>
+                          {listing.alias || listing.owner.substr(0, 6)}
                         </Link>
                       </div>
-                      <div className={styles.price}>
-                        {listing.current.pricePerItem} FTM
-                      </div>
+                      <div className={styles.price}>{listing.price} FTM</div>
                       {tokenInfo?.totalSupply > 1 && (
                         <div className={styles.quantity}>
-                          {listing.current.quantity}
+                          {listing.quantity}
                         </div>
                       )}
                       <div className={styles.buy}>
-                        {listing.current.owner.toLowerCase() !==
+                        {listing.owner.toLowerCase() !==
                           account.toLowerCase() && (
                           <div
                             className={styles.buyButton}
-                            onClick={() =>
-                              handleBuyItem(listing.current.pricePerItem)
-                            }
+                            onClick={() => handleBuyItem(listing)}
                           >
                             Buy
                           </div>
                         )}
                       </div>
                     </div>
-                  )}
+                  ))}
                 </div>
               </Panel>
             </div>
@@ -1519,12 +1595,6 @@ const NFTItem = () => {
                             {offer.creator.substr(0, 6)}
                           </Link>
                         </div>
-                        {/* <Link
-                          to={`/account/${offer.creator}`}
-                          className={styles.owner}
-                        >
-                          {offer.creator.substr(0, 6)}
-                        </Link> */}
                         <div className={styles.price}>
                           {offer.pricePerItem} FTM
                         </div>
@@ -1608,12 +1678,40 @@ const NFTItem = () => {
                   <div className={styles.historyPrice}>{history.price} FTM</div>
                   <div className={styles.from}>
                     <Link to={`/account/${history.from}`}>
-                      {history.from.substr(0, 6)}
+                      <div className={styles.userAvatarWrapper}>
+                        {history.fromImage ? (
+                          <img
+                            src={`https://gateway.pinata.cloud/ipfs/${history.fromImage}`}
+                            className={styles.userAvatar}
+                          />
+                        ) : (
+                          <Identicon
+                            account={history.from}
+                            size={24}
+                            className={styles.userAvatar}
+                          />
+                        )}
+                      </div>
+                      {history.fromAlias || history.from.substr(0, 6)}
                     </Link>
                   </div>
                   <div className={styles.to}>
                     <Link to={`/account/${history.to}`}>
-                      {history.to.substr(0, 6)}
+                      <div className={styles.userAvatarWrapper}>
+                        {history.toImage ? (
+                          <img
+                            src={`https://gateway.pinata.cloud/ipfs/${history.toImage}`}
+                            className={styles.userAvatar}
+                          />
+                        ) : (
+                          <Identicon
+                            account={history.to}
+                            size={24}
+                            className={styles.userAvatar}
+                          />
+                        )}
+                      </div>
+                      {history.toAlias || history.to.substr(0, 6)}
                     </Link>
                   </div>
                   <div className={styles.saleDate}>{formatDate(saleDate)}</div>
@@ -1627,9 +1725,9 @@ const NFTItem = () => {
       <SellModal
         visible={sellModalVisible}
         onClose={() => setSellModalVisible(false)}
-        onSell={listing.current ? handleUpdatePrice : handleListItem}
-        startPrice={listing.current?.pricePerItem || 0}
-        confirming={itemListing || priceUpdating}
+        onSell={hasListing() ? handleUpdatePrice : handleListItem}
+        startPrice={myListing()?.pricePerItem || 0}
+        confirming={listingItem || priceUpdating}
         approveContract={handleApproveSalesContract}
         contractApproving={salesContractApproving}
         contractApproved={salesContractApproved}

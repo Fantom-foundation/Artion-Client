@@ -18,30 +18,9 @@ export const getSalesContract = async () => {
   return contract;
 };
 
-export const getListing = async (nftAddress, tokenId) => {
+export const buyItem = async (nftAddress, tokenId, owner, value, from) => {
   const contract = await getSalesContract();
-  const res = await contract.listings(nftAddress, tokenId);
-  const owner = res[0];
-  const quantity = parseFloat(res[1].toString());
-  const pricePerItem = parseFloat(res[2].toString()) / 10 ** 18;
-  const startingTime = parseFloat(res[3].toString());
-  const allowedAddress = res[4];
-
-  if (pricePerItem > 0) {
-    return {
-      owner,
-      quantity,
-      pricePerItem,
-      startingTime,
-      allowedAddress,
-    };
-  }
-  return null;
-};
-
-export const buyItem = async (nftAddress, tokenId, value, from) => {
-  const contract = await getSalesContract();
-  const args = [nftAddress, tokenId];
+  const args = [nftAddress, tokenId, owner];
   const options = {
     value,
     from,
