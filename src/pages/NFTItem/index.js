@@ -1042,14 +1042,15 @@ const NFTItem = () => {
                   {auctionCanceling ? 'Canceling Auction...' : 'Cancel Auction'}
                 </div>
               ) : null}
-              {(!auction.current || !auction.current.resulted) && (
-                <div
-                  className={styles.headerButton}
-                  onClick={() => setAuctionModalVisible(true)}
-                >
-                  {auction.current ? 'Update Auction' : 'Start Auction'}
-                </div>
-              )}
+              {(!auction.current || !auction.current.resulted) &&
+                tokenType !== 1155 && (
+                  <div
+                    className={styles.headerButton}
+                    onClick={() => setAuctionModalVisible(true)}
+                  >
+                    {auction.current ? 'Update Auction' : 'Start Auction'}
+                  </div>
+                )}
               {(!auction.current || auction.current.resulted) && (
                 <>
                   {listing.current ? (
