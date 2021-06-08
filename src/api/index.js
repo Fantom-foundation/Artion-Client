@@ -222,6 +222,19 @@ export const getTradeHistory = async (contractAddress, tokenID) => {
   return res.data;
 };
 
+export const getTransferHistory = async (address, tokenID, tokenType) => {
+  const data = { address, tokenID };
+  const res = await axios({
+    method: 'post',
+    url: `${BASE_URL}/nftitems/transfer${tokenType}History`,
+    data: JSON.stringify(data),
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+  return res.data;
+};
+
 export const getAccountActivity = async address => {
   const res = await axios({
     method: 'get',

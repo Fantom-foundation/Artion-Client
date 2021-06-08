@@ -83,7 +83,7 @@ const SellModal = ({
               </div>
             </div>
           </div>
-          {totalSupply > 1 && (
+          {totalSupply !== null && (
             <div className={styles.formGroup}>
               <div className={styles.formLabel}>Quantity</div>
               <div className={styles.formInputCont}>
@@ -92,7 +92,9 @@ const SellModal = ({
                   placeholder={totalSupply}
                   value={quantity}
                   onChange={handleQuantityChange}
-                  disabled={contractApproving || confirming}
+                  disabled={
+                    contractApproving || confirming || totalSupply === 1
+                  }
                 />
               </div>
             </div>
