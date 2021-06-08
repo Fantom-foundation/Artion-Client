@@ -1670,6 +1670,9 @@ const NFTItem = () => {
           <div className={styles.histories}>
             <div className={cx(styles.history, styles.heading)}>
               <div className={styles.historyPrice}>Price</div>
+              {tokenType === 1155 && (
+                <div className={styles.quantity}>Quantity</div>
+              )}
               <div className={styles.from}>From</div>
               <div className={styles.to}>To</div>
               <div className={styles.saleDate}>Date</div>
@@ -1679,6 +1682,9 @@ const NFTItem = () => {
               return (
                 <div className={styles.history} key={idx}>
                   <div className={styles.historyPrice}>{history.price} FTM</div>
+                  {tokenType === 1155 && (
+                    <div className={styles.quantity}>{history.value}</div>
+                  )}
                   <div className={styles.from}>
                     <Link to={`/account/${history.from}`}>
                       <div className={styles.userAvatarWrapper}>
