@@ -1742,7 +1742,7 @@ const NFTItem = () => {
                                 />
                               )}
                             </div>
-                            {offer.creator.substr(0, 6)}
+                            {offer.alias || offer.creator.substr(0, 6)}
                           </Link>
                         </div>
                         <div className={styles.price}>
