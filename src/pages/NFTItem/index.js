@@ -395,7 +395,7 @@ const NFTItem = () => {
     }
   };
 
-  const offerCreatedHandler = (
+  const offerCreatedHandler = async (
     creator,
     nft,
     id,
@@ -405,15 +405,21 @@ const NFTItem = () => {
     deadline
   ) => {
     if (eventMatches(nft, id)) {
-      const newOffers = [...offers.current];
-      newOffers.push({
+      const newOffer = {
         creator,
         deadline: parseFloat(deadline.toString()),
         payToken,
         pricePerItem: parseFloat(pricePerItem.toString()) / 10 ** 18,
         quantity: parseFloat(quantity.toString()),
-      });
-      offers.current = newOffers;
+      };
+      try {
+        const { data } = await getUserAccountDetails(creator);
+        newOffer.alias = data.alias;
+        newOffer.image = data.imageHash;
+      } catch (e) {
+        console.log(e);
+      }
+      offers.current.push(newOffer);
     }
   };
 

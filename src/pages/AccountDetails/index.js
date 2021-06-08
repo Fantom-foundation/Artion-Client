@@ -14,6 +14,7 @@ import Identicon from 'components/Identicon';
 import { shortenAddress } from 'utils';
 import {
   getUserAccountDetails,
+  fetchCollections,
   fetchTokens,
   updateBanner,
   getAccountActivity,
@@ -21,6 +22,7 @@ import {
 } from 'api';
 import HeaderActions from 'actions/header.actions';
 import ModalActions from 'actions/modal.actions';
+import CollectionsActions from 'actions/collections.actions';
 
 import iconCopy from 'assets/svgs/copy.svg';
 import iconSettings from 'assets/svgs/settings.svg';
@@ -61,6 +63,7 @@ const AccountDetails = () => {
   const [activities, setActivities] = useState([]);
   const [offersLoading, setOffersLoading] = useState(false);
   const [offers, setOffers] = useState([]);
+  const [fetchInterval, setFetchInterval] = useState(null);
 
   const getUserDetails = async account => {
     setLoading(true);
@@ -94,6 +97,35 @@ const AccountDetails = () => {
     setTab(0);
     getUserDetails(uid);
   }, [uid]);
+
+  const updateCollections = async () => {
+    try {
+      dispatch(CollectionsActions.fetchStart());
+      const res = await fetchCollections();
+      if (res.status === 'success') {
+        const verified = [];
+        const unverified = [];
+        res.data.map(item => {
+          if (item.isVerified) verified.push(item);
+          else unverified.push(item);
+        });
+        dispatch(CollectionsActions.fetchSuccess([...verified, ...unverified]));
+      }
+    } catch {
+      dispatch(CollectionsActions.fetchFailed());
+    }
+  };
+
+  useEffect(() => {
+    updateCollections();
+    setFetchInterval(setInterval(updateCollections, 1000 * 60 * 10));
+
+    return () => {
+      if (fetchInterval) {
+        clearInterval(fetchInterval);
+      }
+    };
+  }, []);
 
   const isMe = account?.toLowerCase() === uid.toLowerCase();
 
