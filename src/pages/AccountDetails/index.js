@@ -49,7 +49,7 @@ const AccountDetails = () => {
   const fileInput = useRef();
 
   const [fetching, setFetching] = useState(false);
-  const [tokens, setTokens] = useState([]);
+  const tokens = useRef([]);
   const [count, setCount] = useState(0);
   const [now, setNow] = useState(new Date());
   const [page, setPage] = useState(0);
@@ -85,7 +85,7 @@ const AccountDetails = () => {
     try {
       const { data } = await fetchTokens(step, [], null, 'createdAt', [], uid);
       setFetching(false);
-      setTokens([...tokens, ...data.tokens]);
+      tokens.current.push(...data.tokens);
       setCount(data.total);
       setPage(step);
     } catch {
@@ -143,7 +143,7 @@ const AccountDetails = () => {
   const handleScroll = e => {
     if (tab) return;
     if (fetching) return;
-    if (tokens.length === count) return;
+    if (tokens.current.length === count) return;
 
     const obj = e.currentTarget;
     if (obj.scrollHeight - obj.clientHeight - obj.scrollTop < 100) {
@@ -153,7 +153,7 @@ const AccountDetails = () => {
 
   useEffect(() => {
     if (tab === 0) {
-      setTokens([]);
+      tokens.current = [];
       setCount(0);
       fetchNFTs(0);
     } else if (tab === 1) {
@@ -161,7 +161,7 @@ const AccountDetails = () => {
     } else {
       getOffers();
     }
-  }, [tab, uid]);
+  }, [tab]);
 
   const getActivity = async () => {
     try {
@@ -361,7 +361,7 @@ const AccountDetails = () => {
         </div>
         <div className={styles.contentBody} onScroll={handleScroll}>
           {tab === 0 ? (
-            <NFTsGrid items={tokens} loading={fetching} />
+            <NFTsGrid items={tokens.current} loading={fetching} />
           ) : tab === 1 ? (
             <div className={styles.tableWapper}>
               <div className={styles.activityHeader}>

@@ -25,7 +25,6 @@ import iconUser from 'assets/svgs/user.svg';
 import iconAdd from 'assets/svgs/add.svg';
 import iconSwap from 'assets/svgs/swap.svg';
 import iconExit from 'assets/svgs/exit.svg';
-import PLACEHOLDER from 'assets/imgs/nft-placeholder.png';
 
 import styles from './styles.module.scss';
 
@@ -182,7 +181,7 @@ const NiftyHeader = ({ light }) => {
             const { data } = await axios.get(token.tokenURI);
             return data.image;
           } catch {
-            return PLACEHOLDER;
+            return null;
           }
         })
       );
@@ -335,7 +334,7 @@ const NiftyHeader = ({ light }) => {
                         {tokenDetailsLoading ? (
                           <Skeleton width={40} height={40} />
                         ) : (
-                          <img src={tk.image} />
+                          tk.image && <img src={tk.image} />
                         )}
                       </div>
                       <div className={styles.resulttitle}>{tk.name}</div>

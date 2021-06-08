@@ -9,7 +9,6 @@ import axios from 'axios';
 import Loader from 'react-loader-spinner';
 
 import SuspenseImg from 'components/SuspenseImg';
-import PLACEHOLDER from 'assets/imgs/nft-placeholder.png';
 
 const useStyles = makeStyles({
   root: {
@@ -95,9 +94,6 @@ const useStyles = makeStyles({
     backgroundSize: 'contain',
     objectFit: 'cover',
   },
-  mediaMissing: {
-    backgroundSize: 'cover',
-  },
   content: {
     marginTop: 'auto',
     padding: '32px 24px 24px !important',
@@ -161,26 +157,25 @@ const BaseCard = ({ item, loading, style }) => {
           {loading || fetching ? (
             <Skeleton width="100%" height="100%" className={classes.media} />
           ) : (
-            <Suspense
-              fallback={
-                <Loader
-                  type="Oval"
-                  color="#007BFF"
-                  height={32}
-                  width={32}
-                  className={classes.loader}
+            info?.image && (
+              <Suspense
+                fallback={
+                  <Loader
+                    type="Oval"
+                    color="#007BFF"
+                    height={32}
+                    width={32}
+                    className={classes.loader}
+                  />
+                }
+              >
+                <SuspenseImg
+                  src={info.image}
+                  className={classes.media}
+                  alt={info?.name}
                 />
-              }
-            >
-              <SuspenseImg
-                src={info?.image || PLACEHOLDER}
-                className={cx(
-                  classes.media,
-                  info?.image && classes.mediaMissing
-                )}
-                alt={info?.name}
-              />
-            </Suspense>
+              </Suspense>
+            )
           )}
         </div>
         <div className={classes.content}>
