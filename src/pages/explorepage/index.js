@@ -102,8 +102,10 @@ const ExploreAllPage = () => {
       );
       dispatch(TokensActions.fetchingSuccess(data.total, data.tokens));
       setPage(step);
-    } catch {
-      dispatch(TokensActions.fetchingFailed());
+    } catch (e) {
+      if (!axios.isCancel(e)) {
+        dispatch(TokensActions.fetchingFailed());
+      }
     } finally {
       setCancelSource(null);
     }

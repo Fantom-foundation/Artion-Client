@@ -6,8 +6,8 @@ import HelpIcon from '@material-ui/icons/Help';
 
 import styles from './styles.module.scss';
 
-const Panel = ({ title, fixed, children }) => {
-  const [open, setOpen] = useState(!!fixed);
+const Panel = ({ title, expanded, fixed, children }) => {
+  const [open, setOpen] = useState(!!expanded || !!fixed);
 
   const handleOpen = () => {
     if (!fixed) {

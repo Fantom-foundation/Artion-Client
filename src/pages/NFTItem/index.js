@@ -395,7 +395,7 @@ const NFTItem = () => {
     }
   };
 
-  const offerCreatedHandler = (
+  const offerCreatedHandler = async (
     creator,
     nft,
     id,
@@ -405,15 +405,21 @@ const NFTItem = () => {
     deadline
   ) => {
     if (eventMatches(nft, id)) {
-      const newOffers = [...offers.current];
-      newOffers.push({
+      const newOffer = {
         creator,
         deadline: parseFloat(deadline.toString()),
         payToken,
         pricePerItem: parseFloat(pricePerItem.toString()) / 10 ** 18,
         quantity: parseFloat(quantity.toString()),
-      });
-      offers.current = newOffers;
+      };
+      try {
+        const { data } = await getUserAccountDetails(creator);
+        newOffer.alias = data.alias;
+        newOffer.image = data.imageHash;
+      } catch (e) {
+        console.log(e);
+      }
+      offers.current.push(newOffer);
     }
   };
 
@@ -1636,7 +1642,7 @@ const NFTItem = () => {
               </Panel>
             </div>
             <div className={styles.panelWrapper}>
-              <Panel title="Listings">
+              <Panel title="Listings" expanded>
                 <div className={styles.listings}>
                   <div className={cx(styles.listing, styles.heading)}>
                     <div className={styles.owner}>From</div>
@@ -1704,7 +1710,7 @@ const NFTItem = () => {
               </Panel>
             </div>
             <div className={styles.panelWrapper}>
-              <Panel title="Offers">
+              <Panel title="Offers" expanded>
                 <div className={styles.offers}>
                   <div className={cx(styles.offer, styles.heading)}>
                     <div className={styles.owner}>From</div>
@@ -1722,6 +1728,20 @@ const NFTItem = () => {
                       <div className={styles.offer} key={idx}>
                         <div className={styles.owner}>
                           <Link to={`/account/${offer.creator}`}>
+                            <div className={styles.userAvatarWrapper}>
+                              {offer.image ? (
+                                <img
+                                  src={`https://gateway.pinata.cloud/ipfs/${offer.image}`}
+                                  className={styles.userAvatar}
+                                />
+                              ) : (
+                                <Identicon
+                                  account={offer.owner}
+                                  size={24}
+                                  className={styles.userAvatar}
+                                />
+                              )}
+                            </div>
                             {offer.creator.substr(0, 6)}
                           </Link>
                         </div>
