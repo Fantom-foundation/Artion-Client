@@ -110,9 +110,9 @@ const NFTItem = () => {
   const [owner, setOwner] = useState();
   const [ownerInfo, setOwnerInfo] = useState();
   const [ownerInfoLoading, setOwnerInfoLoading] = useState(false);
-  const [tokenType, setTokenType] = useState();
+  const tokenType = useRef();
   const [tokenInfo, setTokenInfo] = useState();
-  const [holders, setHolders] = useState([]);
+  const holders = useRef([]);
   const [collection, setCollection] = useState();
   const [collectionLoading, setCollectionLoading] = useState(false);
 
@@ -170,7 +170,7 @@ const NFTItem = () => {
     try {
       setOwnerInfoLoading(true);
       const type = await getTokenType(address);
-      setTokenType(type);
+      tokenType.current = type;
       if (type === 721) {
         const [contract] = await getNFTContract(address);
         const res = await contract.ownerOf(tokenID);
@@ -181,9 +181,9 @@ const NFTItem = () => {
         setTokenInfo(_tokenInfo);
         try {
           const { data: _holders } = await getTokenHolders(address, tokenID);
-          setHolders(_holders);
+          holders.current = _holders;
         } catch {
-          setHolders([]);
+          holders.current = [];
         }
       }
     } catch {
@@ -304,43 +304,48 @@ const NFTItem = () => {
     }
   };
 
-  const itemSoldHandler = async (seller, buyer, nft, id, price) => {
+  const itemSoldHandler = async (seller, buyer, nft, id, quantity, price) => {
     if (eventMatches(nft, id)) {
-      const listing = listings.current.find(
-        listing => listing.owner.toLowerCase() === seller.toLowerCase()
-      );
       listings.current = listings.current.filter(
         listing => listing.owner.toLowerCase() !== seller.toLowerCase()
       );
-      if (tokenType === 721) {
+      if (tokenType.current === 721) {
         setOwner(buyer);
       } else {
-        const sellerIndex = holders.findIndex(
+        const sellerIndex = holders.current.findIndex(
           holder => holder.address.toLowerCase() === seller.toLowerCase()
         );
-        const buyerIndex = holders.findIndex(
+        const buyerIndex = holders.current.findIndex(
           holder => holder.address.toLowerCase() === buyer.toLowerCase()
         );
         if (sellerIndex > -1) {
-          holders[sellerIndex].supply -= listing.quantity;
+          holders.current[sellerIndex].supply -= quantity;
         }
         if (buyerIndex > -1) {
-          holders[buyerIndex].supply += listing.quantity;
-        }
-        if (holders[sellerIndex].supply === 0) {
-          const newHolders = holders.filter(
-            (holder, idx) => idx !== sellerIndex
-          );
-          setHolders(newHolders);
+          holders.current[buyerIndex].supply += quantity;
         } else {
-          setHolders(holders);
+          const buyerInfo = {
+            address: buyer,
+            supply: quantity,
+          };
+          try {
+            const { data } = await getUserAccountDetails(buyer);
+            buyerInfo.alias = data.alias;
+            buyerInfo.imageHash = data.imageHash;
+          } catch (e) {
+            console.log(e);
+          }
+          holders.current.push(buyerInfo);
+        }
+        if (holders.current[sellerIndex].supply === 0) {
+          holders.current.splice(sellerIndex, 1);
         }
       }
       const newTradeHistory = {
         from: seller,
         to: buyer,
         price: parseFloat(price.toString()) / 10 ** 18,
-        quantity: listing.quantity,
+        value: quantity,
         createdAt: new Date().toISOString(),
       };
       try {
@@ -355,7 +360,7 @@ const NFTItem = () => {
       } catch (e) {
         console.log(e);
       }
-      tradeHistory.current.push(newTradeHistory);
+      tradeHistory.current = [newTradeHistory, ...tradeHistory.current];
     }
   };
 
@@ -671,9 +676,9 @@ const NFTItem = () => {
   };
 
   const isMine =
-    tokenType === 721
+    tokenType.current === 721
       ? owner?.toLowerCase() === account?.toLowerCase()
-      : holders.findIndex(
+      : holders.current.findIndex(
           holder => holder.address.toLowerCase() === account?.toLowerCase()
         ) > -1;
 
@@ -1095,7 +1100,7 @@ const NFTItem = () => {
           <div className={styles.itemOwner}>
             {ownerInfoLoading ? (
               <Skeleton width={180} height={25} />
-            ) : tokenType === 721 ? (
+            ) : tokenType.current === 721 ? (
               <>
                 <div className={styles.ownerAvatar}>
                   {ownerInfo?.imageHash ? (
@@ -1268,7 +1273,7 @@ const NFTItem = () => {
                 </div>
               ) : null}
               {(!auction.current || !auction.current.resulted) &&
-                tokenType !== 1155 && (
+                tokenType.current !== 1155 && (
                   <div
                     className={styles.headerButton}
                     onClick={() => setAuctionModalVisible(true)}
@@ -1670,7 +1675,7 @@ const NFTItem = () => {
           <div className={styles.histories}>
             <div className={cx(styles.history, styles.heading)}>
               <div className={styles.historyPrice}>Price</div>
-              {tokenType === 1155 && (
+              {tokenType.current === 1155 && (
                 <div className={styles.quantity}>Quantity</div>
               )}
               <div className={styles.from}>From</div>
@@ -1682,7 +1687,7 @@ const NFTItem = () => {
               return (
                 <div className={styles.history} key={idx}>
                   <div className={styles.historyPrice}>{history.price} FTM</div>
-                  {tokenType === 1155 && (
+                  {tokenType.current === 1155 && (
                     <div className={styles.quantity}>{history.value}</div>
                   )}
                   <div className={styles.from}>
@@ -1777,7 +1782,7 @@ const NFTItem = () => {
       <OwnersModal
         visible={ownersModalVisible}
         onClose={() => setOwnersModalVisible(false)}
-        holders={holders}
+        holders={holders.current}
       />
     </div>
   );
