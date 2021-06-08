@@ -307,6 +307,12 @@
   }
 }
 
+@media only screen and (max-width: 768px) {
+  .container {
+    padding-top: 155px;
+  }
+}
+
 @media only screen and (max-width: 600px) {
   .inner {
     margin: 0;

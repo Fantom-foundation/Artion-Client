@@ -265,6 +265,97 @@ const NiftyHeader = ({ light }) => {
     </Menu>
   );
 
+  const renderSearchBox = () => (
+    <div className={cx(styles.searchcont, searchBarActive && styles.active)}>
+      <div className={styles.searchcontinner}>
+        <div className={styles.searchbar}>
+          <SearchIcon className={styles.searchicon} />
+          <input
+            placeholder="Search"
+            className={styles.searchinput}
+            onChange={e => handleSearch(e.target.value)}
+            onFocus={() => setSearchBarActive(true)}
+            onBlur={() => setTimeout(() => setSearchBarActive(false), 200)}
+          />
+        </div>
+        {searchBarActive && (
+          <div className={styles.resultcont}>
+            {collections.length > 0 && (
+              <div className={styles.resultsection}>
+                <div className={styles.resultsectiontitle}>Collections</div>
+                <div className={styles.separator} />
+                <div className={styles.resultlist}>
+                  {collections.map((collection, idx) => (
+                    <div key={idx} className={styles.result}>
+                      <img
+                        className={styles.resultimg}
+                        src={`https://gateway.pinata.cloud/ipfs/${collection.logoImageHash}`}
+                      />
+                      <div className={styles.resulttitle}>
+                        {collection.collectionName}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            {accounts.length > 0 && (
+              <div className={styles.resultsection}>
+                <div className={styles.resultsectiontitle}>Accounts</div>
+                <div className={styles.separator} />
+                <div className={styles.resultlist}>
+                  {accounts.map((account, idx) => (
+                    <Link
+                      to={`/account/${account.address}`}
+                      key={idx}
+                      className={styles.result}
+                    >
+                      <img
+                        className={styles.resultimg}
+                        src={`https://gateway.pinata.cloud/ipfs/${account.imageHash}`}
+                      />
+                      <div className={styles.resulttitle}>{account.alias}</div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+            {tokens.length > 0 && (
+              <div className={styles.resultsection}>
+                <div className={styles.resultsectiontitle}>Items</div>
+                <div className={styles.separator} />
+                <div className={styles.resultlist}>
+                  {tokens.map((tk, idx) => (
+                    <Link
+                      to={`/explore/${tk.contractAddress}/${tk.tokenID}`}
+                      key={idx}
+                      className={styles.result}
+                    >
+                      <div className={styles.resultimg}>
+                        {tokenDetailsLoading ? (
+                          <Skeleton width={40} height={40} />
+                        ) : (
+                          <img src={tk.image} />
+                        )}
+                      </div>
+                      <div className={styles.resulttitle}>{tk.name}</div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+            {keyword.length > 0 &&
+              collections.length === 0 &&
+              accounts.length === 0 &&
+              tokens.length === 0 && (
+                <div className={styles.noResults}>No Results</div>
+              )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
   return (
     <div className={cx(styles.header, light && styles.lightBg)}>
       <div className={styles.left}>
@@ -280,106 +371,26 @@ const NiftyHeader = ({ light }) => {
             className={styles.logoSmall}
           />
         </Link>
-        {isSearchbarShown && (
-          <div
-            className={cx(styles.searchcont, searchBarActive && styles.active)}
+        {isSearchbarShown && renderSearchBox()}
+        <div className={styles.secondmenu}>
+          <NavLink
+            to="/exploreall"
+            className={cx(styles.menuLink, styles.link)}
+            activeClassName={styles.active}
           >
-            <div className={styles.searchcontinner}>
-              <div className={styles.searchbar}>
-                <SearchIcon className={styles.searchicon} />
-                <input
-                  placeholder="Search"
-                  className={styles.searchinput}
-                  onChange={e => handleSearch(e.target.value)}
-                  onFocus={() => setSearchBarActive(true)}
-                  onBlur={() =>
-                    setTimeout(() => setSearchBarActive(false), 200)
-                  }
-                />
-              </div>
-              {searchBarActive && (
-                <div className={styles.resultcont}>
-                  {collections.length > 0 && (
-                    <div className={styles.resultsection}>
-                      <div className={styles.resultsectiontitle}>
-                        Collections
-                      </div>
-                      <div className={styles.separator} />
-                      <div className={styles.resultlist}>
-                        {collections.map((collection, idx) => (
-                          <div key={idx} className={styles.result}>
-                            <img
-                              className={styles.resultimg}
-                              src={`https://gateway.pinata.cloud/ipfs/${collection.logoImageHash}`}
-                            />
-                            <div className={styles.resulttitle}>
-                              {collection.collectionName}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                  {accounts.length > 0 && (
-                    <div className={styles.resultsection}>
-                      <div className={styles.resultsectiontitle}>Accounts</div>
-                      <div className={styles.separator} />
-                      <div className={styles.resultlist}>
-                        {accounts.map((account, idx) => (
-                          <Link
-                            to={`/account/${account.address}`}
-                            key={idx}
-                            className={styles.result}
-                          >
-                            <img
-                              className={styles.resultimg}
-                              src={`https://gateway.pinata.cloud/ipfs/${account.imageHash}`}
-                            />
-                            <div className={styles.resulttitle}>
-                              {account.alias}
-                            </div>
-                          </Link>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                  {tokens.length > 0 && (
-                    <div className={styles.resultsection}>
-                      <div className={styles.resultsectiontitle}>Items</div>
-                      <div className={styles.separator} />
-                      <div className={styles.resultlist}>
-                        {tokens.map((tk, idx) => (
-                          <Link
-                            to={`/explore/${tk.contractAddress}/${tk.tokenID}`}
-                            key={idx}
-                            className={styles.result}
-                          >
-                            <div className={styles.resultimg}>
-                              {tokenDetailsLoading ? (
-                                <Skeleton width={40} height={40} />
-                              ) : (
-                                <img src={tk.image} />
-                              )}
-                            </div>
-                            <div className={styles.resulttitle}>{tk.name}</div>
-                          </Link>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                  {keyword.length > 0 &&
-                    collections.length === 0 &&
-                    accounts.length === 0 &&
-                    tokens.length === 0 && (
-                      <div className={styles.noResults}>No Results</div>
-                    )}
-                </div>
-              )}
-            </div>
-          </div>
-        )}
+            Explore
+          </NavLink>
+          <NavLink
+            to="/create"
+            className={cx(styles.menuLink, styles.link)}
+            activeClassName={styles.active}
+          >
+            Create
+          </NavLink>
+        </div>
       </div>
       <div className={styles.menu}>
+        {isSearchbarShown && renderSearchBox()}
         <NavLink
           to="/exploreall"
           className={cx(styles.menuLink, styles.link)}

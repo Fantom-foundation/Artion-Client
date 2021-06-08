@@ -69,7 +69,7 @@
   align-items: center;
 }
 
-.avatar {
+.avatarWrapper {
   width: 40px;
   height: 40px;
   border-radius: 50%;
@@ -78,6 +78,15 @@
   align-items: center;
   justify-content: center;
   box-sizing: border-box;
+  position: relative;
+}
+
+.avatar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
 }
 
 .info {

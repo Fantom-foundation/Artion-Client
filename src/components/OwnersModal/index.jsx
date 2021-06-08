@@ -37,7 +37,7 @@ const OwnersModal = ({ visible, onClose, holders }) => {
           {holders.map((holder, idx) => (
             <Holder key={idx} holder={holder}>
               <div className={styles.holderInfo}>
-                <div className={styles.avatar}>
+                <div className={styles.avatarWrapper}>
                   {holder.imageHash ? (
                     <img
                       src={`https://gateway.pinata.cloud/ipfs/${holder.imageHash}`}
@@ -45,7 +45,11 @@ const OwnersModal = ({ visible, onClose, holders }) => {
                       height={40}
                     />
                   ) : (
-                    <Identicon account={holder.address} size={40} />
+                    <Identicon
+                      account={holder.address}
+                      size={40}
+                      className={styles.avatar}
+                    />
                   )}
                 </div>
                 <div className={styles.info}>
