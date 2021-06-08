@@ -1642,7 +1642,7 @@ const NFTItem = () => {
               </Panel>
             </div>
             <div className={styles.panelWrapper}>
-              <Panel title="Listings">
+              <Panel title="Listings" expanded>
                 <div className={styles.listings}>
                   <div className={cx(styles.listing, styles.heading)}>
                     <div className={styles.owner}>From</div>
@@ -1710,7 +1710,7 @@ const NFTItem = () => {
               </Panel>
             </div>
             <div className={styles.panelWrapper}>
-              <Panel title="Offers">
+              <Panel title="Offers" expanded>
                 <div className={styles.offers}>
                   <div className={cx(styles.offer, styles.heading)}>
                     <div className={styles.owner}>From</div>
