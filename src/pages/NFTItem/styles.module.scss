@@ -517,6 +517,49 @@
   display: none;
 }
 
+.filtermenu {
+  width: 220px;
+  padding: 24px;
+  border-radius: 10px !important;
+  border: 1px solid rgba(0, 0, 0, .2);
+  box-shadow: 0 4px 40px rgba(0, 0, 0, .15);
+}
+
+.menuList {
+  padding: 0 !important;
+}
+
+.menuTitle {
+  font-weight: 700;
+  font-size: 18px;
+  line-height: 18px;
+  color: #3D3D3D;
+}
+
+.menu {
+  display: flex;
+  align-items: center;
+  margin-top: 16px;
+  font-weight: 500;
+  font-size: 18px;
+  line-height: 18px;
+  color: rgba(0, 0, 0, .4);
+  cursor: pointer;
+
+  img {
+    margin-left: 32px;
+    display: none;
+  }
+
+  &.active {
+    color: rgba(0, 0, 0, .6);
+
+    img {
+      display: block;
+    }
+  }
+}
+
 @media only screen and (max-width: 1100px) {
   .topContainer {
     flex-direction: column;

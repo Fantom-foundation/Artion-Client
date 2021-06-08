@@ -1,5 +1,5 @@
 export const SALES_CONTRACT_ADDRESS =
-  '0x5597B2a31edd8C87c25427CE5eA464B48529DC40';
+  '0x61bE08096165cE2f474fA130548F1F4bE2CDe57c';
 
 export const AUCTION_CONTRACT_ADDRESS =
   '0x754C4BeDA855c64F6D71A60A4D1eF28c26D7fA47';
@@ -104,6 +104,12 @@ export const SALES_CONTRACT_ABI = [
         indexed: false,
         internalType: 'uint256',
         name: 'tokenId',
+        type: 'uint256',
+      },
+      {
+        indexed: false,
+        internalType: 'uint256',
+        name: 'quantity',
         type: 'uint256',
       },
       {

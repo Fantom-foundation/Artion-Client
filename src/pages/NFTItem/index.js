@@ -20,7 +20,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye } from '@fortawesome/free-solid-svg-icons';
 import { useWeb3React } from '@web3-react/core';
 import { ClipLoader } from 'react-spinners';
-import Tooltip from '@material-ui/core/Tooltip';
+import { Tooltip, Menu } from '@material-ui/core';
 import {
   People as PeopleIcon,
   ViewModule as ViewModuleIcon,
@@ -34,6 +34,7 @@ import {
   getListings,
   getOffers,
   getTradeHistory,
+  getTransferHistory,
   fetchCollection,
   getUserAccountDetails,
   getTokenType,
@@ -84,6 +85,7 @@ import telegramIcon from 'assets/svgs/telegram.svg';
 import twitterIcon from 'assets/svgs/twitter.svg';
 import mediumIcon from 'assets/svgs/medium.svg';
 import filterIcon from 'assets/svgs/filter.svg';
+import checkIcon from 'assets/svgs/check.svg';
 
 import styles from './styles.module.scss';
 
@@ -91,6 +93,8 @@ const ONE_MIN = 60;
 const ONE_HOUR = ONE_MIN * 60;
 const ONE_DAY = ONE_HOUR * 24;
 const ONE_MONTH = ONE_DAY * 30;
+
+const filters = ['Trade History', 'Transfer History'];
 
 const NFTItem = () => {
   const { addr: address, id: tokenID } = useParams();
@@ -110,9 +114,10 @@ const NFTItem = () => {
   const [owner, setOwner] = useState();
   const [ownerInfo, setOwnerInfo] = useState();
   const [ownerInfoLoading, setOwnerInfoLoading] = useState(false);
-  const [tokenType, setTokenType] = useState();
+  const [tokenOwnerLoading, setTokenOwnerLoading] = useState(false);
+  const tokenType = useRef();
   const [tokenInfo, setTokenInfo] = useState();
-  const [holders, setHolders] = useState([]);
+  const holders = useRef([]);
   const [collection, setCollection] = useState();
   const [collectionLoading, setCollectionLoading] = useState(false);
 
@@ -127,6 +132,7 @@ const NFTItem = () => {
   const [offerPlacing, setOfferPlacing] = useState(false);
   const [offerCanceling, setOfferCanceling] = useState(false);
   const [offerAccepting, setOfferAccepting] = useState(false);
+  const [buyingItem, setBuyingItem] = useState(false);
   const [auctionStarting, setAuctionStarting] = useState(false);
   const [auctionUpdating, setAuctionUpdating] = useState(false);
   const [auctionCanceling, setAuctionCanceling] = useState(false);
@@ -145,6 +151,11 @@ const NFTItem = () => {
   const listings = useRef([]);
   const offers = useRef([]);
   const tradeHistory = useRef([]);
+  const transferHistory = useRef([]);
+
+  const [filter, setFilter] = useState(0);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const isMenuOpen = Boolean(anchorEl);
 
   const { isConnected: isWalletConnected } = useSelector(
     state => state.ConnectWallet
@@ -168,28 +179,28 @@ const NFTItem = () => {
 
   const getTokenOwner = async () => {
     try {
-      setOwnerInfoLoading(true);
+      setTokenOwnerLoading(true);
       const type = await getTokenType(address);
-      setTokenType(type);
+      tokenType.current = type;
       if (type === 721) {
         const [contract] = await getNFTContract(address);
         const res = await contract.ownerOf(tokenID);
         setOwner(res);
       } else if (type === 1155) {
-        setOwner(null);
         const { data: _tokenInfo } = await get1155Info(address, tokenID);
         setTokenInfo(_tokenInfo);
         try {
           const { data: _holders } = await getTokenHolders(address, tokenID);
-          setHolders(_holders);
+          holders.current = _holders;
         } catch {
-          setHolders([]);
+          holders.current = [];
         }
+        setOwner(null);
       }
     } catch {
       setOwner(null);
     } finally {
-      setOwnerInfoLoading(false);
+      setTokenOwnerLoading(false);
     }
   };
 
@@ -225,7 +236,24 @@ const NFTItem = () => {
   const getItemTradeHistory = async () => {
     try {
       const { data } = await getTradeHistory(address, tokenID);
-      tradeHistory.current = data;
+      tradeHistory.current = data.sort((a, b) =>
+        a.createdAt < b.createdAt ? 1 : -1
+      );
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  const getItemTransferHistory = async () => {
+    try {
+      const { data } = await getTransferHistory(
+        address,
+        tokenID,
+        tokenType.current
+      );
+      transferHistory.current = data.sort((a, b) =>
+        a.createdAt < b.createdAt ? 1 : -1
+      );
     } catch (e) {
       console.log(e);
     }
@@ -304,58 +332,66 @@ const NFTItem = () => {
     }
   };
 
-  const itemSoldHandler = async (seller, buyer, nft, id, price) => {
+  const itemSoldHandler = async (seller, buyer, nft, id, _quantity, price) => {
+    const quantity = parseFloat(_quantity.toString());
     if (eventMatches(nft, id)) {
-      const listing = listings.current.find(
-        listing => listing.owner.toLowerCase() === seller.toLowerCase()
-      );
       listings.current = listings.current.filter(
         listing => listing.owner.toLowerCase() !== seller.toLowerCase()
       );
-      if (tokenType === 721) {
+      if (tokenType.current === 721) {
         setOwner(buyer);
       } else {
-        const sellerIndex = holders.findIndex(
+        const sellerIndex = holders.current.findIndex(
           holder => holder.address.toLowerCase() === seller.toLowerCase()
         );
-        const buyerIndex = holders.findIndex(
+        const buyerIndex = holders.current.findIndex(
           holder => holder.address.toLowerCase() === buyer.toLowerCase()
         );
         if (sellerIndex > -1) {
-          holders[sellerIndex].supply -= listing.quantity;
+          holders.current[sellerIndex].supply -= quantity;
         }
         if (buyerIndex > -1) {
-          holders[buyerIndex].supply += listing.quantity;
-        }
-        if (holders[sellerIndex].supply === 0) {
-          const newHolders = holders.filter(
-            (holder, idx) => idx !== sellerIndex
-          );
-          setHolders(newHolders);
+          holders.current[buyerIndex].supply += quantity;
         } else {
-          setHolders(holders);
+          const buyerInfo = {
+            address: buyer,
+            supply: quantity,
+          };
+          try {
+            const { data } = await getUserAccountDetails(buyer);
+            buyerInfo.alias = data.alias;
+            buyerInfo.imageHash = data.imageHash;
+          } catch (e) {
+            console.log(e);
+          }
+          holders.current.push(buyerInfo);
+        }
+        if (holders.current[sellerIndex].supply === 0) {
+          holders.current.splice(sellerIndex, 1);
         }
       }
       const newTradeHistory = {
         from: seller,
         to: buyer,
         price: parseFloat(price.toString()) / 10 ** 18,
-        quantity: listing.quantity,
+        value: quantity,
         createdAt: new Date().toISOString(),
       };
       try {
-        const [from, to] = await Promise.all([
-          getUserAccountDetails(seller),
-          getUserAccountDetails(buyer),
-        ]);
+        const from = await getUserAccountDetails(seller);
         newTradeHistory.fromAlias = from?.data.alias;
         newTradeHistory.fromImage = from?.data.imageHash;
+      } catch (e) {
+        console.log(e);
+      }
+      try {
+        const to = await getUserAccountDetails(buyer);
         newTradeHistory.toAlias = to?.data.alias;
         newTradeHistory.toImage = to?.data.imageHash;
       } catch (e) {
         console.log(e);
       }
-      tradeHistory.current.push(newTradeHistory);
+      tradeHistory.current = [newTradeHistory, ...tradeHistory.current];
     }
   };
 
@@ -584,6 +620,12 @@ const NFTItem = () => {
   }, [address, tokenID]);
 
   useEffect(() => {
+    if (tokenType.current) {
+      getItemTransferHistory();
+    }
+  }, [address, tokenID, tokenType.current]);
+
+  useEffect(() => {
     getOwnerInfo();
   }, [owner]);
 
@@ -670,12 +712,14 @@ const NFTItem = () => {
     }
   };
 
+  const myHolding = holders.current.find(
+    holder => holder.address.toLowerCase() === account?.toLowerCase()
+  );
+
   const isMine =
-    tokenType === 721
+    tokenType.current === 721
       ? owner?.toLowerCase() === account?.toLowerCase()
-      : holders.findIndex(
-          holder => holder.address.toLowerCase() === account?.toLowerCase()
-        ) > -1;
+      : !!myHolding;
 
   const handleListItem = async (_price, quantity) => {
     if (listingItem) return;
@@ -737,20 +781,30 @@ const NFTItem = () => {
   };
 
   const handleBuyItem = async listing => {
-    const _price = listing.price * listing.quantity;
-    const price = ethers.utils.parseEther(_price.toString());
-    const tx = await buyItem(
-      address,
-      ethers.BigNumber.from(tokenID),
-      listing.owner,
-      price,
-      account
-    );
+    if (buyingItem) return;
 
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    await provider.waitForTransaction(tx.hash);
+    try {
+      setBuyingItem(true);
+      const _price = listing.price * listing.quantity;
+      const price = ethers.utils.parseEther(_price.toString());
+      const tx = await buyItem(
+        address,
+        ethers.BigNumber.from(tokenID),
+        listing.owner,
+        price,
+        account
+      );
+      await tx.wait();
+      setBuyingItem(false);
 
-    toast('success', 'You have bought the item!');
+      toast('success', 'You have bought the item!');
+
+      listings.current = listings.current.filter(
+        _listing => _listing.owner !== listing.owner
+      );
+    } catch {
+      setBuyingItem(false);
+    }
   };
 
   const handleMakeOffer = async (_price, quantity, endTime) => {
@@ -810,6 +864,10 @@ const NFTItem = () => {
       setOfferAccepting(false);
 
       toast('success', 'Offer accepted!');
+
+      offers.current = offers.current.filter(
+        _offer => _offer.creator !== offer.creator
+      );
     } catch {
       setOfferAccepting(false);
     }
@@ -1066,6 +1124,59 @@ const NFTItem = () => {
     return myListing() !== undefined;
   };
 
+  const maxSupply = () => {
+    let supply = 0;
+    holders.current.map(holder => {
+      if (
+        holder.address.toLowerCase() !== account.toLowerCase() &&
+        holder.supply > supply
+      ) {
+        supply = holder.supply;
+      }
+    });
+    return supply;
+  };
+
+  const handleMenuOpen = e => {
+    setAnchorEl(e.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleSelectFilter = _filter => {
+    setFilter(_filter);
+    handleMenuClose();
+  };
+
+  const renderMenu = (
+    <Menu
+      anchorEl={anchorEl}
+      anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+      keepMounted
+      transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+      open={isMenuOpen}
+      onClose={handleMenuClose}
+      classes={{
+        paper: styles.filtermenu,
+        list: styles.menuList,
+      }}
+    >
+      <div className={styles.menuTitle}>Filter By</div>
+      {filters.map((_filter, idx) => (
+        <div
+          key={idx}
+          className={cx(styles.menu, filter === idx && styles.active)}
+          onClick={() => handleSelectFilter(idx)}
+        >
+          {_filter}
+          <img src={checkIcon} />
+        </div>
+      ))}
+    </Menu>
+  );
+
   const renderProperties = properties => {
     const res = [];
     Object.keys(properties).map((key, idx) => {
@@ -1091,11 +1202,11 @@ const NFTItem = () => {
       </div>
       <div className={styles.itemName}>{info?.name || ''}</div>
       <div className={styles.itemStats}>
-        {(ownerInfoLoading || owner || tokenInfo) && (
+        {(ownerInfoLoading || tokenOwnerLoading || owner || tokenInfo) && (
           <div className={styles.itemOwner}>
-            {ownerInfoLoading ? (
+            {ownerInfoLoading || tokenOwnerLoading ? (
               <Skeleton width={180} height={25} />
-            ) : tokenType === 721 ? (
+            ) : tokenType.current === 721 ? (
               <>
                 <div className={styles.ownerAvatar}>
                   {ownerInfo?.imageHash ? (
@@ -1123,8 +1234,8 @@ const NFTItem = () => {
                   onClick={() => setOwnersModalVisible(true)}
                 >
                   <PeopleIcon style={styles.itemIcon} />
-                  &nbsp;{tokenInfo.holders}
-                  &nbsp;owner{tokenInfo.holders > 1 && 's'}
+                  &nbsp;{holders.current.length}
+                  &nbsp;owner{holders.current.length > 1 && 's'}
                 </div>
                 <div className={styles.itemViews}>
                   <ViewModuleIcon style={styles.itemIcon} />
@@ -1254,7 +1365,7 @@ const NFTItem = () => {
       <Header light />
       {isLoggedIn() && (
         <div className={styles.header}>
-          {isMine ? (
+          {isMine && (
             <>
               {auction.current?.resulted === false ? (
                 <div
@@ -1268,7 +1379,7 @@ const NFTItem = () => {
                 </div>
               ) : null}
               {(!auction.current || !auction.current.resulted) &&
-                tokenType !== 1155 && (
+                tokenType.current !== 1155 && (
                   <div
                     className={styles.headerButton}
                     onClick={() => setAuctionModalVisible(true)}
@@ -1299,7 +1410,10 @@ const NFTItem = () => {
                 </>
               )}
             </>
-          ) : (
+          )}
+          {(!isMine ||
+            (tokenType.current === 1155 &&
+              myHolding.supply < tokenInfo.totalSupply)) &&
             (!auction.current || auction.current.resulted) && (
               <div
                 className={cx(
@@ -1320,8 +1434,7 @@ const NFTItem = () => {
                   ? 'Making Offer...'
                   : 'Make Offer'}
               </div>
-            )
-          )}
+            )}
         </div>
       )}
       <div className={styles.inner}>
@@ -1564,10 +1677,24 @@ const NFTItem = () => {
                         {listing.owner.toLowerCase() !==
                           account.toLowerCase() && (
                           <div
-                            className={styles.buyButton}
+                            className={cx(
+                              styles.buyButton,
+                              (salesContractApproving || buyingItem) &&
+                                styles.disabled
+                            )}
                             onClick={() => handleBuyItem(listing)}
                           >
-                            Buy
+                            {!salesContractApproved ? (
+                              salesContractApproving ? (
+                                <ClipLoader color="#FFF" size={16} />
+                              ) : (
+                                'Approve'
+                              )
+                            ) : buyingItem ? (
+                              <ClipLoader color="#FFF" size={16} />
+                            ) : (
+                              'Buy'
+                            )}
                           </div>
                         )}
                       </div>
@@ -1610,32 +1737,36 @@ const NFTItem = () => {
                           {formatExpiration(offer.deadline)}
                         </div>
                         <div className={styles.buy}>
-                          {isMine && (
-                            <div
-                              className={cx(
-                                styles.buyButton,
-                                (salesContractApproving || offerAccepting) &&
-                                  styles.disabled
-                              )}
-                              onClick={
-                                salesContractApproved
-                                  ? () => handleAcceptOffer(offer)
-                                  : handleApproveSalesContract
-                              }
-                            >
-                              {!salesContractApproved ? (
-                                salesContractApproving ? (
+                          {((tokenType.current === 721 && isMine) ||
+                            (myHolding &&
+                              myHolding.supply >= offer.quantity)) &&
+                            offer.creator?.toLowerCase() !==
+                              account?.toLowerCase() && (
+                              <div
+                                className={cx(
+                                  styles.buyButton,
+                                  (salesContractApproving || offerAccepting) &&
+                                    styles.disabled
+                                )}
+                                onClick={
+                                  salesContractApproved
+                                    ? () => handleAcceptOffer(offer)
+                                    : handleApproveSalesContract
+                                }
+                              >
+                                {!salesContractApproved ? (
+                                  salesContractApproving ? (
+                                    <ClipLoader color="#FFF" size={16} />
+                                  ) : (
+                                    'Approve'
+                                  )
+                                ) : offerAccepting ? (
                                   <ClipLoader color="#FFF" size={16} />
                                 ) : (
-                                  'Approve'
-                                )
-                              ) : offerAccepting ? (
-                                <ClipLoader color="#FFF" size={16} />
-                              ) : (
-                                'Accept'
-                              )}
-                            </div>
-                          )}
+                                  'Accept'
+                                )}
+                              </div>
+                            )}
                           {offer.creator?.toLowerCase() ===
                             account?.toLowerCase() && (
                             <div
@@ -1662,27 +1793,34 @@ const NFTItem = () => {
         </div>
         <div className={styles.tradeHistoryWrapper}>
           <div className={styles.tradeHistoryHeader}>
-            <div className={styles.tradeHistoryTitle}>Trade History</div>
-            <div className={styles.filter}>
+            <div className={styles.tradeHistoryTitle}>{filters[filter]}</div>
+            <div className={styles.filter} onClick={handleMenuOpen}>
               <img src={filterIcon} className={styles.filterIcon} />
             </div>
           </div>
           <div className={styles.histories}>
             <div className={cx(styles.history, styles.heading)}>
-              <div className={styles.historyPrice}>Price</div>
-              {tokenType === 1155 && (
+              {filter === 0 && <div className={styles.historyPrice}>Price</div>}
+              {tokenType.current === 1155 && (
                 <div className={styles.quantity}>Quantity</div>
               )}
               <div className={styles.from}>From</div>
               <div className={styles.to}>To</div>
               <div className={styles.saleDate}>Date</div>
             </div>
-            {tradeHistory.current.map((history, idx) => {
+            {(filter === 0
+              ? tradeHistory.current
+              : transferHistory.current
+            ).map((history, idx) => {
               const saleDate = new Date(history.createdAt);
               return (
                 <div className={styles.history} key={idx}>
-                  <div className={styles.historyPrice}>{history.price} FTM</div>
-                  {tokenType === 1155 && (
+                  {filter === 0 && (
+                    <div className={styles.historyPrice}>
+                      {history.price} FTM
+                    </div>
+                  )}
+                  {tokenType.current === 1155 && (
                     <div className={styles.quantity}>{history.value}</div>
                   )}
                   <div className={styles.from}>
@@ -1731,6 +1869,8 @@ const NFTItem = () => {
         </div>
       </div>
 
+      {renderMenu}
+
       <SellModal
         visible={sellModalVisible}
         onClose={() => setSellModalVisible(false)}
@@ -1740,7 +1880,7 @@ const NFTItem = () => {
         approveContract={handleApproveSalesContract}
         contractApproving={salesContractApproving}
         contractApproved={salesContractApproved}
-        totalSupply={tokenInfo?.totalSupply || 1}
+        totalSupply={tokenType.current === 1155 ? myHolding?.supply : null}
       />
       <OfferModal
         visible={offerModalVisible}
@@ -1750,7 +1890,7 @@ const NFTItem = () => {
         approveContract={handleApproveSalesContract}
         contractApproving={salesContractApproving}
         contractApproved={salesContractApproved}
-        totalSupply={tokenInfo?.totalSupply || 1}
+        totalSupply={tokenType.current === 1155 ? maxSupply() : null}
       />
       <AuctionModal
         visible={auctionModalVisible}
@@ -1777,7 +1917,7 @@ const NFTItem = () => {
       <OwnersModal
         visible={ownersModalVisible}
         onClose={() => setOwnersModalVisible(false)}
-        holders={holders}
+        holders={holders.current}
       />
     </div>
   );
