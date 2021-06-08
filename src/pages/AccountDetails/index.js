@@ -414,7 +414,21 @@ const AccountDetails = () => {
                           to={`/account/${activity.to}`}
                           className={styles.owner}
                         >
-                          {shortenAddress(activity.to)}
+                          <div className={styles.ownerAvatarWrapper}>
+                            {activity.image ? (
+                              <img
+                                src={`https://gateway.pinata.cloud/ipfs/${activity.image}`}
+                                className={styles.ownerAvatar}
+                              />
+                            ) : (
+                              <Identicon
+                                account={activity.to}
+                                size={24}
+                                className={styles.ownerAvatar}
+                              />
+                            )}
+                          </div>
+                          {activity.alias || shortenAddress(activity.to)}
                         </Link>
                       ) : (
                         <div className={styles.owner}>
@@ -450,7 +464,21 @@ const AccountDetails = () => {
                           to={`/account/${offer.creator}`}
                           className={styles.owner}
                         >
-                          {shortenAddress(offer.creator)}
+                          <div className={styles.ownerAvatarWrapper}>
+                            {offer.image ? (
+                              <img
+                                src={`https://gateway.pinata.cloud/ipfs/${offer.image}`}
+                                className={styles.ownerAvatar}
+                              />
+                            ) : (
+                              <Identicon
+                                account={offer.creator}
+                                size={24}
+                                className={styles.ownerAvatar}
+                              />
+                            )}
+                          </div>
+                          {offer.alias || shortenAddress(offer.creator)}
                         </Link>
                       ) : (
                         <div className={styles.owner}>
