@@ -1722,6 +1722,20 @@ const NFTItem = () => {
                       <div className={styles.offer} key={idx}>
                         <div className={styles.owner}>
                           <Link to={`/account/${offer.creator}`}>
+                            <div className={styles.userAvatarWrapper}>
+                              {offer.image ? (
+                                <img
+                                  src={`https://gateway.pinata.cloud/ipfs/${offer.image}`}
+                                  className={styles.userAvatar}
+                                />
+                              ) : (
+                                <Identicon
+                                  account={offer.owner}
+                                  size={24}
+                                  className={styles.userAvatar}
+                                />
+                              )}
+                            </div>
                             {offer.creator.substr(0, 6)}
                           </Link>
                         </div>
