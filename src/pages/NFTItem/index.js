@@ -183,7 +183,7 @@ const NFTItem = () => {
       const type = await getTokenType(address);
       tokenType.current = type;
       if (type === 721) {
-        const [contract] = await getNFTContract(address);
+        const contract = await getNFTContract(address);
         const res = await contract.ownerOf(tokenID);
         setOwner(res);
       } else if (type === 1155) {
@@ -636,7 +636,7 @@ const NFTItem = () => {
   }, [owner]);
 
   const getSalesContractStatus = async () => {
-    const [contract] = await getNFTContract(address);
+    const contract = await getNFTContract(address);
     try {
       const approved = await contract.isApprovedForAll(
         account,
@@ -649,7 +649,7 @@ const NFTItem = () => {
   };
 
   const getAuctionContractStatus = async () => {
-    const [contract] = await getNFTContract(address);
+    const contract = await getNFTContract(address);
     try {
       const approved = await contract.isApprovedForAll(
         account,
@@ -662,7 +662,7 @@ const NFTItem = () => {
   };
 
   const addNFTContractEventListeners = async () => {
-    const [contract] = await getNFTContract(address);
+    const contract = await getNFTContract(address);
 
     contract.on('ApprovalForAll', (owner, operator, approved) => {
       if (account?.toLowerCase() === owner?.toLowerCase()) {
@@ -690,9 +690,9 @@ const NFTItem = () => {
   const handleApproveSalesContract = async () => {
     setSalesContractApproving(true);
     try {
-      const [contract, provider] = await getNFTContract(address);
+      const contract = await getNFTContract(address);
       const tx = await contract.setApprovalForAll(SALES_CONTRACT_ADDRESS, true);
-      await provider.waitForTransaction(tx.hash);
+      await tx.wait();
       setSalesContractApproved(true);
     } catch (e) {
       console.log(e);
@@ -704,12 +704,12 @@ const NFTItem = () => {
   const handleApproveAuctionContract = async () => {
     setAuctionContractApproving(true);
     try {
-      const [contract, provider] = await getNFTContract(address);
+      const contract = await getNFTContract(address);
       const tx = await contract.setApprovalForAll(
         AUCTION_CONTRACT_ADDRESS,
         true
       );
-      await provider.waitForTransaction(tx.hash);
+      await tx.wait();
       setAuctionContractApproved(true);
     } catch (e) {
       console.log(e);
