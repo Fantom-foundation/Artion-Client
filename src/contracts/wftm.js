@@ -9,11 +9,11 @@ const getWFTMContract = async () => {
   const signer = provider.getSigner();
   const contract = new ethers.Contract(WFTM_ADDRESS, WFTM_ABI, signer);
 
-  return [contract, provider];
+  return contract;
 };
 
 export const getWFTMBalance = async address => {
-  const [contract] = await getWFTMContract();
+  const contract = await getWFTMContract();
   return await contract.balanceOf(address);
 };
 
@@ -38,7 +38,7 @@ export const unwrapFTM = async value => {
 };
 
 export const getAllowance = async (owner, spender) => {
-  const [contract] = await getWFTMContract();
+  const contract = await getWFTMContract();
   return await contract.allowance(owner, spender);
 };
 
