@@ -69,7 +69,7 @@ class PaintStore {
       this.canvasBg.width = canvasBg.clientWidth;
       this.canvasBg.height = canvasBg.clientHeight;
       this.ctxBg = canvasBg.getContext('2d');
-      this.ctxBg.fillStyle = 'red';
+      this.ctxBg.fillStyle = 'transparent';
       this.ctxBg.fillRect(0, 0, this.canvasBg.width, this.canvasBg.height);
       const fileSelector = document.createElement('input');
       fileSelector.setAttribute('type', 'file');
@@ -84,7 +84,7 @@ class PaintStore {
             background.src = reader.result;
             background.onload = () => {
               if (background.width == background.height)
-                this.ctx.drawImage(
+                this.ctxBg.drawImage(
                   background,
                   0,
                   0,
@@ -101,7 +101,7 @@ class PaintStore {
                 imgH *= ratioToCanvas;
                 const x = (this.canvas.width - imgW) / 2;
                 const y = (this.canvas.height - imgH) / 2;
-                this.ctx.drawImage(background, x, y, imgW, imgH);
+                this.ctxBg.drawImage(background, x, y, imgW, imgH);
               }
               fileSelector.value = null;
             };
@@ -190,19 +190,21 @@ class PaintStore {
     }
   };
 
-  clear = () => {
+  clear = (clearBg = false) => {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    this.ctxBg.clearRect(0, 0, this.canvasBg.width, this.canvasBg.height);
-    this.backgroundColor = 'white';
-    this.ctxBg.fillStyle = this.backgroundColor;
-    this.ctxBg.fillRect(0, 0, this.canvasBg.width, this.canvasBg.height);
+    if (clearBg) {
+      this.ctxBg.clearRect(0, 0, this.canvasBg.width, this.canvasBg.height);
+      this.backgroundColor = 'white';
+      this.ctxBg.fillStyle = this.backgroundColor;
+      this.ctxBg.fillRect(0, 0, this.canvasBg.width, this.canvasBg.height);
+    }
   };
 
   reset = () => {
     this.strokeHistory = [];
     this.session = [];
     this.redos = [];
-    this.clear();
+    this.clear(true);
   };
 
   saveToFile = () => {
