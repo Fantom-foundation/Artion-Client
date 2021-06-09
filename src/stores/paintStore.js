@@ -206,9 +206,27 @@ class PaintStore {
   };
 
   saveToFile = () => {
-    this.canvas.toBlob(blob => {
-      saveAs(blob, 'newArt.png');
-    });
+    const canvas = this.canvas;
+    const canvasBg = this.canvasBg;
+    const newcanvas = document.createElement('canvas');
+    newcanvas.width = canvas.clientWidth;
+    newcanvas.height = canvas.clientHeight;
+    const ctx = newcanvas.getContext('2d');
+    const image = new Image();
+    image.onload = function() {
+      ctx.drawImage(image, 0, 0);
+
+      const image1 = new Image();
+      image1.onload = async function() {
+        ctx.drawImage(image1, 0, 0);
+
+        newcanvas.toBlob(blob => {
+          saveAs(blob, 'image.png');
+        });
+      };
+      image1.src = canvas.toDataURL();
+    };
+    image.src = canvasBg.toDataURL();
   };
 }
 

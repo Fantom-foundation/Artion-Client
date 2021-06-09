@@ -233,37 +233,44 @@ const ExploreCollections = () => {
                     className={classes.collection}
                   />
                 ))}
-            {filteredCollections().map((item, idx) => (
-              <div
-                key={idx}
-                className={classes.collection}
-                onClick={() => handleSelectCollection(item.address)}
-              >
-                <img
-                  className={classes.logo}
-                  src={
-                    item.isVerified
-                      ? `https://gateway.pinata.cloud/ipfs/${item.logoImageHash}`
-                      : collections.includes(item.address)
-                      ? nftActiveIcon
-                      : nftIcon
-                  }
-                />
-                <span
-                  className={cx(
-                    classes.name,
-                    collections.includes(item.address) ? classes.selected : null
-                  )}
+            {filteredCollections()
+              .filter(item => item.isVerified)
+              .map((item, idx) => (
+                <div
+                  key={idx}
+                  className={classes.collection}
+                  onClick={() => handleSelectCollection(item.address)}
                 >
-                  {item.name || item.collectionName}
-                </span>
-                {item.isVerified && (
-                  <BootstrapTooltip title="Verified Collection" placement="top">
-                    <CheckCircleIcon className={classes.checkIcon} />
-                  </BootstrapTooltip>
-                )}
-              </div>
-            ))}
+                  <img
+                    className={classes.logo}
+                    src={
+                      item.isVerified
+                        ? `https://gateway.pinata.cloud/ipfs/${item.logoImageHash}`
+                        : collections.includes(item.address)
+                        ? nftActiveIcon
+                        : nftIcon
+                    }
+                  />
+                  <span
+                    className={cx(
+                      classes.name,
+                      collections.includes(item.address)
+                        ? classes.selected
+                        : null
+                    )}
+                  >
+                    {item.name || item.collectionName}
+                  </span>
+                  {item.isVerified && (
+                    <BootstrapTooltip
+                      title="Verified Collection"
+                      placement="top"
+                    >
+                      <CheckCircleIcon className={classes.checkIcon} />
+                    </BootstrapTooltip>
+                  )}
+                </div>
+              ))}
           </div>
         </AccordionDetails>
       </Accordion>
