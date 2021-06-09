@@ -234,7 +234,7 @@ const ExploreCollections = () => {
                   />
                 ))}
             {filteredCollections()
-              .filter(item => item.isVerified)
+              .filter(item => item.isVisible)
               .map((item, idx) => (
                 <div
                   key={idx}
