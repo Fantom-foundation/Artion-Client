@@ -173,7 +173,7 @@ const NiftyHeader = ({ light }) => {
         },
       } = await axios({
         method: 'post',
-        url: `https://api0.artion.io/info/searchNames`,
+        url: `https://api.artion.io/info/searchNames`,
         data: JSON.stringify({ name: word }),
         headers: {
           'Content-Type': 'application/json',
