@@ -176,7 +176,12 @@ const AccountModal = () => {
         <div className={styles.paper}>
           <h2 className={styles.title}>Account Settings</h2>
           <div className={styles.formGroup}>
-            <p className={styles.formLabel}>User Avatar</p>
+            <p className={styles.formLabel}>
+              User Avatar{' '}
+              <small>
+                <i>(required)</i>
+              </small>
+            </p>
             <input
               ref={inputRef}
               type="file"
@@ -195,7 +200,12 @@ const AccountModal = () => {
             </div>
           </div>
           <div className={styles.formGroup}>
-            <p className={styles.formLabel}>Username</p>
+            <p className={styles.formLabel}>
+              Username{' '}
+              <small>
+                <i>(required)</i>
+              </small>
+            </p>
             <input
               type="text"
               className={cx(
@@ -213,7 +223,12 @@ const AccountModal = () => {
             )}
           </div>
           <div className={styles.formGroup}>
-            <p className={styles.formLabel}>Email Address</p>
+            <p className={styles.formLabel}>
+              Email Address{' '}
+              <small>
+                <i>(required)</i>
+              </small>
+            </p>
             <input
               type="text"
               className={cx(
