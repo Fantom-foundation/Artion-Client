@@ -10,6 +10,7 @@ import axios from 'axios';
 
 import WalletConnectActions from 'actions/walletconnect.actions';
 import AuthActions from 'actions/auth.actions';
+import ModalActions from 'actions/modal.actions';
 import { shortenAddress } from 'utils';
 import { injected } from 'connectors';
 import { getAuthToken, getAccountDetails } from 'api';
@@ -39,8 +40,8 @@ const NiftyHeader = ({ light }) => {
   const { isConnected: isWalletConnected } = useSelector(
     state => state.ConnectWallet
   );
+  const { wftmModalVisible } = useSelector(state => state.Modal);
 
-  const [stationModalVisible, setStationModalVisible] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [loading, setLoading] = useState(false);
   const [searchBarActive, setSearchBarActive] = useState(false);
@@ -222,7 +223,7 @@ const NiftyHeader = ({ light }) => {
   };
 
   const openWrapStation = () => {
-    setStationModalVisible(true);
+    dispatch(ModalActions.showWFTMModal());
     handleMenuClose();
   };
 
@@ -453,8 +454,8 @@ const NiftyHeader = ({ light }) => {
       </div>
       {renderMenu}
       <WFTMModal
-        visible={stationModalVisible}
-        onClose={() => setStationModalVisible(false)}
+        visible={wftmModalVisible}
+        onClose={() => dispatch(ModalActions.hideWFTMModal())}
       />
     </div>
   );

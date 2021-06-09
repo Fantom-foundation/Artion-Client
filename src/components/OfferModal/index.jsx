@@ -65,7 +65,7 @@ const OfferModal = ({
         </div>
         <div className={styles.body}>
           <div className={styles.formGroup}>
-            <div className={styles.formLabel}>Price</div>
+            <div className={styles.formLabel}>Price (in wFTM)</div>
             <div className={styles.formInputCont}>
               <input
                 className={styles.formInput}

@@ -116,17 +116,7 @@ const App = ({ paintStore }) => {
         </Switch>
         <AccountModal />
         <WFTMModal />
-        <Toaster
-          position="bottom-right"
-          reverseOrder={false}
-          toastOptions={{
-            style: {
-              padding: 24,
-              borderRadius: 10,
-              boxShadow: '0px 4px 40px rgba(0, 0, 0, 0.1)',
-            },
-          }}
-        />
+        <Toaster position="bottom-right" reverseOrder={false} />
       </Router>
     </div>
   );
