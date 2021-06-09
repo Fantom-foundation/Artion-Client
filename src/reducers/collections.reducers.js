@@ -9,7 +9,7 @@ export function Collections(state = initialState, action) {
   switch (action.type) {
     case CollectionsConstants.FETCH_COLLECTIONS_START: {
       return {
-        collections: [],
+        ...state,
         collectionsLoading: true,
       };
     }

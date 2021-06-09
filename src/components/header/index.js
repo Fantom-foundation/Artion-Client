@@ -16,6 +16,8 @@ import { injected } from 'connectors';
 import { getAuthToken, getAccountDetails } from 'api';
 import { NETWORK_LABEL } from 'constants/networks';
 import WFTMModal from 'components/WFTMModal';
+import BanItemModal from 'components/BanItemModal';
+import BoostCollectionModal from 'components/BoostCollectionModal';
 import Identicon from 'components/Identicon';
 
 import logoWhite from 'assets/svgs/logo_white.svg';
@@ -28,6 +30,8 @@ import iconSwap from 'assets/svgs/swap.svg';
 import iconExit from 'assets/svgs/exit.svg';
 
 import styles from './styles.module.scss';
+
+const adminAddress = '0xB7bC6D2666e73F8Cd143a929DB5404e2fc03eA89';
 
 const NiftyHeader = ({ light }) => {
   const history = useHistory();
@@ -45,6 +49,11 @@ const NiftyHeader = ({ light }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [loading, setLoading] = useState(false);
   const [searchBarActive, setSearchBarActive] = useState(false);
+  const [banItemModalVisible, setBanItemModalVisible] = useState(false);
+  const [
+    boostCollectionModalVisible,
+    setBoostCollectionModalVisible,
+  ] = useState(false);
 
   const [keyword, setKeyword] = useState('');
   const [cancelSource, setCancelSource] = useState(null);
@@ -227,6 +236,16 @@ const NiftyHeader = ({ light }) => {
     handleMenuClose();
   };
 
+  const banItem = () => {
+    setBanItemModalVisible(true);
+    handleMenuClose();
+  };
+
+  const boostCollection = () => {
+    setBoostCollectionModalVisible(true);
+    handleMenuClose();
+  };
+
   const renderMenu = (
     <Menu
       anchorEl={anchorEl}
@@ -258,6 +277,17 @@ const NiftyHeader = ({ light }) => {
         FTM / WFTM Station
       </div>
       <div className={styles.menuSeparator} />
+      {account?.toLowerCase() === adminAddress.toLowerCase() && (
+        <>
+          <div className={styles.menuItem} onClick={banItem}>
+            Ban Item (Admin only)
+          </div>
+          <div className={styles.menuItem} onClick={boostCollection}>
+            Boost Collection (Admin only)
+          </div>
+          <div className={styles.menuSeparator} />
+        </>
+      )}
       <div className={styles.menuItem} onClick={handleSignOut}>
         <img src={iconExit} className={styles.menuIcon} />
         Sign Out
@@ -456,6 +486,14 @@ const NiftyHeader = ({ light }) => {
       <WFTMModal
         visible={wftmModalVisible}
         onClose={() => dispatch(ModalActions.hideWFTMModal())}
+      />
+      <BanItemModal
+        visible={banItemModalVisible}
+        onClose={() => setBanItemModalVisible(false)}
+      />
+      <BoostCollectionModal
+        visible={boostCollectionModalVisible}
+        onClose={() => setBoostCollectionModalVisible(false)}
       />
     </div>
   );
