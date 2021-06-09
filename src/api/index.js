@@ -250,3 +250,31 @@ export const getActivityFromOthers = async address => {
   });
   return res.data;
 };
+
+export const banItem = async (address, tokenID, authToken) => {
+  const data = { address, tokenID };
+  const res = await axios({
+    method: 'post',
+    url: `${BASE_URL}/ban/banItem`,
+    data: JSON.stringify(data),
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${authToken}`,
+    },
+  });
+  return res.data;
+};
+
+export const boostCollection = async (address, authToken) => {
+  const data = { address };
+  const res = await axios({
+    method: 'post',
+    url: `${BASE_URL}/ban/boostCollection`,
+    data: JSON.stringify(data),
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${authToken}`,
+    },
+  });
+  return res.data;
+};

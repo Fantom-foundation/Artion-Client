@@ -223,6 +223,7 @@ const ExploreCollections = () => {
           </div>
           <div className={classes.collectionsList}>
             {collectionsLoading &&
+              collectionItems.length === 0 &&
               new Array(8)
                 .fill(0)
                 .map((_, idx) => (
