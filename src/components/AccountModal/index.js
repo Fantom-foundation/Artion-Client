@@ -246,10 +246,9 @@ const AccountModal = () => {
               className={cx(
                 styles.button,
                 styles.save,
-                saving && styles.disabled
+                (saving || !validate()) && styles.disabled
               )}
-              onClick={onSave}
-              disabled={!validate()}
+              onClick={validate() ? onSave : null}
             >
               {saving ? <ClipLoader color="#FFF" size={16} /> : 'Save'}
             </div>
