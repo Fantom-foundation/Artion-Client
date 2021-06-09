@@ -18,7 +18,7 @@ export const getWFTMBalance = async address => {
 };
 
 export const wrapFTM = async (value, from) => {
-  const [contract, provider] = await getWFTMContract();
+  const contract = await getWFTMContract();
   const options = {
     value,
     from,
@@ -27,14 +27,14 @@ export const wrapFTM = async (value, from) => {
   options.gasLimit = calculateGasMargin(gasEstimate);
 
   const tx = await contract.deposit(options);
-  await provider.waitForTransaction(tx.hash);
+  await tx.wait();
 };
 
 export const unwrapFTM = async value => {
-  const [contract, provider] = await getWFTMContract();
+  const contract = await getWFTMContract();
 
   const tx = await contract.withdraw(value);
-  await provider.waitForTransaction(tx.hash);
+  await tx.wait();
 };
 
 export const getAllowance = async (owner, spender) => {
@@ -43,7 +43,7 @@ export const getAllowance = async (owner, spender) => {
 };
 
 export const approve = async (address, value) => {
-  const [contract, provider] = await getWFTMContract();
+  const contract = await getWFTMContract();
   const tx = await contract.approve(address, value);
-  await provider.waitForTransaction(tx.hash);
+  await tx.wait();
 };
