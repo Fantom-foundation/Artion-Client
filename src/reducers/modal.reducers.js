@@ -2,6 +2,7 @@ import ModalConstants from '../constants/modal.constants';
 
 const initialState = {
   accountModalVisible: false,
+  wftmModalVisible: false,
 };
 
 export function Modal(state = initialState, action) {
@@ -15,6 +16,16 @@ export function Modal(state = initialState, action) {
       return {
         ...state,
         accountModalVisible: false,
+      };
+    case ModalConstants.SHOW_WFTM_MODAL:
+      return {
+        ...state,
+        wftmModalVisible: true,
+      };
+    case ModalConstants.HIDE_WFTM_MODAL:
+      return {
+        ...state,
+        wftmModalVisible: false,
       };
     default: {
       return state;

@@ -15,10 +15,10 @@ const icons = {
   warning: iconWarning,
 };
 
-export default (type, title, body = '') => {
-  toast(
+export default (type, title, body = '', onClick = () => {}) => {
+  return toast(
     () => (
-      <div>
+      <div className={styles.toastInner} onClick={onClick}>
         <div className={styles.header}>
           <img src={icons[type]} alt={type} className={styles.icon} />
           <span>{title}</span>
@@ -28,6 +28,7 @@ export default (type, title, body = '') => {
     ),
     {
       duration: 5000,
+      className: styles.toast,
     }
   );
 };

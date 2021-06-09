@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState, useRef, Suspense } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import cx from 'classnames';
 import axios from 'axios';
 import { ethers } from 'ethers';
@@ -25,8 +25,9 @@ import {
   People as PeopleIcon,
   ViewModule as ViewModuleIcon,
 } from '@material-ui/icons';
+import toast from 'react-hot-toast';
 
-import Panel from '../../components/Panel';
+import Panel from 'components/Panel';
 import Identicon from 'components/Identicon';
 import {
   fetchTokenURI,
@@ -70,7 +71,7 @@ import {
   AUCTION_CONTRACT_ADDRESS,
 } from 'contracts';
 import { shortenAddress } from 'utils';
-import toast from 'utils/toast';
+import showToast from 'utils/toast';
 import SellModal from 'components/SellModal';
 import OfferModal from 'components/OfferModal';
 import AuctionModal from 'components/AuctionModal';
@@ -78,6 +79,7 @@ import BidModal from 'components/BidModal';
 import OwnersModal from 'components/OwnersModal';
 import Header from 'components/header';
 import SuspenseImg from 'components/SuspenseImg';
+import ModalActions from 'actions/modal.actions';
 
 import webIcon from 'assets/svgs/web.svg';
 import discordIcon from 'assets/svgs/discord.svg';
@@ -97,6 +99,8 @@ const ONE_MONTH = ONE_DAY * 30;
 const filters = ['Trade History', 'Transfer History'];
 
 const NFTItem = () => {
+  const dispatch = useDispatch();
+
   const { addr: address, id: tokenID } = useParams();
 
   const { account, chainId } = useWeb3React();
@@ -744,7 +748,7 @@ const NFTItem = () => {
       );
       await tx.wait();
 
-      toast('success', 'Item listed successfully!');
+      showToast('success', 'Item listed successfully!');
 
       setSellModalVisible(false);
       setListingItem(false);
@@ -768,7 +772,7 @@ const NFTItem = () => {
       );
       await tx.wait();
 
-      toast('success', 'Price updated successfully!');
+      showToast('success', 'Price updated successfully!');
 
       setPriceUpdating(false);
       setSellModalVisible(false);
@@ -783,7 +787,7 @@ const NFTItem = () => {
       listing => listing.owner.toLowerCase() !== account.toLowerCase()
     );
 
-    toast('success', 'Item unlisted successfully!');
+    showToast('success', 'Item unlisted successfully!');
   };
 
   const handleBuyItem = async listing => {
@@ -803,7 +807,7 @@ const NFTItem = () => {
       await tx.wait();
       setBuyingItem(false);
 
-      toast('success', 'You have bought the item!');
+      showToast('success', 'You have bought the item!');
 
       listings.current = listings.current.filter(
         _listing => _listing.owner !== listing.owner
@@ -825,10 +829,15 @@ const NFTItem = () => {
       const balance = await getWFTMBalance(account);
 
       if (balance.lt(amount)) {
-        toast(
+        const toastId = showToast(
           'error',
           'Insufficient WFTM Balance!',
-          'You can wrap FTM in the WFTM station.'
+          'You can wrap FTM in the WFTM station.',
+          () => {
+            toast.dismiss(toastId);
+            setOfferModalVisible(false);
+            dispatch(ModalActions.showWFTMModal());
+          }
         );
         setOfferPlacing(false);
         return;
@@ -852,7 +861,7 @@ const NFTItem = () => {
 
       setOfferModalVisible(false);
 
-      toast('success', 'Offer placed successfully!');
+      showToast('success', 'Offer placed successfully!');
     } catch (e) {
       console.log(e);
     } finally {
@@ -869,7 +878,7 @@ const NFTItem = () => {
       await tx.wait();
       setOfferAccepting(false);
 
-      toast('success', 'Offer accepted!');
+      showToast('success', 'Offer accepted!');
 
       offers.current = offers.current.filter(
         _offer => _offer.creator !== offer.creator
@@ -888,7 +897,7 @@ const NFTItem = () => {
       const tx = await cancelOffer(address, tokenID);
       await tx.wait();
 
-      toast('success', 'You have withdrawn your offer!');
+      showToast('success', 'You have withdrawn your offer!');
 
       offerCanceledHandler(account, address, ethers.BigNumber.from(tokenID));
 
@@ -915,7 +924,7 @@ const NFTItem = () => {
       );
       await tx.wait();
 
-      toast('success', 'Auction started!');
+      showToast('success', 'Auction started!');
 
       setAuctionStarting(false);
       setAuctionModalVisible(false);
@@ -938,7 +947,7 @@ const NFTItem = () => {
           ethers.BigNumber.from(price)
         );
 
-        toast('success', 'Auction reserve price updated successfully!');
+        showToast('success', 'Auction reserve price updated successfully!');
       }
 
       const startTime = Math.floor(_startTime.getTime() / 1000);
@@ -949,7 +958,7 @@ const NFTItem = () => {
           ethers.BigNumber.from(startTime)
         );
 
-        toast('success', 'Auction start time updated successfully!');
+        showToast('success', 'Auction start time updated successfully!');
       }
 
       const endTime = Math.floor(_endTime.getTime() / 1000);
@@ -960,7 +969,7 @@ const NFTItem = () => {
           ethers.BigNumber.from(endTime)
         );
 
-        toast('success', 'Auction end time updated successfully!');
+        showToast('success', 'Auction end time updated successfully!');
       }
 
       setAuctionUpdating(false);
@@ -978,7 +987,7 @@ const NFTItem = () => {
       await cancelAuction(address, tokenID);
       auction.current = null;
 
-      toast('success', 'Auction canceled!');
+      showToast('success', 'Auction canceled!');
     } catch (err) {
       console.log(err);
     } finally {
@@ -994,7 +1003,7 @@ const NFTItem = () => {
       await resultAuction(address, tokenID);
       setResulting(false);
       setResulted(true);
-      toast('success', 'Auction resulted!');
+      showToast('success', 'Auction resulted!');
     } catch {
       setResulting(false);
     }
@@ -1015,7 +1024,7 @@ const NFTItem = () => {
       );
       await tx.wait();
 
-      toast('success', 'Bid placed successfully!');
+      showToast('success', 'Bid placed successfully!');
 
       setBidPlacing(false);
       setBidModalVisible(false);
@@ -1031,7 +1040,7 @@ const NFTItem = () => {
       setBidWithdrawing(true);
       await withdrawBid(address, ethers.BigNumber.from(tokenID));
       setBidWithdrawing(false);
-      toast('success', 'You have withdrawn your bid!');
+      showToast('success', 'You have withdrawn your bid!');
     } catch {
       setBidWithdrawing(false);
     }
