@@ -50,23 +50,18 @@ const AccountModal = () => {
     return alias.length > 0 && alias.length <= 20 && alias.indexOf(' ') === -1;
   };
 
-  const validEmail = email => /(.+)@(.+){2,}\.(.+){2,}/.test(email);
+  const validEmail = email =>
+    email.length === 0 || /(.+)@(.+){2,}\.(.+){2,}/.test(email);
 
   const validateAlias = () => {
-    if (alias.length === 0) {
-      return setAliasError('This field is required');
-    }
-    if (!validAlias(alias)) {
+    if (alias.length > 0 && !validAlias(alias)) {
       return setAliasError('Invalid username.');
     }
     setAliasError(null);
   };
 
   const validateEmail = () => {
-    if (email.length === 0) {
-      return setEmailError('This field is required');
-    }
-    if (validEmail(email)) {
+    if (email.length === 0 || validEmail(email)) {
       setEmailError(null);
     } else {
       setEmailError('Invalid email address.');
@@ -87,9 +82,7 @@ const AccountModal = () => {
     }
   };
 
-  const validate = () => {
-    return avatar && validEmail(email) && validAlias(alias);
-  };
+  const isValid = () => aliasError === null && emailError === null;
 
   const closeModal = () => {
     dispatch(ModalActions.hideAccountModal());
@@ -121,7 +114,7 @@ const AccountModal = () => {
     try {
       setSaving(true);
 
-      if (avatar.startsWith('https')) {
+      if (!avatar || avatar.startsWith('https')) {
         const res = await updateAccountDetails(
           alias,
           email,
@@ -176,12 +169,7 @@ const AccountModal = () => {
         <div className={styles.paper}>
           <h2 className={styles.title}>Account Settings</h2>
           <div className={styles.formGroup}>
-            <p className={styles.formLabel}>
-              User Avatar{' '}
-              <small>
-                <i>(required)</i>
-              </small>
-            </p>
+            <p className={styles.formLabel}>User Avatar</p>
             <input
               ref={inputRef}
               type="file"
@@ -200,12 +188,7 @@ const AccountModal = () => {
             </div>
           </div>
           <div className={styles.formGroup}>
-            <p className={styles.formLabel}>
-              Username{' '}
-              <small>
-                <i>(required)</i>
-              </small>
-            </p>
+            <p className={styles.formLabel}>Username</p>
             <input
               type="text"
               className={cx(
@@ -223,12 +206,7 @@ const AccountModal = () => {
             )}
           </div>
           <div className={styles.formGroup}>
-            <p className={styles.formLabel}>
-              Email Address{' '}
-              <small>
-                <i>(required)</i>
-              </small>
-            </p>
+            <p className={styles.formLabel}>Email Address</p>
             <input
               type="text"
               className={cx(
@@ -261,9 +239,9 @@ const AccountModal = () => {
               className={cx(
                 styles.button,
                 styles.save,
-                (saving || !validate()) && styles.disabled
+                (saving || !isValid()) && styles.disabled
               )}
-              onClick={validate() ? onSave : null}
+              onClick={isValid() ? onSave : null}
             >
               {saving ? <ClipLoader color="#FFF" size={16} /> : 'Save'}
             </div>

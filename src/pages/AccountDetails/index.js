@@ -130,7 +130,7 @@ const AccountDetails = () => {
   const isMe = account?.toLowerCase() === uid.toLowerCase();
 
   useEffect(() => {
-    if (isMe && me.alias) {
+    if (isMe) {
       setUser(me);
     }
   }, [me]);
