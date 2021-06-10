@@ -246,7 +246,7 @@ const Metadata = () => {
           try {
             const args = [account, jsonHash];
             const options = {
-              value: ethers.utils.parseEther('2'),
+              value: ethers.utils.parseEther('5'),
             };
             const gasEstimate = await fnft_sc.estimateGas.mint(
               ...args,
@@ -353,7 +353,7 @@ const Metadata = () => {
         </Button>
         <div className={classes.fee}>
           <InfoIcon />
-          &nbsp;2 FTMs are charged to create a new NFT.
+          &nbsp;5 FTMs are charged to create a new NFT.
         </div>
       </div>
       <div className={classes.mintStatusContainer}>
