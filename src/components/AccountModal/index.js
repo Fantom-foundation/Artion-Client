@@ -47,7 +47,7 @@ const AccountModal = () => {
   }, [accountModalVisible]);
 
   const validAlias = alias => {
-    return alias.length > 0 && alias.length <= 20 && alias.indexOf(' ') === -1;
+    return alias.length > 0 && alias.indexOf(' ') === -1;
   };
 
   const validEmail = email =>
@@ -195,12 +195,14 @@ const AccountModal = () => {
                 styles.formInput,
                 aliasError !== null ? styles.hasError : null
               )}
+              maxLength={20}
               placeholder="Enter Username"
               value={alias}
               onChange={e => setAlias(e.target.value)}
               onBlur={validateAlias}
               disabled={fetching}
             />
+            <div className={styles.lengthIndicator}>{alias.length}/20</div>
             {aliasError !== null && (
               <p className={styles.error}>{aliasError}</p>
             )}
@@ -227,11 +229,13 @@ const AccountModal = () => {
             <p className={styles.formLabel}>Bio</p>
             <textarea
               className={cx(styles.formInput, styles.longInput)}
+              maxLength={120}
               placeholder="Bio"
               value={bio}
               onChange={e => setBio(e.target.value)}
               disabled={fetching}
             />
+            <div className={styles.lengthIndicator}>{bio.length}/120</div>
           </div>
 
           <div className={styles.footer}>
