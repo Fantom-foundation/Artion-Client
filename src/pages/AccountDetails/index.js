@@ -34,7 +34,7 @@ const ONE_HOUR = ONE_MIN * 60;
 const ONE_DAY = ONE_HOUR * 24;
 const ONE_MONTH = ONE_DAY * 30;
 
-const tabs = ['Items', 'Activity', 'Offers'];
+const tabs = ['Items', 'Listings & Offers', 'Received Offers'];
 
 const AccountDetails = () => {
   const dispatch = useDispatch();
