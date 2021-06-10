@@ -13,7 +13,7 @@ import AuthActions from 'actions/auth.actions';
 import ModalActions from 'actions/modal.actions';
 import { shortenAddress } from 'utils';
 import { injected } from 'connectors';
-import { getAuthToken, getAccountDetails } from 'api';
+import { API_URL, getAuthToken, getAccountDetails } from 'api';
 import { NETWORK_LABEL } from 'constants/networks';
 import WFTMModal from 'components/WFTMModal';
 import BanItemModal from 'components/BanItemModal';
@@ -173,7 +173,7 @@ const NiftyHeader = ({ light }) => {
         },
       } = await axios({
         method: 'post',
-        url: `https://api0.artion.io/info/searchNames`,
+        url: `${API_URL}/info/searchNames`,
         data: JSON.stringify({ name: word }),
         headers: {
           'Content-Type': 'application/json',

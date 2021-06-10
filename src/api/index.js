@@ -1,11 +1,12 @@
 import axios from 'axios';
 
-const BASE_URL = 'https://api0.artion.io';
+// eslint-disable-next-line no-undef
+export const API_URL = process.env.REACT_APP_API_URL;
 
 export const getAuthToken = async address => {
   let result = await axios({
     method: 'post',
-    url: `${BASE_URL}/auth/getToken`,
+    url: `${API_URL}/auth/getToken`,
     data: JSON.stringify({ address: address }),
     headers: { 'Content-Type': 'application/json' },
   });
@@ -19,7 +20,7 @@ export const getAuthToken = async address => {
 export const getAccountDetails = async authToken => {
   const res = await axios({
     method: 'get',
-    url: `${BASE_URL}/account/getaccountinfo`,
+    url: `${API_URL}/account/getaccountinfo`,
     headers: {
       Authorization: `Bearer ${authToken}`,
     },
@@ -32,7 +33,7 @@ export const getUserAccountDetails = async address => {
   const data = { address };
   const res = await axios({
     method: 'post',
-    url: `${BASE_URL}/account/getuseraccountinfo`,
+    url: `${API_URL}/account/getuseraccountinfo`,
     data: JSON.stringify(data),
     headers: {
       'Content-Type': 'application/json',
@@ -55,11 +56,13 @@ export const updateAccountDetails = async (
   if (bio) {
     formData.append('bio', bio);
   }
-  formData.append('imgData', avatar);
+  if (avatar) {
+    formData.append('imgData', avatar);
+  }
 
   const res = await axios({
     method: 'post',
-    url: `${BASE_URL}/account/accountdetails`,
+    url: `${API_URL}/account/accountdetails`,
     data: formData,
     headers: {
       'Content-Type': 'multipart/form-data',
@@ -74,7 +77,7 @@ export const updateBanner = async (imageData, authToken) => {
   formData.append('imgData', imageData);
   const res = await axios({
     method: 'post',
-    url: `${BASE_URL}/ipfs/uploadBannerImage2Server`,
+    url: `${API_URL}/ipfs/uploadBannerImage2Server`,
     data: formData,
     headers: {
       'Content-Type': 'multipart/form-data',
@@ -86,34 +89,34 @@ export const updateBanner = async (imageData, authToken) => {
 
 export const getTokenType = async contractAddress => {
   const { data } = await axios.get(
-    `${BASE_URL}/info/getTokenType/${contractAddress}`
+    `${API_URL}/info/getTokenType/${contractAddress}`
   );
   return data.data;
 };
 
 export const get1155Info = async (contractAddress, tokenID) => {
   const { data } = await axios.get(
-    `${BASE_URL}/info/get1155info/${contractAddress}/${tokenID}`
+    `${API_URL}/info/get1155info/${contractAddress}/${tokenID}`
   );
   return data;
 };
 
 export const getTokenHolders = async (contractAddress, tokenID) => {
   const { data } = await axios.get(
-    `${BASE_URL}/info/getOwnership/${contractAddress}/${tokenID}`
+    `${API_URL}/info/getOwnership/${contractAddress}/${tokenID}`
   );
   return data;
 };
 
 export const fetchCollections = async () => {
-  const res = await axios.get(`${BASE_URL}/info/getcollections`);
+  const res = await axios.get(`${API_URL}/info/getcollections`);
   return res.data;
 };
 
 export const fetchCollection = async contractAddress => {
   const res = await axios({
     method: 'post',
-    url: `${BASE_URL}/collection/getCollectionInfo`,
+    url: `${API_URL}/collection/getCollectionInfo`,
     data: JSON.stringify({ contractAddress }),
     headers: {
       'Content-Type': 'application/json',
@@ -147,7 +150,7 @@ export const fetchTokens = async (
   data.sortby = sortBy;
   const res = await axios({
     method: 'post',
-    url: `${BASE_URL}/nftitems/fetchTokens`,
+    url: `${API_URL}/nftitems/fetchTokens`,
     data: JSON.stringify(data),
     headers: {
       'Content-Type': 'application/json',
@@ -161,7 +164,7 @@ export const fetchTokenURI = async (contractAddress, tokenID) => {
   const data = { contractAddress, tokenID };
   const res = await axios({
     method: 'post',
-    url: `${BASE_URL}/nftitems/getTokenURI`,
+    url: `${API_URL}/nftitems/getTokenURI`,
     data: JSON.stringify(data),
     headers: {
       'Content-Type': 'application/json',
@@ -174,7 +177,7 @@ export const increaseViewCount = async (contractAddress, tokenID) => {
   const data = { contractAddress, tokenID };
   const res = await axios({
     method: 'post',
-    url: `${BASE_URL}/nftitems/increaseViews`,
+    url: `${API_URL}/nftitems/increaseViews`,
     data: JSON.stringify(data),
     headers: {
       'Content-Type': 'application/json',
@@ -187,7 +190,7 @@ export const getListings = async (contractAddress, tokenID) => {
   const data = { contractAddress, tokenID };
   const res = await axios({
     method: 'post',
-    url: `${BASE_URL}/listing/getListings`,
+    url: `${API_URL}/listing/getListings`,
     data: JSON.stringify(data),
     headers: {
       'Content-Type': 'application/json',
@@ -200,7 +203,7 @@ export const getOffers = async (contractAddress, tokenID) => {
   const data = { contractAddress, tokenID };
   const res = await axios({
     method: 'post',
-    url: `${BASE_URL}/offer/getOffers`,
+    url: `${API_URL}/offer/getOffers`,
     data: JSON.stringify(data),
     headers: {
       'Content-Type': 'application/json',
@@ -213,7 +216,7 @@ export const getTradeHistory = async (contractAddress, tokenID) => {
   const data = { contractAddress, tokenID };
   const res = await axios({
     method: 'post',
-    url: `${BASE_URL}/tradehistory/getTradeHistory`,
+    url: `${API_URL}/tradehistory/getTradeHistory`,
     data: JSON.stringify(data),
     headers: {
       'Content-Type': 'application/json',
@@ -226,7 +229,7 @@ export const getTransferHistory = async (address, tokenID, tokenType) => {
   const data = { address, tokenID };
   const res = await axios({
     method: 'post',
-    url: `${BASE_URL}/nftitems/transfer${tokenType}History`,
+    url: `${API_URL}/nftitems/transfer${tokenType}History`,
     data: JSON.stringify(data),
     headers: {
       'Content-Type': 'application/json',
@@ -238,7 +241,7 @@ export const getTransferHistory = async (address, tokenID, tokenType) => {
 export const getAccountActivity = async address => {
   const res = await axios({
     method: 'get',
-    url: `${BASE_URL}/info/getAccountActivity/${address}`,
+    url: `${API_URL}/info/getAccountActivity/${address}`,
   });
   return res.data;
 };
@@ -246,7 +249,7 @@ export const getAccountActivity = async address => {
 export const getActivityFromOthers = async address => {
   const res = await axios({
     method: 'get',
-    url: `${BASE_URL}/info/getActivityFromOthers/${address}`,
+    url: `${API_URL}/info/getActivityFromOthers/${address}`,
   });
   return res.data;
 };
@@ -255,7 +258,7 @@ export const banItem = async (address, tokenID, authToken) => {
   const data = { address, tokenID };
   const res = await axios({
     method: 'post',
-    url: `${BASE_URL}/ban/banItem`,
+    url: `${API_URL}/ban/banItem`,
     data: JSON.stringify(data),
     headers: {
       'Content-Type': 'application/json',
@@ -269,7 +272,7 @@ export const boostCollection = async (address, authToken) => {
   const data = { address };
   const res = await axios({
     method: 'post',
-    url: `${BASE_URL}/ban/boostCollection`,
+    url: `${API_URL}/ban/boostCollection`,
     data: JSON.stringify(data),
     headers: {
       'Content-Type': 'application/json',

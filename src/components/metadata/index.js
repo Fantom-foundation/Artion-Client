@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useSelector } from 'react-redux';
 import axios from 'axios';
 import { makeStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
@@ -13,14 +14,14 @@ import InfoIcon from '@material-ui/icons/Info';
 
 import { BigNumber, ethers } from 'ethers';
 
-import { FantomNFTConstants } from '../../constants/smartcontracts/fnft.constants';
-import SCHandlers from '../../utils/sc.interaction';
-import SystemConstants from '../../constants/system.constants';
-import { useSelector } from 'react-redux';
+import { FantomNFTConstants } from 'constants/smartcontracts/fnft.constants';
+import SCHandlers from 'utils/sc.interaction';
+import SystemConstants from 'constants/system.constants';
 
 import toast from 'utils/toast';
-import WalletUtils from '../../utils/wallet';
+import WalletUtils from 'utils/wallet';
 import { calculateGasMargin } from 'utils';
+import { API_URL } from 'api';
 
 const useStyles = makeStyles(() => ({
   container: {
@@ -221,7 +222,7 @@ const Metadata = () => {
         try {
           let result = await axios({
             method: 'post',
-            url: 'https://api0.artion.io/ipfs/uploadImage2Server',
+            url: `${API_URL}/ipfs/uploadImage2Server`,
             data: formData,
             headers: {
               'Content-Type': 'multipart/form-data',
