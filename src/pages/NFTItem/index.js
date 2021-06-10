@@ -1216,6 +1216,9 @@ const NFTItem = () => {
         {collection?.collectionName || collection?.name || ''}
       </div>
       <div className={styles.itemName}>{info?.name || ''}</div>
+      {info?.description && (
+        <div className={styles.itemDescription}>{info.description}</div>
+      )}
       <div className={styles.itemStats}>
         {(ownerInfoLoading || tokenOwnerLoading || owner || tokenInfo) && (
           <div className={styles.itemOwner}>
