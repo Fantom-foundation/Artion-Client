@@ -221,7 +221,7 @@ const Metadata = () => {
         try {
           let result = await axios({
             method: 'post',
-            url: 'https://api0artion.io/ipfs/uploadImage2Server',
+            url: 'https://api0.artion.io/ipfs/uploadImage2Server',
             data: formData,
             headers: {
               'Content-Type': 'multipart/form-data',
