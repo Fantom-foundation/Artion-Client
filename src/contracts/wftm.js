@@ -26,15 +26,13 @@ export const wrapFTM = async (value, from) => {
   const gasEstimate = await contract.estimateGas.deposit(options);
   options.gasLimit = calculateGasMargin(gasEstimate);
 
-  const tx = await contract.deposit(options);
-  await tx.wait();
+  return await contract.deposit(options);
 };
 
 export const unwrapFTM = async value => {
   const contract = await getWFTMContract();
 
-  const tx = await contract.withdraw(value);
-  await tx.wait();
+  return await contract.withdraw(value);
 };
 
 export const getAllowance = async (owner, spender) => {

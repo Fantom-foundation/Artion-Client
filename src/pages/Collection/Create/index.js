@@ -39,8 +39,11 @@ const CollectionCreate = () => {
   const [name, setName] = useState('');
   const [nameError, setNameError] = useState(null);
   const [description, setDescription] = useState('');
+  const [descriptionError, setDescriptionError] = useState(null);
   const [address, setAddress] = useState('');
+  const [addressError, setAddressError] = useState('');
   const [siteUrl, setSiteUrl] = useState('');
+  const [siteUrlError, setSiteUrlError] = useState('');
   const [discord, setDiscord] = useState('');
   const [twitterHandle, setTwitterHandle] = useState('');
   const [instagramHandle, setInstagramHandle] = useState('');
@@ -80,6 +83,30 @@ const CollectionCreate = () => {
     }
   };
 
+  const validateDescription = () => {
+    if (description.length === 0) {
+      setDescriptionError("This field can't be blank");
+    } else {
+      setDescriptionError(null);
+    }
+  };
+
+  const validateAddress = () => {
+    if (address.length === 0) {
+      setAddressError("This field can't be blank");
+    } else {
+      setAddressError(null);
+    }
+  };
+
+  const validateSiteUrl = () => {
+    if (siteUrl.length === 0) {
+      setSiteUrlError("This field can't be blank");
+    } else {
+      setSiteUrlError(null);
+    }
+  };
+
   const handleMenuOpen = e => {
     if (selected.length < 3) {
       setAnchorEl(e.currentTarget);
@@ -99,6 +126,15 @@ const CollectionCreate = () => {
 
   const deselectCategory = catId => {
     setSelected(selected.filter(id => id !== catId));
+  };
+
+  const isValid = () => {
+    if (!logo) return false;
+    if (nameError) return false;
+    if (descriptionError) return false;
+    if (addressError) return false;
+    if (siteUrl.length === 0) return false;
+    return true;
   };
 
   const clipImage = (image, clipX, clipY, clipWidth, clipHeight, cb) => {
@@ -178,8 +214,9 @@ const CollectionCreate = () => {
           toast('success', 'Collection created successfully!');
 
           history.push('/exploreall');
-        } catch {
-          toast('error', 'Failed to create collection!');
+        } catch (e) {
+          const { data } = e.response;
+          toast('error', data.data);
           setCreating(false);
         }
       });
@@ -221,7 +258,7 @@ const CollectionCreate = () => {
         <div className={styles.title}>Create Collection</div>
 
         <div className={styles.inputGroup}>
-          <div className={styles.inputTitle}>Logo image</div>
+          <div className={styles.inputTitle}>Logo image *</div>
           <div className={styles.inputSubTitle}>
             This image will also be used for navigation. 300x300 recommended.
           </div>
@@ -246,7 +283,7 @@ const CollectionCreate = () => {
         </div>
 
         <div className={styles.inputGroup}>
-          <div className={styles.inputTitle1}>Name</div>
+          <div className={styles.inputTitle1}>Name *</div>
           <div className={styles.inputWrapper}>
             <input
               className={cx(styles.input, nameError && styles.hasError)}
@@ -260,14 +297,22 @@ const CollectionCreate = () => {
         </div>
 
         <div className={styles.inputGroup}>
-          <div className={styles.inputTitle1}>Description</div>
+          <div className={styles.inputTitle1}>Description *</div>
           <div className={styles.inputWrapper}>
             <textarea
-              className={cx(styles.input, styles.longInput)}
+              className={cx(
+                styles.input,
+                styles.longInput,
+                descriptionError && styles.hasError
+              )}
               placeholder="Provide your description for your collection"
               value={description}
               onChange={e => setDescription(e.target.value)}
+              onBlur={validateDescription}
             />
+            {descriptionError && (
+              <div className={styles.error}>{descriptionError}</div>
+            )}
           </div>
         </div>
 
@@ -304,7 +349,9 @@ const CollectionCreate = () => {
           <div className={styles.inputTitle}>Links</div>
           <div className={styles.inputWrapper}>
             <div className={styles.linksWrapper}>
-              <div className={styles.linkItem}>
+              <div
+                className={cx(styles.linkItem, addressError && styles.hasError)}
+              >
                 <div className={styles.linkIconWrapper}>
                   <img src={nftIcon} className={styles.linkIcon} />
                 </div>
@@ -316,9 +363,15 @@ const CollectionCreate = () => {
                   placeholder="0x..."
                   value={address}
                   onChange={e => setAddress(e.target.value)}
+                  onBlur={validateAddress}
                 />
               </div>
-              <div className={styles.linkItem}>
+              {addressError && (
+                <div className={styles.error}>{addressError}</div>
+              )}
+              <div
+                className={cx(styles.linkItem, siteUrlError && styles.hasError)}
+              >
                 <div className={styles.linkIconWrapper}>
                   <img src={webIcon} className={styles.linkIcon} />
                 </div>
@@ -328,8 +381,12 @@ const CollectionCreate = () => {
                   placeholder="yoursite.io"
                   value={siteUrl}
                   onChange={e => setSiteUrl(e.target.value)}
+                  onBlur={validateSiteUrl}
                 />
               </div>
+              {siteUrlError && (
+                <div className={styles.error}>{siteUrlError}</div>
+              )}
               <div className={styles.linkItem}>
                 <div className={styles.linkIconWrapper}>
                   <img src={discordIcon} className={styles.linkIcon} />
@@ -396,8 +453,11 @@ const CollectionCreate = () => {
 
         <div className={styles.buttonsWrapper}>
           <div
-            className={cx(styles.createButton, creating && styles.disabled)}
-            onClick={handleSave}
+            className={cx(
+              styles.createButton,
+              (creating || !isValid()) && styles.disabled
+            )}
+            onClick={isValid() ? handleSave : null}
           >
             {creating ? <ClipLoader color="#FFF" size={16} /> : 'Create'}
           </div>

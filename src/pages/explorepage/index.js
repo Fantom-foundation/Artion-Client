@@ -149,7 +149,7 @@ const ExploreAllPage = () => {
   return (
     <>
       <Header light />
-      <div className={styles.container}>
+      <div className={styles.container} onScroll={handleScroll}>
         <div className={styles.sidebar}>
           {uid && (
             <div className={styles.profileWrapper}>

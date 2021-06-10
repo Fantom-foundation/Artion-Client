@@ -18,7 +18,9 @@ const AuctionModal = ({
   contractApproved,
 }) => {
   const [reservePrice, setReservePrice] = useState('');
-  const [startTime, setStartTime] = useState(new Date());
+  const [startTime, setStartTime] = useState(
+    new Date(new Date().getTime() + 2 * 60 * 1000)
+  );
   const [endTime, setEndTime] = useState(
     new Date(new Date().getTime() + 24 * 60 * 60 * 1000)
   );
@@ -29,7 +31,9 @@ const AuctionModal = ({
   useEffect(() => {
     setReservePrice(auction?.reservePrice || '');
     setStartTime(
-      auction?.startTime ? new Date(auction.startTime * 1000) : new Date()
+      auction?.startTime
+        ? new Date(auction.startTime * 1000)
+        : new Date(new Date().getTime() + 2 * 60 * 1000)
     );
     setEndTime(
       auction?.endTime
@@ -146,7 +150,7 @@ const AuctionModal = ({
             ) : contractApproving ? (
               'Approving Item'
             ) : (
-              'Appove Item'
+              'Approve Item'
             )}
           </div>
           <div

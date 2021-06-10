@@ -16,7 +16,6 @@ import { BigNumber, ethers } from 'ethers';
 
 import { FantomNFTConstants } from 'constants/smartcontracts/fnft.constants';
 import SCHandlers from 'utils/sc.interaction';
-import SystemConstants from 'constants/system.constants';
 
 import toast from 'utils/toast';
 import WalletUtils from 'utils/wallet';
@@ -178,14 +177,10 @@ const Metadata = () => {
       toast('info', 'You are not connected to Fantom Opera Network');
       return;
     }
-    // only when the user has more than 1k ftms on the wallet
-    let balance = await WalletUtils.checkBalance(account);
+    const balance = await WalletUtils.checkBalance(account);
 
-    if (balance < SystemConstants.FMT_BALANCE_LIMIT) {
-      toast(
-        'custom',
-        `Your balance should be at least ${SystemConstants.FMT_BALANCE_LIMIT} ftm to mint an NFT`
-      );
+    if (balance < 5) {
+      toast('custom', `Your balance should be at least 5 FTM to mint an NFT`);
       return;
     }
 
@@ -246,7 +241,7 @@ const Metadata = () => {
           try {
             const args = [account, jsonHash];
             const options = {
-              value: ethers.utils.parseEther('2'),
+              value: ethers.utils.parseEther('5'),
             };
             const gasEstimate = await fnft_sc.estimateGas.mint(
               ...args,
@@ -353,7 +348,7 @@ const Metadata = () => {
         </Button>
         <div className={classes.fee}>
           <InfoIcon />
-          &nbsp;2 FTMs are charged to create a new NFT.
+          &nbsp;5 FTMs are charged to create a new NFT.
         </div>
       </div>
       <div className={classes.mintStatusContainer}>

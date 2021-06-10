@@ -103,6 +103,11 @@
     flex-direction: column;
     padding-left: 30px;
     padding-right: 30px;
+
+    /* width */
+    &::-webkit-scrollbar {
+      width: 0;
+    }
   }
 
   .sidebar {
@@ -111,5 +116,15 @@
 
   .body {
     margin-left: 0;
+    overflow-y: visible;
+  }
+
+  .header {
+    flex: 0 0 50px;
+  }
+
+  .exploreAll {
+    padding-right: 0;
+    overflow-y: visible;
   }
 }

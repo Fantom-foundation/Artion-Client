@@ -6,9 +6,10 @@ import { ClipLoader } from 'react-spinners';
 import { useWeb3React } from '@web3-react/core';
 import Skeleton from 'react-loading-skeleton';
 import SwapVertIcon from '@material-ui/icons/SwapVert';
+import toast from 'react-hot-toast';
 
 import { getWFTMBalance, wrapFTM, unwrapFTM } from 'contracts';
-import toast from 'utils/toast';
+import showToast from 'utils/toast';
 
 import styles from './styles.module.scss';
 
@@ -81,11 +82,29 @@ const WFTMModal = ({ visible, onClose }) => {
     try {
       const price = ethers.utils.parseEther(amount);
       if (wrap) {
-        await wrapFTM(price, account);
-        toast('success', 'Wrapped FTM successfully!');
+        const tx = await wrapFTM(price, account);
+        await tx.wait();
+        const toastId = showToast(
+          'success',
+          'Wrapped FTM successfully!',
+          '',
+          () => {
+            toast.dismiss(toastId);
+            window.open(`https://ftmscan.com/tx/${tx.hash}`, '_blank');
+          }
+        );
       } else {
-        await unwrapFTM(price);
-        toast('success', 'Unwrap W-FTM successfully!');
+        const tx = await unwrapFTM(price);
+        await tx.wait();
+        const toastId = showToast(
+          'success',
+          'Unwrap W-FTM successfully!',
+          '',
+          () => {
+            toast.dismiss(toastId);
+            window.open(`https://ftmscan.com/tx/${tx.hash}`, '_blank');
+          }
+        );
       }
       setAmount('');
     } catch (err) {

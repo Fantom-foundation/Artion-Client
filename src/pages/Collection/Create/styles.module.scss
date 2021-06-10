@@ -204,12 +204,12 @@
   height: 56px;
   border: 2px solid rgba(0, 0, 0, .1);
   box-sizing: border-box;
-  margin-bottom: 16px;
+  margin-top: 16px;
   border-radius: 5px;
   overflow: hidden;
 
-  &:last-child {
-    margin-bottom: 0;
+  &:first-child {
+    margin-top: 0;
   }
 }
 

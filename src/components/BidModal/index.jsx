@@ -88,7 +88,7 @@ const BidModal = ({
             ) : contractApproving ? (
               'Approving Item'
             ) : (
-              'Appove Item'
+              'Approve Item'
             )}
           </div>
           <div
