@@ -34,6 +34,7 @@
 
 .formGroup {
   margin-bottom: 25px;
+  position: relative;
 }
 
 .formLabel {
@@ -56,6 +57,18 @@
 .longInput {
   resize: none;
   height: 100px;
+  margin: 0;
+}
+
+.lengthIndicator {
+  margin-top: 6px;
+  margin-right: 6px;
+  text-align: right;
+  color: #3D3D3D;
+
+  & + .error {
+    margin-top: -20px;
+  }
 }
 
 .hasError {
