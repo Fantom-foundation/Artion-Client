@@ -57,6 +57,13 @@ const OfferModal = ({
     onMakeOffer(price, quant, endTime);
   };
 
+  const validateInput = () => {
+    if (price.length === 0) return false;
+    if (totalSupply > 1 && quantity.length === 0) return false;
+    if (endTime.getTime() < new Date().getTime()) return false;
+    return true;
+  };
+
   return (
     <div className={cx(styles.container, visible ? styles.visible : null)}>
       <div className={styles.modal} onClick={handleClick}>
@@ -108,6 +115,10 @@ const OfferModal = ({
                   onKeyDown: e => e.preventDefault(),
                   disabled: contractApproving || confirming,
                 }}
+                closeOnSelect
+                isValidDate={cur =>
+                  cur.valueOf() > new Date().getTime() - 1000 * 60 * 60 * 24
+                }
               />
             </div>
           </div>
@@ -116,11 +127,16 @@ const OfferModal = ({
           <div
             className={cx(
               styles.listButton,
-              (contractApproving || confirming) && styles.disabled
+              (contractApproving ||
+                confirming ||
+                (contractApproved && !validateInput())) &&
+                styles.disabled
             )}
             onClick={() =>
               contractApproved
-                ? !confirming && handleMakeOffer()
+                ? !confirming && validateInput()
+                  ? handleMakeOffer()
+                  : null
                 : approveContract()
             }
           >
@@ -131,9 +147,9 @@ const OfferModal = ({
                 'Place Offer'
               )
             ) : contractApproving ? (
-              'Approving Contract'
+              'Approving Item'
             ) : (
-              'Appove Contract'
+              'Appove Item'
             )}
           </div>
           <div

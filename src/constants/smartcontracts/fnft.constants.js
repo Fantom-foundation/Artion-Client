@@ -4,7 +4,7 @@ export const FantomNFTConstants = {
   PRIVATEKEY: '',
   MAINNETRPC: 'https://rpc3.fantom.network',
   MAINNETCHAINID: 250,
-  TESTNETRPC: 'https://xapi.testnet.fantom.network/lachesis',
+  TESTNETRPC: 'https://xapi0testnet.fantom.network/lachesis',
   TESTNETCHAINID: 4002,
   ABI: [
     {

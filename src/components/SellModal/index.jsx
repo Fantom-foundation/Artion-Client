@@ -53,6 +53,12 @@ const SellModal = ({
     onSell(price, quant);
   };
 
+  const validateInput = () => {
+    if (price.length === 0) return false;
+    if (totalSupply > 1 && quantity.length === 0) return false;
+    return true;
+  };
+
   return (
     <div className={cx(styles.container, visible ? styles.visible : null)}>
       <div className={styles.modal} onClick={handleClick}>
@@ -104,11 +110,16 @@ const SellModal = ({
           <div
             className={cx(
               styles.listButton,
-              (contractApproving || confirming) && styles.disabled
+              (contractApproving ||
+                confirming ||
+                (contractApproved && !validateInput())) &&
+                styles.disabled
             )}
             onClick={() =>
               contractApproved
-                ? !confirming && handleSellItem()
+                ? !confirming && validateInput()
+                  ? handleSellItem()
+                  : null
                 : approveContract()
             }
           >
@@ -121,9 +132,9 @@ const SellModal = ({
                 'List Item'
               )
             ) : contractApproving ? (
-              'Approving Contract'
+              'Approving Item'
             ) : (
-              'Appove Contract'
+              'Appove Item'
             )}
           </div>
           <div

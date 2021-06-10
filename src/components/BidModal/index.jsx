@@ -29,6 +29,10 @@ const BidModal = ({
     e.stopPropagation();
   };
 
+  const validateInput = () => {
+    return price.length > 0;
+  };
+
   return (
     <div className={cx(styles.container, visible ? styles.visible : null)}>
       <div className={styles.modal} onClick={handleClick}>
@@ -62,11 +66,16 @@ const BidModal = ({
           <div
             className={cx(
               styles.listButton,
-              (contractApproving || confirming) && styles.disabled
+              (contractApproving ||
+                confirming ||
+                (contractApproved && !validateInput())) &&
+                styles.disabled
             )}
             onClick={() =>
               contractApproved
-                ? !confirming && onPlaceBid(price)
+                ? !confirming && validateInput()
+                  ? onPlaceBid(price)
+                  : null
                 : approveContract()
             }
           >
@@ -77,9 +86,9 @@ const BidModal = ({
                 'Place'
               )
             ) : contractApproving ? (
-              'Approving Contract'
+              'Approving Item'
             ) : (
-              'Appove Contract'
+              'Appove Item'
             )}
           </div>
           <div

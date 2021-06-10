@@ -43,6 +43,12 @@ const AuctionModal = ({
     e.stopPropagation();
   };
 
+  const validateInput = () => {
+    if (reservePrice.length === 0) return false;
+    if (startTime.getTime() < new Date().getTime()) return false;
+    return endTime.getTime() > startTime.getTime() + 1000 * 60 * 60;
+  };
+
   return (
     <div className={cx(styles.container, visible ? styles.visible : null)}>
       <div className={styles.modal} onClick={handleClick}>
@@ -86,6 +92,10 @@ const AuctionModal = ({
                   onKeyDown: e => e.preventDefault(),
                   disabled: contractApproving || confirming,
                 }}
+                closeOnSelect
+                isValidDate={cur =>
+                  cur.valueOf() > new Date().getTime() - 1000 * 60 * 60 * 24
+                }
               />
             </div>
           </div>
@@ -100,6 +110,10 @@ const AuctionModal = ({
                   onKeyDown: e => e.preventDefault(),
                   disabled: contractApproving || confirming,
                 }}
+                closeOnSelect
+                isValidDate={cur =>
+                  cur.valueOf() > startTime.getTime() - 1000 * 60 * 60 * 23
+                }
               />
             </div>
           </div>
@@ -108,12 +122,16 @@ const AuctionModal = ({
           <div
             className={cx(
               styles.listButton,
-              (contractApproving || confirming) && styles.disabled
+              (contractApproving ||
+                confirming ||
+                (contractApproved && !validateInput())) &&
+                styles.disabled
             )}
             onClick={() =>
               contractApproved
-                ? !confirming &&
-                  onStartAuction(reservePrice, startTime, endTime)
+                ? !confirming && validateInput()
+                  ? onStartAuction(reservePrice, startTime, endTime)
+                  : null
                 : approveContract()
             }
           >
@@ -126,9 +144,9 @@ const AuctionModal = ({
                 'Start Auction'
               )
             ) : contractApproving ? (
-              'Approving Contract'
+              'Approving Item'
             ) : (
-              'Appove Contract'
+              'Appove Item'
             )}
           </div>
           <div
