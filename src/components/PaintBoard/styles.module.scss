@@ -1,0 +1,122 @@
+.container {
+  position: absolute;
+  width: 100%;
+  height: 100vh;
+  top: 0;
+  padding-top: 130px;
+  box-sizing: border-box;
+}
+
+.body {
+  width: 100%;
+  height: 100%;
+  padding: 0 40px 40px;
+  box-sizing: border-box;
+  display: flex;
+}
+
+.board {
+  flex: 1;
+  height: 100%;
+  margin-right: 40px;
+}
+
+.panel {
+  flex: 0 0 400px;
+  height: 100%;
+  padding-top: 20px;
+}
+
+.input {
+  width: 100%;
+  border-radius: 5px;
+  background-color: #F6F6F6;
+  padding: 0 22px 12px;
+  margin-bottom: 20px;
+}
+
+.inputLabel {
+  left: 22px;
+}
+
+.button {
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 20px;
+  width: 200px;
+  height: 56px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 18px;
+  background-color: #1969FF;
+  color: #FFF;
+  box-shadow: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.fee {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #3D3D3D;
+  opacity: 0.6;
+}
+
+.mintStatusContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  font-size: x-large;
+  position: absolute;
+  width: 100%;
+}
+
+.nftIDLabel {
+  font-size: 18px;
+  color: #A5A5A5;
+}
+
+.tnxAnchor {
+  text-decoration: unset;
+  font-size: 18px;
+  margin-top: 18px;
+  color: #007bff;
+}
+
+.formGroup {
+  margin-bottom: 25px;
+  position: relative;
+}
+
+.formLabel {
+  margin: 0 0 8px;
+  font-size: 18px;
+  color: #3D3D3D;
+}
+
+.formInput {
+  width: 100%;
+  outline: none;
+  height: 50px;
+  border-radius: 10px;
+  border: 2px solid rgba(0, 0, 0, 0.1);
+  padding: 8px 16px;
+  box-sizing: border-box;
+  font-size: 16px;
+}
+
+.longInput {
+  resize: none;
+  height: 100px;
+  margin: 0;
+}
+
+.disabled {
+  cursor: not-allowed;
+  box-shadow: none;
+  opacity: 0.7;
+}
