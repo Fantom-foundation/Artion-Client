@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, Redirect } from 'react-router-dom';
 import cx from 'classnames';
 import { Edit as EditIcon } from '@material-ui/icons';
 import Tooltip from '@material-ui/core/Tooltip';
@@ -11,7 +11,7 @@ import Skeleton from 'react-loading-skeleton';
 import NFTsGrid from 'components/NFTsGrid';
 import Header from 'components/header';
 import Identicon from 'components/Identicon';
-import { shortenAddress } from 'utils';
+import { isAddress, shortenAddress } from 'utils';
 import {
   getUserAccountDetails,
   fetchCollections,
@@ -270,6 +270,10 @@ const AccountDetails = () => {
     }
     return `${diff} Second${diff > 1 ? 's' : ''} Ago`;
   };
+
+  if (!isAddress(uid)) {
+    return <Redirect to="/404" />;
+  }
 
   return (
     <div className={styles.container}>

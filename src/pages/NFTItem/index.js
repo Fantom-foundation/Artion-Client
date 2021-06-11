@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState, useRef, Suspense } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useHistory } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import cx from 'classnames';
 import axios from 'axios';
@@ -100,6 +100,7 @@ const filters = ['Trade History', 'Transfer History'];
 
 const NFTItem = () => {
   const dispatch = useDispatch();
+  const history = useHistory();
 
   const { addr: address, id: tokenID } = useParams();
 
@@ -177,6 +178,7 @@ const NFTItem = () => {
       setInfo(data);
     } catch {
       console.log('Token URI not available');
+      history.replace('/404');
     }
     setLoading(false);
   };
