@@ -12,11 +12,7 @@ import StepLabel from '@material-ui/core/StepLabel';
 import InfoIcon from '@material-ui/icons/Info';
 
 import HeaderActions from 'actions/header.actions';
-// import { Container, Board, Canvas, CanvasBg } from './style';
 import Header from 'components/header';
-// import Layout from './layout';
-// import Toolbar from './toolbar';
-// import Metadata from './metadata';
 import ImageEditor from 'components/ImageEditor';
 import { calculateGasMargin } from 'utils';
 import showToast from 'utils/toast';
@@ -26,6 +22,8 @@ import { API_URL } from 'api';
 import { FantomNFTConstants } from 'constants/smartcontracts/fnft.constants';
 
 import whiteTheme from './white-theme';
+
+import transparentBackground from './transparent.png';
 
 import 'tui-image-editor/dist/tui-image-editor.css';
 import 'tui-color-picker/dist/tui-color-picker.css';
@@ -71,8 +69,16 @@ const PaintBoard = () => {
     }
   }, [ref.current]);
 
+  const resetBoard = () => {
+    if (!imageEditor) return;
+
+    imageEditor.loadImageFromURL(transparentBackground, 'image');
+  };
+
   const validateMetadata = () => {
-    return name != '' && symbol != '' && account != '';
+    return (
+      name !== '' && symbol !== '' && account !== '' && imageEditor?.toDataURL()
+    );
   };
 
   const resetMintingStatus = () => {
@@ -160,8 +166,9 @@ const PaintBoard = () => {
         setLastMintedTkId(mintedTkId.toNumber());
 
         showToast('success', 'New NFT item minted!');
-        setName('fAsset');
-        setSymbol('newnft');
+        resetBoard();
+        setName('');
+        setSymbol('');
         setDescription('');
       } catch (error) {
         showToast('error', error.message);
@@ -174,11 +181,19 @@ const PaintBoard = () => {
 
   const options = {
     includeUI: {
+      loadImage: {
+        path: transparentBackground,
+        name: 'image',
+      },
       theme: whiteTheme,
       menuBarPosition: 'right',
       uiSize: {
         height: '100%',
         width: '100%',
+      },
+      draw: {
+        color: '#00a9ff',
+        opacity: 1.0,
       },
     },
     cssMaxWidth: 512,
@@ -241,9 +256,14 @@ const PaintBoard = () => {
           <div
             className={cx(
               styles.button,
-              (isMinting || !isWalletConnected) && styles.disabled
+              (isMinting || !isWalletConnected || !validateMetadata()) &&
+                styles.disabled
             )}
-            onClick={isMinting || !isWalletConnected ? null : mintNFT}
+            onClick={
+              isMinting || !isWalletConnected || !validateMetadata()
+                ? null
+                : mintNFT
+            }
           >
             {isMinting ? (
               <ClipLoader size="16" color="white"></ClipLoader>
