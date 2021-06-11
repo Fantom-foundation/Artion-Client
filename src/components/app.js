@@ -1,7 +1,12 @@
 import React, { useRef, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { observer, inject } from 'mobx-react';
-import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
+import {
+  BrowserRouter as Router,
+  Switch,
+  Route,
+  Redirect,
+} from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { Client } from '@bandprotocol/bandchain.js';
 
@@ -11,6 +16,7 @@ import Toolbar from './toolbar';
 import Metadata from './metadata';
 import AccountModal from './AccountModal';
 import WFTMModal from './WFTMModal';
+import NotFound from './NotFound';
 import { Container, Board, Canvas, CanvasBg } from './style';
 import { isMobile } from 'utils/userAgent';
 import LandingPage from '../pages/landingpage';
@@ -113,6 +119,10 @@ const App = ({ paintStore }) => {
           <Route path="/explore/:addr/:id" component={NFTItem} />
           <Route path="/account/:uid" component={AccountDetails} />
           <Route path="/collection/create" component={CollectionCreate} />
+          <Route path="/404" component={NotFound} />
+          <Route path="*">
+            <Redirect to="/404" />
+          </Route>
         </Switch>
         <AccountModal />
         <WFTMModal />
