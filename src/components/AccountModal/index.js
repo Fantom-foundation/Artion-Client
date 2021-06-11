@@ -89,7 +89,7 @@ const AccountModal = () => {
   };
 
   const clipImage = (image, clipX, clipY, clipWidth, clipHeight, cb) => {
-    const CANVAS_SIZE = Math.max(Math.min(512, clipWidth), 128);
+    const CANVAS_SIZE = 128;
     const canvas = document.createElement('canvas');
     canvas.width = CANVAS_SIZE;
     canvas.height = CANVAS_SIZE;

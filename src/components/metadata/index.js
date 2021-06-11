@@ -197,16 +197,17 @@ const Metadata = () => {
     const canvas = document.getElementById('drawingboard');
 
     const newcanvas = document.createElement('canvas');
-    newcanvas.width = canvas.clientWidth;
-    newcanvas.height = canvas.clientHeight;
+    const SIZE = 512;
+    newcanvas.width = SIZE;
+    newcanvas.height = SIZE;
     const ctx = newcanvas.getContext('2d');
     const image = new Image();
     image.onload = function() {
-      ctx.drawImage(image, 0, 0);
+      ctx.drawImage(image, 0, 0, SIZE, SIZE);
 
       const image1 = new Image();
       image1.onload = async function() {
-        ctx.drawImage(image1, 0, 0);
+        ctx.drawImage(image1, 0, 0, SIZE, SIZE);
 
         let formData = new FormData();
         formData.append('image', newcanvas.toDataURL());
