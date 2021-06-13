@@ -71,11 +71,15 @@ const PaintBoard = () => {
   );
   const authToken = useSelector(state => state.ConnectWallet.authToken);
 
-  useEffect(() => {
-    dispatch(HeaderActions.toggleSearchbar(false));
+  const init = () => {
     if (width > 1150) {
       setModeSelecting(true);
     }
+  };
+
+  useEffect(() => {
+    dispatch(HeaderActions.toggleSearchbar(false));
+    init();
   }, []);
 
   useEffect(() => {
@@ -255,7 +259,7 @@ const PaintBoard = () => {
 
   return (
     <div className={styles.container}>
-      <Header light />
+      <Header light onCreate={init} />
       <div className={styles.body}>
         {mode === 0 || width > 1150 ? (
           <>
