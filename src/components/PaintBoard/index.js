@@ -16,6 +16,7 @@ import InfoIcon from '@material-ui/icons/Info';
 import HeaderActions from 'actions/header.actions';
 import Header from 'components/header';
 import ImageEditor from 'components/ImageEditor';
+import MintModeModal from 'components/MintModeModal';
 import { calculateGasMargin } from 'utils';
 import showToast from 'utils/toast';
 import WalletUtils from 'utils/wallet';
@@ -47,11 +48,10 @@ const PaintBoard = () => {
   const ref = useRef();
   const imageRef = useRef();
 
+  const [modeSelecting, setModeSelecting] = useState(false);
   const [mode, setMode] = useState(0);
-  console.log(setMode);
   const [imageEditor, setImageEditor] = useState(null);
   const [image, setImage] = useState(null);
-  // const [fileBuffer, setFileBuffer] = useState(null);
 
   const [name, setName] = useState('');
   const [symbol, setSymbol] = useState('');
@@ -70,6 +70,7 @@ const PaintBoard = () => {
 
   useEffect(() => {
     dispatch(HeaderActions.toggleSearchbar(false));
+    setModeSelecting(true);
   }, []);
 
   useEffect(() => {
@@ -80,14 +81,6 @@ const PaintBoard = () => {
 
   const onDrop = useCallback(acceptedFiles => {
     setImage(acceptedFiles[0]);
-
-    const reader = new FileReader();
-
-    reader.onload = () => {
-      // const binaryStr = reader.result;
-      // setFileBuffer(binaryStr);
-    };
-    reader.readAsArrayBuffer(acceptedFiles[0]);
   }, []);
 
   const { getRootProps, getInputProps } = useDropzone({
@@ -385,6 +378,13 @@ const PaintBoard = () => {
           </div>
         </div>
       </div>
+      <MintModeModal
+        visible={modeSelecting}
+        onModeSelect={_mode => {
+          setMode(_mode);
+          setModeSelecting(false);
+        }}
+      />
     </div>
   );
 };
