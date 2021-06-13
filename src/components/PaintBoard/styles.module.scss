@@ -13,6 +13,7 @@
   padding: 0 40px 40px;
   box-sizing: border-box;
   display: flex;
+  position: relative;
 }
 
 .board {
@@ -177,5 +178,68 @@
 :global {
   .tui-image-editor {
     border: 1px solid rgba(0, 0, 0, .2);
+  }
+}
+
+.warning {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 150px;
+}
+
+.warningIcon {
+  width: 100px;
+  height: 100px;
+  color: #E15A5A;
+}
+
+.warningTitle {
+  margin-top: 20px;
+  font-weight: 500;
+  font-size: 24px;
+  text-align: center;
+  color: #3D3D3D;
+}
+
+.switchButton {
+  margin-top: 40px;
+  width: 160px;
+  height: 40px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 18px;
+  border: 1px solid #1969FF;
+  color: #1969FF;
+  box-shadow: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+@media only screen and (max-width: 950px) {
+  .body {
+    flex-direction: column;
+    padding-top: 40px;
+    height: fit-content;
+  }
+
+  .board {
+    margin-right: 0;
+    flex: 0 0 512px;
+    height: 512px;
+    max-height: calc(100vw - 80px);
+  }
+}
+
+@media only screen and (max-width: 600px) {
+  .body {
+    padding: 40px 20px;
+  }
+
+  .board {
+    max-height: calc(100vw - 40px);
   }
 }

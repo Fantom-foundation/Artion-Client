@@ -7,6 +7,7 @@ import axios from 'axios';
 import { BigNumber, ethers } from 'ethers';
 import { useDropzone } from 'react-dropzone';
 
+import WarningIcon from '@material-ui/icons/Warning';
 import CloseIcon from '@material-ui/icons/Close';
 import Stepper from '@material-ui/core/Stepper';
 import Step from '@material-ui/core/Step';
@@ -23,6 +24,7 @@ import WalletUtils from 'utils/wallet';
 import SCHandlers from 'utils/sc.interaction';
 import { API_URL } from 'api';
 import { FantomNFTConstants } from 'constants/smartcontracts/fnft.constants';
+import useWindowDimensions from 'hooks/useWindowDimensions';
 
 import whiteTheme from './white-theme';
 
@@ -52,6 +54,7 @@ const PaintBoard = () => {
   const [mode, setMode] = useState(0);
   const [imageEditor, setImageEditor] = useState(null);
   const [image, setImage] = useState(null);
+  const { width } = useWindowDimensions();
 
   const [name, setName] = useState('');
   const [symbol, setSymbol] = useState('');
@@ -70,7 +73,9 @@ const PaintBoard = () => {
 
   useEffect(() => {
     dispatch(HeaderActions.toggleSearchbar(false));
-    setModeSelecting(true);
+    if (width > 1150) {
+      setModeSelecting(true);
+    }
   }, []);
 
   useEffect(() => {
@@ -252,131 +257,145 @@ const PaintBoard = () => {
     <div className={styles.container}>
       <Header light />
       <div className={styles.body}>
-        <div className={styles.board}>
-          {mode === 0 ? (
-            <div {...getRootProps({ className: styles.uploadCont })}>
-              <input {...getInputProps()} ref={imageRef} />
-              {image ? (
-                <>
-                  <img
-                    className={styles.image}
-                    src={URL.createObjectURL(image)}
-                  />
-                  <div className={styles.overlay}>
-                    <CloseIcon
-                      className={styles.remove}
-                      onClick={removeImage}
-                    />
-                  </div>
-                </>
+        {mode === 0 || width > 1150 ? (
+          <>
+            <div className={styles.board}>
+              {mode === 0 ? (
+                <div {...getRootProps({ className: styles.uploadCont })}>
+                  <input {...getInputProps()} ref={imageRef} />
+                  {image ? (
+                    <>
+                      <img
+                        className={styles.image}
+                        src={URL.createObjectURL(image)}
+                      />
+                      <div className={styles.overlay}>
+                        <CloseIcon
+                          className={styles.remove}
+                          onClick={removeImage}
+                        />
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className={styles.uploadtitle}>
+                        Drop files here or&nbsp;
+                        <span
+                          className={styles.browse}
+                          onClick={() => imageRef.current?.click()}
+                        >
+                          browse
+                        </span>
+                      </div>
+                      <div className={styles.uploadsubtitle}>
+                        PNG, GIF Max 30mb.
+                      </div>
+                    </>
+                  )}
+                </div>
               ) : (
-                <>
-                  <div className={styles.uploadtitle}>
-                    Drop files here or&nbsp;
-                    <span
-                      className={styles.browse}
-                      onClick={() => imageRef.current?.click()}
-                    >
-                      browse
-                    </span>
-                  </div>
-                  <div className={styles.uploadsubtitle}>
-                    PNG, GIF Max 30mb.
-                  </div>
-                </>
+                <ImageEditor ref={ref} {...options} />
               )}
             </div>
-          ) : (
-            <ImageEditor ref={ref} {...options} />
-          )}
-        </div>
-        <div className={styles.panel}>
-          <div className={styles.formGroup}>
-            <p className={styles.formLabel}>Name</p>
-            <input
-              className={styles.formInput}
-              maxLength={20}
-              placeholder="Name"
-              value={name}
-              onChange={e => setName(e.target.value)}
-              disabled={isMinting}
-            />
-          </div>
-          <div className={styles.formGroup}>
-            <p className={styles.formLabel}>Symbol</p>
-            <input
-              className={styles.formInput}
-              maxLength={20}
-              placeholder="Symbol"
-              value={symbol}
-              onChange={e => setSymbol(e.target.value)}
-              disabled={isMinting}
-            />
-          </div>
-          <div className={styles.formGroup}>
-            <p className={styles.formLabel}>Description</p>
-            <textarea
-              className={cx(styles.formInput, styles.longInput)}
-              maxLength={120}
-              placeholder="Description"
-              value={description}
-              onChange={e => setDescription(e.target.value)}
-              disabled={isMinting}
-            />
-          </div>
+            <div className={styles.panel}>
+              <div className={styles.formGroup}>
+                <p className={styles.formLabel}>Name</p>
+                <input
+                  className={styles.formInput}
+                  maxLength={20}
+                  placeholder="Name"
+                  value={name}
+                  onChange={e => setName(e.target.value)}
+                  disabled={isMinting}
+                />
+              </div>
+              <div className={styles.formGroup}>
+                <p className={styles.formLabel}>Symbol</p>
+                <input
+                  className={styles.formInput}
+                  maxLength={20}
+                  placeholder="Symbol"
+                  value={symbol}
+                  onChange={e => setSymbol(e.target.value)}
+                  disabled={isMinting}
+                />
+              </div>
+              <div className={styles.formGroup}>
+                <p className={styles.formLabel}>Description</p>
+                <textarea
+                  className={cx(styles.formInput, styles.longInput)}
+                  maxLength={120}
+                  placeholder="Description"
+                  value={description}
+                  onChange={e => setDescription(e.target.value)}
+                  disabled={isMinting}
+                />
+              </div>
 
-          {isMinting && (
-            <div>
-              <Stepper activeStep={currentMintingStep} alternativeLabel>
-                {mintSteps.map(label => (
-                  <Step key={label}>
-                    <StepLabel>{label}</StepLabel>
-                  </Step>
-                ))}
-              </Stepper>
-            </div>
-          )}
-          <div
-            className={cx(
-              styles.button,
-              (isMinting || !isWalletConnected || !validateMetadata()) &&
-                styles.disabled
-            )}
-            onClick={
-              isMinting || !isWalletConnected || !validateMetadata()
-                ? null
-                : mintNFT
-            }
-          >
-            {isMinting ? (
-              <ClipLoader size="16" color="white"></ClipLoader>
-            ) : (
-              'Mint'
-            )}
-          </div>
-          <div className={styles.fee}>
-            <InfoIcon />
-            &nbsp;5 FTMs are charged to create a new NFT.
-          </div>
-          <div className={styles.mintStatusContainer}>
-            {lastMintedTkId !== 0 && (
-              <label className={styles.nftIDLabel}>
-                You have created an NFT with ID of {lastMintedTkId}
-              </label>
-            )}
-
-            {lastMintedTnxId !== '' && (
-              <a
-                className={styles.tnxAnchor}
-                target="_blank"
-                rel="noopener noreferrer"
-                href={`https://ftmscan.com/tx/${lastMintedTnxId}`}
+              {isMinting && (
+                <div>
+                  <Stepper activeStep={currentMintingStep} alternativeLabel>
+                    {mintSteps.map(label => (
+                      <Step key={label}>
+                        <StepLabel>{label}</StepLabel>
+                      </Step>
+                    ))}
+                  </Stepper>
+                </div>
+              )}
+              <div
+                className={cx(
+                  styles.button,
+                  (isMinting || !isWalletConnected || !validateMetadata()) &&
+                    styles.disabled
+                )}
+                onClick={
+                  isMinting || !isWalletConnected || !validateMetadata()
+                    ? null
+                    : mintNFT
+                }
               >
-                You can track the last transaction here ...
-              </a>
-            )}
+                {isMinting ? (
+                  <ClipLoader size="16" color="white"></ClipLoader>
+                ) : (
+                  'Mint'
+                )}
+              </div>
+              <div className={styles.fee}>
+                <InfoIcon />
+                &nbsp;5 FTMs are charged to create a new NFT.
+              </div>
+              <div className={styles.mintStatusContainer}>
+                {lastMintedTkId !== 0 && (
+                  <label className={styles.nftIDLabel}>
+                    You have created an NFT with ID of {lastMintedTkId}
+                  </label>
+                )}
+
+                {lastMintedTnxId !== '' && (
+                  <a
+                    className={styles.tnxAnchor}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    href={`https://ftmscan.com/tx/${lastMintedTnxId}`}
+                  >
+                    You can track the last transaction here ...
+                  </a>
+                )}
+              </div>
+            </div>
+          </>
+        ) : (
+          <div className={styles.warning}>
+            <WarningIcon className={styles.warningIcon} />
+            <div className={styles.warningTitle}>
+              Can not edit image on small screens!
+            </div>
+            <div className={styles.switchButton} onClick={() => setMode(0)}>
+              Switch Mode
+            </div>
           </div>
-        </div>
+        )}
       </div>
       <MintModeModal
         visible={modeSelecting}
