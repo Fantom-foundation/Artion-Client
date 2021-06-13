@@ -86,6 +86,7 @@
     "react-datetime": "^3.0.4",
     "react-dev-utils": "^9.0.2",
     "react-dom": "^16.9.0",
+    "react-dropzone": "^11.3.2",
     "react-hot-toast": "^1.0.2",
     "react-list-drag-and-drop": "^0.9.1",
     "react-loader-spinner": "^4.0.0",

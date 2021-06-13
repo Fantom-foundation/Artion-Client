@@ -72,6 +72,7 @@
 .itemMain {
   flex: 1 1 0;
   margin-left: 40px;
+  overflow: hidden;
 }
 
 .itemMedia {
@@ -188,6 +189,9 @@
   line-height: 26px;
   color: #3D3D3D;
   margin-top: 16px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .itemDescription {
@@ -196,6 +200,11 @@
   line-height: 20px;
   color: rgba(0, 0, 0, .6);
   margin-top: 10px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
 }
 
 .itemStats {
