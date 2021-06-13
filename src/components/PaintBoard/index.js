@@ -1,11 +1,13 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import cx from 'classnames';
 import { ClipLoader } from 'react-spinners';
 import { useWeb3React } from '@web3-react/core';
 import axios from 'axios';
 import { BigNumber, ethers } from 'ethers';
+import { useDropzone } from 'react-dropzone';
 
+import CloseIcon from '@material-ui/icons/Close';
 import Stepper from '@material-ui/core/Stepper';
 import Step from '@material-ui/core/Step';
 import StepLabel from '@material-ui/core/StepLabel';
@@ -29,6 +31,8 @@ import 'tui-image-editor/dist/tui-image-editor.css';
 import 'tui-color-picker/dist/tui-color-picker.css';
 import styles from './styles.module.scss';
 
+const accept = ['image/*'];
+
 const mintSteps = [
   'Uploading to IPFS',
   'Create your NFT',
@@ -41,8 +45,13 @@ const PaintBoard = () => {
   const { account, chainId } = useWeb3React();
 
   const ref = useRef();
+  const imageRef = useRef();
 
+  const [mode, setMode] = useState(0);
+  console.log(setMode);
   const [imageEditor, setImageEditor] = useState(null);
+  const [image, setImage] = useState(null);
+  // const [fileBuffer, setFileBuffer] = useState(null);
 
   const [name, setName] = useState('');
   const [symbol, setSymbol] = useState('');
@@ -69,6 +78,43 @@ const PaintBoard = () => {
     }
   }, [ref.current]);
 
+  const onDrop = useCallback(acceptedFiles => {
+    setImage(acceptedFiles[0]);
+
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      // const binaryStr = reader.result;
+      // setFileBuffer(binaryStr);
+    };
+    reader.readAsArrayBuffer(acceptedFiles[0]);
+  }, []);
+
+  const { getRootProps, getInputProps } = useDropzone({
+    accept: accept.join(', '),
+    multiple: false,
+    onDrop,
+    maxSize: 15728640,
+  });
+
+  const removeImage = () => {
+    setImage(null);
+    imageRef.current.value = '';
+  };
+
+  const imageToBase64 = () => {
+    return new Promise((resolve, reject) => {
+      let reader = new FileReader();
+      reader.readAsDataURL(image);
+      reader.onload = () => {
+        resolve(reader.result);
+      };
+      reader.onerror = err => {
+        reject(err);
+      };
+    });
+  };
+
   const resetBoard = () => {
     if (!imageEditor) return;
 
@@ -77,7 +123,10 @@ const PaintBoard = () => {
 
   const validateMetadata = () => {
     return (
-      name !== '' && symbol !== '' && account !== '' && imageEditor?.toDataURL()
+      name !== '' &&
+      symbol !== '' &&
+      account !== '' &&
+      (mode === 0 ? image : imageEditor?.toDataURL())
     );
   };
 
@@ -118,7 +167,12 @@ const PaintBoard = () => {
     }
 
     let formData = new FormData();
-    formData.append('image', imageEditor.toDataURL());
+    if (mode === 0) {
+      const base64 = await imageToBase64();
+      formData.append('image', base64);
+    } else {
+      formData.append('image', imageEditor.toDataURL());
+    }
     formData.append('name', name);
     formData.append('account', account);
     formData.append('description', description);
@@ -167,6 +221,7 @@ const PaintBoard = () => {
 
         showToast('success', 'New NFT item minted!');
         resetBoard();
+        removeImage();
         setName('');
         setSymbol('');
         setDescription('');
@@ -205,7 +260,42 @@ const PaintBoard = () => {
       <Header light />
       <div className={styles.body}>
         <div className={styles.board}>
-          <ImageEditor ref={ref} {...options} />
+          {mode === 0 ? (
+            <div {...getRootProps({ className: styles.uploadCont })}>
+              <input {...getInputProps()} ref={imageRef} />
+              {image ? (
+                <>
+                  <img
+                    className={styles.image}
+                    src={URL.createObjectURL(image)}
+                  />
+                  <div className={styles.overlay}>
+                    <CloseIcon
+                      className={styles.remove}
+                      onClick={removeImage}
+                    />
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className={styles.uploadtitle}>
+                    Drop files here or&nbsp;
+                    <span
+                      className={styles.browse}
+                      onClick={() => imageRef.current?.click()}
+                    >
+                      browse
+                    </span>
+                  </div>
+                  <div className={styles.uploadsubtitle}>
+                    PNG, GIF Max 30mb.
+                  </div>
+                </>
+              )}
+            </div>
+          ) : (
+            <ImageEditor ref={ref} {...options} />
+          )}
         </div>
         <div className={styles.panel}>
           <div className={styles.formGroup}>
