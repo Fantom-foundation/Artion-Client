@@ -15,6 +15,7 @@ import TokensActions from 'actions/tokens.actions';
 import HeaderActions from 'actions/header.actions';
 import { shortenAddress } from 'utils';
 import Identicon from 'components/Identicon';
+import useWindowDimensions from 'hooks/useWindowDimensions';
 
 import styles from './styles.module.scss';
 
@@ -22,6 +23,7 @@ const ExploreAllPage = () => {
   const dispatch = useDispatch();
 
   const { uid } = useParams();
+  const { width } = useWindowDimensions();
 
   const [page, setPage] = useState(0);
   const [user, setUser] = useState({});
@@ -126,7 +128,7 @@ const ExploreAllPage = () => {
     if (fetching) return;
     if (tokens.length === count) return;
 
-    const obj = e.currentTarget;
+    const obj = e.target;
     if (obj.scrollHeight - obj.clientHeight - obj.scrollTop < 100) {
       fetchNFTs(page + 1);
     }
@@ -149,7 +151,10 @@ const ExploreAllPage = () => {
   return (
     <>
       <Header light />
-      <div className={styles.container} onScroll={handleScroll}>
+      <div
+        className={styles.container}
+        onScroll={width <= 600 ? handleScroll : null}
+      >
         <div className={styles.sidebar}>
           {uid && (
             <div className={styles.profileWrapper}>
@@ -183,7 +188,10 @@ const ExploreAllPage = () => {
           <div className={styles.filterHeader}>
             <ExploreFilterHeader loading={fetching} />
           </div>
-          <div className={styles.exploreAll} onScroll={handleScroll}>
+          <div
+            className={styles.exploreAll}
+            onScroll={width > 600 ? handleScroll : null}
+          >
             <NFTsGrid items={tokens} loading={fetching} />
           </div>
         </div>
