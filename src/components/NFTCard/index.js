@@ -170,7 +170,11 @@ const BaseCard = ({ item, loading, style }) => {
                 }
               >
                 <SuspenseImg
-                  src={info.image}
+                  src={
+                    info.thumbnailPath?.startsWith('https')
+                      ? info.thumbnailPath
+                      : info.image
+                  }
                   className={classes.media}
                   alt={info?.name}
                 />

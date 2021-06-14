@@ -414,26 +414,30 @@ const AccountDetails = () => {
                         )}
                       </div>
                       {activity ? (
-                        <Link
-                          to={`/account/${activity.to}`}
-                          className={styles.owner}
-                        >
-                          <div className={styles.ownerAvatarWrapper}>
-                            {activity.image ? (
-                              <img
-                                src={`https://gateway.pinata.cloud/ipfs/${activity.image}`}
-                                className={styles.ownerAvatar}
-                              />
-                            ) : (
-                              <Identicon
-                                account={activity.to}
-                                size={24}
-                                className={styles.ownerAvatar}
-                              />
-                            )}
-                          </div>
-                          {activity.alias || shortenAddress(activity.to)}
-                        </Link>
+                        activity.owner ? (
+                          <Link
+                            to={`/account/${activity.owner}`}
+                            className={styles.owner}
+                          >
+                            <div className={styles.ownerAvatarWrapper}>
+                              {activity.image ? (
+                                <img
+                                  src={`https://gateway.pinata.cloud/ipfs/${activity.image}`}
+                                  className={styles.ownerAvatar}
+                                />
+                              ) : (
+                                <Identicon
+                                  account={activity.to}
+                                  size={24}
+                                  className={styles.ownerAvatar}
+                                />
+                              )}
+                            </div>
+                            {activity.alias || shortenAddress(activity.owner)}
+                          </Link>
+                        ) : (
+                          <div className={styles.owner} />
+                        )
                       ) : (
                         <div className={styles.owner}>
                           <Skeleton width={130} height={20} />
