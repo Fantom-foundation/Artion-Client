@@ -238,7 +238,7 @@ const BaseCard = ({ item, loading, style }) => {
           renderContent()
         )}
       </div>
-      {item?.supply && (
+      {item?.tokenType === 1155 && (
         <>
           <div className={classes.card} />
           <div className={classes.card} />
