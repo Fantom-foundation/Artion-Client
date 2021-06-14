@@ -1399,6 +1399,7 @@ const NFTItem = () => {
                 </div>
               ) : null}
               {(!auction.current || !auction.current.resulted) &&
+                !hasListing() &&
                 tokenType.current !== 1155 && (
                   <div
                     className={styles.headerButton}
