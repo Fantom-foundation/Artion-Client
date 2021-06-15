@@ -414,9 +414,9 @@ const AccountDetails = () => {
                         )}
                       </div>
                       {activity ? (
-                        activity.owner ? (
+                        activity.to ? (
                           <Link
-                            to={`/account/${activity.owner}`}
+                            to={`/account/${activity.to}`}
                             className={styles.owner}
                           >
                             <div className={styles.ownerAvatarWrapper}>
@@ -433,7 +433,7 @@ const AccountDetails = () => {
                                 />
                               )}
                             </div>
-                            {activity.alias || shortenAddress(activity.owner)}
+                            {activity.alias || shortenAddress(activity.to)}
                           </Link>
                         ) : (
                           <div className={styles.owner} />
@@ -464,59 +464,62 @@ const AccountDetails = () => {
                 <div className={styles.date}>Date</div>
               </div>
               <div className={styles.activityList}>
-                {(offersLoading ? new Array(5).fill(null) : offers).map(
-                  (offer, idx) => (
-                    <div key={idx} className={styles.activity}>
-                      {offer ? (
-                        <Link
-                          to={`/account/${offer.creator}`}
-                          className={styles.owner}
-                        >
-                          <div className={styles.ownerAvatarWrapper}>
-                            {offer.image ? (
-                              <img
-                                src={`https://gateway.pinata.cloud/ipfs/${offer.image}`}
-                                className={styles.ownerAvatar}
-                              />
-                            ) : (
-                              <Identicon
-                                account={offer.creator}
-                                size={24}
-                                className={styles.ownerAvatar}
-                              />
-                            )}
-                          </div>
-                          {offer.alias || shortenAddress(offer.creator)}
-                        </Link>
-                      ) : (
-                        <div className={styles.owner}>
-                          <Skeleton width={130} height={20} />
+                {(offersLoading
+                  ? new Array(5).fill(null)
+                  : offers.filter(
+                      offer => offer.deadline * 1000 > now.getTime()
+                    )
+                ).map((offer, idx) => (
+                  <div key={idx} className={styles.activity}>
+                    {offer ? (
+                      <Link
+                        to={`/account/${offer.creator}`}
+                        className={styles.owner}
+                      >
+                        <div className={styles.ownerAvatarWrapper}>
+                          {offer.image ? (
+                            <img
+                              src={`https://gateway.pinata.cloud/ipfs/${offer.image}`}
+                              className={styles.ownerAvatar}
+                            />
+                          ) : (
+                            <Identicon
+                              account={offer.creator}
+                              size={24}
+                              className={styles.ownerAvatar}
+                            />
+                          )}
                         </div>
+                        {offer.alias || shortenAddress(offer.creator)}
+                      </Link>
+                    ) : (
+                      <div className={styles.owner}>
+                        <Skeleton width={130} height={20} />
+                      </div>
+                    )}
+                    <div className={styles.price}>
+                      {offer ? (
+                        `${offer.pricePerItem} FTM`
+                      ) : (
+                        <Skeleton width={100} height={20} />
                       )}
-                      <div className={styles.price}>
-                        {offer ? (
-                          `${offer.pricePerItem} FTM`
-                        ) : (
-                          <Skeleton width={100} height={20} />
-                        )}
-                      </div>
-                      <div className={styles.quantity}>
-                        {offer ? (
-                          offer.quantity
-                        ) : (
-                          <Skeleton width={80} height={20} />
-                        )}
-                      </div>
-                      <div className={styles.date}>
-                        {offer ? (
-                          formatDate(offer.createdAt)
-                        ) : (
-                          <Skeleton width={120} height={20} />
-                        )}
-                      </div>
                     </div>
-                  )
-                )}
+                    <div className={styles.quantity}>
+                      {offer ? (
+                        offer.quantity
+                      ) : (
+                        <Skeleton width={80} height={20} />
+                      )}
+                    </div>
+                    <div className={styles.date}>
+                      {offer ? (
+                        formatDate(offer.createdAt)
+                      ) : (
+                        <Skeleton width={120} height={20} />
+                      )}
+                    </div>
+                  </div>
+                ))}
               </div>
             </>
           )}
