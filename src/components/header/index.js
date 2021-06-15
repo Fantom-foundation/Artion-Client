@@ -33,7 +33,7 @@ import styles from './styles.module.scss';
 
 const adminAddress = '0xB7bC6D2666e73F8Cd143a929DB5404e2fc03eA89';
 
-const NiftyHeader = ({ light, onCreate }) => {
+const NiftyHeader = ({ light }) => {
   const history = useHistory();
   const dispatch = useDispatch();
 
@@ -414,7 +414,6 @@ const NiftyHeader = ({ light, onCreate }) => {
             to="/create"
             className={cx(styles.menuLink, styles.link)}
             activeClassName={styles.active}
-            onClick={onCreate || null}
           >
             Create
           </NavLink>
@@ -433,7 +432,6 @@ const NiftyHeader = ({ light, onCreate }) => {
           to="/create"
           className={cx(styles.menuLink, styles.link)}
           activeClassName={styles.active}
-          onClick={onCreate || null}
         >
           Create
         </NavLink>
