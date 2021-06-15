@@ -51,7 +51,7 @@ const App = () => {
           <Route exact path="/create" component={PaintBoard} />
           <Route path="/explore/:addr/:id" component={NFTItem} />
           <Route path="/account/:uid" component={AccountDetails} />
-          <Route path="/collection/create" component={CollectionCreate} />
+          <Route path="/collection/add" component={CollectionCreate} />
           <Route path="/404" component={NotFound} />
           <Route path="*">
             <Redirect to="/404" />

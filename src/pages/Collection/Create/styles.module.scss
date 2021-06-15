@@ -50,6 +50,17 @@
   margin-top: 16px;
 }
 
+.lengthIndicator {
+  margin-top: 6px;
+  margin-right: 6px;
+  text-align: right;
+  color: rgba(0, 0, 0, .6);
+
+  & + .error {
+    margin-top: -20px;
+  }
+}
+
 .error {
   margin: 6px 0 0 6px;
   color: rgba(235, 87, 87);

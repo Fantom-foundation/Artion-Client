@@ -227,7 +227,7 @@ const NiftyHeader = ({ light }) => {
   };
 
   const handleCreateCollection = () => {
-    history.push('/collection/create');
+    history.push('/collection/add');
     handleMenuClose();
   };
 
@@ -270,7 +270,7 @@ const NiftyHeader = ({ light }) => {
       )}
       <div className={styles.menuItem} onClick={handleCreateCollection}>
         <img src={iconAdd} className={styles.menuIcon} />
-        Create Collection
+        Register Collection
       </div>
       <div className={styles.menuItem} onClick={openWrapStation}>
         <img src={iconSwap} className={styles.menuIcon} />

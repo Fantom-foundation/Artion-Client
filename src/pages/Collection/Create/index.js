@@ -255,7 +255,7 @@ const CollectionCreate = () => {
     <div className={styles.container}>
       <Header light />
       <div className={styles.inner}>
-        <div className={styles.title}>Create Collection</div>
+        <div className={styles.title}>Register Collection</div>
 
         <div className={styles.inputGroup}>
           <div className={styles.inputTitle}>Logo image *</div>
@@ -287,11 +287,13 @@ const CollectionCreate = () => {
           <div className={styles.inputWrapper}>
             <input
               className={cx(styles.input, nameError && styles.hasError)}
+              maxLength={20}
               placeholder="Type your name here"
               value={name}
               onChange={e => setName(e.target.value)}
               onBlur={validateName}
             />
+            <div className={styles.lengthIndicator}>{name.length}/20</div>
             {nameError && <div className={styles.error}>{nameError}</div>}
           </div>
         </div>
@@ -305,11 +307,15 @@ const CollectionCreate = () => {
                 styles.longInput,
                 descriptionError && styles.hasError
               )}
+              maxLength={200}
               placeholder="Provide your description for your collection"
               value={description}
               onChange={e => setDescription(e.target.value)}
               onBlur={validateDescription}
             />
+            <div className={styles.lengthIndicator}>
+              {description.length}/200
+            </div>
             {descriptionError && (
               <div className={styles.error}>{descriptionError}</div>
             )}
