@@ -7,6 +7,7 @@ import { useWeb3React } from '@web3-react/core';
 import axios from 'axios';
 import { BigNumber, ethers } from 'ethers';
 import { useDropzone } from 'react-dropzone';
+import Skeleton from 'react-loading-skeleton';
 
 import CloseIcon from '@material-ui/icons/Close';
 import Stepper from '@material-ui/core/Stepper';
@@ -44,6 +45,7 @@ const PaintBoard = () => {
   const imageRef = useRef();
 
   const [image, setImage] = useState(null);
+  const [fee, setFee] = useState(null);
 
   const [name, setName] = useState('');
   const [symbol, setSymbol] = useState('');
@@ -59,7 +61,17 @@ const PaintBoard = () => {
   );
   const authToken = useSelector(state => state.ConnectWallet.authToken);
 
+  const getFee = async () => {
+    const [contract] = await SCHandlers.loadContract(
+      FantomNFTConstants.MAINNETADDRESS,
+      FantomNFTConstants.ABI
+    );
+    const _fee = await contract.platformFee();
+    setFee(parseFloat(_fee.toString()) / 10 ** 18);
+  };
+
   useEffect(() => {
+    getFee();
     dispatch(HeaderActions.toggleSearchbar(false));
   }, []);
 
@@ -119,7 +131,7 @@ const PaintBoard = () => {
     if (balance < 5) {
       showToast(
         'custom',
-        `Your balance should be at least 5 FTM to mint an NFT`
+        `Your balance should be at least ${fee} FTM to mint an NFT`
       );
       return;
     }
@@ -306,8 +318,14 @@ const PaintBoard = () => {
             )}
           </div>
           <div className={styles.fee}>
-            <InfoIcon />
-            &nbsp;5 FTMs are charged to create a new NFT.
+            {fee ? (
+              <>
+                <InfoIcon />
+                &nbsp;{fee} FTMs are charged to create a new NFT.
+              </>
+            ) : (
+              <Skeleton width={330} height={22} />
+            )}
           </div>
           <div className={styles.mintStatusContainer}>
             {lastMintedTnxId !== '' && (
