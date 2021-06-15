@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useHistory } from 'react-router';
 import cx from 'classnames';
 import { ClipLoader } from 'react-spinners';
 import { useWeb3React } from '@web3-react/core';
@@ -36,6 +37,7 @@ const mintSteps = [
 
 const PaintBoard = () => {
   const dispatch = useDispatch();
+  const history = useHistory();
 
   const { account, chainId } = useWeb3React();
 
@@ -50,7 +52,6 @@ const PaintBoard = () => {
   const [currentMintingStep, setCurrentMintingStep] = useState(0);
   const [isMinting, setIsMinting] = useState(false);
 
-  const [lastMintedTkId, setLastMintedTkId] = useState(0);
   const [lastMintedTnxId, setLastMintedTnxId] = useState('');
 
   const isWalletConnected = useSelector(
@@ -94,7 +95,7 @@ const PaintBoard = () => {
   };
 
   const validateMetadata = () => {
-    return name !== '' && symbol !== '' && account !== '' && image;
+    return name !== '' && account !== '' && image;
   };
 
   const resetMintingStatus = () => {
@@ -123,7 +124,6 @@ const PaintBoard = () => {
       return;
     }
 
-    setLastMintedTkId(0);
     setLastMintedTnxId('');
     // show stepper
     setIsMinting(true);
@@ -171,22 +171,27 @@ const PaintBoard = () => {
         };
         const gasEstimate = await fnft_sc.estimateGas.mint(...args, options);
         options.gasLimit = calculateGasMargin(gasEstimate);
-        let tx = await fnft_sc.mint(...args, options);
+        const tx = await fnft_sc.mint(...args, options);
         setCurrentMintingStep(1);
         setLastMintedTnxId(tx.hash);
 
         setCurrentMintingStep(2);
         const confirmedTnx = await provider.waitForTransaction(tx.hash);
         setCurrentMintingStep(3);
-        let evtCaught = confirmedTnx.logs[0].topics;
-        let mintedTkId = BigNumber.from(evtCaught[3]);
-        setLastMintedTkId(mintedTkId.toNumber());
+        const evtCaught = confirmedTnx.logs[0].topics;
+        const mintedTkId = BigNumber.from(evtCaught[3]);
 
         showToast('success', 'New NFT item minted!');
         removeImage();
         setName('');
         setSymbol('');
         setDescription('');
+
+        history.push(
+          `/explore/${
+            FantomNFTConstants.MAINNETADDRESS
+          }/${mintedTkId.toNumber()}`
+        );
       } catch (error) {
         showToast('error', error.message);
       }
@@ -236,12 +241,13 @@ const PaintBoard = () => {
             <p className={styles.formLabel}>Name</p>
             <input
               className={styles.formInput}
-              maxLength={20}
+              maxLength={40}
               placeholder="Name"
               value={name}
               onChange={e => setName(e.target.value)}
               disabled={isMinting}
             />
+            <div className={styles.lengthIndicator}>{name.length}/40</div>
           </div>
           <div className={styles.formGroup}>
             <p className={styles.formLabel}>Symbol</p>
@@ -253,6 +259,7 @@ const PaintBoard = () => {
               onChange={e => setSymbol(e.target.value)}
               disabled={isMinting}
             />
+            <div className={styles.lengthIndicator}>{symbol.length}/20</div>
           </div>
           <div className={styles.formGroup}>
             <p className={styles.formLabel}>Description</p>
@@ -264,6 +271,9 @@ const PaintBoard = () => {
               onChange={e => setDescription(e.target.value)}
               disabled={isMinting}
             />
+            <div className={styles.lengthIndicator}>
+              {description.length}/120
+            </div>
           </div>
 
           {isMinting && (
@@ -300,12 +310,6 @@ const PaintBoard = () => {
             &nbsp;5 FTMs are charged to create a new NFT.
           </div>
           <div className={styles.mintStatusContainer}>
-            {lastMintedTkId !== 0 && (
-              <label className={styles.nftIDLabel}>
-                You have created an NFT with ID of {lastMintedTkId}
-              </label>
-            )}
-
             {lastMintedTnxId !== '' && (
               <a
                 className={styles.tnxAnchor}

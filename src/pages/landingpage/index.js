@@ -32,7 +32,7 @@ const LandingPage = () => {
       </div>
       <Header />
       <div className={styles.body}>
-        <div className={styles.title}>The Global NFT Marketplace on Fantom</div>
+        <div className={styles.title}>Global NFT Marketplace on Fantom</div>
         <div className={styles.subtitle}>
           Create, Buy, Sell and Discover rare digital assets
         </div>
