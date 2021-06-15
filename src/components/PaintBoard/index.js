@@ -101,7 +101,9 @@ const PaintBoard = () => {
 
   const removeImage = () => {
     setImage(null);
-    imageRef.current.value = '';
+    if (imageRef.current) {
+      imageRef.current.value = '';
+    }
   };
 
   const imageToBase64 = () => {

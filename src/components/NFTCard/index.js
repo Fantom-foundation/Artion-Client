@@ -95,8 +95,10 @@ const useStyles = makeStyles({
     objectFit: 'cover',
   },
   content: {
-    marginTop: 'auto',
     padding: '32px 24px 24px !important',
+    flexGrow: 1,
+    display: 'flex',
+    flexDirection: 'column',
   },
   collection: {
     fontSize: 16,
