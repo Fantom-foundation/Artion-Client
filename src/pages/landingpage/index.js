@@ -6,6 +6,8 @@ import HeaderActions from 'actions/header.actions';
 import Header from 'components/header';
 import FakeCard from 'components/FakeCard';
 
+import fantomLogo from 'assets/svgs/fantom_logo_blue.svg';
+
 import bg1 from 'assets/svgs/bg1.svg';
 import bg2 from 'assets/svgs/bg2.svg';
 
@@ -32,7 +34,7 @@ const LandingPage = () => {
       </div>
       <Header />
       <div className={styles.body}>
-        <div className={styles.title}>Global NFT Marketplace on Fantom</div>
+        <div className={styles.title}>The largest NFT marketplace</div>
         <div className={styles.subtitle}>
           Create, Buy, Sell and Discover rare digital assets
         </div>
@@ -44,6 +46,11 @@ const LandingPage = () => {
             Create
           </Link>
         </div>
+        <div className={styles.subtitle2}>Zero % based fees on sales</div>
+      </div>
+      <div className={styles.footer}>
+        Powered by&nbsp;
+        <img src={fantomLogo} className={styles.logo} />
       </div>
 
       <div className={styles.cardsGroup}>

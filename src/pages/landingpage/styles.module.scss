@@ -70,6 +70,15 @@
   opacity: 0.8;
 }
 
+.subtitle2 {
+  margin-top: 40px;
+  font-weight: 600;
+  font-size: 24px;
+  line-height: 29px;
+  text-align: center;
+  color: #FFF;
+}
+
 .buttonsContainer {
   margin-top: 40px;
   display: flex;
@@ -165,6 +174,30 @@
   transform: rotate(-15deg) scale(.6);
 }
 
+.footer {
+  z-index: 100;
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  font-weight: 400;
+  font-size: 18px;
+  opacity: .8;
+
+  img {
+    height: 24px;
+  }
+}
+
+@media only screen and (min-width: 1500px) {
+  .bg1,
+  .bg2 {
+    top: calc((1500px - 100vw) / 100vw * 100vh);
+  }
+}
+
 @media only screen and (max-width: 991px) {
   .body {
     padding-top: 70px;
@@ -222,7 +255,8 @@
     line-height: 46px;
   }
 
-  .subtitle {
+  .subtitle,
+  .subtitle2 {
     font-size: 20px;
     line-height: 32px;
   }

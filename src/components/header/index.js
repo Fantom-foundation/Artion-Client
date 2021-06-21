@@ -65,18 +65,22 @@ const NiftyHeader = ({ light }) => {
   const isMenuOpen = Boolean(anchorEl);
 
   const login = async () => {
-    const token = await getAuthToken(account);
-
-    dispatch(WalletConnectActions.connectWallet(token));
-    dispatch(AuthActions.fetchStart());
     try {
       setLoading(true);
-      const { data } = await getAccountDetails(token);
-      dispatch(AuthActions.fetchSuccess(data));
+      const token = await getAuthToken(account);
+
+      dispatch(WalletConnectActions.connectWallet(token));
+      dispatch(AuthActions.fetchStart());
+      try {
+        const { data } = await getAccountDetails(token);
+        dispatch(AuthActions.fetchSuccess(data));
+      } catch {
+        dispatch(AuthActions.fetchFailed());
+      }
+      setLoading(false);
     } catch {
-      dispatch(AuthActions.fetchFailed());
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const changeNetwork = async () => {
@@ -107,8 +111,6 @@ const NiftyHeader = ({ light }) => {
   };
 
   const init = () => {
-    if (isWalletConnected) return;
-
     changeNetwork();
     login();
   };

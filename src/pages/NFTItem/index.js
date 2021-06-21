@@ -113,6 +113,7 @@ const NFTItem = () => {
     false
   );
 
+  const [previewIndex, setPreviewIndex] = useState(0);
   const [minBidIncrement, setMinBidIncrement] = useState(0);
   const [withdrawLockTime, setWithdrawLockTime] = useState(0);
   const [info, setInfo] = useState();
@@ -1487,6 +1488,44 @@ const NFTItem = () => {
                   </Suspense>
                 )}
               </div>
+              {false && (
+                <div className={styles.previewList}>
+                  {new Array(20).fill(0).map((_, idx) => (
+                    <div
+                      key={idx}
+                      className={cx(
+                        styles.preview,
+                        !loading && idx === previewIndex && styles.active
+                      )}
+                      onClick={() => setPreviewIndex(idx)}
+                    >
+                      {loading ? (
+                        <Loader
+                          type="Oval"
+                          color="#007BFF"
+                          height={32}
+                          width={32}
+                          className={styles.loader}
+                        />
+                      ) : (
+                        <Suspense
+                          fallback={
+                            <Loader
+                              type="Oval"
+                              color="#007BFF"
+                              height={32}
+                              width={32}
+                              className={styles.loader}
+                            />
+                          }
+                        >
+                          <SuspenseImg src={info?.image} />
+                        </Suspense>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
             <div className={styles.itemInfo}>{renderItemInfo()}</div>
             <div className={styles.itemInfoCont}>
