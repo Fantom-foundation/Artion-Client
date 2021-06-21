@@ -3,131 +3,20 @@ import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import cx from 'classnames';
 import Skeleton from 'react-loading-skeleton';
-import { makeStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import axios from 'axios';
 import Loader from 'react-loader-spinner';
+import Carousel, { Dots } from '@brainhubeu/react-carousel';
+import '@brainhubeu/react-carousel/lib/style.css';
 
 import SuspenseImg from 'components/SuspenseImg';
 
-const useStyles = makeStyles({
-  root: {
-    boxSizing: 'border-box',
-    display: 'flex',
-    flexDirection: 'column',
-    height: '100%',
-    position: 'relative',
-  },
-  card: {
-    flexGrow: 1,
-    cursor: 'pointer',
-    borderRadius: 10,
-    transition: 'transform ease 0.1s',
-    border: '1px solid rgba(0, 0, 0, 0.1)',
-    display: 'flex',
-    flexDirection: 'column',
-    backgroundColor: 'white',
-
-    '&:nth-child(n+2)': {
-      position: 'absolute',
-      height: '100%',
-      left: '50%',
-      transform: 'translateX(-50%)',
-      zIndex: -1,
-    },
-    '&:nth-child(2)': {
-      width: '93%',
-      top: 4,
-    },
-    '&:nth-child(3)': {
-      width: '96%',
-      top: 1,
-    },
-  },
-  link: {
-    height: '100%',
-    display: 'flex',
-    flexDirection: 'column',
-    textDecoration: 'inherit',
-  },
-  label: {
-    fontWeight: 500,
-    fontSize: 14,
-    lineHeight: '14px',
-    margin: 0,
-    color: 'rgba(61, 61, 61, .56)',
-  },
-  price: {
-    marginTop: 9,
-    color: '#000',
-  },
-  name: {
-    flex: 1,
-    fontWeight: 700,
-    fontSize: 18,
-    lineHeight: '18px',
-    margin: 0,
-    color: '#333',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    display: '-webkit-box',
-    '-webkit-line-clamp': 2,
-    '-webkit-box-orient': 'vertical',
-  },
-  mediaBox: {
-    position: 'relative',
-    paddingBottom: '100%',
-  },
-  loader: {
-    position: 'absolute',
-    top: '50%',
-    left: '50%',
-    transform: 'translate(-50%, -50%)',
-  },
-  media: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    width: '100%',
-    height: '100%',
-    borderRadius: '10px !important',
-    backgroundSize: 'contain',
-    objectFit: 'cover',
-  },
-  content: {
-    padding: '32px 24px 24px !important',
-    flexGrow: 1,
-    display: 'flex',
-    flexDirection: 'column',
-  },
-  collection: {
-    fontSize: 16,
-    lineHeight: '16px',
-    color: 'rgba(0, 0, 0, .56)',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    display: '-webkit-box',
-    '-webkit-line-clamp': 2,
-    '-webkit-box-orient': 'vertical',
-  },
-  alignBottom: {
-    display: 'flex',
-    alignItems: 'flex-end',
-    justifyContent: 'space-between',
-    marginTop: 12,
-  },
-  alignRight: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'flex-end',
-  },
-});
+import styles from './styles.module.scss';
 
 const BaseCard = ({ item, loading, style }) => {
-  const classes = useStyles();
-
   const [fetching, setFetching] = useState(false);
   const [info, setInfo] = useState(null);
+  const [index, setIndex] = useState(0);
 
   const { collections } = useSelector(state => state.Collections);
 
@@ -152,64 +41,128 @@ const BaseCard = ({ item, loading, style }) => {
     }
   }, [item]);
 
+  const renderSlides = () => {
+    return [0, 1, 2].map((v, idx) => (
+      <div className={styles.imageBox} key={idx}>
+        {info?.image && (
+          <Suspense
+            fallback={
+              <Loader
+                type="Oval"
+                color="#007BFF"
+                height={32}
+                width={32}
+                className={styles.loader}
+              />
+            }
+          >
+            <SuspenseImg
+              src={
+                item.thumbnailPath?.startsWith('https')
+                  ? item.thumbnailPath
+                  : info.image
+              }
+              className={styles.media}
+              alt={info?.name}
+            />
+          </Suspense>
+        )}
+      </div>
+    ));
+  };
+
+  const renderDots = () => {
+    return [0, 1, 2].map((v, idx) => (
+      <div className={cx(styles.dot)} key={idx} />
+    ));
+  };
+
   const renderContent = () => {
     return (
       <>
-        <div className={classes.mediaBox}>
-          {loading || fetching ? (
-            <Skeleton width="100%" height="100%" className={classes.media} />
-          ) : (
-            info?.image && (
-              <Suspense
-                fallback={
-                  <Loader
-                    type="Oval"
-                    color="#007BFF"
-                    height={32}
-                    width={32}
-                    className={classes.loader}
-                  />
-                }
-              >
-                <SuspenseImg
-                  src={
-                    item.thumbnailPath?.startsWith('https')
-                      ? item.thumbnailPath
-                      : info.image
+        <div className={styles.mediaBox}>
+          <div className={styles.mediaPanel}>
+            {loading || fetching ? (
+              <Skeleton
+                width="100%"
+                height="100%"
+                className={styles.mediaLoading}
+              />
+            ) : item.isBundle ? (
+              <>
+                <Carousel
+                  className={styles.carousel}
+                  plugins={['fastSwipe']}
+                  value={index}
+                  onChange={_index =>
+                    setIndex(Math.min(Math.max(_index, 0), 2))
                   }
-                  className={classes.media}
-                  alt={info?.name}
+                  slides={renderSlides()}
+                  numberOfInfiniteClones={1}
                 />
-              </Suspense>
-            )
-          )}
+                <Dots
+                  className={styles.dots}
+                  value={index}
+                  onChange={setIndex}
+                  number={3}
+                  thumbnails={renderDots()}
+                />
+              </>
+            ) : (
+              <div className={styles.imageBox}>
+                {info?.image && (
+                  <Suspense
+                    fallback={
+                      <Loader
+                        type="Oval"
+                        color="#007BFF"
+                        height={32}
+                        width={32}
+                        className={styles.loader}
+                      />
+                    }
+                  >
+                    <SuspenseImg
+                      src={
+                        item.thumbnailPath?.startsWith('https')
+                          ? item.thumbnailPath
+                          : info.image
+                      }
+                      className={styles.media}
+                      alt={info?.name}
+                    />
+                  </Suspense>
+                )}
+              </div>
+            )}
+          </div>
         </div>
-        <div className={classes.content}>
+        <div className={styles.content}>
           {loading || fetching ? (
             <Skeleton width="100%" height={20} />
           ) : (
-            <Typography component="h4" className={classes.collection}>
+            <Typography component="h4" className={styles.collection}>
               {collection?.collectionName || collection?.name}
             </Typography>
           )}
           {loading || fetching ? (
             <Skeleton width="100%" height={20} />
           ) : (
-            <Typography component="h4" className={classes.name}>
+            <Typography component="h4" className={styles.name}>
               {info?.name}
             </Typography>
           )}
-          <div className={classes.alignBottom}>
+          <div className={styles.alignBottom}>
             {loading || fetching ? (
               <Skeleton width={80} height={20} />
             ) : (
-              <Typography component="h4" className={classes.label}>
+              <Typography component="h4" className={styles.label}>
                 {item?.holderSupply || item?.supply || 1} of {item?.supply || 1}
               </Typography>
             )}
-            <div className={classes.alignRight}>
+            <div className={styles.alignRight}>
               {!(loading || fetching) && (
-                <Typography component="h4" className={classes.label}>
+                <Typography component="h4" className={styles.label}>
                   Price
                 </Typography>
               )}
@@ -218,7 +171,7 @@ const BaseCard = ({ item, loading, style }) => {
               ) : (
                 <Typography
                   component="h4"
-                  className={cx(classes.label, classes.price)}
+                  className={cx(styles.label, styles.price)}
                 >
                   {item?.price} FTM
                 </Typography>
@@ -231,12 +184,12 @@ const BaseCard = ({ item, loading, style }) => {
   };
 
   return (
-    <div style={style} className={classes.root}>
-      <div className={classes.card}>
+    <div style={style} className={styles.root}>
+      <div className={styles.card}>
         {item ? (
           <Link
             to={`/explore/${item.contractAddress}/${item.tokenID}`}
-            className={classes.link}
+            className={styles.link}
           >
             {renderContent()}
           </Link>
@@ -246,8 +199,8 @@ const BaseCard = ({ item, loading, style }) => {
       </div>
       {item?.tokenType === 1155 && (
         <>
-          <div className={classes.card} />
-          <div className={classes.card} />
+          <div className={styles.card} />
+          <div className={styles.card} />
         </>
       )}
     </div>

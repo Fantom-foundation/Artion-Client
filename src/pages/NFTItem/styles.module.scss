@@ -108,6 +108,40 @@
   }
 }
 
+.previewList {
+  overflow-x: scroll;
+  display: flex;
+  align-items: center;
+}
+
+.preview {
+  flex: 0 0 80px;
+  height: 80px;
+  margin: 5px 8px;
+  border-radius: 4px;
+  overflow: hidden;
+  cursor: pointer;
+  box-sizing: border-box;
+  border: 4px solid transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  img {
+    width: 100%;
+    height: 100%;
+    border-radius: 4px;
+  }
+
+  &.active {
+    border-color: #007BFF;
+
+    img {
+      border-radius: 0px;
+    }
+  }
+}
+
 .property {
   display: flex;
   margin-bottom: 10px;
