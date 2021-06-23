@@ -11,6 +11,7 @@ import Skeleton from 'react-loading-skeleton';
 import NFTsGrid from 'components/NFTsGrid';
 import Header from 'components/header';
 import Identicon from 'components/Identicon';
+import NewBundleModal from 'components/NewBundleModal';
 import { isAddress, shortenAddress } from 'utils';
 import {
   getUserAccountDetails,
@@ -34,7 +35,12 @@ const ONE_HOUR = ONE_MIN * 60;
 const ONE_DAY = ONE_HOUR * 24;
 const ONE_MONTH = ONE_DAY * 30;
 
-const tabs = ['Items', 'Listings & Offers', 'Received Offers'];
+const tabs = [
+  'Single Items',
+  'Bundles',
+  'Listings & Offers',
+  'Received Offers',
+];
 
 const AccountDetails = () => {
   const dispatch = useDispatch();
@@ -48,6 +54,7 @@ const AccountDetails = () => {
 
   const fileInput = useRef();
 
+  const [bundleModalVisible, setBundleModalVisible] = useState(false);
   const [fetching, setFetching] = useState(false);
   const tokens = useRef([]);
   const [count, setCount] = useState(0);
@@ -96,6 +103,7 @@ const AccountDetails = () => {
   useEffect(() => {
     setTab(0);
     getUserDetails(uid);
+    setTimeout(init, 0);
   }, [uid]);
 
   const updateCollections = async () => {
@@ -140,18 +148,23 @@ const AccountDetails = () => {
     setInterval(() => setNow(new Date()), 1000);
   }, []);
 
-  const handleScroll = e => {
-    if (tab) return;
+  const loadNextPage = () => {
     if (fetching) return;
     if (tokens.current.length === count) return;
 
+    fetchNFTs(page + 1);
+  };
+
+  const handleScroll = e => {
+    if (tab) return;
+
     const obj = e.currentTarget;
     if (obj.scrollHeight - obj.clientHeight - obj.scrollTop < 100) {
-      fetchNFTs(page + 1);
+      loadNextPage();
     }
   };
 
-  useEffect(() => {
+  const init = () => {
     if (tab === 0) {
       tokens.current = [];
       setCount(0);
@@ -161,6 +174,10 @@ const AccountDetails = () => {
     } else {
       getOffers();
     }
+  };
+
+  useEffect(() => {
+    init();
   }, [tab]);
 
   const getActivity = async () => {
@@ -247,6 +264,10 @@ const AccountDetails = () => {
 
   const openAccountSettings = () => {
     dispatch(ModalActions.showAccountModal());
+  };
+
+  const handleCreateBundle = () => {
+    setBundleModalVisible(true);
   };
 
   const formatDate = _date => {
@@ -367,6 +388,13 @@ const AccountDetails = () => {
           {tab === 0 ? (
             <NFTsGrid items={tokens.current} loading={fetching} />
           ) : tab === 1 ? (
+            <NFTsGrid
+              items={tokens.current}
+              loading={fetching}
+              showCreate
+              onCreate={handleCreateBundle}
+            />
+          ) : tab === 2 ? (
             <div className={styles.tableWapper}>
               <div className={styles.activityHeader}>
                 <div className={styles.event}>Event</div>
@@ -525,6 +553,12 @@ const AccountDetails = () => {
           )}
         </div>
       </div>
+      <NewBundleModal
+        visible={bundleModalVisible}
+        onClose={() => setBundleModalVisible(false)}
+        items={tokens.current}
+        onLoadNext={loadNextPage}
+      />
     </div>
   );
 };

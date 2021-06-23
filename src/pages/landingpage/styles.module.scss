@@ -194,7 +194,7 @@
 @media only screen and (min-width: 1500px) {
   .bg1,
   .bg2 {
-    top: calc((1500px - 100vw) / 100vw * 100vh);
+    top: calc((1500px - 100vw) / 4);
   }
 }
 
