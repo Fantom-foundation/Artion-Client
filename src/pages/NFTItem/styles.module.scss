@@ -346,7 +346,7 @@
 }
 
 .bundleItemImage {
-  width: 60px;
+  flex: 0 0 60px;
   height: 60px;
   border-radius: 5px;
   overflow: hidden;
@@ -359,12 +359,20 @@
 }
 
 .bundleItemInfo {
-  margin-left: 16px;
+  margin: 0 14px;
+  overflow: hidden;
 }
 
 .bundleItemCategory {
   font-size: 18px;
   color: #007BFF;
+}
+
+.bundleItemCategory,
+.bundleItemName {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .bundleItemSupply {

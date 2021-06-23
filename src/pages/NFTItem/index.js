@@ -806,7 +806,7 @@ const NFTItem = () => {
   );
 
   const isMine =
-    tokenType.current === 721
+    tokenType.current === 721 || bundleID
       ? owner?.toLowerCase() === account?.toLowerCase()
       : !!myHolding;
 
@@ -1409,7 +1409,7 @@ const NFTItem = () => {
           <div className={styles.bundleItemCategory}>
             {collection?.collectionName || collection?.name}
           </div>
-          <div>{item.name}</div>
+          <div className={styles.bundleItemName}>{item.name}</div>
         </div>
         <div className={styles.bundleItemSupply}>x{item.supply}</div>
       </Link>
@@ -1442,7 +1442,9 @@ const NFTItem = () => {
             </div>
             Created by&nbsp;
             <Link to={`/account/${creator}`} className={styles.ownerName}>
-              {creatorInfo?.alias || shortenAddress(creator)}
+              {creator?.toLowerCase() === account?.toLowerCase()
+                ? 'Me'
+                : creatorInfo?.alias || shortenAddress(creator)}
             </Link>
           </div>
         )}
