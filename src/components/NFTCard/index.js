@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import cx from 'classnames';
 import Skeleton from 'react-loading-skeleton';
 import Typography from '@material-ui/core/Typography';
+import AddIcon from '@material-ui/icons/Add';
 import axios from 'axios';
 import Loader from 'react-loader-spinner';
 import Carousel, { Dots } from '@brainhubeu/react-carousel';
@@ -13,7 +14,7 @@ import SuspenseImg from 'components/SuspenseImg';
 
 import styles from './styles.module.scss';
 
-const BaseCard = ({ item, loading, style }) => {
+const BaseCard = ({ item, loading, style, create, onCreate }) => {
   const [fetching, setFetching] = useState(false);
   const [info, setInfo] = useState(null);
   const [index, setIndex] = useState(0);
@@ -124,8 +125,8 @@ const BaseCard = ({ item, loading, style }) => {
                   >
                     <SuspenseImg
                       src={
-                        item.thumbnailPath?.startsWith('https')
-                          ? item.thumbnailPath
+                        item.thumbnailPath?.length > 10
+                          ? `https://storage.artion.io/image/${item.thumbnailPath}`
                           : info.image
                       }
                       className={styles.media}
@@ -184,9 +185,13 @@ const BaseCard = ({ item, loading, style }) => {
   };
 
   return (
-    <div style={style} className={styles.root}>
+    <div style={style} className={styles.root} onClick={onCreate}>
       <div className={styles.card}>
-        {item ? (
+        {create ? (
+          <div className={styles.createBtn}>
+            <AddIcon className={styles.createIcon} />
+          </div>
+        ) : item ? (
           <Link
             to={`/explore/${item.contractAddress}/${item.tokenID}`}
             className={styles.link}
