@@ -281,3 +281,17 @@ export const boostCollection = async (address, authToken) => {
   });
   return res.data;
 };
+
+export const createBundle = async (name, price, items, authToken) => {
+  const data = { name, price, items };
+  const res = await axios({
+    method: 'post',
+    url: `${API_URL}/bundle/createBundle`,
+    data: JSON.stringify(data),
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${authToken}`,
+    },
+  });
+  return res.data;
+};

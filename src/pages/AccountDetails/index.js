@@ -391,7 +391,7 @@ const AccountDetails = () => {
             <NFTsGrid
               items={tokens.current}
               loading={fetching}
-              showCreate
+              showCreate={isMe}
               onCreate={handleCreateBundle}
             />
           ) : tab === 2 ? (

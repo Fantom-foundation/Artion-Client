@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, Suspense } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import cx from 'classnames';
 import { ClipLoader } from 'react-spinners';
 import Modal from '@material-ui/core/Modal';
@@ -7,8 +7,7 @@ import Skeleton from 'react-loading-skeleton';
 import Loader from 'react-loader-spinner';
 
 import SuspenseImg from 'components/SuspenseImg';
-import AuthActions from 'actions/auth.actions';
-import { updateAccountDetails } from 'api';
+import { createBundle } from 'api';
 import toast from 'utils/toast';
 import axios from 'axios';
 
@@ -79,30 +78,26 @@ const NFTItem = ({ item, loading, selected, onClick }) => {
 };
 
 const NewBundleModal = ({ visible, onClose, items, onLoadNext }) => {
-  const dispatch = useDispatch();
-
   const rootRef = useRef(null);
 
   const selected = useRef([]);
-  const [step, setStep] = useState(0);
   const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
+  const [price, setPrice] = useState('');
   const [creating, setCreating] = useState(false);
 
   const { authToken } = useSelector(state => state.ConnectWallet);
+  const { price: ftmPrice } = useSelector(state => state.Price);
 
   useEffect(() => {
     if (visible) {
       selected.current = [];
-      setStep(0);
       setName('');
-      setDescription('');
+      setPrice('');
     }
   }, [visible]);
 
   const isValid = () => {
-    if (step === 0) return name;
-    return true;
+    return name && price && selected.current.length;
   };
 
   const closeModal = () => {
@@ -125,16 +120,22 @@ const NewBundleModal = ({ visible, onClose, items, onLoadNext }) => {
     }
   };
 
-  const onNext = () => setStep(1);
-
-  const onSave = async () => {
+  const onCreate = async () => {
     if (creating) return;
 
     try {
       setCreating(true);
 
-      const res = await updateAccountDetails(name, description, authToken);
-      dispatch(AuthActions.fetchSuccess(res.data));
+      const selectedItems = [];
+      for (let i = 0; i < selected.current.length; i++) {
+        const item = items[selected.current[i]];
+        selectedItems.push({
+          address: item.contractAddress,
+          tokenID: item.tokenID,
+          supply: item?.holderSupply || item?.supply || 1,
+        });
+      }
+      await createBundle(name, parseFloat(price), selectedItems, authToken);
       toast('success', 'Account details saved!');
       setCreating(false);
 
@@ -155,101 +156,75 @@ const NewBundleModal = ({ visible, onClose, items, onLoadNext }) => {
       <Modal open className={styles.modal} container={() => rootRef.current}>
         <div className={styles.paper}>
           <h2 className={styles.title}>Create Bundle</h2>
-          {step === 0 ? (
-            <>
-              <div className={styles.formGroup}>
-                <p className={styles.formLabel}>Name</p>
-                <input
-                  type="text"
-                  className={styles.formInput}
-                  maxLength={20}
-                  placeholder="Bundle Name"
-                  value={name}
-                  onChange={e => setName(e.target.value)}
-                  disabled={creating}
+          <div className={styles.formGroup}>
+            <p className={styles.formLabel}>Name</p>
+            <div className={styles.formInputCont}>
+              <input
+                type="text"
+                className={styles.formInput}
+                maxLength={20}
+                placeholder="Bundle Name"
+                value={name}
+                onChange={e => setName(e.target.value)}
+                disabled={creating}
+              />
+            </div>
+            <div className={styles.lengthIndicator}>{name.length}/20</div>
+          </div>
+          <div className={styles.formGroup}>
+            <div className={styles.formLabel}>Price</div>
+            <div className={styles.formInputCont}>
+              <input
+                className={styles.formInput}
+                placeholder="0.00"
+                value={price}
+                onChange={e =>
+                  setPrice(isNaN(e.target.value) ? price : e.target.value)
+                }
+                disabled={creating}
+              />
+              <div className={styles.usdPrice}>
+                ${((parseFloat(price) || 0) * ftmPrice).toFixed(2)}
+              </div>
+            </div>
+          </div>
+          <div className={styles.formGroup}>
+            <p className={styles.formLabel}>Items</p>
+            <div className={styles.itemList} onScroll={handleScroll}>
+              {items.map((item, idx) => (
+                <NFTItem
+                  key={idx}
+                  item={item}
+                  onClick={() => handleItemClick(idx)}
+                  selected={selected.current.indexOf(idx) > -1}
                 />
-                <div className={styles.lengthIndicator}>{name.length}/20</div>
-              </div>
-              <div className={styles.formGroup}>
-                <p className={styles.formLabel}>Description</p>
-                <textarea
-                  className={cx(styles.formInput, styles.longInput)}
-                  maxLength={120}
-                  placeholder="Bundle Description"
-                  value={description}
-                  onChange={e => setDescription(e.target.value)}
-                  disabled={creating}
-                />
-                <div className={styles.lengthIndicator}>
-                  {description.length}/120
-                </div>
-              </div>
+              ))}
+            </div>
+          </div>
 
-              <div className={styles.footer}>
-                <div
-                  className={cx(
-                    styles.button,
-                    styles.save,
-                    (creating || !isValid()) && styles.disabled
-                  )}
-                  onClick={isValid() ? onNext : null}
-                >
-                  {creating ? <ClipLoader color="#FFF" size={16} /> : 'Next'}
-                </div>
+          <div className={styles.footer}>
+            <div
+              className={cx(
+                styles.button,
+                styles.save,
+                (creating || !isValid()) && styles.disabled
+              )}
+              onClick={isValid() ? onCreate : null}
+            >
+              {creating ? <ClipLoader color="#FFF" size={16} /> : 'Create'}
+            </div>
 
-                <div
-                  className={cx(
-                    styles.button,
-                    styles.cancel,
-                    creating && styles.disabled
-                  )}
-                  onClick={!creating ? onCancel : null}
-                >
-                  Cancel
-                </div>
-              </div>
-            </>
-          ) : (
-            <>
-              <div className={styles.formGroup}>
-                <p className={styles.formLabel}>Items</p>
-                <div className={styles.itemList} onScroll={handleScroll}>
-                  {items.map((item, idx) => (
-                    <NFTItem
-                      key={idx}
-                      item={item}
-                      onClick={() => handleItemClick(idx)}
-                      selected={selected.current.indexOf(idx) > -1}
-                    />
-                  ))}
-                </div>
-              </div>
-
-              <div className={styles.footer}>
-                <div
-                  className={cx(
-                    styles.button,
-                    styles.save,
-                    (creating || !isValid()) && styles.disabled
-                  )}
-                  onClick={isValid() ? onSave : null}
-                >
-                  {creating ? <ClipLoader color="#FFF" size={16} /> : 'Create'}
-                </div>
-
-                <div
-                  className={cx(
-                    styles.button,
-                    styles.cancel,
-                    creating && styles.disabled
-                  )}
-                  onClick={!creating ? onCancel : null}
-                >
-                  Cancel
-                </div>
-              </div>
-            </>
-          )}
+            <div
+              className={cx(
+                styles.button,
+                styles.cancel,
+                creating && styles.disabled
+              )}
+              onClick={!creating ? onCancel : null}
+            >
+              Cancel
+            </div>
+          </div>
         </div>
       </Modal>
     </div>

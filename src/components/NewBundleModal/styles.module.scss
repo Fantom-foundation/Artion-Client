@@ -43,15 +43,36 @@
   color: #3D3D3D;
 }
 
+.formInputCont {
+  height: 50px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  border-radius: 10px;
+  border: 2px solid rgba(0, 0, 0, .1);
+}
+
 .formInput {
   width: 100%;
-  outline: none;
   height: 50px;
-  border-radius: 10px;
-  border: 2px solid rgba(0, 0, 0, 0.1);
   padding: 8px 16px;
   box-sizing: border-box;
+  outline: none;
+  border: none;
+  background-color: transparent;
   font-size: 16px;
+}
+
+.usdPrice {
+  min-width: 130px;
+  height: 50px;
+  border-left: 1.5px solid rgba(0, 0, 0, .1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 500;
+  font-size: 16px;
+  color: rgba(0, 0, 0, .4);
 }
 
 .longInput {
@@ -122,9 +143,10 @@
 
 .itemList {
   height: 300px;
-  border: 1px solid rgba(0, 0, 0, .2);
+  border: 2px solid rgba(0, 0, 0, 0.1);
   border-radius: 12px;
   overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .item {
@@ -132,6 +154,7 @@
   align-items: center;
   padding: 4px 8px;
   user-select: none;
+  cursor: pointer;
 
   &:hover {
     background-color: rgba(0, 0, 0, .05);
