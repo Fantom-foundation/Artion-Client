@@ -50,6 +50,7 @@ const App = () => {
           <Route exact path="/exploreall" component={ExploreAllPage} />
           <Route exact path="/create" component={PaintBoard} />
           <Route path="/explore/:addr/:id" component={NFTItem} />
+          <Route path="/bundle/:bundleID" component={NFTItem} />
           <Route path="/account/:uid" component={AccountDetails} />
           <Route path="/collection/add" component={CollectionCreate} />
           <Route path="/404" component={NotFound} />

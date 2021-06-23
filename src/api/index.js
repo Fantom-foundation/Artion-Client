@@ -160,6 +160,32 @@ export const fetchTokens = async (
   return res.data;
 };
 
+export const getBundleDetails = async bundleID => {
+  const data = { bundleID };
+  const res = await axios({
+    method: 'post',
+    url: `${API_URL}/bundle/getBundleByID`,
+    data: JSON.stringify(data),
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+  return res.data;
+};
+
+export const increaseBundleViewCount = async bundleID => {
+  const data = { bundleID };
+  const res = await axios({
+    method: 'post',
+    url: `${API_URL}/bundle/increaseViews`,
+    data: JSON.stringify(data),
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+  return res.data;
+};
+
 export const fetchTokenURI = async (contractAddress, tokenID) => {
   const data = { contractAddress, tokenID };
   const res = await axios({
@@ -273,6 +299,20 @@ export const boostCollection = async (address, authToken) => {
   const res = await axios({
     method: 'post',
     url: `${API_URL}/ban/boostCollection`,
+    data: JSON.stringify(data),
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${authToken}`,
+    },
+  });
+  return res.data;
+};
+
+export const createBundle = async (name, price, items, authToken) => {
+  const data = { name, price, items };
+  const res = await axios({
+    method: 'post',
+    url: `${API_URL}/bundle/createBundle`,
     data: JSON.stringify(data),
     headers: {
       'Content-Type': 'application/json',

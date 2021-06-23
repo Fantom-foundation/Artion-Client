@@ -30,7 +30,9 @@ import toast from 'react-hot-toast';
 import Panel from 'components/Panel';
 import Identicon from 'components/Identicon';
 import {
+  getBundleDetails,
   fetchTokenURI,
+  increaseBundleViewCount,
   increaseViewCount,
   getListings,
   getOffers,
@@ -102,7 +104,7 @@ const NFTItem = () => {
   const dispatch = useDispatch();
   const history = useHistory();
 
-  const { addr: address, id: tokenID } = useParams();
+  const { addr: address, id: tokenID, bundleID } = useParams();
 
   const { account, chainId } = useWeb3React();
 
@@ -116,6 +118,11 @@ const NFTItem = () => {
   const [previewIndex, setPreviewIndex] = useState(0);
   const [minBidIncrement, setMinBidIncrement] = useState(0);
   const [withdrawLockTime, setWithdrawLockTime] = useState(0);
+  const [bundleInfo, setBundleInfo] = useState();
+  const [bundleItems, setBundleItems] = useState([]);
+  const [creator, setCreator] = useState();
+  const [creatorInfo, setCreatorInfo] = useState();
+  const [creatorInfoLoading, setCreatorInfoLoading] = useState(false);
   const [info, setInfo] = useState();
   const [owner, setOwner] = useState();
   const [ownerInfo, setOwnerInfo] = useState();
@@ -124,6 +131,7 @@ const NFTItem = () => {
   const tokenType = useRef();
   const [tokenInfo, setTokenInfo] = useState();
   const holders = useRef([]);
+  const [collections, setCollections] = useState([]);
   const [collection, setCollection] = useState();
   const [collectionLoading, setCollectionLoading] = useState(false);
 
@@ -152,7 +160,7 @@ const NFTItem = () => {
   const [winningBid, setWinningBid] = useState(null);
   const [views, setViews] = useState();
   const [now, setNow] = useState(new Date());
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const auction = useRef(null);
   const listings = useRef([]);
   const offers = useRef([]);
@@ -169,6 +177,44 @@ const NFTItem = () => {
 
   const isLoggedIn = () => {
     return isWalletConnected && chainId === 250;
+  };
+
+  const getBundleInfo = async () => {
+    setLoading(true);
+    try {
+      const { data } = await getBundleDetails(bundleID);
+      setBundleInfo(data.bundle);
+      setCreator(data.bundle.creator);
+      setOwner(data.bundle.owner);
+      const items = await Promise.all(
+        data.items.map(async item => {
+          try {
+            const { data: itemData } = await axios.get(item.tokenURI);
+            return { ...item, metadata: itemData };
+          } catch {
+            return item;
+          }
+        })
+      );
+      setBundleItems(items);
+      const _addreses = data.items.map(item => item.contractAddress);
+      const addresses = [...new Set(_addreses)];
+      const collections = await Promise.all(
+        addresses.map(async addr => {
+          try {
+            const { data } = await fetchCollection(addr);
+            return data;
+          } catch {
+            return null;
+          }
+        })
+      );
+      setCollections(collections);
+    } catch {
+      console.log('Bundle does not exist');
+      history.replace('/404');
+    }
+    setLoading(false);
   };
 
   const getTokenURI = async () => {
@@ -209,6 +255,17 @@ const NFTItem = () => {
     } finally {
       setTokenOwnerLoading(false);
     }
+  };
+
+  const getCreatorInfo = async () => {
+    setCreatorInfoLoading(true);
+    try {
+      const { data } = await getUserAccountDetails(creator);
+      setCreatorInfo(data);
+    } catch {
+      setCreatorInfo(null);
+    }
+    setCreatorInfoLoading(false);
   };
 
   const getOwnerInfo = async () => {
@@ -607,36 +664,53 @@ const NFTItem = () => {
   };
 
   useEffect(() => {
-    addEventListeners();
-    getAuctionConfiguration();
+    if (address && tokenID) {
+      addEventListeners();
+      getAuctionConfiguration();
+    }
+
     setInterval(() => {
       setNow(new Date());
     }, 1000);
 
     return () => {
-      removeEventListeners();
+      if (address && tokenID) {
+        removeEventListeners();
+      }
     };
   }, []);
 
   useEffect(() => {
-    getTokenURI();
-    getTokenOwner();
-    getItemListings();
-    getCurrentOffers();
-    getItemTradeHistory();
-    getAuctions();
-    getBid();
+    if (bundleID) {
+      getBundleInfo();
 
-    increaseViewCount(address, tokenID).then(({ data }) => {
-      setViews(data);
-    });
-  }, [address, tokenID]);
+      increaseBundleViewCount(bundleID).then(({ data }) => {
+        setViews(data);
+      });
+    } else {
+      getTokenURI();
+      getTokenOwner();
+      getItemListings();
+      getCurrentOffers();
+      getItemTradeHistory();
+      getAuctions();
+      getBid();
+
+      increaseViewCount(address, tokenID).then(({ data }) => {
+        setViews(data);
+      });
+    }
+  }, [address, tokenID, bundleID]);
 
   useEffect(() => {
-    if (tokenType.current) {
+    if (address && tokenID && tokenType.current) {
       getItemTransferHistory();
     }
   }, [address, tokenID, tokenType.current]);
+
+  useEffect(() => {
+    getCreatorInfo();
+  }, [creator]);
 
   useEffect(() => {
     getOwnerInfo();
@@ -683,15 +757,17 @@ const NFTItem = () => {
   };
 
   useEffect(() => {
-    if (account) {
+    if (address && account) {
       getSalesContractStatus();
       getAuctionContractStatus();
     }
   }, [address, account]);
 
   useEffect(() => {
-    addNFTContractEventListeners();
-    getCollection();
+    if (address) {
+      addNFTContractEventListeners();
+      getCollection();
+    }
   }, [address]);
 
   const handleApproveSalesContract = async () => {
@@ -730,7 +806,7 @@ const NFTItem = () => {
   );
 
   const isMine =
-    tokenType.current === 721
+    tokenType.current === 721 || bundleID
       ? owner?.toLowerCase() === account?.toLowerCase()
       : !!myHolding;
 
@@ -1218,7 +1294,9 @@ const NFTItem = () => {
       <div className={styles.itemCategory}>
         {collection?.collectionName || collection?.name || ''}
       </div>
-      <div className={styles.itemName}>{info?.name || ''}</div>
+      <div className={styles.itemName}>
+        {(bundleID ? bundleInfo?.name : info?.name) || ''}
+      </div>
       {info?.description && (
         <div className={styles.itemDescription}>{info.description}</div>
       )}
@@ -1227,7 +1305,7 @@ const NFTItem = () => {
           <div className={styles.itemOwner}>
             {ownerInfoLoading || tokenOwnerLoading ? (
               <Skeleton width={180} height={25} />
-            ) : tokenType.current === 721 ? (
+            ) : tokenType.current === 721 || bundleID ? (
               <>
                 <div className={styles.ownerAvatar}>
                   {ownerInfo?.imageHash ? (
@@ -1277,6 +1355,101 @@ const NFTItem = () => {
         </div>
       </div>
     </>
+  );
+
+  const renderBundleItem = (item, idx) => {
+    if (!item) {
+      return (
+        <div className={styles.bundleItem} key={idx}>
+          <div className={styles.bundleItemImage}>
+            <Skeleton width={60} height={60} />
+          </div>
+          <div className={styles.bundleItemInfo}>
+            <div>
+              <Skeleton width={180} height={22} />
+            </div>
+            <div>
+              <Skeleton width={180} height={22} />
+            </div>
+          </div>
+          <div className={styles.bundleItemSupply}>
+            <Skeleton width={80} height={20} />
+          </div>
+        </div>
+      );
+    }
+
+    const collection = item
+      ? collections.find(col => col.erc721Address === item.contractAddress)
+      : null;
+    return (
+      <Link
+        to={`/explore/${item.contractAddress}/${item.tokenID}`}
+        className={styles.bundleItem}
+        key={idx}
+      >
+        <div className={styles.bundleItemImage}>
+          <Suspense
+            fallback={
+              <Loader
+                type="Oval"
+                color="#007BFF"
+                height={32}
+                width={32}
+                className={styles.loader}
+              />
+            }
+          >
+            <SuspenseImg
+              src={`https://storage.artion.io/image/${item.thumbnailPath}`}
+            />
+          </Suspense>
+        </div>
+        <div className={styles.bundleItemInfo}>
+          <div className={styles.bundleItemCategory}>
+            {collection?.collectionName || collection?.name}
+          </div>
+          <div className={styles.bundleItemName}>{item.name}</div>
+        </div>
+        <div className={styles.bundleItemSupply}>x{item.supply}</div>
+      </Link>
+    );
+  };
+
+  const renderBundleInfoPanel = () => (
+    <Panel
+      title={<div className={styles.panelTitle}>Bundle Description</div>}
+      expanded
+    >
+      <div className={styles.panelBody}>
+        {creatorInfoLoading ? (
+          <Skeleton width={180} height={25} />
+        ) : (
+          <div className={styles.itemOwner}>
+            <div className={styles.ownerAvatar}>
+              {creatorInfo?.imageHash ? (
+                <img
+                  src={`https://gateway.pinata.cloud/ipfs/${creatorInfo.imageHash}`}
+                  className={styles.avatar}
+                />
+              ) : (
+                <Identicon
+                  account={creator}
+                  size={32}
+                  className={styles.avatar}
+                />
+              )}
+            </div>
+            Created by&nbsp;
+            <Link to={`/account/${creator}`} className={styles.ownerName}>
+              {creator?.toLowerCase() === account?.toLowerCase()
+                ? 'Me'
+                : creatorInfo?.alias || shortenAddress(creator)}
+            </Link>
+          </div>
+        )}
+      </div>
+    </Panel>
   );
 
   const renderAboutPanel = () => (
@@ -1484,46 +1657,54 @@ const NFTItem = () => {
                       />
                     }
                   >
-                    <SuspenseImg src={info?.image} />
+                    <SuspenseImg
+                      src={
+                        bundleID
+                          ? bundleItems[previewIndex].metadata?.image
+                          : info?.image
+                      }
+                    />
                   </Suspense>
                 )}
               </div>
-              {false && (
+              {bundleID && (
                 <div className={styles.previewList}>
-                  {new Array(20).fill(0).map((_, idx) => (
-                    <div
-                      key={idx}
-                      className={cx(
-                        styles.preview,
-                        !loading && idx === previewIndex && styles.active
-                      )}
-                      onClick={() => setPreviewIndex(idx)}
-                    >
-                      {loading ? (
-                        <Loader
-                          type="Oval"
-                          color="#007BFF"
-                          height={32}
-                          width={32}
-                          className={styles.loader}
-                        />
-                      ) : (
-                        <Suspense
-                          fallback={
-                            <Loader
-                              type="Oval"
-                              color="#007BFF"
-                              height={32}
-                              width={32}
-                              className={styles.loader}
+                  {(loading ? [null, null, null] : bundleItems).map(
+                    (item, idx) => (
+                      <div
+                        key={idx}
+                        className={cx(
+                          styles.preview,
+                          !loading && idx === previewIndex && styles.active
+                        )}
+                        onClick={() => setPreviewIndex(idx)}
+                      >
+                        {item ? (
+                          <Suspense
+                            fallback={
+                              <Loader
+                                type="Oval"
+                                color="#007BFF"
+                                height={32}
+                                width={32}
+                                className={styles.loader}
+                              />
+                            }
+                          >
+                            <SuspenseImg
+                              src={
+                                item.thumbnailPath
+                                  ? `https://storage.artion.io/image/${item.thumbnailPath}`
+                                  : item.metadata?.image
+                              }
                             />
-                          }
-                        >
-                          <SuspenseImg src={info?.image} />
-                        </Suspense>
-                      )}
-                    </div>
-                  ))}
+                          </Suspense>
+                        ) : (
+                          <Skeleton width={72} height={72} />
+                        )}
+                      </div>
+                    )
+                  )}
                 </div>
               )}
             </div>
@@ -1536,8 +1717,9 @@ const NFTItem = () => {
                   </div>
                 </Panel>
               )}
-              {renderAboutPanel()}
-              {renderCollectionPanel()}
+              {bundleID && renderBundleInfoPanel()}
+              {!bundleID && renderAboutPanel()}
+              {!bundleID && renderCollectionPanel()}
             </div>
           </div>
           <div className={styles.itemMain}>
@@ -1551,12 +1733,21 @@ const NFTItem = () => {
                 </Panel>
               </div>
             )}
-            <div className={cx(styles.panelWrapper, styles.infoPanel)}>
-              {renderAboutPanel()}
-            </div>
-            <div className={cx(styles.panelWrapper, styles.infoPanel)}>
-              {renderCollectionPanel()}
-            </div>
+            {bundleID && (
+              <div className={cx(styles.panelWrapper, styles.infoPanel)}>
+                {renderBundleInfoPanel()}
+              </div>
+            )}
+            {!bundleID && (
+              <div className={cx(styles.panelWrapper, styles.infoPanel)}>
+                {renderAboutPanel()}
+              </div>
+            )}
+            {!bundleID && (
+              <div className={cx(styles.panelWrapper, styles.infoPanel)}>
+                {renderCollectionPanel()}
+              </div>
+            )}
             {(winner || auction.current?.resulted === false) && (
               <div className={styles.panelWrapper}>
                 <Panel
@@ -1658,43 +1849,45 @@ const NFTItem = () => {
                 </Panel>
               </div>
             )}
-            <div className={styles.panelWrapper}>
-              <Panel title="Price History">
-                <ReactResizeDetector>
-                  {({ width }) =>
-                    width > 0 ? (
-                      <div className={styles.chartWrapper}>
-                        <div className={styles.chart}>
-                          <LineChart
-                            width={width}
-                            height={250}
-                            data={data}
-                            margin={{
-                              top: 5,
-                              right: 30,
-                              left: 20,
-                              bottom: 5,
-                            }}
-                          >
-                            <XAxis dataKey="date" />
-                            <YAxis />
-                            <ChartTooltip />
-                            <CartesianGrid stroke="#eee" />
-                            <Line
-                              type="monotone"
-                              dataKey="price"
-                              stroke="#2479FA"
-                            />
-                          </LineChart>
+            {!bundleID && (
+              <div className={styles.panelWrapper}>
+                <Panel title="Price History">
+                  <ReactResizeDetector>
+                    {({ width }) =>
+                      width > 0 ? (
+                        <div className={styles.chartWrapper}>
+                          <div className={styles.chart}>
+                            <LineChart
+                              width={width}
+                              height={250}
+                              data={data}
+                              margin={{
+                                top: 5,
+                                right: 30,
+                                left: 20,
+                                bottom: 5,
+                              }}
+                            >
+                              <XAxis dataKey="date" />
+                              <YAxis />
+                              <ChartTooltip />
+                              <CartesianGrid stroke="#eee" />
+                              <Line
+                                type="monotone"
+                                dataKey="price"
+                                stroke="#2479FA"
+                              />
+                            </LineChart>
+                          </div>
                         </div>
-                      </div>
-                    ) : (
-                      <div>{width}</div>
-                    )
-                  }
-                </ReactResizeDetector>
-              </Panel>
-            </div>
+                      ) : (
+                        <div>{width}</div>
+                      )
+                    }
+                  </ReactResizeDetector>
+                </Panel>
+              </div>
+            )}
             <div className={styles.panelWrapper}>
               <Panel title="Listings" expanded>
                 <div className={styles.listings}>
@@ -1863,6 +2056,18 @@ const NFTItem = () => {
                 </div>
               </Panel>
             </div>
+            {bundleID && (
+              <div className={styles.panelWrapper}>
+                <Panel title="Items" expanded>
+                  <div className={styles.items}>
+                    {(loading
+                      ? [null, null, null]
+                      : bundleItems
+                    ).map((item, idx) => renderBundleItem(item, idx))}
+                  </div>
+                </Panel>
+              </div>
+            )}
           </div>
         </div>
         <div className={styles.tradeHistoryWrapper}>
