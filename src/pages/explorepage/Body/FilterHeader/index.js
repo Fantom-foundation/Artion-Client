@@ -9,7 +9,7 @@ import {
   Close as CloseIcon,
 } from '@material-ui/icons';
 
-import { /* GroupFilters,*/ SortByOptions } from 'constants/filter.constants';
+import { GroupFilters, SortByOptions } from 'constants/filter.constants';
 import FilterActions from 'actions/filter.actions';
 import nftActiveIcon from 'assets/svgs/nft_active.svg';
 
@@ -22,9 +22,7 @@ const ExploreFilterHeader = ({ loading }) => {
     state => state.Collections
   );
   const { count } = useSelector(state => state.Tokens);
-  const { /*groupType,*/ sortBy, collections } = useSelector(
-    state => state.Filter
-  );
+  const { groupType, sortBy, collections } = useSelector(state => state.Filter);
 
   const selectedCollections = () => {
     const res = new Array(collections.length).fill(null);
@@ -37,10 +35,10 @@ const ExploreFilterHeader = ({ loading }) => {
     return res.filter(item => !!item);
   };
 
-  // const handleGroupTypeChange = e => {
-  //   const newGroupType = e.target.value;
-  //   dispatch(FilterActions.updateGroupTypeFilter(newGroupType));
-  // };
+  const handleGroupTypeChange = e => {
+    const newGroupType = e.target.value;
+    dispatch(FilterActions.updateGroupTypeFilter(newGroupType));
+  };
 
   const handleSortByChange = e => {
     const newSortBy = e.target.value;
@@ -80,7 +78,7 @@ const ExploreFilterHeader = ({ loading }) => {
         ))}
       </div>
       <div className="filterSelectGroup">
-        {/* <FormControl className="filterHeaderFormControl">
+        <FormControl className="filterHeaderFormControl">
           <Select
             value={groupType}
             onChange={handleGroupTypeChange}
@@ -101,17 +99,17 @@ const ExploreFilterHeader = ({ loading }) => {
             {GroupFilters.map((filter, idx) => {
               return (
                 <MenuItem
-                  value={idx}
+                  value={filter.value}
                   key={idx}
                   className="menuItem"
                   classes={{ selected: 'menuItemSelected ' }}
                 >
-                  {filter}
+                  {filter.label}
                 </MenuItem>
               );
             })}
           </Select>
-        </FormControl> */}
+        </FormControl>
         <FormControl className="filterHeaderFormControl">
           <Select
             value={sortBy}

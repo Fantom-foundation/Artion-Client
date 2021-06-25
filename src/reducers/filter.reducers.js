@@ -7,7 +7,7 @@ const initialState = {
   statusOnAuction: false,
   collections: [],
   category: null,
-  groupType: 0, // 0: All, 1: Single, 2: Bundles
+  groupType: 'all',
   sortBy: 'createdAt',
 };
 

@@ -127,6 +127,7 @@ export const fetchCollection = async contractAddress => {
 
 export const fetchTokens = async (
   step,
+  type = 'all',
   collections = [],
   category = null,
   sortBy = 'listedAt',
@@ -134,7 +135,7 @@ export const fetchTokens = async (
   address = null,
   cancelToken
 ) => {
-  const data = { step };
+  const data = { step, type };
   if (collections.length > 0) {
     data.collectionAddresses = collections;
   }
