@@ -33,6 +33,7 @@ const ExploreAllPage = () => {
   const { fetching, tokens, count } = useSelector(state => state.Tokens);
   const {
     collections,
+    groupType,
     category,
     sortBy,
     statusBuyNow,
@@ -95,6 +96,7 @@ const ExploreAllPage = () => {
       setCancelSource(cancelTokenSource);
       const { data } = await fetchTokens(
         step,
+        groupType,
         collections,
         category,
         sortBy,
@@ -139,6 +141,7 @@ const ExploreAllPage = () => {
     fetchNFTs(0);
   }, [
     collections,
+    groupType,
     category,
     sortBy,
     statusBuyNow,

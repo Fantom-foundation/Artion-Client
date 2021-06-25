@@ -1,11 +1,10 @@
-import React, { useEffect, useState, Suspense } from 'react';
+import React, { useState, Suspense } from 'react';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import cx from 'classnames';
 import Skeleton from 'react-loading-skeleton';
 import Typography from '@material-ui/core/Typography';
 import AddIcon from '@material-ui/icons/Add';
-import axios from 'axios';
 import Loader from 'react-loader-spinner';
 import Carousel, { Dots } from '@brainhubeu/react-carousel';
 import '@brainhubeu/react-carousel/lib/style.css';
@@ -15,8 +14,6 @@ import SuspenseImg from 'components/SuspenseImg';
 import styles from './styles.module.scss';
 
 const BaseCard = ({ item, loading, style, create, onCreate }) => {
-  const [fetching, setFetching] = useState(false);
-  const [info, setInfo] = useState(null);
   const [index, setIndex] = useState(0);
 
   const { collections } = useSelector(state => state.Collections);
@@ -25,27 +22,10 @@ const BaseCard = ({ item, loading, style, create, onCreate }) => {
     col => col.address === item?.contractAddress
   );
 
-  const getTokenURI = async tokenURI => {
-    setFetching(true);
-    try {
-      const { data } = await axios.get(tokenURI);
-      setInfo(data);
-    } catch {
-      setInfo(null);
-    }
-    setFetching(false);
-  };
-
-  useEffect(() => {
-    if (item) {
-      getTokenURI(item.tokenURI);
-    }
-  }, [item]);
-
   const renderSlides = () => {
-    return [0, 1, 2].map((v, idx) => (
+    return item.items.map((v, idx) => (
       <div className={styles.imageBox} key={idx}>
-        {info?.image && (
+        {v.imageURL && (
           <Suspense
             fallback={
               <Loader
@@ -59,12 +39,12 @@ const BaseCard = ({ item, loading, style, create, onCreate }) => {
           >
             <SuspenseImg
               src={
-                item.thumbnailPath?.startsWith('https')
-                  ? item.thumbnailPath
-                  : info.image
+                v.thumbnailPath?.length > 10
+                  ? `https://storage.artion.io/image/${v.thumbnailPath}`
+                  : v.imageURL
               }
               className={styles.media}
-              alt={info?.name}
+              alt={v.name}
             />
           </Suspense>
         )}
@@ -73,7 +53,7 @@ const BaseCard = ({ item, loading, style, create, onCreate }) => {
   };
 
   const renderDots = () => {
-    return [0, 1, 2].map((v, idx) => (
+    return item.items.map((v, idx) => (
       <div className={cx(styles.dot)} key={idx} />
     ));
   };
@@ -83,13 +63,13 @@ const BaseCard = ({ item, loading, style, create, onCreate }) => {
       <>
         <div className={styles.mediaBox}>
           <div className={styles.mediaPanel}>
-            {loading || fetching ? (
+            {loading ? (
               <Skeleton
                 width="100%"
                 height="100%"
                 className={styles.mediaLoading}
               />
-            ) : item.isBundle ? (
+            ) : item.items ? (
               <>
                 <Carousel
                   className={styles.carousel}
@@ -111,7 +91,7 @@ const BaseCard = ({ item, loading, style, create, onCreate }) => {
               </>
             ) : (
               <div className={styles.imageBox}>
-                {info?.image && (
+                {item?.imageURL && (
                   <Suspense
                     fallback={
                       <Loader
@@ -127,10 +107,10 @@ const BaseCard = ({ item, loading, style, create, onCreate }) => {
                       src={
                         item.thumbnailPath?.length > 10
                           ? `https://storage.artion.io/image/${item.thumbnailPath}`
-                          : info.image
+                          : item.imageURL
                       }
                       className={styles.media}
-                      alt={info?.name}
+                      alt={item.name}
                     />
                   </Suspense>
                 )}
@@ -139,22 +119,22 @@ const BaseCard = ({ item, loading, style, create, onCreate }) => {
           </div>
         </div>
         <div className={styles.content}>
-          {loading || fetching ? (
+          {loading ? (
             <Skeleton width="100%" height={20} />
           ) : (
             <Typography component="h4" className={styles.collection}>
               {collection?.collectionName || collection?.name}
             </Typography>
           )}
-          {loading || fetching ? (
+          {loading ? (
             <Skeleton width="100%" height={20} />
           ) : (
             <Typography component="h4" className={styles.name}>
-              {info?.name}
+              {item?.name}
             </Typography>
           )}
           <div className={styles.alignBottom}>
-            {loading || fetching ? (
+            {loading ? (
               <Skeleton width={80} height={20} />
             ) : (
               <Typography component="h4" className={styles.label}>
@@ -162,12 +142,12 @@ const BaseCard = ({ item, loading, style, create, onCreate }) => {
               </Typography>
             )}
             <div className={styles.alignRight}>
-              {!(loading || fetching) && (
+              {!loading && (
                 <Typography component="h4" className={styles.label}>
                   Price
                 </Typography>
               )}
-              {loading || fetching ? (
+              {loading ? (
                 <Skeleton width={80} height={20} />
               ) : (
                 <Typography
@@ -193,7 +173,11 @@ const BaseCard = ({ item, loading, style, create, onCreate }) => {
           </div>
         ) : item ? (
           <Link
-            to={`/explore/${item.contractAddress}/${item.tokenID}`}
+            to={
+              item.items
+                ? `/bundle/${item._id}`
+                : `/explore/${item.contractAddress}/${item.tokenID}`
+            }
             className={styles.link}
           >
             {renderContent()}

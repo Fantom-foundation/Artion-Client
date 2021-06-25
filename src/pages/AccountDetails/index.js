@@ -90,7 +90,15 @@ const AccountDetails = () => {
     setCount(0);
 
     try {
-      const { data } = await fetchTokens(step, [], null, 'createdAt', [], uid);
+      const { data } = await fetchTokens(
+        step,
+        tab === 0 ? 'single' : 'bundle',
+        [],
+        null,
+        'createdAt',
+        [],
+        uid
+      );
       setFetching(false);
       tokens.current.push(...data.tokens);
       setCount(data.total);
@@ -170,6 +178,10 @@ const AccountDetails = () => {
       setCount(0);
       fetchNFTs(0);
     } else if (tab === 1) {
+      tokens.current = [];
+      setCount(0);
+      fetchNFTs(0);
+    } else if (tab === 2) {
       getActivity();
     } else {
       getOffers();

@@ -6,7 +6,20 @@ import iconTrading from 'assets/svgs/trading.svg';
 import iconVirtual from 'assets/svgs/virtual.svg';
 import iconDomain from 'assets/svgs/domain.svg';
 
-export const GroupFilters = ['All Items', 'Single Items', 'Bundles'];
+export const GroupFilters = [
+  {
+    value: 'all',
+    label: 'All Items',
+  },
+  {
+    value: 'single',
+    label: 'Single Items',
+  },
+  {
+    value: 'bundle',
+    label: 'Bundles',
+  },
+];
 
 export const Categories = [
   {
