@@ -1,11 +1,11 @@
 export const SALES_CONTRACT_ADDRESS =
-  '0x980beB91e7Bd4dAf42c078dD0394Fde8B0f1e625';
+  '0x17bDD333e7DAD2bDe1109B1f6E3c308F9f4E4f93';
 
 export const BUNDLE_SALES_CONTRACT_ADDRESS =
-  '0x02C3190c333BD19e93DFc7ed25eda517E1864D01';
+  '0x4E9AE30d53d23d94bfA7bd0a43FFC8da8B392C6f';
 
 export const AUCTION_CONTRACT_ADDRESS =
-  '0x8e101c91a89a247BE50Eb69DB38be9F177b54E89';
+  '0x13A8F06d5b61eb0b65C50eb319e1040d6bff1023';
 
 export const WFTM_ADDRESS = '0x21be370d5312f44cb42ce377bc9b8a0cef1a4c83';
 
@@ -482,7 +482,7 @@ export const BUNDLE_SALES_CONTRACT_ABI = [
         type: 'address',
       },
       {
-        indexed: false,
+        indexed: true,
         internalType: 'string',
         name: 'bundleID',
         type: 'string',
@@ -505,24 +505,6 @@ export const BUNDLE_SALES_CONTRACT_ABI = [
         internalType: 'string',
         name: 'bundleID',
         type: 'string',
-      },
-      {
-        indexed: false,
-        internalType: 'address[]',
-        name: 'nft',
-        type: 'address[]',
-      },
-      {
-        indexed: false,
-        internalType: 'uint256[]',
-        name: 'tokenId',
-        type: 'uint256[]',
-      },
-      {
-        indexed: false,
-        internalType: 'uint256[]',
-        name: 'quantity',
-        type: 'uint256[]',
       },
       {
         indexed: false,
@@ -592,6 +574,24 @@ export const BUNDLE_SALES_CONTRACT_ABI = [
         internalType: 'string',
         name: 'bundleID',
         type: 'string',
+      },
+      {
+        indexed: false,
+        internalType: 'address[]',
+        name: 'nft',
+        type: 'address[]',
+      },
+      {
+        indexed: false,
+        internalType: 'uint256[]',
+        name: 'tokenId',
+        type: 'uint256[]',
+      },
+      {
+        indexed: false,
+        internalType: 'uint256[]',
+        name: 'quantity',
+        type: 'uint256[]',
       },
       {
         indexed: false,
@@ -923,6 +923,7 @@ export const BUNDLE_SALES_CONTRACT_ABI = [
     inputs: [
       { internalType: 'address', name: '_nftAddress', type: 'address' },
       { internalType: 'uint256', name: '_tokenId', type: 'uint256' },
+      { internalType: 'uint256', name: '_quantity', type: 'uint256' },
     ],
     name: 'validateItemSold',
     outputs: [],

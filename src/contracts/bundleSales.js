@@ -50,11 +50,11 @@ export const buyBundle = async (bundleID, value, from) => {
   return await contract.buyItem(...args, options);
 };
 
-// export const cancelListing = async (nftAddress, tokenId) => {
-//   const contract = await getBundleSalesContract();
-//   const tx = await contract.cancelListing(nftAddress, tokenId);
-//   await tx.wait();
-// };
+export const cancelBundleListing = async bundleID => {
+  const contract = await getBundleSalesContract();
+  const tx = await contract.cancelListing(bundleID);
+  await tx.wait();
+};
 
 export const listBundle = async (
   bundleID,

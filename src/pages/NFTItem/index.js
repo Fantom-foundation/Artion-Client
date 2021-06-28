@@ -55,6 +55,7 @@ import {
   listBundle,
   getBundleListing,
   updateBundleListing,
+  cancelBundleListing,
   buyBundle,
   createBundleOffer,
   cancelBundleOffer,
@@ -132,7 +133,6 @@ const NFTItem = () => {
   const [minBidIncrement, setMinBidIncrement] = useState(0);
   const [withdrawLockTime, setWithdrawLockTime] = useState(0);
   const [bundleInfo, setBundleInfo] = useState();
-  const [bundleItems, setBundleItems] = useState([]);
   const [creator, setCreator] = useState();
   const [creatorInfo, setCreatorInfo] = useState();
   const [creatorInfoLoading, setCreatorInfoLoading] = useState(false);
@@ -177,6 +177,7 @@ const NFTItem = () => {
   const auction = useRef(null);
   const listings = useRef([]);
   const bundleListing = useRef(null);
+  const bundleItems = useRef([]);
   const offers = useRef([]);
   const tradeHistory = useRef([]);
   const transferHistory = useRef([]);
@@ -214,7 +215,7 @@ const NFTItem = () => {
           }
         })
       );
-      setBundleItems(items);
+      bundleItems.current = items;
       const _addreses = data.items.map(item => item.contractAddress);
       const addresses = [...new Set(_addreses)];
       const collections = await Promise.all(
@@ -517,15 +518,7 @@ const NFTItem = () => {
     }
   };
 
-  const bundleListedHandler = (
-    _owner,
-    _bundleID,
-    nfts,
-    tokenIds,
-    quantities,
-    _price,
-    _startingTime
-  ) => {
+  const bundleListedHandler = (_owner, _bundleID, _price, _startingTime) => {
     if (bundleEventMatches(_bundleID.hash)) {
       const price = parseFloat(_price.toString()) / 10 ** 18;
       bundleListing.current = {
@@ -535,10 +528,42 @@ const NFTItem = () => {
     }
   };
 
-  const bundleUpdatedHandler = (_owner, _bundleID, _newPrice) => {
+  const bundleUpdatedHandler = (
+    _owner,
+    _bundleID,
+    _nfts,
+    _tokenIds,
+    _quantities,
+    _newPrice
+  ) => {
+    const nfts = _nfts.map(val => val);
+    const tokenIds = _tokenIds.map(val => parseInt(val.toString()));
+    const quantities = _quantities.map(val => parseInt(val.toString()));
     if (bundleEventMatches(_bundleID.hash)) {
       const price = parseFloat(_newPrice.toString()) / 10 ** 18;
       bundleListing.current.price = price;
+      const newBundleItems = [];
+      bundleItems.current.map(item => {
+        let idx = 0;
+        while (idx < nfts.length) {
+          const address = nfts[idx];
+          const tokenId = tokenIds[idx];
+          const quantity = quantities[idx];
+          if (
+            address.toLowerCase() === item.contractAddress.toLowerCase() &&
+            tokenId === item.tokenID
+          ) {
+            item.supply = quantity;
+            newBundleItems.push(item);
+            nfts.splice(idx, 1);
+            tokenIds.splice(idx, 1);
+            quantities.splice(idx, 1);
+            break;
+          }
+          idx++;
+        }
+      });
+      bundleItems.current = newBundleItems;
     }
   };
 
@@ -551,6 +576,7 @@ const NFTItem = () => {
   const bundleSoldHandler = async (_seller, _buyer, _bundleID, _price) => {
     if (bundleEventMatches(_bundleID.hash)) {
       setOwner(_buyer);
+      bundleListing.current = null;
       const newTradeHistory = {
         from: _seller,
         to: _buyer,
@@ -875,7 +901,9 @@ const NFTItem = () => {
   };
 
   const getBundleSalesContractStatus = async () => {
-    let contractAddresses = bundleItems.map(item => item.contractAddress);
+    let contractAddresses = bundleItems.current.map(
+      item => item.contractAddress
+    );
     contractAddresses = contractAddresses.filter(
       (addr, idx) => contractAddresses.indexOf(addr) === idx
     );
@@ -932,10 +960,10 @@ const NFTItem = () => {
   }, [address, account]);
 
   useEffect(() => {
-    if (bundleItems && account) {
+    if (bundleItems.current && account) {
       getBundleSalesContractStatus();
     }
-  }, [bundleItems, account]);
+  }, [bundleItems.current, account]);
 
   useEffect(() => {
     if (address) {
@@ -960,11 +988,13 @@ const NFTItem = () => {
 
   const handleApproveBundleSalesContract = async () => {
     if (salesContractApproving) return;
-    if (bundleItems.length === 0) return;
+    if (bundleItems.current.length === 0) return;
 
     setSalesContractApproving(true);
     try {
-      let contractAddresses = bundleItems.map(item => item.contractAddress);
+      let contractAddresses = bundleItems.current.map(
+        item => item.contractAddress
+      );
       contractAddresses = contractAddresses.filter(
         (addr, idx) => contractAddresses.indexOf(addr) === idx
       );
@@ -1031,7 +1061,7 @@ const NFTItem = () => {
         const addresses = [];
         const tokenIds = [];
         const quantities = [];
-        bundleItems.map(item => {
+        bundleItems.current.map(item => {
           addresses.push(item.contractAddress);
           tokenIds.push(item.tokenID);
           quantities.push(item.supply);
@@ -1071,8 +1101,10 @@ const NFTItem = () => {
   };
 
   const isBundleContractApproved = () => {
-    if (bundleItems.length === 0) return false;
-    let contractAddresses = bundleItems.map(item => item.contractAddress);
+    if (bundleItems.current.length === 0) return false;
+    let contractAddresses = bundleItems.current.map(
+      item => item.contractAddress
+    );
     contractAddresses = contractAddresses.filter(
       (addr, idx) => contractAddresses.indexOf(addr) === idx
     );
@@ -1112,12 +1144,18 @@ const NFTItem = () => {
   };
 
   const cancelList = async () => {
-    await cancelListing(address, tokenID);
-    listings.current = listings.current.filter(
-      listing => listing.owner.toLowerCase() !== account.toLowerCase()
-    );
+    if (bundleID) {
+      await cancelBundleListing(bundleID);
+      bundleListing.current = null;
+      showToast('success', 'Bundle unlisted successfully!');
+    } else {
+      await cancelListing(address, tokenID);
+      listings.current = listings.current.filter(
+        listing => listing.owner.toLowerCase() !== account.toLowerCase()
+      );
 
-    showToast('success', 'Item unlisted successfully!');
+      showToast('success', 'Item unlisted successfully!');
+    }
   };
 
   const handleBuyItem = async listing => {
@@ -1956,7 +1994,7 @@ const NFTItem = () => {
                     <SuspenseImg
                       src={
                         bundleID
-                          ? bundleItems[previewIndex].metadata?.image
+                          ? bundleItems.current[previewIndex].metadata?.image
                           : info?.image
                       }
                     />
@@ -1965,7 +2003,7 @@ const NFTItem = () => {
               </div>
               {bundleID && (
                 <div className={styles.previewList}>
-                  {(loading ? [null, null, null] : bundleItems).map(
+                  {(loading ? [null, null, null] : bundleItems.current).map(
                     (item, idx) => (
                       <div
                         key={idx}
@@ -2330,7 +2368,7 @@ const NFTItem = () => {
                                 />
                               ) : (
                                 <Identicon
-                                  account={offer.owner}
+                                  account={offer.creator}
                                   size={24}
                                   className={styles.userAvatar}
                                 />
@@ -2413,7 +2451,7 @@ const NFTItem = () => {
                   <div className={styles.items}>
                     {(loading
                       ? [null, null, null]
-                      : bundleItems
+                      : bundleItems.current
                     ).map((item, idx) => renderBundleItem(item, idx))}
                   </div>
                 </Panel>
