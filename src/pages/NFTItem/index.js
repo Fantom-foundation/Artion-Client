@@ -46,11 +46,17 @@ import {
 } from 'api';
 import {
   getSalesContract,
+  getBundleSalesContract,
   getNFTContract,
   listItem,
   cancelListing,
   updateListing,
   buyItem,
+  listBundle,
+  getBundleListing,
+  updateBundleListing,
+  buyBundle,
+  createBundleOffer,
   getWFTMBalance,
   getAllowance,
   approve,
@@ -69,6 +75,7 @@ import {
   withdrawBid,
   resultAuction,
   SALES_CONTRACT_ADDRESS,
+  BUNDLE_SALES_CONTRACT_ADDRESS,
   WFTM_ADDRESS,
   AUCTION_CONTRACT_ADDRESS,
 } from 'contracts';
@@ -110,6 +117,10 @@ const NFTItem = () => {
 
   const [salesContractApproved, setSalesContractApproved] = useState(false);
   const [salesContractApproving, setSalesContractApproving] = useState(false);
+  const [
+    bundleSalesContractApproved,
+    setBundleSalesContractApproved,
+  ] = useState({});
   const [auctionContractApproved, setAuctionContractApproved] = useState(false);
   const [auctionContractApproving, setAuctionContractApproving] = useState(
     false
@@ -163,6 +174,7 @@ const NFTItem = () => {
   const [loading, setLoading] = useState(true);
   const auction = useRef(null);
   const listings = useRef([]);
+  const bundleListing = useRef(null);
   const offers = useRef([]);
   const tradeHistory = useRef([]);
   const transferHistory = useRef([]);
@@ -186,6 +198,10 @@ const NFTItem = () => {
       setBundleInfo(data.bundle);
       setCreator(data.bundle.creator);
       setOwner(data.bundle.owner);
+      bundleListing.current = await getBundleListing(
+        data.bundle.owner,
+        bundleID
+      );
       const items = await Promise.all(
         data.items.map(async item => {
           try {
@@ -352,6 +368,9 @@ const NFTItem = () => {
     );
   };
 
+  const bundleEventMatches = _bundleID =>
+    ethers.utils.keccak256(ethers.utils.toUtf8Bytes(bundleID)) == _bundleID;
+
   const itemListedHandler = async (
     owner,
     nft,
@@ -491,6 +510,100 @@ const NFTItem = () => {
     if (eventMatches(nft, id)) {
       const newOffers = offers.current.filter(
         offer => offer.creator?.toLowerCase() !== creator?.toLowerCase()
+      );
+      offers.current = newOffers;
+    }
+  };
+
+  const bundleListedHandler = (
+    _owner,
+    _bundleID,
+    nfts,
+    tokenIds,
+    quantities,
+    _price,
+    _startingTime
+  ) => {
+    if (bundleEventMatches(_bundleID.hash)) {
+      const price = parseFloat(_price.toString()) / 10 ** 18;
+      bundleListing.current = {
+        price,
+        startingTime: parseInt(_startingTime.toString()),
+      };
+    }
+  };
+
+  const bundleUpdatedHandler = (_owner, _bundleID, _newPrice) => {
+    if (bundleEventMatches(_bundleID.hash)) {
+      const price = parseFloat(_newPrice.toString()) / 10 ** 18;
+      bundleListing.current.price = price;
+    }
+  };
+
+  const bundleCanceledHandler = (_owner, _bundleID) => {
+    if (bundleEventMatches(_bundleID.hash)) {
+      bundleListing.current = null;
+    }
+  };
+
+  const bundleSoldHandler = async (_seller, _buyer, _bundleID, _price) => {
+    if (bundleEventMatches(_bundleID.hash)) {
+      setOwner(_buyer);
+      const newTradeHistory = {
+        from: _seller,
+        to: _buyer,
+        price: parseFloat(_price.toString()) / 10 ** 18,
+        value: 1,
+        createdAt: new Date().toISOString(),
+      };
+      try {
+        const from = await getUserAccountDetails(_seller);
+        newTradeHistory.fromAlias = from?.data.alias;
+        newTradeHistory.fromImage = from?.data.imageHash;
+      } catch (e) {
+        console.log(e);
+      }
+      try {
+        const to = await getUserAccountDetails(_buyer);
+        newTradeHistory.toAlias = to?.data.alias;
+        newTradeHistory.toImage = to?.data.imageHash;
+      } catch (e) {
+        console.log(e);
+      }
+      tradeHistory.current = [newTradeHistory, ...tradeHistory.current];
+    }
+  };
+
+  const bundleOfferCreatedHandler = async (
+    _creator,
+    _bundleID,
+    _payToken,
+    _price,
+    _deadline
+  ) => {
+    if (bundleEventMatches(_bundleID.hash)) {
+      const newOffer = {
+        creator: _creator,
+        deadline: parseFloat(_deadline.toString()),
+        payToken: _payToken,
+        pricePerItem: parseFloat(_price.toString()) / 10 ** 18,
+        quantity: 1,
+      };
+      try {
+        const { data } = await getUserAccountDetails(_creator);
+        newOffer.alias = data.alias;
+        newOffer.image = data.imageHash;
+      } catch (e) {
+        console.log(e);
+      }
+      offers.current.push(newOffer);
+    }
+  };
+
+  const bundleOfferCanceledHandler = (_creator, _bundleID) => {
+    if (bundleEventMatches(_bundleID.hash)) {
+      const newOffers = offers.current.filter(
+        offer => offer.creator?.toLowerCase() !== _creator?.toLowerCase()
       );
       offers.current = newOffers;
     }
@@ -640,6 +753,28 @@ const NFTItem = () => {
     auctionContract.off('AuctionResulted', auctionResultedHandler);
   };
 
+  const addBundleEventListeners = async () => {
+    const bundleSalesContract = await getBundleSalesContract();
+
+    bundleSalesContract.on('ItemListed', bundleListedHandler);
+    bundleSalesContract.on('ItemUpdated', bundleUpdatedHandler);
+    bundleSalesContract.on('ItemCanceled', bundleCanceledHandler);
+    bundleSalesContract.on('ItemSold', bundleSoldHandler);
+    bundleSalesContract.on('OfferCreated', bundleOfferCreatedHandler);
+    bundleSalesContract.on('OfferCanceled', bundleOfferCanceledHandler);
+  };
+
+  const removeBundleEventListeners = async () => {
+    const bundleSalesContract = await getBundleSalesContract();
+
+    bundleSalesContract.off('ItemListed', bundleListedHandler);
+    bundleSalesContract.off('ItemUpdated', bundleUpdatedHandler);
+    bundleSalesContract.off('ItemCanceled', bundleCanceledHandler);
+    bundleSalesContract.off('ItemSold', bundleSoldHandler);
+    bundleSalesContract.off('OfferCreated', bundleOfferCreatedHandler);
+    bundleSalesContract.off('OfferCanceled', bundleOfferCanceledHandler);
+  };
+
   const getAuctionConfiguration = async () => {
     const contract = await getAuctionContract();
 
@@ -669,6 +804,10 @@ const NFTItem = () => {
       getAuctionConfiguration();
     }
 
+    if (bundleID) {
+      addBundleEventListeners();
+    }
+
     setInterval(() => {
       setNow(new Date());
     }, 1000);
@@ -676,6 +815,10 @@ const NFTItem = () => {
     return () => {
       if (address && tokenID) {
         removeEventListeners();
+      }
+
+      if (bundleID) {
+        removeBundleEventListeners();
       }
     };
   }, []);
@@ -729,6 +872,29 @@ const NFTItem = () => {
     }
   };
 
+  const getBundleSalesContractStatus = async () => {
+    let contractAddresses = bundleItems.map(item => item.contractAddress);
+    contractAddresses = contractAddresses.filter(
+      (addr, idx) => contractAddresses.indexOf(addr) === idx
+    );
+    const approved = {};
+    await Promise.all(
+      contractAddresses.map(async address => {
+        const contract = await getNFTContract(address);
+        try {
+          const _approved = await contract.isApprovedForAll(
+            account,
+            BUNDLE_SALES_CONTRACT_ADDRESS
+          );
+          approved[address] = _approved;
+        } catch (e) {
+          console.log(e);
+        }
+      })
+    );
+    setBundleSalesContractApproved(approved);
+  };
+
   const getAuctionContractStatus = async () => {
     const contract = await getNFTContract(address);
     try {
@@ -764,6 +930,12 @@ const NFTItem = () => {
   }, [address, account]);
 
   useEffect(() => {
+    if (bundleItems && account) {
+      getBundleSalesContractStatus();
+    }
+  }, [bundleItems, account]);
+
+  useEffect(() => {
     if (address) {
       addNFTContractEventListeners();
       getCollection();
@@ -777,6 +949,42 @@ const NFTItem = () => {
       const tx = await contract.setApprovalForAll(SALES_CONTRACT_ADDRESS, true);
       await tx.wait();
       setSalesContractApproved(true);
+    } catch (e) {
+      console.log(e);
+    } finally {
+      setSalesContractApproving(false);
+    }
+  };
+
+  const handleApproveBundleSalesContract = async () => {
+    if (salesContractApproving) return;
+    if (bundleItems.length === 0) return;
+
+    setSalesContractApproving(true);
+    try {
+      let contractAddresses = bundleItems.map(item => item.contractAddress);
+      contractAddresses = contractAddresses.filter(
+        (addr, idx) => contractAddresses.indexOf(addr) === idx
+      );
+      const approved = {};
+      await Promise.all(
+        contractAddresses.map(async address => {
+          const contract = await getNFTContract(address);
+          const _approved = await contract.isApprovedForAll(
+            account,
+            BUNDLE_SALES_CONTRACT_ADDRESS
+          );
+          if (!_approved) {
+            const tx = await contract.setApprovalForAll(
+              BUNDLE_SALES_CONTRACT_ADDRESS,
+              true
+            );
+            await tx.wait();
+          }
+          approved[address] = true;
+        })
+      );
+      setBundleSalesContractApproved(approved);
     } catch (e) {
       console.log(e);
     } finally {
@@ -816,24 +1024,60 @@ const NFTItem = () => {
     try {
       setListingItem(true);
 
-      const price = ethers.utils.parseEther(_price);
-      const tx = await listItem(
-        address,
-        ethers.BigNumber.from(tokenID),
-        ethers.BigNumber.from(quantity),
-        price,
-        ethers.BigNumber.from(Math.floor(new Date().getTime() / 1000)),
-        '0x0000000000000000000000000000000000000000'
-      );
-      await tx.wait();
+      if (bundleID) {
+        const price = ethers.utils.parseEther(_price);
+        const addresses = [];
+        const tokenIds = [];
+        const quantities = [];
+        bundleItems.map(item => {
+          addresses.push(item.contractAddress);
+          tokenIds.push(item.tokenID);
+          quantities.push(item.supply);
+        });
+        const tx = await listBundle(
+          bundleID,
+          addresses,
+          tokenIds,
+          quantities,
+          price,
+          ethers.BigNumber.from(Math.floor(new Date().getTime() / 1000)),
+          '0x0000000000000000000000000000000000000000'
+        );
+        await tx.wait();
 
-      showToast('success', 'Item listed successfully!');
+        showToast('success', 'Bundle listed successfully!');
+      } else {
+        const price = ethers.utils.parseEther(_price);
+        const tx = await listItem(
+          address,
+          ethers.BigNumber.from(tokenID),
+          ethers.BigNumber.from(quantity),
+          price,
+          ethers.BigNumber.from(Math.floor(new Date().getTime() / 1000)),
+          '0x0000000000000000000000000000000000000000'
+        );
+        await tx.wait();
+
+        showToast('success', 'Item listed successfully!');
+      }
 
       setSellModalVisible(false);
       setListingItem(false);
     } catch {
       setListingItem(false);
     }
+  };
+
+  const isBundleContractApproved = () => {
+    if (bundleItems.length === 0) return false;
+    let contractAddresses = bundleItems.map(item => item.contractAddress);
+    contractAddresses = contractAddresses.filter(
+      (addr, idx) => contractAddresses.indexOf(addr) === idx
+    );
+    const approved = contractAddresses
+      .map(addr => bundleSalesContractApproved[addr])
+      .reduce((cur, _approved) => cur && _approved, true);
+    return approved;
   };
 
   const handleUpdatePrice = async (_price, quantity) => {
@@ -843,13 +1087,18 @@ const NFTItem = () => {
       setPriceUpdating(true);
 
       const price = ethers.utils.parseEther(_price);
-      const tx = await updateListing(
-        address,
-        tokenID,
-        price,
-        ethers.BigNumber.from(quantity)
-      );
-      await tx.wait();
+      if (bundleID) {
+        const tx = await updateBundleListing(bundleID, price);
+        await tx.wait();
+      } else {
+        const tx = await updateListing(
+          address,
+          tokenID,
+          price,
+          ethers.BigNumber.from(quantity)
+        );
+        await tx.wait();
+      }
 
       showToast('success', 'Price updated successfully!');
 
@@ -896,6 +1145,27 @@ const NFTItem = () => {
     }
   };
 
+  const handleBuyBundle = async () => {
+    if (buyingItem) return;
+
+    try {
+      setBuyingItem(true);
+      const price = ethers.utils.parseEther(
+        bundleListing.current.price.toString()
+      );
+      const tx = await buyBundle(bundleID, price, account);
+      await tx.wait();
+      setBuyingItem(false);
+
+      showToast('success', 'You have bought the bundle!');
+
+      // eslint-disable-next-line require-atomic-updates
+      bundleListing.current = null;
+    } catch {
+      setBuyingItem(false);
+    }
+  };
+
   const handleMakeOffer = async (_price, quantity, endTime) => {
     if (offerPlacing) return;
 
@@ -922,25 +1192,44 @@ const NFTItem = () => {
         return;
       }
 
-      const allowance = await getAllowance(account, SALES_CONTRACT_ADDRESS);
-      if (allowance.lt(amount)) {
-        await approve(SALES_CONTRACT_ADDRESS, amount);
+      if (bundleID) {
+        const allowance = await getAllowance(
+          account,
+          BUNDLE_SALES_CONTRACT_ADDRESS
+        );
+        if (allowance.lt(amount)) {
+          await approve(BUNDLE_SALES_CONTRACT_ADDRESS, amount);
+        }
+
+        const tx = await createBundleOffer(
+          bundleID,
+          WFTM_ADDRESS,
+          price,
+          ethers.BigNumber.from(deadline)
+        );
+
+        await tx.wait();
+      } else {
+        const allowance = await getAllowance(account, SALES_CONTRACT_ADDRESS);
+        if (allowance.lt(amount)) {
+          await approve(SALES_CONTRACT_ADDRESS, amount);
+        }
+
+        const tx = await createOffer(
+          address,
+          ethers.BigNumber.from(tokenID),
+          WFTM_ADDRESS,
+          ethers.BigNumber.from(quantity),
+          price,
+          ethers.BigNumber.from(deadline)
+        );
+
+        await tx.wait();
       }
 
-      const tx = await createOffer(
-        address,
-        ethers.BigNumber.from(tokenID),
-        WFTM_ADDRESS,
-        ethers.BigNumber.from(quantity),
-        price,
-        ethers.BigNumber.from(deadline)
-      );
-
-      await tx.wait();
+      showToast('success', 'Offer placed successfully!');
 
       setOfferModalVisible(false);
-
-      showToast('success', 'Offer placed successfully!');
     } catch (e) {
       console.log(e);
     } finally {
@@ -1215,7 +1504,7 @@ const NFTItem = () => {
   };
 
   const hasListing = () => {
-    return myListing() !== undefined;
+    return bundleListing.current || myListing() !== undefined;
   };
 
   const maxSupply = () => {
@@ -1391,13 +1680,7 @@ const NFTItem = () => {
         <div className={styles.bundleItemImage}>
           <Suspense
             fallback={
-              <Loader
-                type="Oval"
-                color="#007BFF"
-                height={32}
-                width={32}
-                className={styles.loader}
-              />
+              <Loader type="Oval" color="#007BFF" height={32} width={32} />
             }
           >
             <SuspenseImg
@@ -1572,7 +1855,8 @@ const NFTItem = () => {
                   {auctionCanceling ? 'Canceling Auction...' : 'Cancel Auction'}
                 </div>
               ) : null}
-              {(!auction.current || !auction.current.resulted) &&
+              {!bundleID &&
+                (!auction.current || !auction.current.resulted) &&
                 !hasListing() &&
                 tokenType.current !== 1155 && (
                   <div
@@ -1899,60 +2183,111 @@ const NFTItem = () => {
                     )}
                     <div className={styles.buy} />
                   </div>
-                  {listings.current.map((listing, idx) => (
-                    <div className={styles.listing} key={idx}>
-                      <div className={styles.owner}>
-                        <Link to={`/account/${listing.owner}`}>
-                          <div className={styles.userAvatarWrapper}>
-                            {listing.image ? (
-                              <img
-                                src={`https://gateway.pinata.cloud/ipfs/${listing.image}`}
-                                className={styles.userAvatar}
-                              />
+                  {bundleID
+                    ? bundleListing.current && (
+                        <div className={styles.listing}>
+                          <div className={styles.owner}>
+                            {loading ? (
+                              <Skeleton width={120} height={24} />
                             ) : (
-                              <Identicon
-                                account={listing.owner}
-                                size={24}
-                                className={styles.userAvatar}
-                              />
+                              <Link to={`/account/${owner}`}>
+                                <div className={styles.userAvatarWrapper}>
+                                  {ownerInfo?.imageHash ? (
+                                    <img
+                                      src={`https://gateway.pinata.cloud/ipfs/${ownerInfo.imageHash}`}
+                                      className={styles.userAvatar}
+                                    />
+                                  ) : (
+                                    <Identicon
+                                      account={owner}
+                                      size={24}
+                                      className={styles.userAvatar}
+                                    />
+                                  )}
+                                </div>
+                                {isMine
+                                  ? 'Me'
+                                  : ownerInfo?.alias || shortenAddress(owner)}
+                              </Link>
                             )}
                           </div>
-                          {listing.alias || listing.owner.substr(0, 6)}
-                        </Link>
-                      </div>
-                      <div className={styles.price}>{listing.price} FTM</div>
-                      {tokenInfo?.totalSupply > 1 && (
-                        <div className={styles.quantity}>
-                          {listing.quantity}
+                          <div className={styles.price}>
+                            {loading ? (
+                              <Skeleton width={100} height={24} />
+                            ) : (
+                              `${bundleListing.current.price} FTM`
+                            )}
+                          </div>
+                          <div className={styles.buy}>
+                            {!isMine && (
+                              <div
+                                className={cx(
+                                  styles.buyButton,
+                                  (salesContractApproving || buyingItem) &&
+                                    styles.disabled
+                                )}
+                                onClick={handleBuyBundle}
+                              >
+                                {buyingItem ? (
+                                  <ClipLoader color="#FFF" size={16} />
+                                ) : (
+                                  'Buy'
+                                )}
+                              </div>
+                            )}
+                          </div>
                         </div>
-                      )}
-                      <div className={styles.buy}>
-                        {listing.owner.toLowerCase() !==
-                          account.toLowerCase() && (
-                          <div
-                            className={cx(
-                              styles.buyButton,
-                              (salesContractApproving || buyingItem) &&
-                                styles.disabled
-                            )}
-                            onClick={() => handleBuyItem(listing)}
-                          >
-                            {!salesContractApproved ? (
-                              salesContractApproving ? (
-                                <ClipLoader color="#FFF" size={16} />
-                              ) : (
-                                'Approve'
-                              )
-                            ) : buyingItem ? (
-                              <ClipLoader color="#FFF" size={16} />
-                            ) : (
-                              'Buy'
+                      )
+                    : listings.current.map((listing, idx) => (
+                        <div className={styles.listing} key={idx}>
+                          <div className={styles.owner}>
+                            <Link to={`/account/${listing.owner}`}>
+                              <div className={styles.userAvatarWrapper}>
+                                {listing.image ? (
+                                  <img
+                                    src={`https://gateway.pinata.cloud/ipfs/${listing.image}`}
+                                    className={styles.userAvatar}
+                                  />
+                                ) : (
+                                  <Identicon
+                                    account={listing.owner}
+                                    size={24}
+                                    className={styles.userAvatar}
+                                  />
+                                )}
+                              </div>
+                              {listing.alias || listing.owner.substr(0, 6)}
+                            </Link>
+                          </div>
+                          <div className={styles.price}>
+                            {listing.price} FTM
+                          </div>
+                          {tokenInfo?.totalSupply > 1 && (
+                            <div className={styles.quantity}>
+                              {listing.quantity}
+                            </div>
+                          )}
+                          <div className={styles.buy}>
+                            {listing.owner.toLowerCase() !==
+                              account.toLowerCase() && (
+                              <div
+                                className={cx(
+                                  styles.buyButton,
+                                  (salesContractApproving || buyingItem) &&
+                                    styles.disabled
+                                )}
+                                onClick={() => handleBuyItem(listing)}
+                              >
+                                {buyingItem ? (
+                                  <ClipLoader color="#FFF" size={16} />
+                                ) : (
+                                  'Buy'
+                                )}
+                              </div>
                             )}
                           </div>
-                        )}
-                      </div>
-                    </div>
-                  ))}
+                        </div>
+                      ))}
                 </div>
               </Panel>
             </div>
@@ -2004,7 +2339,7 @@ const NFTItem = () => {
                           {formatExpiration(offer.deadline)}
                         </div>
                         <div className={styles.buy}>
-                          {((tokenType.current === 721 && isMine) ||
+                          {(isMine ||
                             (myHolding &&
                               myHolding.supply >= offer.quantity)) &&
                             offer.creator?.toLowerCase() !==
@@ -2016,7 +2351,11 @@ const NFTItem = () => {
                                     styles.disabled
                                 )}
                                 onClick={
-                                  salesContractApproved
+                                  bundleID
+                                    ? isBundleContractApproved()
+                                      ? () => handleAcceptOffer(offer)
+                                      : handleApproveBundleSalesContract
+                                    : salesContractApproved
                                     ? () => handleAcceptOffer(offer)
                                     : handleApproveSalesContract
                                 }
@@ -2154,11 +2493,21 @@ const NFTItem = () => {
         visible={sellModalVisible}
         onClose={() => setSellModalVisible(false)}
         onSell={hasListing() ? handleUpdatePrice : handleListItem}
-        startPrice={myListing()?.pricePerItem || 0}
+        startPrice={
+          bundleID
+            ? bundleListing.current?.price || 0
+            : myListing()?.pricePerItem || 0
+        }
         confirming={listingItem || priceUpdating}
-        approveContract={handleApproveSalesContract}
+        approveContract={
+          bundleID
+            ? handleApproveBundleSalesContract
+            : handleApproveSalesContract
+        }
         contractApproving={salesContractApproving}
-        contractApproved={salesContractApproved}
+        contractApproved={
+          bundleID ? isBundleContractApproved() : salesContractApproved
+        }
         totalSupply={tokenType.current === 1155 ? myHolding?.supply : null}
       />
       <OfferModal
@@ -2166,9 +2515,6 @@ const NFTItem = () => {
         onClose={() => setOfferModalVisible(false)}
         onMakeOffer={handleMakeOffer}
         confirming={offerPlacing}
-        approveContract={handleApproveSalesContract}
-        contractApproving={salesContractApproving}
-        contractApproved={salesContractApproved}
         totalSupply={tokenType.current === 1155 ? maxSupply() : null}
       />
       <AuctionModal

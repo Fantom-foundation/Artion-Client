@@ -55,7 +55,11 @@ const ExploreFilterHeader = ({ loading }) => {
     <div className="filterHeaderRoot">
       <div className="filterHeaderLeft">
         <label className="filterResultLabel">
-          {loading ? <Skeleton width={100} height={24} /> : `${count} results`}
+          {loading ? (
+            <Skeleton width={100} height={24} />
+          ) : (
+            `${count} result${count > 1 ? 's' : ''}`
+          )}
         </label>
         {selectedCollections().map((item, idx) => (
           <div key={idx} className="filterCollectionItem">

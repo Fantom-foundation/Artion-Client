@@ -109,9 +109,11 @@ const AccountDetails = () => {
   };
 
   useEffect(() => {
-    setTab(0);
-    getUserDetails(uid);
-    setTimeout(init, 0);
+    if (tab !== 0) {
+      setTab(0);
+      getUserDetails(uid);
+      setTimeout(init, 0);
+    }
   }, [uid]);
 
   const updateCollections = async () => {

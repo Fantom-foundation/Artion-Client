@@ -94,7 +94,7 @@ const NiftyHeader = ({ light }) => {
         symbol: 'FTM',
         decimals: 18,
       },
-      rpcUrls: ['https://rpc.fantom.network'],
+      rpcUrls: ['https://rpcapi.fantom.network'],
       blockExplorerUrls: ['https://ftmscan.com'],
     };
 
