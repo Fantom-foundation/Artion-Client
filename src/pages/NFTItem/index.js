@@ -57,6 +57,8 @@ import {
   updateBundleListing,
   buyBundle,
   createBundleOffer,
+  cancelBundleOffer,
+  acceptBundleOffer,
   getWFTMBalance,
   getAllowance,
   approve,
@@ -1242,8 +1244,13 @@ const NFTItem = () => {
 
     try {
       setOfferAccepting(true);
-      const tx = await acceptOffer(address, tokenID, offer.creator);
-      await tx.wait();
+      if (bundleID) {
+        const tx = await acceptBundleOffer(bundleID, offer.creator);
+        await tx.wait();
+      } else {
+        const tx = await acceptOffer(address, tokenID, offer.creator);
+        await tx.wait();
+      }
       setOfferAccepting(false);
 
       showToast('success', 'Offer accepted!');
@@ -1262,8 +1269,13 @@ const NFTItem = () => {
     try {
       setOfferCanceling(true);
 
-      const tx = await cancelOffer(address, tokenID);
-      await tx.wait();
+      if (bundleID) {
+        const tx = await cancelBundleOffer(bundleID);
+        await tx.wait();
+      } else {
+        const tx = await cancelOffer(address, tokenID);
+        await tx.wait();
+      }
 
       showToast('success', 'You have withdrawn your offer!');
 

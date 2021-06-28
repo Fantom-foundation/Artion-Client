@@ -92,12 +92,12 @@ export const createBundleOffer = async (
   return await contract.createOffer(bundleID, payToken, price, deadline);
 };
 
-// export const cancelOffer = async (nftAddress, tokenId) => {
-//   const contract = await getBundleSalesContract();
-//   return await contract.cancelOffer(nftAddress, tokenId);
-// };
+export const cancelBundleOffer = async bundleID => {
+  const contract = await getBundleSalesContract();
+  return await contract.cancelOffer(bundleID);
+};
 
-// export const acceptOffer = async (nftAddress, tokenId, creator) => {
-//   const contract = await getBundleSalesContract();
-//   return await contract.acceptOffer(nftAddress, tokenId, creator);
-// };
+export const acceptBundleOffer = async (bundleID, creator) => {
+  const contract = await getBundleSalesContract();
+  return await contract.acceptOffer(bundleID, creator);
+};
