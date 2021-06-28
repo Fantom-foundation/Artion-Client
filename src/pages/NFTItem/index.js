@@ -2027,7 +2027,7 @@ const NFTItem = () => {
                           >
                             <SuspenseImg
                               src={
-                                item.thumbnailPath
+                                item.thumbnailPath?.length > 10
                                   ? `https://storage.artion.io/image/${item.thumbnailPath}`
                                   : item.metadata?.image
                               }

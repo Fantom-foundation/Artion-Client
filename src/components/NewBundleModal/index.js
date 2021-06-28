@@ -5,49 +5,35 @@ import { ClipLoader } from 'react-spinners';
 import Modal from '@material-ui/core/Modal';
 import Skeleton from 'react-loading-skeleton';
 import Loader from 'react-loader-spinner';
+import { ethers } from 'ethers';
+import { useWeb3React } from '@web3-react/core';
 
 import SuspenseImg from 'components/SuspenseImg';
 import { createBundle } from 'api';
+import {
+  listBundle,
+  getNFTContract,
+  BUNDLE_SALES_CONTRACT_ADDRESS,
+} from 'contracts';
 import toast from 'utils/toast';
-import axios from 'axios';
 
 import styles from './styles.module.scss';
 
 const NFTItem = ({ item, loading, selected, onClick }) => {
-  const [fetching, setFetching] = useState(false);
-  const [info, setInfo] = useState(null);
-
-  const getTokenURI = async tokenURI => {
-    setFetching(true);
-    try {
-      const { data } = await axios.get(tokenURI);
-      setInfo(data);
-    } catch {
-      setInfo(null);
-    }
-    setFetching(false);
-  };
-
-  useEffect(() => {
-    if (item) {
-      getTokenURI(item.tokenURI);
-    }
-  }, [item]);
-
   return (
     <div
       className={cx(styles.item, selected && styles.selected)}
       onClick={onClick}
     >
       <div className={styles.imageBox}>
-        {loading || fetching ? (
+        {loading ? (
           <Skeleton
             width="100%"
             height="100%"
             className={styles.mediaLoading}
           />
         ) : (
-          info?.image && (
+          item?.imageURL && (
             <Suspense
               fallback={
                 <Loader
@@ -61,12 +47,12 @@ const NFTItem = ({ item, loading, selected, onClick }) => {
             >
               <SuspenseImg
                 src={
-                  item.thumbnailPath?.startsWith('https')
-                    ? item.thumbnailPath
-                    : info.image
+                  item.thumbnailPath?.length > 10
+                    ? `https://storage.artion.io/image/${item.thumbnailPath}`
+                    : item.imageURL
                 }
                 className={styles.media}
-                alt={info?.name}
+                alt={item.name}
               />
             </Suspense>
           )
@@ -77,13 +63,24 @@ const NFTItem = ({ item, loading, selected, onClick }) => {
   );
 };
 
-const NewBundleModal = ({ visible, onClose, items, onLoadNext }) => {
+const NewBundleModal = ({
+  visible,
+  onClose,
+  items,
+  onLoadNext,
+  onCreateSuccess = () => {},
+}) => {
+  const { account } = useWeb3React();
+
   const rootRef = useRef(null);
 
   const selected = useRef([]);
   const [name, setName] = useState('');
   const [price, setPrice] = useState('');
   const [creating, setCreating] = useState(false);
+  const [loadingStatus, setLoadingStatus] = useState(false);
+  const [approved, setApproved] = useState(true);
+  const [approving, setApproving] = useState(false);
 
   const { authToken } = useSelector(state => state.ConnectWallet);
   const { price: ftmPrice } = useSelector(state => state.Price);
@@ -95,6 +92,37 @@ const NewBundleModal = ({ visible, onClose, items, onLoadNext }) => {
       setPrice('');
     }
   }, [visible]);
+
+  const getContractApprovedStatus = async () => {
+    setLoadingStatus(true);
+    let contractAddresses = selected.current.map(
+      idx => items[idx].contractAddress
+    );
+    contractAddresses = contractAddresses.filter(
+      (addr, idx) => contractAddresses.indexOf(addr) === idx
+    );
+    let approved = true;
+    try {
+      await Promise.all(
+        contractAddresses.map(async address => {
+          const contract = await getNFTContract(address);
+          try {
+            const _approved = await contract.isApprovedForAll(
+              account,
+              BUNDLE_SALES_CONTRACT_ADDRESS
+            );
+            approved = approved && _approved;
+          } catch (e) {
+            console.log(e);
+          }
+        })
+      );
+    } catch (e) {
+      console.log(e);
+    }
+    setApproved(approved);
+    setLoadingStatus(false);
+  };
 
   const isValid = () => {
     return name && price && selected.current.length;
@@ -118,15 +146,49 @@ const NewBundleModal = ({ visible, onClose, items, onLoadNext }) => {
     } else {
       selected.current.push(idx);
     }
+    getContractApprovedStatus();
+  };
+
+  const onApprove = async () => {
+    setApproving(true);
+    let contractAddresses = selected.current.map(
+      idx => items[idx].contractAddress
+    );
+    contractAddresses = contractAddresses.filter(
+      (addr, idx) => contractAddresses.indexOf(addr) === idx
+    );
+    try {
+      await Promise.all(
+        contractAddresses.map(async address => {
+          const contract = await getNFTContract(address);
+          const _approved = await contract.isApprovedForAll(
+            account,
+            BUNDLE_SALES_CONTRACT_ADDRESS
+          );
+          if (!_approved) {
+            const tx = await contract.setApprovalForAll(
+              BUNDLE_SALES_CONTRACT_ADDRESS,
+              true
+            );
+            await tx.wait();
+          }
+        })
+      );
+    } catch (e) {
+      console.log(e);
+    }
+    setApproved(true);
+    setApproving(false);
   };
 
   const onCreate = async () => {
     if (creating) return;
 
+    let bundleID;
+    const selectedItems = [];
     try {
       setCreating(true);
 
-      const selectedItems = [];
       for (let i = 0; i < selected.current.length; i++) {
         const item = items[selected.current[i]];
         selectedItems.push({
@@ -135,13 +197,37 @@ const NewBundleModal = ({ visible, onClose, items, onLoadNext }) => {
           supply: item?.holderSupply || item?.supply || 1,
         });
       }
-      await createBundle(name, parseFloat(price), selectedItems, authToken);
-      toast('success', 'Account details saved!');
+      const { data } = await createBundle(
+        name,
+        parseFloat(price),
+        selectedItems,
+        authToken
+      );
+      bundleID = data;
+    } catch {
+      setCreating(false);
+    }
+
+    try {
+      const tx = await listBundle(
+        bundleID,
+        selectedItems.map(item => item.address),
+        selectedItems.map(item => item.tokenID),
+        selectedItems.map(item => item.supply),
+        ethers.utils.parseEther(price),
+        ethers.BigNumber.from(Math.floor(new Date().getTime() / 1000)),
+        '0x0000000000000000000000000000000000000000'
+      );
+      await tx.wait();
+
+      toast('success', 'Bundle created successfully!');
       setCreating(false);
 
       closeModal();
+      onCreateSuccess();
     } catch {
       setCreating(false);
+      // TODO: delete created bundle from backend
     }
   };
 
@@ -207,11 +293,24 @@ const NewBundleModal = ({ visible, onClose, items, onLoadNext }) => {
               className={cx(
                 styles.button,
                 styles.save,
-                (creating || !isValid()) && styles.disabled
+                (creating || loadingStatus || approving || !isValid()) &&
+                  styles.disabled
               )}
-              onClick={isValid() ? onCreate : null}
+              onClick={
+                isValid() && !creating && !loadingStatus && !approving
+                  ? approved
+                    ? onCreate
+                    : onApprove
+                  : null
+              }
             >
-              {creating ? <ClipLoader color="#FFF" size={16} /> : 'Create'}
+              {creating || loadingStatus || approving ? (
+                <ClipLoader color="#FFF" size={16} />
+              ) : approved ? (
+                'Create'
+              ) : (
+                'Approve Items'
+              )}
             </div>
 
             <div
