@@ -105,7 +105,7 @@ const BaseCard = ({ item, loading, style, create, onCreate }) => {
                   className={styles.dots}
                   value={index}
                   onChange={setIndex}
-                  number={3}
+                  number={Math.min(item.items.length, 18)}
                   thumbnails={renderDots()}
                 />
               </>
@@ -158,7 +158,13 @@ const BaseCard = ({ item, loading, style, create, onCreate }) => {
               <Skeleton width={80} height={20} />
             ) : (
               <Typography component="h4" className={styles.label}>
-                {item?.holderSupply || item?.supply || 1} of {item?.supply || 1}
+                {item.items
+                  ? `${item.items.length} item${
+                      item.items.length > 1 ? 's' : ''
+                    }`
+                  : `${item?.holderSupply ||
+                      item?.supply ||
+                      1} of ${item?.supply || 1}`}
               </Typography>
             )}
             <div className={styles.alignRight}>
