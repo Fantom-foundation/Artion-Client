@@ -519,7 +519,7 @@ const NFTItem = () => {
   };
 
   const bundleListedHandler = (_owner, _bundleID, _price, _startingTime) => {
-    if (bundleEventMatches(_bundleID.hash)) {
+    if (bundleEventMatches(_bundleID)) {
       const price = parseFloat(_price.toString()) / 10 ** 18;
       bundleListing.current = {
         price,
@@ -539,7 +539,7 @@ const NFTItem = () => {
     const nfts = _nfts.map(val => val);
     const tokenIds = _tokenIds.map(val => parseInt(val.toString()));
     const quantities = _quantities.map(val => parseInt(val.toString()));
-    if (bundleEventMatches(_bundleID.hash)) {
+    if (bundleEventMatches(_bundleID)) {
       const price = parseFloat(_newPrice.toString()) / 10 ** 18;
       bundleListing.current.price = price;
       const newBundleItems = [];
@@ -568,13 +568,13 @@ const NFTItem = () => {
   };
 
   const bundleCanceledHandler = (_owner, _bundleID) => {
-    if (bundleEventMatches(_bundleID.hash)) {
+    if (bundleEventMatches(_bundleID)) {
       bundleListing.current = null;
     }
   };
 
   const bundleSoldHandler = async (_seller, _buyer, _bundleID, _price) => {
-    if (bundleEventMatches(_bundleID.hash)) {
+    if (bundleEventMatches(_bundleID)) {
       setOwner(_buyer);
       bundleListing.current = null;
       const newTradeHistory = {
@@ -609,7 +609,7 @@ const NFTItem = () => {
     _price,
     _deadline
   ) => {
-    if (bundleEventMatches(_bundleID.hash)) {
+    if (bundleEventMatches(_bundleID)) {
       const newOffer = {
         creator: _creator,
         deadline: parseFloat(_deadline.toString()),
@@ -629,7 +629,7 @@ const NFTItem = () => {
   };
 
   const bundleOfferCanceledHandler = (_creator, _bundleID) => {
-    if (bundleEventMatches(_bundleID.hash)) {
+    if (bundleEventMatches(_bundleID)) {
       const newOffers = offers.current.filter(
         offer => offer.creator?.toLowerCase() !== _creator?.toLowerCase()
       );
@@ -2462,9 +2462,11 @@ const NFTItem = () => {
         <div className={styles.tradeHistoryWrapper}>
           <div className={styles.tradeHistoryHeader}>
             <div className={styles.tradeHistoryTitle}>{filters[filter]}</div>
-            <div className={styles.filter} onClick={handleMenuOpen}>
-              <img src={filterIcon} className={styles.filterIcon} />
-            </div>
+            {!bundleID && (
+              <div className={styles.filter} onClick={handleMenuOpen}>
+                <img src={filterIcon} className={styles.filterIcon} />
+              </div>
+            )}
           </div>
           <div className={styles.histories}>
             <div className={cx(styles.history, styles.heading)}>

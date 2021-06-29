@@ -9,7 +9,7 @@ import { ethers } from 'ethers';
 import { useWeb3React } from '@web3-react/core';
 
 import SuspenseImg from 'components/SuspenseImg';
-import { createBundle } from 'api';
+import { createBundle, deleteBundle } from 'api';
 import {
   listBundle,
   getNFTContract,
@@ -227,7 +227,11 @@ const NewBundleModal = ({
       onCreateSuccess();
     } catch {
       setCreating(false);
-      // TODO: delete created bundle from backend
+      try {
+        await deleteBundle(bundleID, authToken);
+      } catch (e) {
+        console.log(e);
+      }
     }
   };
 

@@ -1,4 +1,4 @@
-import React, { useState, Suspense } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import cx from 'classnames';
@@ -8,12 +8,15 @@ import AddIcon from '@material-ui/icons/Add';
 import Loader from 'react-loader-spinner';
 import Carousel, { Dots } from '@brainhubeu/react-carousel';
 import '@brainhubeu/react-carousel/lib/style.css';
+import axios from 'axios';
 
 import SuspenseImg from 'components/SuspenseImg';
 
 import styles from './styles.module.scss';
 
 const BaseCard = ({ item, loading, style, create, onCreate }) => {
+  const [fetching, setFetching] = useState(false);
+  const [info, setInfo] = useState(null);
   const [index, setIndex] = useState(0);
 
   const { collections } = useSelector(state => state.Collections);
@@ -21,6 +24,23 @@ const BaseCard = ({ item, loading, style, create, onCreate }) => {
   const collection = collections.find(
     col => col.address === item?.contractAddress
   );
+
+  const getTokenURI = async tokenURI => {
+    setFetching(true);
+    try {
+      const { data } = await axios.get(tokenURI);
+      setInfo(data);
+    } catch {
+      setInfo(null);
+    }
+    setFetching(false);
+  };
+
+  useEffect(() => {
+    if (item && !item.name) {
+      getTokenURI(item.tokenURI);
+    }
+  }, [item]);
 
   const renderSlides = () => {
     return item.items.map((v, idx) => (
@@ -63,7 +83,7 @@ const BaseCard = ({ item, loading, style, create, onCreate }) => {
       <>
         <div className={styles.mediaBox}>
           <div className={styles.mediaPanel}>
-            {loading ? (
+            {loading || fetching ? (
               <Skeleton
                 width="100%"
                 height="100%"
@@ -85,13 +105,13 @@ const BaseCard = ({ item, loading, style, create, onCreate }) => {
                   className={styles.dots}
                   value={index}
                   onChange={setIndex}
-                  number={3}
+                  number={Math.min(item.items.length, 18)}
                   thumbnails={renderDots()}
                 />
               </>
             ) : (
               <div className={styles.imageBox}>
-                {item?.imageURL && (
+                {(item?.imageURL || info?.image) && (
                   <Suspense
                     fallback={
                       <Loader
@@ -107,7 +127,7 @@ const BaseCard = ({ item, loading, style, create, onCreate }) => {
                       src={
                         item.thumbnailPath?.length > 10
                           ? `https://storage.artion.io/image/${item.thumbnailPath}`
-                          : item.imageURL
+                          : item?.imageURL || info?.image
                       }
                       className={styles.media}
                       alt={item.name}
@@ -119,26 +139,32 @@ const BaseCard = ({ item, loading, style, create, onCreate }) => {
           </div>
         </div>
         <div className={styles.content}>
-          {loading ? (
+          {loading || fetching ? (
             <Skeleton width="100%" height={20} />
           ) : (
             <Typography component="h4" className={styles.collection}>
               {collection?.collectionName || collection?.name}
             </Typography>
           )}
-          {loading ? (
+          {loading || fetching ? (
             <Skeleton width="100%" height={20} />
           ) : (
             <Typography component="h4" className={styles.name}>
-              {item?.name}
+              {item?.name || info?.name}
             </Typography>
           )}
           <div className={styles.alignBottom}>
-            {loading ? (
+            {loading || fetching ? (
               <Skeleton width={80} height={20} />
             ) : (
               <Typography component="h4" className={styles.label}>
-                {item?.holderSupply || item?.supply || 1} of {item?.supply || 1}
+                {item.items
+                  ? `${item.items.length} item${
+                      item.items.length > 1 ? 's' : ''
+                    }`
+                  : `${item?.holderSupply ||
+                      item?.supply ||
+                      1} of ${item?.supply || 1}`}
               </Typography>
             )}
             <div className={styles.alignRight}>
@@ -147,7 +173,7 @@ const BaseCard = ({ item, loading, style, create, onCreate }) => {
                   Price
                 </Typography>
               )}
-              {loading ? (
+              {loading || fetching ? (
                 <Skeleton width={80} height={20} />
               ) : (
                 <Typography

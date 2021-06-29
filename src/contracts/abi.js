@@ -2,7 +2,7 @@ export const SALES_CONTRACT_ADDRESS =
   '0x17bDD333e7DAD2bDe1109B1f6E3c308F9f4E4f93';
 
 export const BUNDLE_SALES_CONTRACT_ADDRESS =
-  '0x4E9AE30d53d23d94bfA7bd0a43FFC8da8B392C6f';
+  '0x80bAa89cF5aa41339331916dFf22c5AFEff78885';
 
 export const AUCTION_CONTRACT_ADDRESS =
   '0x13A8F06d5b61eb0b65C50eb319e1040d6bff1023';
@@ -482,7 +482,7 @@ export const BUNDLE_SALES_CONTRACT_ABI = [
         type: 'address',
       },
       {
-        indexed: true,
+        indexed: false,
         internalType: 'string',
         name: 'bundleID',
         type: 'string',
@@ -501,7 +501,7 @@ export const BUNDLE_SALES_CONTRACT_ABI = [
         type: 'address',
       },
       {
-        indexed: true,
+        indexed: false,
         internalType: 'string',
         name: 'bundleID',
         type: 'string',
@@ -545,7 +545,7 @@ export const BUNDLE_SALES_CONTRACT_ABI = [
         type: 'address',
       },
       {
-        indexed: true,
+        indexed: false,
         internalType: 'string',
         name: 'bundleID',
         type: 'string',
@@ -570,7 +570,7 @@ export const BUNDLE_SALES_CONTRACT_ABI = [
         type: 'address',
       },
       {
-        indexed: true,
+        indexed: false,
         internalType: 'string',
         name: 'bundleID',
         type: 'string',
@@ -613,7 +613,7 @@ export const BUNDLE_SALES_CONTRACT_ABI = [
         type: 'address',
       },
       {
-        indexed: true,
+        indexed: false,
         internalType: 'string',
         name: 'bundleID',
         type: 'string',
@@ -632,7 +632,7 @@ export const BUNDLE_SALES_CONTRACT_ABI = [
         type: 'address',
       },
       {
-        indexed: true,
+        indexed: false,
         internalType: 'string',
         name: 'bundleID',
         type: 'string',

@@ -239,11 +239,37 @@ export const getOffers = async (contractAddress, tokenID) => {
   return res.data;
 };
 
+export const getBundleOffers = async bundleID => {
+  const data = { bundleID };
+  const res = await axios({
+    method: 'post',
+    url: `${API_URL}/offer/getBundleOffer`,
+    data: JSON.stringify(data),
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+  return res.data;
+};
+
 export const getTradeHistory = async (contractAddress, tokenID) => {
   const data = { contractAddress, tokenID };
   const res = await axios({
     method: 'post',
     url: `${API_URL}/tradehistory/getTradeHistory`,
+    data: JSON.stringify(data),
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+  return res.data;
+};
+
+export const getBundleTradeHistory = async bundleID => {
+  const data = { bundleID };
+  const res = await axios({
+    method: 'post',
+    url: `${API_URL}/tradehistory/getBundleTradeHistory`,
     data: JSON.stringify(data),
     headers: {
       'Content-Type': 'application/json',
@@ -314,6 +340,20 @@ export const createBundle = async (name, price, items, authToken) => {
   const res = await axios({
     method: 'post',
     url: `${API_URL}/bundle/createBundle`,
+    data: JSON.stringify(data),
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${authToken}`,
+    },
+  });
+  return res.data;
+};
+
+export const deleteBundle = async (bundleID, authToken) => {
+  const data = { bundleID };
+  const res = await axios({
+    method: 'post',
+    url: `${API_URL}/bundle/removeBundle`,
     data: JSON.stringify(data),
     headers: {
       'Content-Type': 'application/json',
