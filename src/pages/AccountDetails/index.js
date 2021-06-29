@@ -57,6 +57,7 @@ const AccountDetails = () => {
   const [bundleModalVisible, setBundleModalVisible] = useState(false);
   const [fetching, setFetching] = useState(false);
   const tokens = useRef([]);
+  const bundles = useRef([]);
   const [count, setCount] = useState(0);
   const [now, setNow] = useState(new Date());
   const [page, setPage] = useState(0);
@@ -100,7 +101,8 @@ const AccountDetails = () => {
         uid
       );
       setFetching(false);
-      tokens.current.push(...data.tokens);
+      if (tab === 0) tokens.current.push(...data.tokens);
+      else bundles.current.push(...data.tokens);
       setCount(data.total);
       setPage(step);
     } catch {
@@ -109,9 +111,11 @@ const AccountDetails = () => {
   };
 
   useEffect(() => {
-    setTab(0);
-    getUserDetails(uid);
-    setTimeout(init, 0);
+    if (tab !== 0) {
+      setTab(0);
+      getUserDetails(uid);
+      setTimeout(init, 0);
+    }
   }, [uid]);
 
   const updateCollections = async () => {
@@ -158,7 +162,8 @@ const AccountDetails = () => {
 
   const loadNextPage = () => {
     if (fetching) return;
-    if (tokens.current.length === count) return;
+    if (tab === 0 && tokens.current.length === count) return;
+    if (tab === 1 && bundles.current.length === count) return;
 
     fetchNFTs(page + 1);
   };
@@ -178,7 +183,7 @@ const AccountDetails = () => {
       setCount(0);
       fetchNFTs(0);
     } else if (tab === 1) {
-      tokens.current = [];
+      bundles.current = [];
       setCount(0);
       fetchNFTs(0);
     } else if (tab === 2) {
@@ -401,7 +406,7 @@ const AccountDetails = () => {
             <NFTsGrid items={tokens.current} loading={fetching} />
           ) : tab === 1 ? (
             <NFTsGrid
-              items={tokens.current}
+              items={bundles.current}
               loading={fetching}
               showCreate={isMe}
               onCreate={handleCreateBundle}
@@ -570,6 +575,7 @@ const AccountDetails = () => {
         onClose={() => setBundleModalVisible(false)}
         items={tokens.current}
         onLoadNext={loadNextPage}
+        onCreateSuccess={() => fetchNFTs(page)}
       />
     </div>
   );

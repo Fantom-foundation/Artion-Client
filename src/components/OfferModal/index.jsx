@@ -12,9 +12,6 @@ const OfferModal = ({
   onClose,
   onMakeOffer,
   confirming,
-  approveContract,
-  contractApproving,
-  contractApproved,
   totalSupply,
 }) => {
   const [price, setPrice] = useState('');
@@ -81,7 +78,7 @@ const OfferModal = ({
                 onChange={e =>
                   setPrice(isNaN(e.target.value) ? price : e.target.value)
                 }
-                disabled={contractApproving || confirming}
+                disabled={confirming}
               />
               <div className={styles.usdPrice}>
                 ${((parseFloat(price) || 0) * ftmPrice).toFixed(2)}
@@ -97,9 +94,7 @@ const OfferModal = ({
                   placeholder={totalSupply}
                   value={quantity}
                   onChange={handleQuantityChange}
-                  disabled={
-                    contractApproving || confirming || totalSupply === 1
-                  }
+                  disabled={confirming || totalSupply === 1}
                 />
               </div>
             </div>
@@ -113,7 +108,7 @@ const OfferModal = ({
                 inputProps={{
                   className: styles.formInput,
                   onKeyDown: e => e.preventDefault(),
-                  disabled: contractApproving || confirming,
+                  disabled: confirming,
                 }}
                 closeOnSelect
                 isValidDate={cur =>
@@ -127,37 +122,17 @@ const OfferModal = ({
           <div
             className={cx(
               styles.listButton,
-              (contractApproving ||
-                confirming ||
-                (contractApproved && !validateInput())) &&
-                styles.disabled
+              (confirming || !validateInput()) && styles.disabled
             )}
             onClick={() =>
-              contractApproved
-                ? !confirming && validateInput()
-                  ? handleMakeOffer()
-                  : null
-                : approveContract()
+              !confirming && validateInput() ? handleMakeOffer() : null
             }
           >
-            {contractApproved ? (
-              confirming ? (
-                <ClipLoader color="#FFF" size={16} />
-              ) : (
-                'Place Offer'
-              )
-            ) : contractApproving ? (
-              'Approving Item'
-            ) : (
-              'Approve Item'
-            )}
+            {confirming ? <ClipLoader color="#FFF" size={16} /> : 'Place Offer'}
           </div>
           <div
-            className={cx(
-              styles.cancelButton,
-              (contractApproving || confirming) && styles.disabled
-            )}
-            onClick={!(contractApproving || confirming) ? onClose : null}
+            className={cx(styles.cancelButton, confirming && styles.disabled)}
+            onClick={!confirming ? onClose : null}
           >
             Cancel
           </div>
