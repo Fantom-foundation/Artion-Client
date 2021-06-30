@@ -60,6 +60,7 @@ const NiftyHeader = ({ light }) => {
   const [accounts, setAccounts] = useState([]);
   const [collections, setCollections] = useState([]);
   const [tokens, setTokens] = useState([]);
+  const [bundles, setBundles] = useState([]);
   const [tokenDetailsLoading, setTokenDetailsLoading] = useState(false);
 
   const isMenuOpen = Boolean(anchorEl);
@@ -146,6 +147,7 @@ const NiftyHeader = ({ light }) => {
     setAccounts([]);
     setCollections([]);
     setTokens([]);
+    setBundles([]);
   };
 
   useEffect(() => {
@@ -171,7 +173,7 @@ const NiftyHeader = ({ light }) => {
 
       const {
         data: {
-          data: { accounts, collections, tokens },
+          data: { accounts, collections, tokens, bundles },
         },
       } = await axios({
         method: 'post',
@@ -187,20 +189,7 @@ const NiftyHeader = ({ light }) => {
       setCollections(collections);
       setTokenDetailsLoading(true);
       setTokens(tokens);
-      const images = await Promise.all(
-        tokens.map(async token => {
-          try {
-            const { data } = await axios.get(token.tokenURI);
-            return data.image;
-          } catch {
-            return null;
-          }
-        })
-      );
-      tokens.map((token, idx) => {
-        token.image = images[idx];
-      });
-      setTokens(tokens);
+      setBundles(bundles);
       setTokenDetailsLoading(false);
     } catch (err) {
       console.log(err);
@@ -367,7 +356,12 @@ const NiftyHeader = ({ light }) => {
                         {tokenDetailsLoading ? (
                           <Skeleton width={40} height={40} />
                         ) : (
-                          tk.image && <img src={tk.image} />
+                          tk.thumbnailPath &&
+                          tk.thumbnailPath.length > 10 && (
+                            <img
+                              src={`https://storage.artion.io/image/${tk.thumbnailPath}`}
+                            />
+                          )
                         )}
                       </div>
                       <div className={styles.resulttitle}>{tk.name}</div>
@@ -376,10 +370,29 @@ const NiftyHeader = ({ light }) => {
                 </div>
               </div>
             )}
+            {bundles.length > 0 && (
+              <div className={styles.resultsection}>
+                <div className={styles.resultsectiontitle}>Bundles</div>
+                <div className={styles.separator} />
+                <div className={styles.resultlist}>
+                  {bundles.map((bundle, idx) => (
+                    <Link
+                      to={`/bundle/${bundle._id}`}
+                      key={idx}
+                      className={styles.result}
+                    >
+                      <div className={styles.resultimg}></div>
+                      <div className={styles.resulttitle}>{bundle.name}</div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
             {keyword.length > 0 &&
               collections.length === 0 &&
               accounts.length === 0 &&
-              tokens.length === 0 && (
+              tokens.length === 0 &&
+              bundles.length === 0 && (
                 <div className={styles.noResults}>No Results</div>
               )}
           </div>
