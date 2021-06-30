@@ -575,7 +575,10 @@ const AccountDetails = () => {
         onClose={() => setBundleModalVisible(false)}
         items={tokens.current}
         onLoadNext={loadNextPage}
-        onCreateSuccess={() => fetchNFTs(page)}
+        onCreateSuccess={() => {
+          bundles.current = [];
+          fetchNFTs(0);
+        }}
       />
     </div>
   );

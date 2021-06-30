@@ -36,7 +36,9 @@ import {
   increaseViewCount,
   getListings,
   getOffers,
+  getBundleOffers as _getBundleOffers,
   getTradeHistory,
+  getBundleTradeHistory as _getBundleTradeHistory,
   getTransferHistory,
   fetchCollection,
   getUserAccountDetails,
@@ -155,6 +157,7 @@ const NFTItem = () => {
   const [ownersModalVisible, setOwnersModalVisible] = useState(false);
 
   const [listingItem, setListingItem] = useState(false);
+  const [cancelingListing, setCancelingListing] = useState(false);
   const [priceUpdating, setPriceUpdating] = useState(false);
   const [offerPlacing, setOfferPlacing] = useState(false);
   const [offerCanceling, setOfferCanceling] = useState(false);
@@ -316,9 +319,31 @@ const NFTItem = () => {
     }
   };
 
+  const getBundleOffers = async () => {
+    try {
+      const { data } = await _getBundleOffers(bundleID);
+      offers.current = data;
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
   const getItemTradeHistory = async () => {
+    tradeHistory.current = [];
     try {
       const { data } = await getTradeHistory(address, tokenID);
+      tradeHistory.current = data.sort((a, b) =>
+        a.createdAt < b.createdAt ? 1 : -1
+      );
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  const getBundleTradeHistory = async () => {
+    tradeHistory.current = [];
+    try {
+      const { data } = await _getBundleTradeHistory(bundleID);
       tradeHistory.current = data.sort((a, b) =>
         a.createdAt < b.createdAt ? 1 : -1
       );
@@ -370,9 +395,6 @@ const NFTItem = () => {
       parseFloat(tokenID) === parseFloat(id.toString())
     );
   };
-
-  const bundleEventMatches = _bundleID =>
-    ethers.utils.keccak256(ethers.utils.toUtf8Bytes(bundleID)) == _bundleID;
 
   const itemListedHandler = async (
     owner,
@@ -493,7 +515,7 @@ const NFTItem = () => {
     if (eventMatches(nft, id)) {
       const newOffer = {
         creator,
-        deadline: parseFloat(deadline.toString()),
+        deadline: parseFloat(deadline.toString()) * 1000,
         payToken,
         pricePerItem: parseFloat(pricePerItem.toString()) / 10 ** 18,
         quantity: parseFloat(quantity.toString()),
@@ -519,7 +541,7 @@ const NFTItem = () => {
   };
 
   const bundleListedHandler = (_owner, _bundleID, _price, _startingTime) => {
-    if (bundleEventMatches(_bundleID)) {
+    if (bundleID.toLowerCase() === _bundleID.toLowerCase()) {
       const price = parseFloat(_price.toString()) / 10 ** 18;
       bundleListing.current = {
         price,
@@ -539,7 +561,7 @@ const NFTItem = () => {
     const nfts = _nfts.map(val => val);
     const tokenIds = _tokenIds.map(val => parseInt(val.toString()));
     const quantities = _quantities.map(val => parseInt(val.toString()));
-    if (bundleEventMatches(_bundleID)) {
+    if (bundleID.toLowerCase() === _bundleID.toLowerCase()) {
       const price = parseFloat(_newPrice.toString()) / 10 ** 18;
       bundleListing.current.price = price;
       const newBundleItems = [];
@@ -568,13 +590,13 @@ const NFTItem = () => {
   };
 
   const bundleCanceledHandler = (_owner, _bundleID) => {
-    if (bundleEventMatches(_bundleID)) {
+    if (bundleID.toLowerCase() === _bundleID.toLowerCase()) {
       bundleListing.current = null;
     }
   };
 
   const bundleSoldHandler = async (_seller, _buyer, _bundleID, _price) => {
-    if (bundleEventMatches(_bundleID)) {
+    if (bundleID.toLowerCase() === _bundleID.toLowerCase()) {
       setOwner(_buyer);
       bundleListing.current = null;
       const newTradeHistory = {
@@ -609,10 +631,10 @@ const NFTItem = () => {
     _price,
     _deadline
   ) => {
-    if (bundleEventMatches(_bundleID)) {
+    if (bundleID.toLowerCase() === _bundleID.toLowerCase()) {
       const newOffer = {
         creator: _creator,
-        deadline: parseFloat(_deadline.toString()),
+        deadline: parseFloat(_deadline.toString()) * 1000,
         payToken: _payToken,
         pricePerItem: parseFloat(_price.toString()) / 10 ** 18,
         quantity: 1,
@@ -629,7 +651,7 @@ const NFTItem = () => {
   };
 
   const bundleOfferCanceledHandler = (_creator, _bundleID) => {
-    if (bundleEventMatches(_bundleID)) {
+    if (bundleID.toLowerCase() === _bundleID.toLowerCase()) {
       const newOffers = offers.current.filter(
         offer => offer.creator?.toLowerCase() !== _creator?.toLowerCase()
       );
@@ -854,6 +876,8 @@ const NFTItem = () => {
   useEffect(() => {
     if (bundleID) {
       getBundleInfo();
+      getBundleOffers();
+      getBundleTradeHistory();
 
       increaseBundleViewCount(bundleID).then(({ data }) => {
         setViews(data);
@@ -1100,7 +1124,7 @@ const NFTItem = () => {
     }
   };
 
-  const isBundleContractApproved = () => {
+  const isBundleContractApproved = (() => {
     if (bundleItems.current.length === 0) return false;
     let contractAddresses = bundleItems.current.map(
       item => item.contractAddress
@@ -1112,7 +1136,7 @@ const NFTItem = () => {
       .map(addr => bundleSalesContractApproved[addr])
       .reduce((cur, _approved) => cur && _approved, true);
     return approved;
-  };
+  })();
 
   const handleUpdatePrice = async (_price, quantity) => {
     if (priceUpdating) return;
@@ -1144,18 +1168,26 @@ const NFTItem = () => {
   };
 
   const cancelList = async () => {
-    if (bundleID) {
-      await cancelBundleListing(bundleID);
-      bundleListing.current = null;
-      showToast('success', 'Bundle unlisted successfully!');
-    } else {
-      await cancelListing(address, tokenID);
-      listings.current = listings.current.filter(
-        listing => listing.owner.toLowerCase() !== account.toLowerCase()
-      );
+    if (cancelingListing) return;
 
-      showToast('success', 'Item unlisted successfully!');
+    setCancelingListing(true);
+    try {
+      if (bundleID) {
+        await cancelBundleListing(bundleID);
+        bundleListing.current = null;
+        showToast('success', 'Bundle unlisted successfully!');
+      } else {
+        await cancelListing(address, tokenID);
+        listings.current = listings.current.filter(
+          listing => listing.owner.toLowerCase() !== account.toLowerCase()
+        );
+
+        showToast('success', 'Item unlisted successfully!');
+      }
+    } catch (e) {
+      console.log(e);
     }
+    setCancelingListing(false);
   };
 
   const handleBuyItem = async listing => {
@@ -1469,7 +1501,7 @@ const NFTItem = () => {
       offers.current.findIndex(
         offer =>
           offer.creator?.toLowerCase() === account?.toLowerCase() &&
-          offer.deadline * 1000 >= now.getTime()
+          offer.deadline >= now.getTime()
       ) > -1
     );
   }, [offers.current]);
@@ -1505,9 +1537,9 @@ const NFTItem = () => {
   };
 
   const formatExpiration = deadline => {
-    if (deadline * 1000 < now.getTime()) return 'Expired';
+    if (deadline < now.getTime()) return 'Expired';
 
-    let diff = new Date(deadline * 1000).getTime() - now.getTime();
+    let diff = new Date(deadline).getTime() - now.getTime();
     diff = Math.floor(diff / 1000);
     return formatDiff(diff);
   };
@@ -1665,7 +1697,7 @@ const NFTItem = () => {
                   {isMine ? 'Me' : ownerInfo?.alias || shortenAddress(owner)}
                 </Link>
               </>
-            ) : (
+            ) : tokenInfo ? (
               <>
                 <div
                   className={cx(styles.itemViews, styles.clickable)}
@@ -1680,7 +1712,7 @@ const NFTItem = () => {
                   &nbsp;{tokenInfo.totalSupply} total
                 </div>
               </>
-            )}
+            ) : null}
           </div>
         )}
         <div className={styles.itemViews}>
@@ -1902,7 +1934,7 @@ const NFTItem = () => {
                   )}
                   onClick={cancelCurrentAuction}
                 >
-                  {auctionCanceling ? 'Canceling Auction...' : 'Cancel Auction'}
+                  Cancel Auction
                 </div>
               ) : null}
               {!bundleID &&
@@ -1910,7 +1942,10 @@ const NFTItem = () => {
                 !hasListing() &&
                 tokenType.current !== 1155 && (
                   <div
-                    className={styles.headerButton}
+                    className={cx(
+                      styles.headerButton,
+                      (auctionStarting || auctionUpdating) && styles.disabled
+                    )}
                     onClick={() => setAuctionModalVisible(true)}
                   >
                     {auction.current ? 'Update Auction' : 'Start Auction'}
@@ -1919,7 +1954,13 @@ const NFTItem = () => {
               {(!auction.current || auction.current.resulted) && (
                 <>
                   {hasListing() ? (
-                    <div className={styles.headerButton} onClick={cancelList}>
+                    <div
+                      className={cx(
+                        styles.headerButton,
+                        cancelingListing && styles.disabled
+                      )}
+                      onClick={cancelList}
+                    >
                       Cancel Listing
                     </div>
                   ) : null}
@@ -1955,13 +1996,7 @@ const NFTItem = () => {
                     : () => setOfferModalVisible(true)
                 }
               >
-                {hasMyOffer
-                  ? offerCanceling
-                    ? 'Withdrawing Offer...'
-                    : 'Withdraw Offer'
-                  : offerPlacing
-                  ? 'Making Offer...'
-                  : 'Make Offer'}
+                {hasMyOffer ? 'Withdraw Offer' : 'Make Offer'}
               </div>
             )}
         </div>
@@ -1979,7 +2014,7 @@ const NFTItem = () => {
                     width={32}
                     className={styles.loader}
                   />
-                ) : (
+                ) : !bundleID || bundleItems.current.length ? (
                   <Suspense
                     fallback={
                       <Loader
@@ -1999,7 +2034,7 @@ const NFTItem = () => {
                       }
                     />
                   </Suspense>
-                )}
+                ) : null}
               </div>
               {bundleID && (
                 <div className={styles.previewList}>
@@ -2354,7 +2389,7 @@ const NFTItem = () => {
                     <div className={styles.buy} />
                   </div>
                   {offers.current
-                    .filter(offer => offer.deadline * 1000 > now.getTime())
+                    .filter(offer => offer.deadline > now.getTime())
                     .sort((a, b) => (a.pricePerItem < b.pricePerItem ? 1 : -1))
                     .map((offer, idx) => (
                       <div className={styles.offer} key={idx}>
@@ -2378,7 +2413,7 @@ const NFTItem = () => {
                           </Link>
                         </div>
                         <div className={styles.price}>
-                          {offer.pricePerItem} FTM
+                          {offer.pricePerItem || offer.price} FTM
                         </div>
                         {tokenInfo?.totalSupply > 1 && (
                           <div className={styles.quantity}>
@@ -2402,7 +2437,7 @@ const NFTItem = () => {
                                 )}
                                 onClick={
                                   bundleID
-                                    ? isBundleContractApproved()
+                                    ? isBundleContractApproved
                                       ? () => handleAcceptOffer(offer)
                                       : handleApproveBundleSalesContract
                                     : salesContractApproved
@@ -2410,7 +2445,9 @@ const NFTItem = () => {
                                     : handleApproveSalesContract
                                 }
                               >
-                                {!salesContractApproved ? (
+                                {!(bundleID
+                                  ? isBundleContractApproved
+                                  : salesContractApproved) ? (
                                   salesContractApproving ? (
                                     <ClipLoader color="#FFF" size={16} />
                                   ) : (
@@ -2558,7 +2595,7 @@ const NFTItem = () => {
         }
         contractApproving={salesContractApproving}
         contractApproved={
-          bundleID ? isBundleContractApproved() : salesContractApproved
+          bundleID ? isBundleContractApproved : salesContractApproved
         }
         totalSupply={tokenType.current === 1155 ? myHolding?.supply : null}
       />
