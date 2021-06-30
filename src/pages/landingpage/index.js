@@ -15,7 +15,7 @@ import card1 from 'assets/imgs/cards/1.gif';
 import card2 from 'assets/imgs/cards/2.png';
 import card3 from 'assets/imgs/cards/3.png';
 import card4 from 'assets/imgs/cards/4.png';
-import card5 from 'assets/imgs/cards/5.png';
+import card5 from 'assets/imgs/cards/5.jpg';
 
 import styles from './styles.module.scss';
 
@@ -58,8 +58,8 @@ const LandingPage = () => {
           <FakeCard
             item={{
               image: card1,
-              category: 'Anonymous',
-              name: 'Bitcoin Doge',
+              category: 'Moose V1',
+              name: 'FTM Moose 1',
               price: 600,
             }}
           />
@@ -68,8 +68,8 @@ const LandingPage = () => {
           <FakeCard
             item={{
               image: card2,
-              category: 'Anonymous',
-              name: 'C-Princess',
+              category: 'Fantums',
+              name: 'LINWOOD LORANCE',
               price: 150,
             }}
           />
@@ -78,8 +78,8 @@ const LandingPage = () => {
           <FakeCard
             item={{
               image: card3,
-              category: 'Anonymous',
-              name: 'PunkG',
+              category: 'Gantom Stone',
+              name: 'Voodoo Calcite Y9514',
               price: 300,
             }}
           />
@@ -88,8 +88,8 @@ const LandingPage = () => {
           <FakeCard
             item={{
               image: card4,
-              category: 'Anonymous',
-              name: 'TradingCard',
+              category: 'BitUmans',
+              name: 'Bit Uman #305',
               price: 50,
             }}
           />
@@ -98,9 +98,9 @@ const LandingPage = () => {
           <FakeCard
             item={{
               image: card5,
-              category: 'Anonymous',
-              name: 'fUni',
-              price: 1000,
+              category: 'ZooCoin Community NFT',
+              name: 'Kaung Kaung',
+              price: 250,
             }}
           />
         </div>
