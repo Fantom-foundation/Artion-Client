@@ -11,6 +11,7 @@ import '@brainhubeu/react-carousel/lib/style.css';
 import axios from 'axios';
 
 import SuspenseImg from 'components/SuspenseImg';
+import { formatNumber } from 'utils';
 
 import styles from './styles.module.scss';
 
@@ -162,9 +163,9 @@ const BaseCard = ({ item, loading, style, create, onCreate }) => {
                   ? `${item.items.length} item${
                       item.items.length > 1 ? 's' : ''
                     }`
-                  : `${item?.holderSupply ||
-                      item?.supply ||
-                      1} of ${item?.supply || 1}`}
+                  : `${formatNumber(
+                      item?.holderSupply || item?.supply || 1
+                    )} of ${formatNumber(item?.supply || 1)}`}
               </Typography>
             )}
             <div className={styles.alignRight}>
@@ -180,7 +181,7 @@ const BaseCard = ({ item, loading, style, create, onCreate }) => {
                   component="h4"
                   className={cx(styles.label, styles.price)}
                 >
-                  {item?.price} FTM
+                  {formatNumber(item?.price || 0)} FTM
                 </Typography>
               )}
             </div>
