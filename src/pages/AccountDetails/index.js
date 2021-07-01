@@ -111,9 +111,9 @@ const AccountDetails = () => {
   };
 
   useEffect(() => {
+    getUserDetails(uid);
     if (tab !== 0) {
       setTab(0);
-      getUserDetails(uid);
       setTimeout(init, 0);
     }
   }, [uid]);

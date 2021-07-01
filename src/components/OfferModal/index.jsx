@@ -5,6 +5,9 @@ import Datetime from 'react-datetime';
 import 'react-datetime/css/react-datetime.css';
 import { ClipLoader } from 'react-spinners';
 
+import { formatNumber } from 'utils';
+import { FTM_TOTAL_SUPPLY } from 'constants/index';
+
 import styles from './styles.module.scss';
 
 const OfferModal = ({
@@ -76,12 +79,17 @@ const OfferModal = ({
                 placeholder="0.00"
                 value={price}
                 onChange={e =>
-                  setPrice(isNaN(e.target.value) ? price : e.target.value)
+                  setPrice(
+                    isNaN(e.target.value)
+                      ? price
+                      : Math.min(e.target.value, FTM_TOTAL_SUPPLY).toString()
+                  )
                 }
                 disabled={confirming}
               />
               <div className={styles.usdPrice}>
-                ${((parseFloat(price) || 0) * ftmPrice).toFixed(2)}
+                $
+                {formatNumber(((parseFloat(price) || 0) * ftmPrice).toFixed(2))}
               </div>
             </div>
           </div>

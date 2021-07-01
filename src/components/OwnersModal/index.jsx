@@ -3,7 +3,7 @@ import cx from 'classnames';
 import { Link } from 'react-router-dom';
 
 import closeIcon from 'assets/svgs/close.svg';
-import { shortenAddress } from 'utils';
+import { shortenAddress, formatNumber } from 'utils';
 import Identicon from 'components/Identicon';
 
 import styles from './styles.module.scss';
@@ -62,7 +62,9 @@ const OwnersModal = ({ visible, onClose, holders }) => {
                 </div>
               </div>
               <div className={styles.holdCount}>
-                {`${holder.supply} item${holder.supply > 1 ? 's' : ''}`}
+                {`${formatNumber(holder.supply)} item${
+                  holder.supply > 1 ? 's' : ''
+                }`}
               </div>
             </Holder>
           ))}

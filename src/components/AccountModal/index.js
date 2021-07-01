@@ -24,7 +24,6 @@ const AccountModal = () => {
   const [email, setEmail] = useState('');
   const [bio, setBio] = useState('');
   const [avatar, setAvatar] = useState(null);
-  const [aliasError, setAliasError] = useState(null);
   const [emailError, setEmailError] = useState(null);
   const [saving, setSaving] = useState(false);
 
@@ -41,27 +40,15 @@ const AccountModal = () => {
       setAlias(user.alias || '');
       setEmail(user.email || '');
       setBio(user.bio || '');
-      setAliasError(null);
       setEmailError(null);
     }
   }, [accountModalVisible]);
 
-  const validAlias = alias => {
-    return alias.length > 0 && alias.indexOf(' ') === -1;
-  };
-
   const validEmail = email =>
     email.length === 0 || /(.+)@(.+){2,}\.(.+){2,}/.test(email);
 
-  const validateAlias = () => {
-    if (alias.length > 0 && !validAlias(alias)) {
-      return setAliasError('Invalid username.');
-    }
-    setAliasError(null);
-  };
-
   const validateEmail = () => {
-    if (email.length === 0 || validEmail(email)) {
+    if (email.length > 0 || validEmail(email)) {
       setEmailError(null);
     } else {
       setEmailError('Invalid email address.');
@@ -82,7 +69,7 @@ const AccountModal = () => {
     }
   };
 
-  const isValid = () => aliasError === null && emailError === null;
+  const isValid = emailError === null;
 
   const closeModal = () => {
     dispatch(ModalActions.hideAccountModal());
@@ -188,24 +175,17 @@ const AccountModal = () => {
             </div>
           </div>
           <div className={styles.formGroup}>
-            <p className={styles.formLabel}>Username</p>
+            <p className={styles.formLabel}>Name</p>
             <input
               type="text"
-              className={cx(
-                styles.formInput,
-                aliasError !== null ? styles.hasError : null
-              )}
+              className={styles.formInput}
               maxLength={20}
               placeholder="Enter Username"
               value={alias}
               onChange={e => setAlias(e.target.value)}
-              onBlur={validateAlias}
               disabled={fetching}
             />
             <div className={styles.lengthIndicator}>{alias.length}/20</div>
-            {aliasError !== null && (
-              <p className={styles.error}>{aliasError}</p>
-            )}
           </div>
           <div className={styles.formGroup}>
             <p className={styles.formLabel}>Email Address</p>
@@ -243,9 +223,9 @@ const AccountModal = () => {
               className={cx(
                 styles.button,
                 styles.save,
-                (saving || !isValid()) && styles.disabled
+                (saving || !isValid) && styles.disabled
               )}
-              onClick={isValid() ? onSave : null}
+              onClick={isValid ? onSave : null}
             >
               {saving ? <ClipLoader color="#FFF" size={16} /> : 'Save'}
             </div>

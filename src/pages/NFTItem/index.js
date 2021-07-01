@@ -84,7 +84,7 @@ import {
   WFTM_ADDRESS,
   AUCTION_CONTRACT_ADDRESS,
 } from 'contracts';
-import { shortenAddress } from 'utils';
+import { shortenAddress, formatNumber } from 'utils';
 import showToast from 'utils/toast';
 import SellModal from 'components/SellModal';
 import OfferModal from 'components/OfferModal';
@@ -1724,12 +1724,12 @@ const NFTItem = () => {
                   onClick={() => setOwnersModalVisible(true)}
                 >
                   <PeopleIcon style={styles.itemIcon} />
-                  &nbsp;{holders.current.length}
+                  &nbsp;{formatNumber(holders.current.length)}
                   &nbsp;owner{holders.current.length > 1 && 's'}
                 </div>
                 <div className={styles.itemViews}>
                   <ViewModuleIcon style={styles.itemIcon} />
-                  &nbsp;{tokenInfo.totalSupply} total
+                  &nbsp;{formatNumber(tokenInfo.totalSupply)} total
                 </div>
               </>
             ) : null}
@@ -1741,7 +1741,7 @@ const NFTItem = () => {
           {isNaN(views) ? (
             <Skeleton width={80} height={24} />
           ) : (
-            `${views} View${views > 1 ? 's' : ''}`
+            `${formatNumber(views)} View${views > 1 ? 's' : ''}`
           )}
         </div>
       </div>
@@ -2166,7 +2166,7 @@ const NFTItem = () => {
                                 ? 'Me'
                                 : shortenAddress(winner)}
                             </Link>
-                            {` (${winningBid} FTM)`}
+                            {` (${formatNumber(winningBid)} FTM)`}
                           </>
                         ) : (
                           'Waiting for result'
@@ -2175,7 +2175,8 @@ const NFTItem = () => {
                     ) : bid ? (
                       <div>
                         <div className={styles.bidtitle}>
-                          Reserve Price : {auction.current.reservePrice} FTM
+                          Reserve Price :&nbsp;
+                          {formatNumber(auction.current.reservePrice)} FTM
                         </div>
                         <div className={styles.bidtitle}>
                           Highest Bid
@@ -2183,12 +2184,14 @@ const NFTItem = () => {
                             ? ' -- Reserve price not met.'
                             : ''}
                         </div>
-                        <div className={styles.bidAmount}>{bid.bid} FTM</div>
+                        <div className={styles.bidAmount}>
+                          {formatNumber(bid.bid)} FTM
+                        </div>
                       </div>
                     ) : (
                       <div className={styles.bidtitle}>
                         No bids yet ( Reserve Price :{' '}
-                        {auction.current.reservePrice} FTM )
+                        {formatNumber(auction.current.reservePrice)} FTM )
                       </div>
                     )}
                     {!isMine &&
@@ -2326,7 +2329,7 @@ const NFTItem = () => {
                             {loading ? (
                               <Skeleton width={100} height={24} />
                             ) : (
-                              `${bundleListing.current.price} FTM`
+                              `${formatNumber(bundleListing.current.price)} FTM`
                             )}
                           </div>
                           <div className={styles.buy}>
@@ -2371,11 +2374,11 @@ const NFTItem = () => {
                             </Link>
                           </div>
                           <div className={styles.price}>
-                            {listing.price} FTM
+                            {formatNumber(listing.price)} FTM
                           </div>
                           {tokenInfo?.totalSupply > 1 && (
                             <div className={styles.quantity}>
-                              {listing.quantity}
+                              {formatNumber(listing.quantity)}
                             </div>
                           )}
                           <div className={styles.buy}>
@@ -2439,11 +2442,11 @@ const NFTItem = () => {
                           </Link>
                         </div>
                         <div className={styles.price}>
-                          {offer.pricePerItem || offer.price} FTM
+                          {formatNumber(offer.pricePerItem || offer.price)} FTM
                         </div>
                         {tokenInfo?.totalSupply > 1 && (
                           <div className={styles.quantity}>
-                            {offer.quantity}
+                            {formatNumber(offer.quantity)}
                           </div>
                         )}
                         <div className={styles.deadline}>
@@ -2553,7 +2556,7 @@ const NFTItem = () => {
                   {filter === 0 && (
                     <div className={styles.historyPrice}>
                       {history ? (
-                        `${history.price} FTM`
+                        `${formatNumber(history.price)} FTM`
                       ) : (
                         <Skeleton width={120} height={25} />
                       )}
@@ -2562,7 +2565,7 @@ const NFTItem = () => {
                   {tokenType.current === 1155 && (
                     <div className={styles.quantity}>
                       {history ? (
-                        history.value
+                        formatNumber(history.value)
                       ) : (
                         <Skeleton width={120} height={25} />
                       )}
