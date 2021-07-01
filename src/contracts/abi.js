@@ -1,11 +1,11 @@
 export const SALES_CONTRACT_ADDRESS =
-  '0x17bDD333e7DAD2bDe1109B1f6E3c308F9f4E4f93';
+  '0x797A0F51dDF0452f54Ce718D918a1F29fB8052cd';
 
 export const BUNDLE_SALES_CONTRACT_ADDRESS =
   '0x80bAa89cF5aa41339331916dFf22c5AFEff78885';
 
 export const AUCTION_CONTRACT_ADDRESS =
-  '0x13A8F06d5b61eb0b65C50eb319e1040d6bff1023';
+  '0x50d96985bA102f49DAe5156821D0114061A5F0F8';
 
 export const WFTM_ADDRESS = '0x21be370d5312f44cb42ce377bc9b8a0cef1a4c83';
 
@@ -273,6 +273,13 @@ export const SALES_CONTRACT_ABI = [
   },
   {
     inputs: [],
+    name: 'artion',
+    outputs: [{ internalType: 'address', name: '', type: 'address' }],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [],
     name: 'auction',
     outputs: [
       { internalType: 'contract IFantomAuction', name: '', type: 'address' },
@@ -363,6 +370,26 @@ export const SALES_CONTRACT_ABI = [
     type: 'function',
   },
   {
+    inputs: [],
+    name: 'marketplace',
+    outputs: [
+      {
+        internalType: 'contract IFantomBundleMarketplace',
+        name: '',
+        type: 'address',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+    name: 'minters',
+    outputs: [{ internalType: 'address', name: '', type: 'address' }],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
     inputs: [
       { internalType: 'address', name: '', type: 'address' },
       { internalType: 'uint256', name: '', type: 'uint256' },
@@ -393,10 +420,27 @@ export const SALES_CONTRACT_ABI = [
     type: 'function',
   },
   {
+    inputs: [
+      { internalType: 'uint256', name: '_tokenId', type: 'uint256' },
+      { internalType: 'uint8', name: '_royalty', type: 'uint8' },
+    ],
+    name: 'registerRoyalty',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
     inputs: [],
     name: 'renounceOwnership',
     outputs: [],
     stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+    name: 'royalties',
+    outputs: [{ internalType: 'uint8', name: '', type: 'uint8' }],
+    stateMutability: 'view',
     type: 'function',
   },
   {
@@ -407,8 +451,24 @@ export const SALES_CONTRACT_ABI = [
     type: 'function',
   },
   {
+    inputs: [{ internalType: 'address', name: '_artion', type: 'address' }],
+    name: 'updateArtion',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
     inputs: [{ internalType: 'address', name: '_auction', type: 'address' }],
     name: 'updateAuction',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [
+      { internalType: 'address', name: '_marketplace', type: 'address' },
+    ],
+    name: 'updateBundleMarketplace',
     outputs: [],
     stateMutability: 'nonpayable',
     type: 'function',
@@ -453,6 +513,18 @@ export const SALES_CONTRACT_ABI = [
       { internalType: 'address', name: '_owner', type: 'address' },
     ],
     name: 'validateCancelListing',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [
+      { internalType: 'address', name: '_nftAddress', type: 'address' },
+      { internalType: 'uint256', name: '_tokenId', type: 'uint256' },
+      { internalType: 'address', name: '_seller', type: 'address' },
+      { internalType: 'address', name: '_buyer', type: 'address' },
+    ],
+    name: 'validateItemSold',
     outputs: [],
     stateMutability: 'nonpayable',
     type: 'function',
@@ -1263,6 +1335,19 @@ export const AUCTION_CONTRACT_ABI = [
     type: 'function',
   },
   {
+    inputs: [],
+    name: 'bundleMarketplace',
+    outputs: [
+      {
+        internalType: 'contract IFantomBundleMarketplace',
+        name: '',
+        type: 'address',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
     inputs: [
       { internalType: 'address', name: '_nftAddress', type: 'address' },
       { internalType: 'uint256', name: '_tokenId', type: 'uint256' },
@@ -1333,6 +1418,19 @@ export const AUCTION_CONTRACT_ABI = [
     inputs: [],
     name: 'isPaused',
     outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [],
+    name: 'marketplace',
+    outputs: [
+      {
+        internalType: 'contract IFantomMarketplace',
+        name: '',
+        type: 'address',
+      },
+    ],
     stateMutability: 'view',
     type: 'function',
   },
@@ -1462,6 +1560,24 @@ export const AUCTION_CONTRACT_ABI = [
   },
   {
     inputs: [
+      { internalType: 'address', name: '_marketplace', type: 'address' },
+    ],
+    name: 'updateBundleMarketplace',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [
+      { internalType: 'address', name: '_marketplace', type: 'address' },
+    ],
+    name: 'updateMarketplace',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [
       { internalType: 'uint256', name: '_minBidIncrement', type: 'uint256' },
     ],
     name: 'updateMinBidIncrement',
@@ -1487,6 +1603,16 @@ export const AUCTION_CONTRACT_ABI = [
       },
     ],
     name: 'updatePlatformFeeRecipient',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [
+      { internalType: 'address', name: '_nftAddress', type: 'address' },
+      { internalType: 'uint256', name: '_tokenId', type: 'uint256' },
+    ],
+    name: 'validateCancelAuction',
     outputs: [],
     stateMutability: 'nonpayable',
     type: 'function',

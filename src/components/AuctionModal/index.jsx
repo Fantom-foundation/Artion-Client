@@ -12,11 +12,13 @@ const AuctionModal = ({
   onClose,
   onStartAuction,
   auction,
+  auctionStarted,
   confirming,
   approveContract,
   contractApproving,
   contractApproved,
 }) => {
+  const [now, setNow] = useState(new Date());
   const [reservePrice, setReservePrice] = useState('');
   const [startTime, setStartTime] = useState(
     new Date(new Date().getTime() + 2 * 60 * 1000)
@@ -27,6 +29,10 @@ const AuctionModal = ({
   const [focused, setFocused] = useState(false);
 
   const { price: ftmPrice } = useSelector(state => state.Price);
+
+  useEffect(() => {
+    setInterval(() => setNow(new Date()), 1000);
+  }, []);
 
   useEffect(() => {
     setReservePrice(auction?.reservePrice || '');
@@ -47,11 +53,11 @@ const AuctionModal = ({
     e.stopPropagation();
   };
 
-  const validateInput = () => {
+  const validateInput = (() => {
     if (reservePrice.length === 0) return false;
-    if (startTime.getTime() < new Date().getTime()) return false;
+    if (!auctionStarted && startTime.getTime() < now.getTime()) return false;
     return endTime.getTime() > startTime.getTime() + 1000 * 60 * 60;
-  };
+  })();
 
   return (
     <div className={cx(styles.container, visible ? styles.visible : null)}>
@@ -94,11 +100,11 @@ const AuctionModal = ({
                 inputProps={{
                   className: styles.formInput,
                   onKeyDown: e => e.preventDefault(),
-                  disabled: contractApproving || confirming,
+                  disabled: auctionStarted || contractApproving || confirming,
                 }}
                 closeOnSelect
                 isValidDate={cur =>
-                  cur.valueOf() > new Date().getTime() - 1000 * 60 * 60 * 24
+                  cur.valueOf() > now.getTime() - 1000 * 60 * 60 * 24
                 }
               />
             </div>
@@ -128,12 +134,12 @@ const AuctionModal = ({
               styles.listButton,
               (contractApproving ||
                 confirming ||
-                (contractApproved && !validateInput())) &&
+                (contractApproved && !validateInput)) &&
                 styles.disabled
             )}
             onClick={() =>
               contractApproved
-                ? !confirming && validateInput()
+                ? !confirming && validateInput
                   ? onStartAuction(reservePrice, startTime, endTime)
                   : null
                 : approveContract()

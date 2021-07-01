@@ -170,6 +170,7 @@ const NFTItem = () => {
   const [bidWithdrawing, setBidWithdrawing] = useState(false);
   const [resulting, setResulting] = useState(false);
   const [resulted, setResulted] = useState(false);
+  const [historyLoading, setHistoryLoading] = useState(false);
 
   const [bid, setBid] = useState(null);
   const [winner, setWinner] = useState(null);
@@ -329,6 +330,7 @@ const NFTItem = () => {
   };
 
   const getItemTradeHistory = async () => {
+    setHistoryLoading(true);
     tradeHistory.current = [];
     try {
       const { data } = await getTradeHistory(address, tokenID);
@@ -338,9 +340,11 @@ const NFTItem = () => {
     } catch (e) {
       console.log(e);
     }
+    setHistoryLoading(false);
   };
 
   const getBundleTradeHistory = async () => {
+    setHistoryLoading(true);
     tradeHistory.current = [];
     try {
       const { data } = await _getBundleTradeHistory(bundleID);
@@ -350,9 +354,11 @@ const NFTItem = () => {
     } catch (e) {
       console.log(e);
     }
+    setHistoryLoading(false);
   };
 
   const getItemTransferHistory = async () => {
+    setHistoryLoading(true);
     try {
       const { data } = await getTransferHistory(
         address,
@@ -365,6 +371,7 @@ const NFTItem = () => {
     } catch (e) {
       console.log(e);
     }
+    setHistoryLoading(false);
   };
 
   const getAuctions = async () => {
@@ -875,6 +882,8 @@ const NFTItem = () => {
 
   useEffect(() => {
     if (bundleID) {
+      listings.current = [];
+
       getBundleInfo();
       getBundleOffers();
       getBundleTradeHistory();
@@ -883,6 +892,8 @@ const NFTItem = () => {
         setViews(data);
       });
     } else {
+      bundleListing.current = null;
+
       getTokenURI();
       getTokenOwner();
       getItemListings();
@@ -898,10 +909,10 @@ const NFTItem = () => {
   }, [address, tokenID, bundleID]);
 
   useEffect(() => {
-    if (address && tokenID && tokenType.current) {
+    if (address && tokenID && tokenType.current && filter === 1) {
       getItemTransferHistory();
     }
-  }, [address, tokenID, tokenType.current]);
+  }, [address, tokenID, tokenType.current, filter]);
 
   useEffect(() => {
     getCreatorInfo();
@@ -1555,13 +1566,12 @@ const NFTItem = () => {
     return `${formatDiff(diff)} Ago`;
   };
 
-  const auctionStarted = () =>
-    now.getTime() / 1000 >= auction.current?.startTime;
+  const auctionStarted = now.getTime() / 1000 >= auction.current?.startTime;
 
-  const auctionEnded = () =>
+  const auctionEnded =
     auction.current?.endTime <= now.getTime() / 1000 || resulted;
 
-  const auctionActive = () => auctionStarted() && !auctionEnded();
+  const auctionActive = () => auctionStarted && !auctionEnded;
 
   const canWithdraw = () =>
     bid?.bidder?.toLowerCase() === account?.toLowerCase() &&
@@ -1650,7 +1660,17 @@ const NFTItem = () => {
           <div key={idx} className={styles.property}>
             <div className={styles.propertyLabel}>{key} : </div>
             <div className={styles.propertyValue}>
-              {properties[key]}
+              {key === 'recipient' ? (
+                <a
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  href={`https://ftmscan.com/address/${properties[key]}`}
+                >
+                  {shortenAddress(properties[key])}
+                </a>
+              ) : (
+                properties[key]
+              )}
               {key === 'royalty' ? '%' : ''}
             </div>
           </div>
@@ -2121,8 +2141,8 @@ const NFTItem = () => {
               <div className={styles.panelWrapper}>
                 <Panel
                   title={
-                    auctionStarted()
-                      ? auctionEnded()
+                    auctionStarted
+                      ? auctionEnded
                         ? 'Sale ended'
                         : `Sale ends in ${formatDuration(
                             auction.current.endTime
@@ -2136,7 +2156,7 @@ const NFTItem = () => {
                   fixed
                 >
                   <div className={styles.bids}>
-                    {auctionEnded() ? (
+                    {auctionEnded ? (
                       <div className={styles.result}>
                         {auction.current.resulted ? (
                           <>
@@ -2155,6 +2175,9 @@ const NFTItem = () => {
                     ) : bid ? (
                       <div>
                         <div className={styles.bidtitle}>
+                          Reserve Price : {auction.current.reservePrice} FTM
+                        </div>
+                        <div className={styles.bidtitle}>
                           Highest Bid
                           {bid.bid < auction.current.reservePrice
                             ? ' -- Reserve price not met.'
@@ -2163,7 +2186,10 @@ const NFTItem = () => {
                         <div className={styles.bidAmount}>{bid.bid} FTM</div>
                       </div>
                     ) : (
-                      <div className={styles.bidtitle}>No bids yet</div>
+                      <div className={styles.bidtitle}>
+                        No bids yet ( Reserve Price :{' '}
+                        {auction.current.reservePrice} FTM )
+                      </div>
                     )}
                     {!isMine &&
                       auctionActive() &&
@@ -2203,7 +2229,7 @@ const NFTItem = () => {
                           Place Bid
                         </div>
                       ))}
-                    {isMine && auctionEnded() && !auction.current.resulted && (
+                    {isMine && auctionEnded && !auction.current.resulted && (
                       <div
                         className={cx(
                           styles.placeBid,
@@ -2515,60 +2541,86 @@ const NFTItem = () => {
               <div className={styles.to}>To</div>
               <div className={styles.saleDate}>Date</div>
             </div>
-            {(filter === 0
+            {(historyLoading
+              ? [null, null, null]
+              : filter === 0
               ? tradeHistory.current
               : transferHistory.current
             ).map((history, idx) => {
-              const saleDate = new Date(history.createdAt);
+              const saleDate = history ? new Date(history.createdAt) : null;
               return (
                 <div className={styles.history} key={idx}>
                   {filter === 0 && (
                     <div className={styles.historyPrice}>
-                      {history.price} FTM
+                      {history ? (
+                        `${history.price} FTM`
+                      ) : (
+                        <Skeleton width={120} height={25} />
+                      )}
                     </div>
                   )}
                   {tokenType.current === 1155 && (
-                    <div className={styles.quantity}>{history.value}</div>
+                    <div className={styles.quantity}>
+                      {history ? (
+                        history.value
+                      ) : (
+                        <Skeleton width={120} height={25} />
+                      )}
+                    </div>
                   )}
                   <div className={styles.from}>
-                    <Link to={`/account/${history.from}`}>
-                      <div className={styles.userAvatarWrapper}>
-                        {history.fromImage ? (
-                          <img
-                            src={`https://gateway.pinata.cloud/ipfs/${history.fromImage}`}
-                            className={styles.userAvatar}
-                          />
-                        ) : (
-                          <Identicon
-                            account={history.from}
-                            size={24}
-                            className={styles.userAvatar}
-                          />
-                        )}
-                      </div>
-                      {history.fromAlias || history.from.substr(0, 6)}
-                    </Link>
+                    {history ? (
+                      <Link to={`/account/${history.from}`}>
+                        <div className={styles.userAvatarWrapper}>
+                          {history.fromImage ? (
+                            <img
+                              src={`https://gateway.pinata.cloud/ipfs/${history.fromImage}`}
+                              className={styles.userAvatar}
+                            />
+                          ) : (
+                            <Identicon
+                              account={history.from}
+                              size={24}
+                              className={styles.userAvatar}
+                            />
+                          )}
+                        </div>
+                        {history.fromAlias || history.from.substr(0, 6)}
+                      </Link>
+                    ) : (
+                      <Skeleton width={200} height={25} />
+                    )}
                   </div>
                   <div className={styles.to}>
-                    <Link to={`/account/${history.to}`}>
-                      <div className={styles.userAvatarWrapper}>
-                        {history.toImage ? (
-                          <img
-                            src={`https://gateway.pinata.cloud/ipfs/${history.toImage}`}
-                            className={styles.userAvatar}
-                          />
-                        ) : (
-                          <Identicon
-                            account={history.to}
-                            size={24}
-                            className={styles.userAvatar}
-                          />
-                        )}
-                      </div>
-                      {history.toAlias || history.to.substr(0, 6)}
-                    </Link>
+                    {history ? (
+                      <Link to={`/account/${history.to}`}>
+                        <div className={styles.userAvatarWrapper}>
+                          {history.toImage ? (
+                            <img
+                              src={`https://gateway.pinata.cloud/ipfs/${history.toImage}`}
+                              className={styles.userAvatar}
+                            />
+                          ) : (
+                            <Identicon
+                              account={history.to}
+                              size={24}
+                              className={styles.userAvatar}
+                            />
+                          )}
+                        </div>
+                        {history.toAlias || history.to.substr(0, 6)}
+                      </Link>
+                    ) : (
+                      <Skeleton width={200} height={25} />
+                    )}
                   </div>
-                  <div className={styles.saleDate}>{formatDate(saleDate)}</div>
+                  <div className={styles.saleDate}>
+                    {saleDate ? (
+                      formatDate(saleDate)
+                    ) : (
+                      <Skeleton width={180} height={25} />
+                    )}
+                  </div>
                 </div>
               );
             })}
@@ -2613,6 +2665,7 @@ const NFTItem = () => {
           auction.current ? handleUpdateAuction : handleStartAuction
         }
         auction={auction.current}
+        auctionStarted={auctionStarted}
         confirming={auctionStarting || auctionUpdating}
         approveContract={handleApproveAuctionContract}
         contractApproving={auctionContractApproving}
@@ -2624,9 +2677,6 @@ const NFTItem = () => {
         onPlaceBid={handlePlaceBid}
         minBidAmount={(bid?.bid || 0) + minBidIncrement}
         confirming={bidPlacing}
-        approveContract={handleApproveAuctionContract}
-        contractApproving={auctionContractApproving}
-        contractApproved={auctionContractApproved}
       />
       <OwnersModal
         visible={ownersModalVisible}
