@@ -3,9 +3,11 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useHistory } from 'react-router';
 import cx from 'classnames';
 import axios from 'axios';
-import { Menu, MenuItem } from '@material-ui/core';
+import { makeStyles } from '@material-ui/core/styles';
+import { Menu, MenuItem, Tooltip } from '@material-ui/core';
 import PublishIcon from '@material-ui/icons/Publish';
 import CloseIcon from '@material-ui/icons/Close';
+import HelpOutlineIcon from '@material-ui/icons/HelpOutline';
 import { ClipLoader } from 'react-spinners';
 
 import { Categories } from 'constants/filter.constants';
@@ -23,6 +25,23 @@ import mediumIcon from 'assets/svgs/medium.svg';
 import nftIcon from 'assets/svgs/nft_active.svg';
 
 import styles from './styles.module.scss';
+
+const useStylesBootstrap = makeStyles(theme => ({
+  arrow: {
+    color: theme.palette.common.black,
+  },
+  tooltip: {
+    backgroundColor: theme.palette.common.black,
+    padding: '8px 16px',
+    fontSize: 14,
+  },
+}));
+
+function BootstrapTooltip(props) {
+  const classes = useStylesBootstrap();
+
+  return <Tooltip arrow classes={classes} {...props} />;
+}
 
 const CollectionCreate = () => {
   const dispatch = useDispatch();
@@ -323,9 +342,27 @@ const CollectionCreate = () => {
         </div>
 
         <div className={styles.inputGroup}>
-          <div className={styles.inputTitle}>Category</div>
+          <div className={styles.inputTitle}>
+            Category&nbsp;
+            <BootstrapTooltip
+              title="Adding a category will help make your item discoverable on Fantom."
+              placement="top"
+            >
+              <HelpOutlineIcon />
+            </BootstrapTooltip>
+          </div>
           <div className={styles.inputSubTitle}>
             Adding a category will help make your item discoverable on Fantom.
+          </div>
+          <div className={styles.inputSubTitle}>
+            For more information, read{' '}
+            <a
+              href="https://docs.fantom.foundation/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              this
+            </a>
           </div>
           <div className={cx(styles.inputWrapper, styles.categoryList)}>
             <div
@@ -465,7 +502,7 @@ const CollectionCreate = () => {
             )}
             onClick={isValid() ? handleSave : null}
           >
-            {creating ? <ClipLoader color="#FFF" size={16} /> : 'Create'}
+            {creating ? <ClipLoader color="#FFF" size={16} /> : 'Register'}
           </div>
         </div>
       </div>

@@ -11,9 +11,6 @@ const BidModal = ({
   onPlaceBid,
   minBidAmount,
   confirming,
-  approveContract,
-  contractApproving,
-  contractApproved,
 }) => {
   const [price, setPrice] = useState('');
   const [focused, setFocused] = useState(false);
@@ -54,7 +51,7 @@ const BidModal = ({
                 }
                 onFocus={() => setFocused(true)}
                 onBlur={() => setFocused(false)}
-                disabled={contractApproving || confirming}
+                disabled={confirming}
               />
               <div className={styles.usdPrice}>
                 ${((parseFloat(price) || 0) * ftmPrice).toFixed(2)}
@@ -66,37 +63,17 @@ const BidModal = ({
           <div
             className={cx(
               styles.listButton,
-              (contractApproving ||
-                confirming ||
-                (contractApproved && !validateInput())) &&
-                styles.disabled
+              (confirming || !validateInput()) && styles.disabled
             )}
             onClick={() =>
-              contractApproved
-                ? !confirming && validateInput()
-                  ? onPlaceBid(price)
-                  : null
-                : approveContract()
+              !confirming && validateInput() ? onPlaceBid(price) : null
             }
           >
-            {contractApproved ? (
-              confirming ? (
-                <ClipLoader color="#FFF" size={16} />
-              ) : (
-                'Place'
-              )
-            ) : contractApproving ? (
-              'Approving Item'
-            ) : (
-              'Approve Item'
-            )}
+            {confirming ? <ClipLoader color="#FFF" size={16} /> : 'Place'}
           </div>
           <div
-            className={cx(
-              styles.cancelButton,
-              (contractApproving || confirming) && styles.disabled
-            )}
-            onClick={!(contractApproving || confirming) ? onClose : null}
+            className={cx(styles.cancelButton, confirming && styles.disabled)}
+            onClick={!confirming ? onClose : null}
           >
             Cancel
           </div>

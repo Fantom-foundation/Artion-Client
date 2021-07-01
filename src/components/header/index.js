@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useHistory, withRouter, NavLink, Link } from 'react-router-dom';
 import cx from 'classnames';
 import Skeleton from 'react-loading-skeleton';
@@ -11,6 +11,7 @@ import axios from 'axios';
 import WalletConnectActions from 'actions/walletconnect.actions';
 import AuthActions from 'actions/auth.actions';
 import ModalActions from 'actions/modal.actions';
+import HeaderActions from 'actions/header.actions';
 import { shortenAddress } from 'utils';
 import { injected } from 'connectors';
 import { API_URL, getAuthToken, getAccountDetails } from 'api';
@@ -62,6 +63,7 @@ const NiftyHeader = ({ light }) => {
   const [tokens, setTokens] = useState([]);
   const [bundles, setBundles] = useState([]);
   const [tokenDetailsLoading, setTokenDetailsLoading] = useState(false);
+  const timer = useRef(null);
 
   const isMenuOpen = Boolean(anchorEl);
 
@@ -138,9 +140,11 @@ const NiftyHeader = ({ light }) => {
   };
 
   useEffect(() => {
-    if (isWalletConnected) return;
+    dispatch(HeaderActions.toggleSearchbar(false));
 
-    handleConnectWallet();
+    if (!isWalletConnected) {
+      handleConnectWallet();
+    }
   }, []);
 
   const resetResults = () => {
@@ -154,7 +158,7 @@ const NiftyHeader = ({ light }) => {
     resetResults();
   }, [isSearchbarShown]);
 
-  const handleSearch = async word => {
+  const search = async word => {
     setKeyword(word);
 
     if (cancelSource) {
@@ -196,6 +200,14 @@ const NiftyHeader = ({ light }) => {
     } finally {
       setCancelSource(null);
     }
+  };
+
+  const handleSearch = word => {
+    if (timer.current) {
+      clearTimeout(timer.current);
+    }
+
+    timer.current = setTimeout(() => search(word), 500);
   };
 
   const handleSignOut = () => {
@@ -357,11 +369,13 @@ const NiftyHeader = ({ light }) => {
                           <Skeleton width={40} height={40} />
                         ) : (
                           tk.thumbnailPath &&
-                          tk.thumbnailPath.length > 10 && (
+                          (tk.thumbnailPath.length > 10 ? (
                             <img
                               src={`https://storage.artion.io/image/${tk.thumbnailPath}`}
                             />
-                          )
+                          ) : tk.thumbnailPath === '.' ? (
+                            <img src={tk.imageURL} />
+                          ) : null)
                         )}
                       </div>
                       <div className={styles.resulttitle}>{tk.name}</div>

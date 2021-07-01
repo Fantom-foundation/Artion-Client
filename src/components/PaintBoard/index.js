@@ -22,6 +22,7 @@ import showToast from 'utils/toast';
 import WalletUtils from 'utils/wallet';
 import SCHandlers from 'utils/sc.interaction';
 import { API_URL } from 'api';
+import { registerRoyalty } from 'contracts';
 import { FantomNFTConstants } from 'constants/smartcontracts/fnft.constants';
 
 import 'tui-image-editor/dist/tui-image-editor.css';
@@ -50,6 +51,7 @@ const PaintBoard = () => {
   const [name, setName] = useState('');
   const [symbol, setSymbol] = useState('');
   const [description, setDescription] = useState('');
+  const [royalty, setRoyalty] = useState(0);
 
   const [currentMintingStep, setCurrentMintingStep] = useState(0);
   const [isMinting, setIsMinting] = useState(false);
@@ -152,6 +154,8 @@ const PaintBoard = () => {
     formData.append('account', account);
     formData.append('description', description);
     formData.append('symbol', symbol);
+    const _royalty = parseInt(royalty);
+    formData.append('royalty', isNaN(_royalty) ? 0 : _royalty);
     try {
       let result = await axios({
         method: 'post',
@@ -192,6 +196,12 @@ const PaintBoard = () => {
         setCurrentMintingStep(3);
         const evtCaught = confirmedTnx.logs[0].topics;
         const mintedTkId = BigNumber.from(evtCaught[3]);
+
+        const royaltyTx = await registerRoyalty(
+          mintedTkId.toNumber(),
+          isNaN(_royalty) ? 0 : _royalty
+        );
+        await royaltyTx.wait();
 
         showToast('success', 'New NFT item minted!');
         removeImage();
@@ -286,6 +296,25 @@ const PaintBoard = () => {
             <div className={styles.lengthIndicator}>
               {description.length}/120
             </div>
+          </div>
+          <div className={styles.formGroup}>
+            <p className={styles.formLabel}>Royalty</p>
+            <input
+              className={styles.formInput}
+              type="number"
+              min={0}
+              max={100}
+              placeholder="Royalty"
+              value={royalty}
+              onChange={e => {
+                const val = e.target.value;
+                if (!isNaN(val)) {
+                  const _royalty = parseInt(val);
+                  setRoyalty(Math.max(Math.min(_royalty, 100), 0));
+                }
+              }}
+              disabled={isMinting}
+            />
           </div>
 
           {isMinting && (
