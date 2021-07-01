@@ -3,8 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useHistory } from 'react-router';
 import cx from 'classnames';
 import axios from 'axios';
-import { makeStyles } from '@material-ui/core/styles';
-import { Menu, MenuItem, Tooltip } from '@material-ui/core';
+import { Menu, MenuItem } from '@material-ui/core';
 import PublishIcon from '@material-ui/icons/Publish';
 import CloseIcon from '@material-ui/icons/Close';
 import HelpOutlineIcon from '@material-ui/icons/HelpOutline';
@@ -13,6 +12,7 @@ import { ClipLoader } from 'react-spinners';
 import { Categories } from 'constants/filter.constants';
 import HeaderActions from 'actions/header.actions';
 import Header from 'components/header';
+import BootstrapTooltip from 'components/BootstrapTooltip';
 import toast from 'utils/toast';
 import { API_URL } from 'api';
 
@@ -25,23 +25,6 @@ import mediumIcon from 'assets/svgs/medium.svg';
 import nftIcon from 'assets/svgs/nft_active.svg';
 
 import styles from './styles.module.scss';
-
-const useStylesBootstrap = makeStyles(theme => ({
-  arrow: {
-    color: theme.palette.common.black,
-  },
-  tooltip: {
-    backgroundColor: theme.palette.common.black,
-    padding: '8px 16px',
-    fontSize: 14,
-  },
-}));
-
-function BootstrapTooltip(props) {
-  const classes = useStylesBootstrap();
-
-  return <Tooltip arrow classes={classes} {...props} />;
-}
 
 const CollectionCreate = () => {
   const dispatch = useDispatch();

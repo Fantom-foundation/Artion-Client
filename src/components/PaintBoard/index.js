@@ -14,9 +14,11 @@ import Stepper from '@material-ui/core/Stepper';
 import Step from '@material-ui/core/Step';
 import StepLabel from '@material-ui/core/StepLabel';
 import InfoIcon from '@material-ui/icons/Info';
+import HelpOutlineIcon from '@material-ui/icons/HelpOutline';
 
 import HeaderActions from 'actions/header.actions';
 import Header from 'components/header';
+import BootstrapTooltip from 'components/BootstrapTooltip';
 import { calculateGasMargin } from 'utils';
 import showToast from 'utils/toast';
 import WalletUtils from 'utils/wallet';
@@ -298,7 +300,15 @@ const PaintBoard = () => {
             </div>
           </div>
           <div className={styles.formGroup}>
-            <p className={styles.formLabel}>Royalty</p>
+            <p className={styles.formLabel}>
+              Royalty (%)&nbsp;
+              <BootstrapTooltip
+                title="If you set a royalty here, you will get X percent of sales price each time an NFT is sold on our platform."
+                placement="top"
+              >
+                <HelpOutlineIcon />
+              </BootstrapTooltip>
+            </p>
             <input
               className={styles.formInput}
               type="number"
