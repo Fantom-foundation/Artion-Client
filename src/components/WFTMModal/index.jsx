@@ -10,6 +10,8 @@ import toast from 'react-hot-toast';
 
 import { getWFTMBalance, wrapFTM, unwrapFTM } from 'contracts';
 import showToast from 'utils/toast';
+import { formatNumber } from 'utils';
+import { FTM_TOTAL_SUPPLY } from 'constants/index';
 
 import styles from './styles.module.scss';
 
@@ -149,11 +151,21 @@ const WFTMModal = ({ visible, onClose }) => {
                     placeholder="0.0"
                     value={amount}
                     onChange={e =>
-                      setAmount(isNaN(e.target.value) ? amount : e.target.value)
+                      setAmount(
+                        isNaN(e.target.value)
+                          ? amount
+                          : Math.min(
+                              e.target.value,
+                              FTM_TOTAL_SUPPLY
+                            ).toString()
+                      )
                     }
                   />
                   <div className={styles.usdVal}>
-                    ${((parseFloat(amount) || 0) * price).toFixed(2)}
+                    $
+                    {formatNumber(
+                      ((parseFloat(amount) || 0) * price).toFixed(2)
+                    )}
                   </div>
                 </div>
               </div>
@@ -183,11 +195,21 @@ const WFTMModal = ({ visible, onClose }) => {
                     placeholder="0.0"
                     value={amount}
                     onChange={e =>
-                      setAmount(isNaN(e.target.value) ? amount : e.target.value)
+                      setAmount(
+                        isNaN(e.target.value)
+                          ? amount
+                          : Math.min(
+                              e.target.value,
+                              FTM_TOTAL_SUPPLY
+                            ).toString()
+                      )
                     }
                   />
                   <div className={styles.usdVal}>
-                    ${((parseFloat(amount) || 0) * price).toFixed(2)}
+                    $
+                    {formatNumber(
+                      ((parseFloat(amount) || 0) * price).toFixed(2)
+                    )}
                   </div>
                 </div>
               </div>
