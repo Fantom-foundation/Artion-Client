@@ -3,6 +3,9 @@ import { useSelector } from 'react-redux';
 import cx from 'classnames';
 import { ClipLoader } from 'react-spinners';
 
+import { formatNumber } from 'utils';
+import { FTM_TOTAL_SUPPLY } from 'constants/index';
+
 import styles from './styles.module.scss';
 
 const SellModal = ({
@@ -78,14 +81,19 @@ const SellModal = ({
                 placeholder="0.00"
                 value={price}
                 onChange={e =>
-                  setPrice(isNaN(e.target.value) ? price : e.target.value)
+                  setPrice(
+                    isNaN(e.target.value)
+                      ? price
+                      : Math.min(e.target.value, FTM_TOTAL_SUPPLY).toString()
+                  )
                 }
                 onFocus={() => setFocused(true)}
                 onBlur={() => setFocused(false)}
                 disabled={contractApproving || confirming}
               />
               <div className={styles.usdPrice}>
-                ${((parseFloat(price) || 0) * ftmPrice).toFixed(2)}
+                $
+                {formatNumber(((parseFloat(price) || 0) * ftmPrice).toFixed(2))}
               </div>
             </div>
           </div>

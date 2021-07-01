@@ -6,7 +6,7 @@ import HeaderActions from 'actions/header.actions';
 import Header from 'components/header';
 import FakeCard from 'components/FakeCard';
 
-import fantomLogo from 'assets/svgs/fantom_logo_blue.svg';
+import fantomLogo from 'assets/svgs/fantom_logo_white.svg';
 
 import bg1 from 'assets/svgs/bg1.svg';
 import bg2 from 'assets/svgs/bg2.svg';
@@ -47,10 +47,10 @@ const LandingPage = () => {
           </Link>
         </div>
         <div className={styles.subtitle2}>Zero % based fees on sales</div>
-      </div>
-      <div className={styles.footer}>
-        Powered by&nbsp;
-        <img src={fantomLogo} className={styles.logo} />
+        <div className={styles.footer}>
+          Powered by&nbsp;
+          <img src={fantomLogo} className={styles.logo} />
+        </div>
       </div>
 
       <div className={styles.cardsGroup}>

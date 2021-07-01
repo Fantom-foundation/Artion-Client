@@ -175,19 +175,16 @@
 }
 
 .footer {
-  z-index: 100;
-  position: absolute;
-  bottom: 24px;
-  left: 50%;
-  transform: translateX(-50%);
+  margin-top: 40px;
   display: flex;
   align-items: center;
   font-weight: 400;
-  font-size: 18px;
+  font-size: 22px;
   opacity: .8;
+  color: #FFF;
 
-  img {
-    height: 24px;
+  .logo {
+    height: 26px;
   }
 }
 
