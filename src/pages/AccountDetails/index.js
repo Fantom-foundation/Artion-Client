@@ -7,12 +7,15 @@ import Tooltip from '@material-ui/core/Tooltip';
 import { useWeb3React } from '@web3-react/core';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import Skeleton from 'react-loading-skeleton';
+import { ClipLoader } from 'react-spinners';
 
 import NFTsGrid from 'components/NFTsGrid';
 import Header from 'components/header';
 import Identicon from 'components/Identicon';
 import NewBundleModal from 'components/NewBundleModal';
+import FollowersModal from 'components/FollowersModal';
 import { isAddress, shortenAddress } from 'utils';
+import toast from 'utils/toast';
 import {
   getUserAccountDetails,
   fetchCollections,
@@ -20,6 +23,10 @@ import {
   updateBanner,
   getAccountActivity,
   getActivityFromOthers,
+  getFollowing,
+  followUser as _followUser,
+  getFollowers,
+  getFollowings,
 } from 'api';
 import HeaderActions from 'actions/header.actions';
 import ModalActions from 'actions/modal.actions';
@@ -49,20 +56,26 @@ const AccountDetails = () => {
 
   const { uid } = useParams();
 
-  const { user: me } = useSelector(state => state.Auth);
   const { authToken } = useSelector(state => state.ConnectWallet);
 
   const fileInput = useRef();
 
   const [bundleModalVisible, setBundleModalVisible] = useState(false);
+  const [followingsModalVisible, setFollowingsModalVisible] = useState(false);
+  const [followersModalVisible, setFollowersModalVisible] = useState(false);
   const [fetching, setFetching] = useState(false);
   const tokens = useRef([]);
   const bundles = useRef([]);
+  const [followersLoading, setFollowersLoading] = useState(false);
+  const followers = useRef([]);
+  const followings = useRef([]);
+  const [following, setFollowing] = useState(false);
+  const [followingInProgress, setFollowingInProgress] = useState(false);
   const [count, setCount] = useState(0);
   const [now, setNow] = useState(new Date());
   const [page, setPage] = useState(0);
   const [bannerHash, setBannerHash] = useState();
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [user, setUser] = useState({});
   const [copied, setCopied] = useState(false);
   const [tooltipOpen, setTooltipOpen] = useState(false);
@@ -73,13 +86,19 @@ const AccountDetails = () => {
   const [offers, setOffers] = useState([]);
   const [fetchInterval, setFetchInterval] = useState(null);
 
-  const getUserDetails = async account => {
+  const getUserDetails = async _account => {
     setLoading(true);
     try {
-      const { data } = await getUserAccountDetails(account);
+      const { data } = await getUserAccountDetails(_account);
       setUser(data);
     } catch {
       setUser({});
+    }
+    try {
+      const { data: isFollowing } = await getFollowing(account, _account);
+      setFollowing(isFollowing);
+    } catch {
+      setFollowing(false);
     }
     setLoading(false);
   };
@@ -112,10 +131,8 @@ const AccountDetails = () => {
 
   useEffect(() => {
     getUserDetails(uid);
-    if (tab !== 0) {
-      setTab(0);
-      setTimeout(init, 0);
-    }
+    setTab(0);
+    setTimeout(init, 0);
   }, [uid]);
 
   const updateCollections = async () => {
@@ -148,12 +165,6 @@ const AccountDetails = () => {
   }, []);
 
   const isMe = account?.toLowerCase() === uid.toLowerCase();
-
-  useEffect(() => {
-    if (isMe) {
-      setUser(me);
-    }
-  }, [me]);
 
   useEffect(() => {
     dispatch(HeaderActions.toggleSearchbar(false));
@@ -287,6 +298,61 @@ const AccountDetails = () => {
     setBundleModalVisible(true);
   };
 
+  const fetchFollowers = async () => {
+    setFollowersLoading(true);
+    try {
+      const { data } = await getFollowers(uid);
+      followers.current = data;
+    } catch {
+      followers.current = [];
+    }
+    setFollowersLoading(false);
+  };
+
+  const fetchFollowings = async () => {
+    setFollowersLoading(true);
+    try {
+      const { data } = await getFollowings(uid);
+      followings.current = data;
+    } catch {
+      followings.current = [];
+    }
+    setFollowersLoading(false);
+  };
+
+  const showFollowers = () => {
+    if (loading || user.followers === 0) return;
+
+    setFollowersModalVisible(true);
+    fetchFollowers();
+  };
+
+  const showFollowings = () => {
+    if (loading || user.followings === 0) return;
+
+    setFollowingsModalVisible(true);
+    fetchFollowings();
+  };
+
+  const followUser = async () => {
+    if (followingInProgress) return;
+
+    setFollowingInProgress(true);
+    try {
+      const { status, data } = await _followUser(uid, !following, authToken);
+      if (status === 'success') {
+        const { data } = await getUserAccountDetails(uid);
+        setUser(data);
+        setFollowing(!following);
+      } else {
+        toast('error', data);
+      }
+    } catch (e) {
+      console.log(e);
+    }
+    setFollowingInProgress(false);
+  };
+
   const formatDate = _date => {
     const date = new Date(_date);
     const diff = Math.floor((now - date.getTime()) / 1000);
@@ -307,6 +373,16 @@ const AccountDetails = () => {
       return `${h} Min${h > 1 ? 's' : ''} Ago`;
     }
     return `${diff} Second${diff > 1 ? 's' : ''} Ago`;
+  };
+
+  const intlFormat = num => {
+    return new Intl.NumberFormat().format(Math.round(num * 10) / 10);
+  };
+
+  const formatFollowers = num => {
+    if (num >= 1000000) return intlFormat(num / 1000000) + 'M';
+    if (num >= 1000) return intlFormat(num / 1000) + 'k';
+    return intlFormat(num);
   };
 
   if (!isAddress(uid)) {
@@ -359,11 +435,32 @@ const AccountDetails = () => {
             <Identicon className={styles.avatar} account={uid} size={150} />
           )}
         </div>
-        <div className={styles.username}>
-          {loading ? (
-            <Skeleton width={120} height={24} />
+        <div className={styles.usernameWrapper}>
+          <div className={styles.username}>
+            {loading ? (
+              <Skeleton width={120} height={24} />
+            ) : (
+              user.alias || 'Unnamed'
+            )}
+          </div>
+          {isMe ? null : loading ? (
+            <Skeleton width={80} height={26} />
           ) : (
-            user.alias || 'Unnamed'
+            <div
+              className={cx(
+                styles.followBtn,
+                followingInProgress && styles.disabled
+              )}
+              onClick={followUser}
+            >
+              {followingInProgress ? (
+                <ClipLoader color="#FFF" size={14} />
+              ) : following ? (
+                'Unfollow'
+              ) : (
+                'Follow'
+              )}
+            </div>
           )}
         </div>
         <div className={styles.addressWrapper}>
@@ -400,6 +497,24 @@ const AccountDetails = () => {
               {t}
             </div>
           ))}
+          <div className={styles.tab} onClick={showFollowers}>
+            Followers (
+            {loading ? (
+              <Skeleton width={30} height={24} />
+            ) : (
+              formatFollowers(user.followers || 0)
+            )}
+            )
+          </div>
+          <div className={styles.tab} onClick={showFollowings}>
+            Followings(
+            {loading ? (
+              <Skeleton width={30} height={24} />
+            ) : (
+              formatFollowers(user.followings || 0)
+            )}
+            )
+          </div>
         </div>
         <div className={styles.contentBody} onScroll={handleScroll}>
           {tab === 0 ? (
@@ -579,6 +694,21 @@ const AccountDetails = () => {
           bundles.current = [];
           fetchNFTs(0);
         }}
+      />
+      <FollowersModal
+        visible={followersModalVisible || followingsModalVisible}
+        onClose={() => {
+          setFollowersModalVisible(false);
+          setFollowingsModalVisible(false);
+        }}
+        title={followersModalVisible ? 'Followers' : 'Followings'}
+        users={
+          followersLoading
+            ? new Array(5).fill(null)
+            : followersModalVisible
+            ? followers.current
+            : followings.current
+        }
       />
     </div>
   );

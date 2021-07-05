@@ -98,11 +98,32 @@
   height: 150px;
 }
 
-.username {
+.usernameWrapper {
   margin-top: 16px;
+  display: flex;
+  align-items: center;
+}
+
+.username {
+  margin-right: 16px;
   font-size: 24px;
   font-weight: 600;
   color: #3D3D3D;
+}
+
+.followBtn {
+  width: 80px;
+  height: 26px;
+  border-radius: 4px;
+  background-color: #2479FA;
+  color: #FFF;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 0 4px rgba(0, 0, 0, .4);
+  user-select: none;
 }
 
 .addressWrapper {
@@ -267,6 +288,12 @@
   left: 0;
   width: 100%;
   height: 100%;
+}
+
+.disabled {
+  cursor: not-allowed;
+  box-shadow: none !important;
+  opacity: 0.7;
 }
 
 @media only screen and (max-width: 600px) {

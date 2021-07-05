@@ -362,3 +362,46 @@ export const deleteBundle = async (bundleID, authToken) => {
   });
   return res.data;
 };
+
+export const getFollowing = async (from, to) => {
+  const data = { from, to };
+  const res = await axios({
+    method: 'post',
+    url: `${API_URL}/follow/isFollowing`,
+    data: JSON.stringify(data),
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+  return res.data;
+};
+
+export const followUser = async (follower, follow, authToken) => {
+  const data = { follower, status: follow ? 1 : 0 };
+  const res = await axios({
+    method: 'post',
+    url: `${API_URL}/follow/update`,
+    data: JSON.stringify(data),
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${authToken}`,
+    },
+  });
+  return res.data;
+};
+
+export const getFollowers = async address => {
+  const res = await axios({
+    method: 'get',
+    url: `${API_URL}/follow/getFollowers/${address}`,
+  });
+  return res.data;
+};
+
+export const getFollowings = async address => {
+  const res = await axios({
+    method: 'get',
+    url: `${API_URL}/follow/getFollowings/${address}`,
+  });
+  return res.data;
+};
