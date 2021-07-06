@@ -221,7 +221,7 @@ const PaintBoard = () => {
         setTimeout(() => {
           history.push(
             `/explore/${
-              FantomNFTConstants.MAINNETADDRESS
+              FantomNFTConstants.ADDRESS[chainId]
             }/${mintedTkId.toNumber()}`
           );
         }, 1000 + Math.random() * 2000);
