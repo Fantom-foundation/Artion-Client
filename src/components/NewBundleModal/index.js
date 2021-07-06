@@ -10,7 +10,7 @@ import { useWeb3React } from '@web3-react/core';
 
 import SuspenseImg from 'components/SuspenseImg';
 import { useApi } from 'api';
-import { useBundleSalesContract, getNFTContract } from 'contracts';
+import { useBundleSalesContract, useNFTContract } from 'contracts';
 import { Contracts } from 'constants/networks';
 import toast from 'utils/toast';
 
@@ -70,6 +70,7 @@ const NewBundleModal = ({
   const { account, chainId } = useWeb3React();
 
   const { createBundle, deleteBundle } = useApi();
+  const { getNFTContract } = useNFTContract();
   const { listBundle } = useBundleSalesContract();
 
   const rootRef = useRef(null);

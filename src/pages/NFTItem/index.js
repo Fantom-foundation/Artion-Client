@@ -31,6 +31,7 @@ import Panel from 'components/Panel';
 import Identicon from 'components/Identicon';
 import { useApi } from 'api';
 import {
+  useNFTContract,
   useWFTMContract,
   useSalesContract,
   useAuctionContract,
@@ -86,9 +87,9 @@ const NFTItem = () => {
     get1155Info,
     getTokenHolders,
   } = useApi();
+  const { getNFTContract } = useNFTContract();
   const {
     wftmAddress,
-    getNFTContract,
     getWFTMBalance,
     getAllowance,
     approve,
@@ -1004,24 +1005,24 @@ const NFTItem = () => {
   };
 
   useEffect(() => {
-    if (address && account) {
+    if (address && account && chainId) {
       getSalesContractStatus();
       getAuctionContractStatus();
     }
-  }, [address, account]);
+  }, [address, account, chainId]);
 
   useEffect(() => {
-    if (bundleItems.current && account) {
+    if (bundleItems.current && account && chainId) {
       getBundleSalesContractStatus();
     }
-  }, [bundleItems.current, account]);
+  }, [bundleItems.current, account, chainId]);
 
   useEffect(() => {
-    if (address) {
+    if (address && chainId) {
       addNFTContractEventListeners();
       getCollection();
     }
-  }, [address]);
+  }, [address, chainId]);
 
   const handleApproveSalesContract = async () => {
     setSalesContractApproving(true);
