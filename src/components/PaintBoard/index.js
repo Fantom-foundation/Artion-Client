@@ -68,7 +68,7 @@ const PaintBoard = () => {
   );
   const authToken = useSelector(state => state.ConnectWallet.authToken);
 
-  const getFee = useCallback(async () => {
+  const getFee = async () => {
     setFee(null);
 
     const contract = await loadContract(
@@ -77,7 +77,7 @@ const PaintBoard = () => {
     );
     const _fee = await contract.platformFee();
     setFee(parseFloat(_fee.toString()) / 10 ** 18);
-  }, [chainId]);
+  };
 
   useEffect(() => {
     if (!chainId) return;
@@ -131,7 +131,7 @@ const PaintBoard = () => {
     }, 1000);
   };
 
-  const mintNFT = useCallback(async () => {
+  const mintNFT = async () => {
     if (!isWalletConnected) {
       showToast('info', 'Connect your wallet first');
       return;
@@ -232,7 +232,7 @@ const PaintBoard = () => {
       showToast('error', error.message);
     }
     resetMintingStatus();
-  }, [chainId]);
+  };
 
   return (
     <div className={styles.container}>
