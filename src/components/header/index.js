@@ -39,7 +39,7 @@ const NiftyHeader = ({ light }) => {
   const history = useHistory();
   const dispatch = useDispatch();
 
-  const { apiUrl, getAuthToken, getAccountDetails } = useApi();
+  const { apiUrl, storageUrl, getAuthToken, getAccountDetails } = useApi();
   const { account, chainId, activate } = useWeb3React();
 
   const { user } = useSelector(state => state.Auth);
@@ -374,7 +374,7 @@ const NiftyHeader = ({ light }) => {
                           tk.thumbnailPath &&
                           (tk.thumbnailPath.length > 10 ? (
                             <img
-                              src={`https://storage.artion.io/image/${tk.thumbnailPath}`}
+                              src={`${storageUrl()}/image/${tk.thumbnailPath}`}
                             />
                           ) : tk.thumbnailPath === '.' ? (
                             <img src={tk.imageURL} />

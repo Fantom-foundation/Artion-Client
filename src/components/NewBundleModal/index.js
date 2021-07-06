@@ -17,6 +17,8 @@ import toast from 'utils/toast';
 import styles from './styles.module.scss';
 
 const NFTItem = ({ item, loading, selected, onClick }) => {
+  const { storageUrl } = useApi();
+
   return (
     <div
       className={cx(styles.item, selected && styles.selected)}
@@ -45,7 +47,7 @@ const NFTItem = ({ item, loading, selected, onClick }) => {
               <SuspenseImg
                 src={
                   item.thumbnailPath?.length > 10
-                    ? `https://storage.artion.io/image/${item.thumbnailPath}`
+                    ? `${storageUrl()}/image/${item.thumbnailPath}`
                     : item.imageURL
                 }
                 className={styles.media}

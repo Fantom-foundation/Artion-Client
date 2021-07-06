@@ -13,6 +13,13 @@ export const useApi = () => {
     return 'https://api.testnet.artion.io';
   }, [chainId]);
 
+  const storageUrl = useCallback(() => {
+    if (chainId === ChainId.FANTOM) {
+      return 'https://storage.artion.io';
+    }
+    return 'https://storage.testnet.artion.io';
+  }, [chainId]);
+
   const getAuthToken = async address => {
     let result = await axios({
       method: 'post',
@@ -412,6 +419,7 @@ export const useApi = () => {
 
   return {
     apiUrl,
+    storageUrl,
     getAuthToken,
     getAccountDetails,
     getUserAccountDetails,

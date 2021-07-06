@@ -71,6 +71,7 @@ const NFTItem = () => {
   const history = useHistory();
 
   const {
+    storageUrl,
     getBundleDetails,
     fetchTokenURI,
     increaseBundleViewCount,
@@ -1805,9 +1806,7 @@ const NFTItem = () => {
               <Loader type="Oval" color="#007BFF" height={32} width={32} />
             }
           >
-            <SuspenseImg
-              src={`https://storage.artion.io/image/${item.thumbnailPath}`}
-            />
+            <SuspenseImg src={`${storageUrl()}/image/${item.thumbnailPath}`} />
           </Suspense>
         </div>
         <div className={styles.bundleItemInfo}>
@@ -2103,7 +2102,9 @@ const NFTItem = () => {
                             <SuspenseImg
                               src={
                                 item.thumbnailPath?.length > 10
-                                  ? `https://storage.artion.io/image/${item.thumbnailPath}`
+                                  ? `${storageUrl()}/image/${
+                                      item.thumbnailPath
+                                    }`
                                   : item.metadata?.image
                               }
                             />

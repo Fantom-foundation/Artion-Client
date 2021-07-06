@@ -12,10 +12,13 @@ import axios from 'axios';
 
 import SuspenseImg from 'components/SuspenseImg';
 import { formatNumber } from 'utils';
+import { useApi } from 'api';
 
 import styles from './styles.module.scss';
 
 const BaseCard = ({ item, loading, style, create, onCreate }) => {
+  const { storageUrl } = useApi();
+
   const [fetching, setFetching] = useState(false);
   const [info, setInfo] = useState(null);
   const [index, setIndex] = useState(0);
@@ -61,7 +64,7 @@ const BaseCard = ({ item, loading, style, create, onCreate }) => {
             <SuspenseImg
               src={
                 v.thumbnailPath?.length > 10
-                  ? `https://storage.artion.io/image/${v.thumbnailPath}`
+                  ? `${storageUrl()}/image/${v.thumbnailPath}`
                   : v.imageURL
               }
               className={styles.media}
@@ -127,7 +130,7 @@ const BaseCard = ({ item, loading, style, create, onCreate }) => {
                     <SuspenseImg
                       src={
                         item.thumbnailPath?.length > 10
-                          ? `https://storage.artion.io/image/${item.thumbnailPath}`
+                          ? `${storageUrl()}/image/${item.thumbnailPath}`
                           : item?.imageURL || info?.image
                       }
                       className={styles.media}
