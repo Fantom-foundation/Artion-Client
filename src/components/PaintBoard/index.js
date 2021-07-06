@@ -134,7 +134,7 @@ const PaintBoard = () => {
     }
     const balance = await WalletUtils.checkBalance(account);
 
-    if (balance < 5) {
+    if (balance < fee) {
       showToast(
         'custom',
         `Your balance should be at least ${fee} FTM to mint an NFT`
@@ -184,7 +184,7 @@ const PaintBoard = () => {
       try {
         const args = [account, jsonHash];
         const options = {
-          value: ethers.utils.parseEther('5'),
+          value: ethers.utils.parseEther(fee.toString()),
         };
         const gasEstimate = await contract.estimateGas.mint(...args, options);
         options.gasLimit = calculateGasMargin(gasEstimate);
