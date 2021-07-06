@@ -4,11 +4,13 @@ import cx from 'classnames';
 import { ClipLoader } from 'react-spinners';
 
 import toast from 'utils/toast';
-import { banItem } from 'api';
+import { useApi } from 'api';
 
 import styles from './styles.module.scss';
 
 const BanItemModal = ({ visible, onClose }) => {
+  const { banItem } = useApi();
+
   const { authToken } = useSelector(state => state.ConnectWallet);
 
   const [banning, setBanning] = useState(false);

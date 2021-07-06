@@ -8,6 +8,7 @@ import axios from 'axios';
 import { BigNumber, ethers } from 'ethers';
 import { useDropzone } from 'react-dropzone';
 import Skeleton from 'react-loading-skeleton';
+import { ChainId } from '@sushiswap/sdk';
 
 import CloseIcon from '@material-ui/icons/Close';
 import Stepper from '@material-ui/core/Stepper';
@@ -23,12 +24,10 @@ import { calculateGasMargin } from 'utils';
 import showToast from 'utils/toast';
 import WalletUtils from 'utils/wallet';
 import SCHandlers from 'utils/sc.interaction';
-import { API_URL } from 'api';
-import { registerRoyalty } from 'contracts';
+import { useApi } from 'api';
+import { useSalesContract } from 'contracts';
 import { FantomNFTConstants } from 'constants/smartcontracts/fnft.constants';
 
-import 'tui-image-editor/dist/tui-image-editor.css';
-import 'tui-color-picker/dist/tui-color-picker.css';
 import styles from './styles.module.scss';
 
 const accept = ['image/*'];
@@ -42,6 +41,9 @@ const mintSteps = [
 const PaintBoard = () => {
   const dispatch = useDispatch();
   const history = useHistory();
+
+  const { apiUrl } = useApi();
+  const { registerRoyalty } = useSalesContract();
 
   const { account, chainId } = useWeb3React();
 
@@ -65,14 +67,14 @@ const PaintBoard = () => {
   );
   const authToken = useSelector(state => state.ConnectWallet.authToken);
 
-  const getFee = async () => {
-    const [contract] = await SCHandlers.loadContract(
-      FantomNFTConstants.MAINNETADDRESS,
+  const getFee = useCallback(async () => {
+    const contract = await SCHandlers.loadContract(
+      FantomNFTConstants.ADDRESS[chainId],
       FantomNFTConstants.ABI
     );
     const _fee = await contract.platformFee();
     setFee(parseFloat(_fee.toString()) / 10 ** 18);
-  };
+  }, [chainId]);
 
   useEffect(() => {
     getFee();
@@ -121,12 +123,12 @@ const PaintBoard = () => {
     }, 1000);
   };
 
-  const mintNFT = async () => {
+  const mintNFT = useCallback(async () => {
     if (!isWalletConnected) {
       showToast('info', 'Connect your wallet first');
       return;
     }
-    if (chainId != 250) {
+    if (chainId !== ChainId.FANTOM && chainId !== ChainId.FANTOM_TESTNET) {
       showToast('info', 'You are not connected to Fantom Opera Network');
       return;
     }
@@ -161,7 +163,7 @@ const PaintBoard = () => {
     try {
       let result = await axios({
         method: 'post',
-        url: `${API_URL}/ipfs/uploadImage2Server`,
+        url: `${apiUrl()}/ipfs/uploadImage2Server`,
         data: formData,
         headers: {
           'Content-Type': 'multipart/form-data',
@@ -174,27 +176,24 @@ const PaintBoard = () => {
 
       const jsonHash = result.data.jsonHash;
 
-      let fnft_sc = await SCHandlers.loadContract(
-        FantomNFTConstants.MAINNETADDRESS,
+      const contract = await SCHandlers.loadContract(
+        FantomNFTConstants.ADDRESS[chainId],
         FantomNFTConstants.ABI
       );
-
-      const provider = fnft_sc[1];
-      fnft_sc = fnft_sc[0];
 
       try {
         const args = [account, jsonHash];
         const options = {
           value: ethers.utils.parseEther('5'),
         };
-        const gasEstimate = await fnft_sc.estimateGas.mint(...args, options);
+        const gasEstimate = await contract.estimateGas.mint(...args, options);
         options.gasLimit = calculateGasMargin(gasEstimate);
-        const tx = await fnft_sc.mint(...args, options);
+        const tx = await contract.mint(...args, options);
         setCurrentMintingStep(1);
         setLastMintedTnxId(tx.hash);
 
         setCurrentMintingStep(2);
-        const confirmedTnx = await provider.waitForTransaction(tx.hash);
+        const confirmedTnx = await tx.wait();
         setCurrentMintingStep(3);
         const evtCaught = confirmedTnx.logs[0].topics;
         const mintedTkId = BigNumber.from(evtCaught[3]);
@@ -225,7 +224,7 @@ const PaintBoard = () => {
       showToast('error', error.message);
     }
     resetMintingStatus();
-  };
+  }, [chainId]);
 
   return (
     <div className={styles.container}>

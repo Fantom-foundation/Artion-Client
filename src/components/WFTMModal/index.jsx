@@ -8,7 +8,7 @@ import Skeleton from 'react-loading-skeleton';
 import SwapVertIcon from '@material-ui/icons/SwapVert';
 import toast from 'react-hot-toast';
 
-import { getWFTMBalance, wrapFTM, unwrapFTM } from 'contracts';
+import { useWFTMContract } from 'contracts';
 import showToast from 'utils/toast';
 import { formatNumber } from 'utils';
 import { FTM_TOTAL_SUPPLY } from 'constants/index';
@@ -16,7 +16,8 @@ import { FTM_TOTAL_SUPPLY } from 'constants/index';
 import styles from './styles.module.scss';
 
 const WFTMModal = ({ visible, onClose }) => {
-  const { account } = useWeb3React();
+  const { account, chainId } = useWeb3React();
+  const { getWFTMBalance, wrapFTM, unwrapFTM } = useWFTMContract();
 
   const [loading, setLoading] = useState(false);
   const [balance, setBalance] = useState(0);
@@ -51,7 +52,7 @@ const WFTMModal = ({ visible, onClose }) => {
       setAmount('');
       getBalances();
     }
-  }, [visible]);
+  }, [visible, chainId]);
 
   const handleClick = e => {
     e.preventDefault();

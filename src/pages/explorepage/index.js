@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useParams } from 'react-router-dom';
 import axios from 'axios';
+import { useWeb3React } from '@web3-react/core';
 
 import StatusFilter from 'components/StatusFilter';
 import CollectionsFilter from 'components/CollectionsFilter';
@@ -9,24 +9,24 @@ import ExploreHeader from './Header';
 import ExploreFilterHeader from './Body/FilterHeader';
 import NFTsGrid from 'components/NFTsGrid';
 import Header from 'components/header';
-import { getUserAccountDetails, fetchCollections, fetchTokens } from 'api';
+import { useApi } from 'api';
 import CollectionsActions from 'actions/collections.actions';
 import TokensActions from 'actions/tokens.actions';
 import HeaderActions from 'actions/header.actions';
-import { shortenAddress } from 'utils';
-import Identicon from 'components/Identicon';
 import useWindowDimensions from 'hooks/useWindowDimensions';
 
 import styles from './styles.module.scss';
 
 const ExploreAllPage = () => {
+  const { fetchCollections, fetchTokens } = useApi();
+
   const dispatch = useDispatch();
 
-  const { uid } = useParams();
+  const { chainId } = useWeb3React();
+
   const { width } = useWindowDimensions();
 
   const [page, setPage] = useState(0);
-  const [user, setUser] = useState({});
   const [fetchInterval, setFetchInterval] = useState(null);
   const [cancelSource, setCancelSource] = useState(null);
 
@@ -42,23 +42,9 @@ const ExploreAllPage = () => {
     statusOnAuction,
   } = useSelector(state => state.Filter);
 
-  const getUserDetails = async account => {
-    try {
-      const { data } = await getUserAccountDetails(account);
-      setUser(data);
-    } catch {
-      setUser({});
-    }
-  };
-
   useEffect(() => {
-    if (uid) {
-      getUserDetails(uid);
-      dispatch(HeaderActions.toggleSearchbar(false));
-    } else {
-      dispatch(HeaderActions.toggleSearchbar(true));
-    }
-  }, [uid]);
+    dispatch(HeaderActions.toggleSearchbar(true));
+  }, []);
 
   const updateCollections = async () => {
     try {
@@ -101,7 +87,7 @@ const ExploreAllPage = () => {
         category,
         sortBy,
         filterBy,
-        uid,
+        null,
         cancelTokenSource.token
       );
       dispatch(TokensActions.fetchingSuccess(data.total, data.tokens));
@@ -124,7 +110,7 @@ const ExploreAllPage = () => {
         clearInterval(fetchInterval);
       }
     };
-  }, []);
+  }, [chainId]);
 
   const handleScroll = e => {
     if (fetching) return;
@@ -148,7 +134,7 @@ const ExploreAllPage = () => {
     statusHasBids,
     statusHasOffers,
     statusOnAuction,
-    uid,
+    chainId,
   ]);
 
   return (
@@ -159,28 +145,6 @@ const ExploreAllPage = () => {
         onScroll={width <= 600 ? handleScroll : null}
       >
         <div className={styles.sidebar}>
-          {uid && (
-            <div className={styles.profileWrapper}>
-              {user.imageHash ? (
-                <img
-                  src={`https://gateway.pinata.cloud/ipfs/${user.imageHash}`}
-                  className={styles.avatar}
-                />
-              ) : (
-                <Identicon account={uid} size={100} />
-              )}
-              <div className={styles.username}>{user.alias || ''}</div>
-              <a
-                href={`https://ftmscan.com/address/${uid}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={styles.account}
-              >
-                {shortenAddress(uid)}
-              </a>
-              <div className={styles.bio}>{user.bio || ''}</div>
-            </div>
-          )}
           <StatusFilter />
           <CollectionsFilter />
         </div>
