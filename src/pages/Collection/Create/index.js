@@ -14,7 +14,7 @@ import HeaderActions from 'actions/header.actions';
 import Header from 'components/header';
 import BootstrapTooltip from 'components/BootstrapTooltip';
 import toast from 'utils/toast';
-import { API_URL } from 'api';
+import { useApi } from 'api';
 
 import webIcon from 'assets/svgs/web.svg';
 import discordIcon from 'assets/svgs/discord.svg';
@@ -29,6 +29,8 @@ import styles from './styles.module.scss';
 const CollectionCreate = () => {
   const dispatch = useDispatch();
   const history = useHistory();
+
+  const { apiUrl } = useApi();
 
   const inputRef = useRef(null);
 
@@ -179,7 +181,7 @@ const CollectionCreate = () => {
           formData.append('imgData', logodata);
           const result = await axios({
             method: 'post',
-            url: `${API_URL}/ipfs/uploadCollectionImage2Server`,
+            url: `${apiUrl()}/ipfs/uploadCollectionImage2Server`,
             data: formData,
             headers: {
               'Content-Type': 'multipart/form-data',
@@ -205,7 +207,7 @@ const CollectionCreate = () => {
 
           await axios({
             method: 'post',
-            url: `${API_URL}/collection/collectiondetails`,
+            url: `${apiUrl()}/collection/collectiondetails`,
             data: JSON.stringify(data),
             headers: {
               'Content-Type': 'application/json',

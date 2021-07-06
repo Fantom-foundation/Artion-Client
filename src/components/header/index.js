@@ -7,6 +7,7 @@ import { UnsupportedChainIdError, useWeb3React } from '@web3-react/core';
 import { ExpandMore, Search as SearchIcon } from '@material-ui/icons';
 import { useDispatch, useSelector } from 'react-redux';
 import axios from 'axios';
+import { ChainId } from '@sushiswap/sdk';
 
 import WalletConnectActions from 'actions/walletconnect.actions';
 import AuthActions from 'actions/auth.actions';
@@ -14,7 +15,7 @@ import ModalActions from 'actions/modal.actions';
 import HeaderActions from 'actions/header.actions';
 import { shortenAddress } from 'utils';
 import { injected } from 'connectors';
-import { API_URL, getAuthToken, getAccountDetails } from 'api';
+import { useApi } from 'api';
 import { NETWORK_LABEL } from 'constants/networks';
 import WFTMModal from 'components/WFTMModal';
 import BanItemModal from 'components/BanItemModal';
@@ -38,6 +39,7 @@ const NiftyHeader = ({ light }) => {
   const history = useHistory();
   const dispatch = useDispatch();
 
+  const { apiUrl, storageUrl, getAuthToken, getAccountDetails } = useApi();
   const { account, chainId, activate } = useWeb3React();
 
   const { user } = useSelector(state => state.Auth);
@@ -87,7 +89,8 @@ const NiftyHeader = ({ light }) => {
   };
 
   const changeNetwork = async () => {
-    if (chainId === 250) return;
+    if (chainId === ChainId.FANTOM || chainId === ChainId.FANTOM_TESTNET)
+      return;
 
     const params = {
       chainId: '0xfa',
@@ -97,7 +100,7 @@ const NiftyHeader = ({ light }) => {
         symbol: 'FTM',
         decimals: 18,
       },
-      rpcUrls: ['https://rpcapi.fantom.network'],
+      rpcUrls: ['https://rpc.ftm.tools'],
       blockExplorerUrls: ['https://ftmscan.com'],
     };
 
@@ -124,7 +127,7 @@ const NiftyHeader = ({ light }) => {
     } else {
       handleSignOut();
     }
-  }, [account]);
+  }, [account, chainId]);
 
   const handleConnectWallet = () => {
     activate(injected, undefined, true)
@@ -181,7 +184,7 @@ const NiftyHeader = ({ light }) => {
         },
       } = await axios({
         method: 'post',
-        url: `${API_URL}/info/searchNames`,
+        url: `${apiUrl()}/info/searchNames`,
         data: JSON.stringify({ name: word }),
         headers: {
           'Content-Type': 'application/json',
@@ -371,7 +374,7 @@ const NiftyHeader = ({ light }) => {
                           tk.thumbnailPath &&
                           (tk.thumbnailPath.length > 10 ? (
                             <img
-                              src={`https://storage.artion.io/image/${tk.thumbnailPath}`}
+                              src={`${storageUrl()}/image/${tk.thumbnailPath}`}
                             />
                           ) : tk.thumbnailPath === '.' ? (
                             <img src={tk.imageURL} />

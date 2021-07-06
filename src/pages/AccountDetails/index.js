@@ -16,18 +16,7 @@ import NewBundleModal from 'components/NewBundleModal';
 import FollowersModal from 'components/FollowersModal';
 import { isAddress, shortenAddress } from 'utils';
 import toast from 'utils/toast';
-import {
-  getUserAccountDetails,
-  fetchCollections,
-  fetchTokens,
-  updateBanner,
-  getAccountActivity,
-  getActivityFromOthers,
-  getFollowing,
-  followUser as _followUser,
-  getFollowers,
-  getFollowings,
-} from 'api';
+import { useApi } from 'api';
 import HeaderActions from 'actions/header.actions';
 import ModalActions from 'actions/modal.actions';
 import CollectionsActions from 'actions/collections.actions';
@@ -52,7 +41,19 @@ const tabs = [
 const AccountDetails = () => {
   const dispatch = useDispatch();
 
-  const { account } = useWeb3React();
+  const {
+    getUserAccountDetails,
+    fetchCollections,
+    fetchTokens,
+    updateBanner,
+    getAccountActivity,
+    getActivityFromOthers,
+    getFollowing,
+    followUser: _followUser,
+    getFollowers,
+    getFollowings,
+  } = useApi();
+  const { account, chainId } = useWeb3React();
 
   const { uid } = useParams();
 
@@ -133,7 +134,7 @@ const AccountDetails = () => {
     getUserDetails(uid);
     setTab(0);
     setTimeout(init, 0);
-  }, [uid]);
+  }, [uid, chainId]);
 
   const updateCollections = async () => {
     try {
@@ -154,15 +155,13 @@ const AccountDetails = () => {
   };
 
   useEffect(() => {
+    if (fetchInterval) {
+      clearInterval(fetchInterval);
+    }
+
     updateCollections();
     setFetchInterval(setInterval(updateCollections, 1000 * 60 * 10));
-
-    return () => {
-      if (fetchInterval) {
-        clearInterval(fetchInterval);
-      }
-    };
-  }, []);
+  }, [chainId]);
 
   const isMe = account?.toLowerCase() === uid.toLowerCase();
 

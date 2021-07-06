@@ -4,11 +4,12 @@ import cx from 'classnames';
 import { ClipLoader } from 'react-spinners';
 
 import toast from 'utils/toast';
-import { boostCollection } from 'api';
+import { useApi } from 'api';
 
 import styles from './styles.module.scss';
 
 const BoostCollectionModal = ({ visible, onClose }) => {
+  const { boostCollection } = useApi();
   const { authToken } = useSelector(state => state.ConnectWallet);
 
   const [boosting, setBoosting] = useState(false);

@@ -21,3 +21,16 @@ export const NETWORK_LABEL = {
   [ChainId.HARMONY]: 'Harmony',
   [ChainId.HARMONY_TESTNET]: 'Harmony Testnet',
 };
+
+export const Contracts = {
+  [ChainId.FANTOM]: {
+    auction: '0xdb404BF33c90b51176cA3db85288296B8594D134',
+    sales: '0x19fD7C9B72cd944f987E0aB1FdD33fF8f68Cf87C',
+    bundleSales: '0x0EeB6B95B52dfDFb86CcF960F8408a211555b63b',
+  },
+  [ChainId.FANTOM_TESTNET]: {
+    auction: '0xa5568193Ba09dbb934A9Af33A9e8639d1eaC6F43',
+    sales: '0xBA8A36804a6BaE272fe4C8A2F5Cf551b03C26A01',
+    bundleSales: '0x03b0Dd901E3366f6666c2eb411D14c469b8E8727',
+  },
+};

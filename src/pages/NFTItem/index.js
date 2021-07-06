@@ -29,62 +29,16 @@ import toast from 'react-hot-toast';
 
 import Panel from 'components/Panel';
 import Identicon from 'components/Identicon';
+import { useApi } from 'api';
 import {
-  getBundleDetails,
-  fetchTokenURI,
-  increaseBundleViewCount,
-  increaseViewCount,
-  getListings,
-  getOffers,
-  getBundleOffers as _getBundleOffers,
-  getTradeHistory,
-  getBundleTradeHistory as _getBundleTradeHistory,
-  getTransferHistory,
-  fetchCollection,
-  getUserAccountDetails,
-  getTokenType,
-  get1155Info,
-  getTokenHolders,
-} from 'api';
-import {
-  getSalesContract,
-  getBundleSalesContract,
-  getNFTContract,
-  listItem,
-  cancelListing,
-  updateListing,
-  buyItem,
-  listBundle,
-  getBundleListing,
-  updateBundleListing,
-  cancelBundleListing,
-  buyBundle,
-  createBundleOffer,
-  cancelBundleOffer,
-  acceptBundleOffer,
-  getWFTMBalance,
-  getAllowance,
-  approve,
-  createOffer,
-  cancelOffer,
-  acceptOffer,
-  getAuctionContract,
-  getAuction,
-  createAuction,
-  cancelAuction,
-  updateAuctionStartTime,
-  updateAuctionEndTime,
-  updateAuctionReservePrice,
-  getHighestBidder,
-  placeBid,
-  withdrawBid,
-  resultAuction,
-  SALES_CONTRACT_ADDRESS,
-  BUNDLE_SALES_CONTRACT_ADDRESS,
-  WFTM_ADDRESS,
-  AUCTION_CONTRACT_ADDRESS,
+  useNFTContract,
+  useWFTMContract,
+  useSalesContract,
+  useAuctionContract,
+  useBundleSalesContract,
 } from 'contracts';
 import { shortenAddress, formatNumber } from 'utils';
+import { Contracts } from 'constants/networks';
 import showToast from 'utils/toast';
 import SellModal from 'components/SellModal';
 import OfferModal from 'components/OfferModal';
@@ -115,6 +69,66 @@ const filters = ['Trade History', 'Transfer History'];
 const NFTItem = () => {
   const dispatch = useDispatch();
   const history = useHistory();
+
+  const {
+    storageUrl,
+    getBundleDetails,
+    fetchTokenURI,
+    increaseBundleViewCount,
+    increaseViewCount,
+    getListings,
+    getOffers,
+    getBundleOffers: _getBundleOffers,
+    getTradeHistory,
+    getBundleTradeHistory: _getBundleTradeHistory,
+    getTransferHistory,
+    fetchCollection,
+    getUserAccountDetails,
+    getTokenType,
+    get1155Info,
+    getTokenHolders,
+  } = useApi();
+  const { getNFTContract } = useNFTContract();
+  const {
+    wftmAddress,
+    getWFTMBalance,
+    getAllowance,
+    approve,
+  } = useWFTMContract();
+  const {
+    getSalesContract,
+    buyItem,
+    cancelListing,
+    listItem,
+    updateListing,
+    createOffer,
+    cancelOffer,
+    acceptOffer,
+  } = useSalesContract();
+  const {
+    getAuctionContract,
+    getAuction,
+    cancelAuction,
+    createAuction,
+    getHighestBidder,
+    placeBid,
+    resultAuction,
+    updateAuctionStartTime,
+    updateAuctionEndTime,
+    updateAuctionReservePrice,
+    withdrawBid,
+  } = useAuctionContract();
+  const {
+    getBundleSalesContract,
+    getBundleListing,
+    buyBundle,
+    cancelBundleListing,
+    listBundle,
+    updateBundleListing,
+    createBundleOffer,
+    cancelBundleOffer,
+    acceptBundleOffer,
+  } = useBundleSalesContract();
 
   const { addr: address, id: tokenID, bundleID } = useParams();
 
@@ -856,6 +870,8 @@ const NFTItem = () => {
   };
 
   useEffect(() => {
+    if (!chainId) return;
+
     if (address && tokenID) {
       addEventListeners();
       getAuctionConfiguration();
@@ -878,9 +894,11 @@ const NFTItem = () => {
         removeBundleEventListeners();
       }
     };
-  }, []);
+  }, [chainId]);
 
   useEffect(() => {
+    if (!chainId) return;
+
     if (bundleID) {
       listings.current = [];
 
@@ -906,7 +924,7 @@ const NFTItem = () => {
         setViews(data);
       });
     }
-  }, [address, tokenID, bundleID]);
+  }, [chainId, address, tokenID, bundleID]);
 
   useEffect(() => {
     if (address && tokenID && tokenType.current && filter === 1) {
@@ -927,7 +945,7 @@ const NFTItem = () => {
     try {
       const approved = await contract.isApprovedForAll(
         account,
-        SALES_CONTRACT_ADDRESS
+        Contracts[chainId].sales
       );
       setSalesContractApproved(approved);
     } catch (e) {
@@ -949,7 +967,7 @@ const NFTItem = () => {
         try {
           const _approved = await contract.isApprovedForAll(
             account,
-            BUNDLE_SALES_CONTRACT_ADDRESS
+            Contracts[chainId].bundleSales
           );
           approved[address] = _approved;
         } catch (e) {
@@ -965,7 +983,7 @@ const NFTItem = () => {
     try {
       const approved = await contract.isApprovedForAll(
         account,
-        AUCTION_CONTRACT_ADDRESS
+        Contracts[chainId].auction
       );
       setAuctionContractApproved(approved);
     } catch (e) {
@@ -978,9 +996,9 @@ const NFTItem = () => {
 
     contract.on('ApprovalForAll', (owner, operator, approved) => {
       if (account?.toLowerCase() === owner?.toLowerCase()) {
-        if (operator === AUCTION_CONTRACT_ADDRESS) {
+        if (operator === Contracts[chainId].auction) {
           setAuctionContractApproved(approved);
-        } else if (operator === SALES_CONTRACT_ADDRESS) {
+        } else if (operator === Contracts[chainId].sales) {
           setSalesContractApproved(approved);
         }
       }
@@ -988,30 +1006,33 @@ const NFTItem = () => {
   };
 
   useEffect(() => {
-    if (address && account) {
+    if (address && account && chainId) {
       getSalesContractStatus();
       getAuctionContractStatus();
     }
-  }, [address, account]);
+  }, [address, account, chainId]);
 
   useEffect(() => {
-    if (bundleItems.current && account) {
+    if (bundleItems.current && account && chainId) {
       getBundleSalesContractStatus();
     }
-  }, [bundleItems.current, account]);
+  }, [bundleItems.current, account, chainId]);
 
   useEffect(() => {
-    if (address) {
+    if (address && chainId) {
       addNFTContractEventListeners();
       getCollection();
     }
-  }, [address]);
+  }, [address, chainId]);
 
   const handleApproveSalesContract = async () => {
     setSalesContractApproving(true);
     try {
       const contract = await getNFTContract(address);
-      const tx = await contract.setApprovalForAll(SALES_CONTRACT_ADDRESS, true);
+      const tx = await contract.setApprovalForAll(
+        Contracts[chainId].sales,
+        true
+      );
       await tx.wait();
       setSalesContractApproved(true);
     } catch (e) {
@@ -1039,11 +1060,11 @@ const NFTItem = () => {
           const contract = await getNFTContract(address);
           const _approved = await contract.isApprovedForAll(
             account,
-            BUNDLE_SALES_CONTRACT_ADDRESS
+            Contracts[chainId].bundleSales
           );
           if (!_approved) {
             const tx = await contract.setApprovalForAll(
-              BUNDLE_SALES_CONTRACT_ADDRESS,
+              Contracts[chainId].bundleSales,
               true
             );
             await tx.wait();
@@ -1064,7 +1085,7 @@ const NFTItem = () => {
     try {
       const contract = await getNFTContract(address);
       const tx = await contract.setApprovalForAll(
-        AUCTION_CONTRACT_ADDRESS,
+        Contracts[chainId].auction,
         true
       );
       await tx.wait();
@@ -1278,30 +1299,30 @@ const NFTItem = () => {
       if (bundleID) {
         const allowance = await getAllowance(
           account,
-          BUNDLE_SALES_CONTRACT_ADDRESS
+          Contracts[chainId].bundleSales
         );
         if (allowance.lt(amount)) {
-          await approve(BUNDLE_SALES_CONTRACT_ADDRESS, amount);
+          await approve(Contracts[chainId].bundleSales, amount);
         }
 
         const tx = await createBundleOffer(
           bundleID,
-          WFTM_ADDRESS,
+          wftmAddress(),
           price,
           ethers.BigNumber.from(deadline)
         );
 
         await tx.wait();
       } else {
-        const allowance = await getAllowance(account, SALES_CONTRACT_ADDRESS);
+        const allowance = await getAllowance(account, Contracts[chainId].sales);
         if (allowance.lt(amount)) {
-          await approve(SALES_CONTRACT_ADDRESS, amount);
+          await approve(Contracts[chainId].sales, amount);
         }
 
         const tx = await createOffer(
           address,
           ethers.BigNumber.from(tokenID),
-          WFTM_ADDRESS,
+          wftmAddress(),
           ethers.BigNumber.from(quantity),
           price,
           ethers.BigNumber.from(deadline)
@@ -1785,9 +1806,7 @@ const NFTItem = () => {
               <Loader type="Oval" color="#007BFF" height={32} width={32} />
             }
           >
-            <SuspenseImg
-              src={`https://storage.artion.io/image/${item.thumbnailPath}`}
-            />
+            <SuspenseImg src={`${storageUrl()}/image/${item.thumbnailPath}`} />
           </Suspense>
         </div>
         <div className={styles.bundleItemInfo}>
@@ -2083,7 +2102,9 @@ const NFTItem = () => {
                             <SuspenseImg
                               src={
                                 item.thumbnailPath?.length > 10
-                                  ? `https://storage.artion.io/image/${item.thumbnailPath}`
+                                  ? `${storageUrl()}/image/${
+                                      item.thumbnailPath
+                                    }`
                                   : item.metadata?.image
                               }
                             />

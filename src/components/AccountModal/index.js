@@ -7,12 +7,13 @@ import CreateIcon from '@material-ui/icons/Create';
 
 import ModalActions from 'actions/modal.actions';
 import AuthActions from 'actions/auth.actions';
-import { updateAccountDetails } from 'api';
+import { useApi } from 'api';
 import toast from 'utils/toast';
 
 import styles from './styles.module.scss';
 
 const AccountModal = () => {
+  const { updateAccountDetails } = useApi();
   const dispatch = useDispatch();
 
   const { fetching, user } = useSelector(state => state.Auth);

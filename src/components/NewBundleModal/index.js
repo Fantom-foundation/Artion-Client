@@ -9,17 +9,16 @@ import { ethers } from 'ethers';
 import { useWeb3React } from '@web3-react/core';
 
 import SuspenseImg from 'components/SuspenseImg';
-import { createBundle, deleteBundle } from 'api';
-import {
-  listBundle,
-  getNFTContract,
-  BUNDLE_SALES_CONTRACT_ADDRESS,
-} from 'contracts';
+import { useApi } from 'api';
+import { useBundleSalesContract, useNFTContract } from 'contracts';
+import { Contracts } from 'constants/networks';
 import toast from 'utils/toast';
 
 import styles from './styles.module.scss';
 
 const NFTItem = ({ item, loading, selected, onClick }) => {
+  const { storageUrl } = useApi();
+
   return (
     <div
       className={cx(styles.item, selected && styles.selected)}
@@ -48,7 +47,7 @@ const NFTItem = ({ item, loading, selected, onClick }) => {
               <SuspenseImg
                 src={
                   item.thumbnailPath?.length > 10
-                    ? `https://storage.artion.io/image/${item.thumbnailPath}`
+                    ? `${storageUrl()}/image/${item.thumbnailPath}`
                     : item.imageURL
                 }
                 className={styles.media}
@@ -70,7 +69,11 @@ const NewBundleModal = ({
   onLoadNext,
   onCreateSuccess = () => {},
 }) => {
-  const { account } = useWeb3React();
+  const { account, chainId } = useWeb3React();
+
+  const { createBundle, deleteBundle } = useApi();
+  const { getNFTContract } = useNFTContract();
+  const { listBundle } = useBundleSalesContract();
 
   const rootRef = useRef(null);
 
@@ -109,7 +112,7 @@ const NewBundleModal = ({
           try {
             const _approved = await contract.isApprovedForAll(
               account,
-              BUNDLE_SALES_CONTRACT_ADDRESS
+              Contracts[chainId].bundleSales
             );
             approved = approved && _approved;
           } catch (e) {
@@ -163,11 +166,11 @@ const NewBundleModal = ({
           const contract = await getNFTContract(address);
           const _approved = await contract.isApprovedForAll(
             account,
-            BUNDLE_SALES_CONTRACT_ADDRESS
+            Contracts[chainId].bundleSales
           );
           if (!_approved) {
             const tx = await contract.setApprovalForAll(
-              BUNDLE_SALES_CONTRACT_ADDRESS,
+              Contracts[chainId].bundleSales,
               true
             );
             await tx.wait();
