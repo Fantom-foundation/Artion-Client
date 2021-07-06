@@ -23,7 +23,7 @@ import BootstrapTooltip from 'components/BootstrapTooltip';
 import { calculateGasMargin } from 'utils';
 import showToast from 'utils/toast';
 import WalletUtils from 'utils/wallet';
-import SCHandlers from 'utils/sc.interaction';
+import useContract from 'utils/sc.interaction';
 import { useApi } from 'api';
 import { useSalesContract } from 'contracts';
 import { FantomNFTConstants } from 'constants/smartcontracts/fnft.constants';
@@ -44,6 +44,7 @@ const PaintBoard = () => {
 
   const { apiUrl } = useApi();
   const { registerRoyalty } = useSalesContract();
+  const { loadContract } = useContract();
 
   const { account, chainId } = useWeb3React();
 
@@ -68,7 +69,9 @@ const PaintBoard = () => {
   const authToken = useSelector(state => state.ConnectWallet.authToken);
 
   const getFee = useCallback(async () => {
-    const contract = await SCHandlers.loadContract(
+    setFee(null);
+
+    const contract = await loadContract(
       FantomNFTConstants.ADDRESS[chainId],
       FantomNFTConstants.ABI
     );
@@ -77,7 +80,12 @@ const PaintBoard = () => {
   }, [chainId]);
 
   useEffect(() => {
+    if (!chainId) return;
+
     getFee();
+  }, [chainId]);
+
+  useEffect(() => {
     dispatch(HeaderActions.toggleSearchbar(false));
   }, []);
 
@@ -176,7 +184,7 @@ const PaintBoard = () => {
 
       const jsonHash = result.data.jsonHash;
 
-      const contract = await SCHandlers.loadContract(
+      const contract = await loadContract(
         FantomNFTConstants.ADDRESS[chainId],
         FantomNFTConstants.ABI
       );
