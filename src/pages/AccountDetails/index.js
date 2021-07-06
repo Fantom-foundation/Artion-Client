@@ -155,14 +155,12 @@ const AccountDetails = () => {
   };
 
   useEffect(() => {
+    if (fetchInterval) {
+      clearInterval(fetchInterval);
+    }
+
     updateCollections();
     setFetchInterval(setInterval(updateCollections, 1000 * 60 * 10));
-
-    return () => {
-      if (fetchInterval) {
-        clearInterval(fetchInterval);
-      }
-    };
   }, [chainId]);
 
   const isMe = account?.toLowerCase() === uid.toLowerCase();
