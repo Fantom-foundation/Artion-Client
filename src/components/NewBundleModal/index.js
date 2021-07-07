@@ -32,7 +32,7 @@ const NFTItem = ({ item, loading, selected, onClick }) => {
             className={styles.mediaLoading}
           />
         ) : (
-          item?.imageURL && (
+          (item?.imageURL || item?.thumbnailPath?.length > 10) && (
             <Suspense
               fallback={
                 <Loader

@@ -35,6 +35,9 @@ import styles from './styles.module.scss';
 
 const adminAddress = '0xB7bC6D2666e73F8Cd143a929DB5404e2fc03eA89';
 
+// eslint-disable-next-line no-undef
+const ENV = process.env.REACT_APP_ENV;
+
 const NiftyHeader = ({ light }) => {
   const history = useHistory();
   const dispatch = useDispatch();
@@ -89,20 +92,36 @@ const NiftyHeader = ({ light }) => {
   };
 
   const changeNetwork = async () => {
-    if (chainId === ChainId.FANTOM || chainId === ChainId.FANTOM_TESTNET)
+    if (
+      (ENV === 'MAINNET' && chainId === ChainId.FANTOM) ||
+      (ENV !== 'MAINNET' && chainId === ChainId.FANTOM_TESTNET)
+    )
       return;
 
-    const params = {
-      chainId: '0xfa',
-      chainName: 'Fantom',
-      nativeCurrency: {
-        name: 'Fantom',
-        symbol: 'FTM',
-        decimals: 18,
-      },
-      rpcUrls: ['https://rpc.ftm.tools'],
-      blockExplorerUrls: ['https://ftmscan.com'],
-    };
+    const params =
+      ENV === 'MAINNET'
+        ? {
+            chainId: '0xfa',
+            chainName: 'Fantom Opera',
+            nativeCurrency: {
+              name: 'Fantom',
+              symbol: 'FTM',
+              decimals: 18,
+            },
+            rpcUrls: ['https://rpc.ftm.tools'],
+            blockExplorerUrls: ['https://ftmscan.com'],
+          }
+        : {
+            chainId: '0xfa2',
+            chainName: 'Fantom Opera Testnet',
+            nativeCurrency: {
+              name: 'Fantom',
+              symbol: 'FTM',
+              decimals: 18,
+            },
+            rpcUrls: ['https://rpc.ftm.tools'],
+            blockExplorerUrls: ['https://testnet.ftmscan.com'],
+          };
 
     const provider = await injected.getProvider();
     try {

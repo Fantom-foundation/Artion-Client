@@ -131,9 +131,10 @@ const AccountDetails = () => {
   };
 
   useEffect(() => {
+    if (!chainId) return;
+
     getUserDetails(uid);
     setTab(0);
-    setTimeout(init, 0);
   }, [uid, chainId]);
 
   const updateCollections = async () => {
@@ -204,8 +205,10 @@ const AccountDetails = () => {
   };
 
   useEffect(() => {
+    if (!chainId) return;
+
     init();
-  }, [tab]);
+  }, [tab, chainId]);
 
   const getActivity = async () => {
     try {

@@ -49,7 +49,7 @@ const BaseCard = ({ item, loading, style, create, onCreate }) => {
   const renderSlides = () => {
     return item.items.map((v, idx) => (
       <div className={styles.imageBox} key={idx}>
-        {v.imageURL && (
+        {(v.imageURL || v.thumbnailPath?.length > 10) && (
           <Suspense
             fallback={
               <Loader
@@ -115,7 +115,9 @@ const BaseCard = ({ item, loading, style, create, onCreate }) => {
               </>
             ) : (
               <div className={styles.imageBox}>
-                {(item?.imageURL || info?.image) && (
+                {(item?.imageURL ||
+                  info?.image ||
+                  item?.thumbnailPath?.length > 10) && (
                   <Suspense
                     fallback={
                       <Loader
