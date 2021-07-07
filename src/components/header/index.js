@@ -98,6 +98,8 @@ const NiftyHeader = ({ light }) => {
     )
       return;
 
+    history.push('/');
+
     const params =
       ENV === 'MAINNET'
         ? {
