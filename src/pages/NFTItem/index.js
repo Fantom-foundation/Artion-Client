@@ -16,6 +16,7 @@ import {
   CartesianGrid,
   Line,
 } from 'recharts';
+import { ChainId } from '@sushiswap/sdk';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye } from '@fortawesome/free-solid-svg-icons';
 import { useWeb3React } from '@web3-react/core';
@@ -65,6 +66,9 @@ const ONE_DAY = ONE_HOUR * 24;
 const ONE_MONTH = ONE_DAY * 30;
 
 const filters = ['Trade History', 'Transfer History'];
+
+// eslint-disable-next-line no-undef
+const ENV = process.env.REACT_APP_ENV;
 
 const NFTItem = () => {
   const dispatch = useDispatch();
@@ -209,7 +213,12 @@ const NFTItem = () => {
   );
 
   const isLoggedIn = () => {
-    return isWalletConnected && chainId === 250;
+    return (
+      isWalletConnected &&
+      (ENV === 'MAINNET'
+        ? chainId === ChainId.FANTOM
+        : chainId === ChainId.FANTOM_TESTNET)
+    );
   };
 
   const getBundleInfo = async () => {
