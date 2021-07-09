@@ -167,10 +167,11 @@
 }
 
 .contentHeader {
-  margin-bottom: 40px;
+  margin-bottom: 24px;
   width: 100%;
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
 }
 
 .contentBody {
@@ -183,6 +184,7 @@
 
 .tab {
   margin-right: 40px;
+  margin-bottom: 16px;
   font-weight: 700;
   font-size: 22px;
   line-height: 27px;
@@ -299,5 +301,13 @@
 @media only screen and (max-width: 600px) {
   .content {
     padding: 0 20px 20px;
+  }
+
+  .contentHeader {
+    flex-direction: column;
+  }
+
+  .tab {
+    margin-right: 0;
   }
 }

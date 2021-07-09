@@ -4,7 +4,13 @@ import Card from '../NFTCard';
 
 import styles from './styles.module.scss';
 
-const NFTsGrid = ({ items, loading, showCreate, onCreate = () => {} }) => {
+const NFTsGrid = ({
+  items,
+  loading,
+  showCreate,
+  onCreate = () => {},
+  onLike = () => {},
+}) => {
   return (
     <div className={styles.container}>
       <div className={styles.grid}>
@@ -15,7 +21,7 @@ const NFTsGrid = ({ items, loading, showCreate, onCreate = () => {} }) => {
         )}
         {(items || []).map((item, idx) => (
           <div className={styles.nft} key={idx}>
-            <Card item={item} />
+            <Card item={item} onLike={onLike} />
           </div>
         ))}
         {loading &&

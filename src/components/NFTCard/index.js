@@ -21,7 +21,7 @@ import { useApi } from 'api';
 
 import styles from './styles.module.scss';
 
-const BaseCard = ({ item, loading, style, create, onCreate }) => {
+const BaseCard = ({ item, loading, style, create, onCreate, onLike }) => {
   const {
     storageUrl,
     isLikingItem,
@@ -110,6 +110,8 @@ const BaseCard = ({ item, loading, style, create, onCreate }) => {
     }
     setIsLike(!isLike);
     setIsLiking(false);
+
+    onLike && onLike();
   };
 
   const renderSlides = () => {
