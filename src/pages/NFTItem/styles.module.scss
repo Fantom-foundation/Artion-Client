@@ -298,6 +298,16 @@
   }
 }
 
+.liking {
+  color: #007BFF;
+}
+
+.favIcon {
+  &:hover {
+    color: #007BFF;
+  }
+}
+
 .panelBody {
   width: 100%;
   padding: 24px;

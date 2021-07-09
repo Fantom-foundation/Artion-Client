@@ -25,6 +25,8 @@ import { Tooltip, Menu } from '@material-ui/core';
 import {
   People as PeopleIcon,
   ViewModule as ViewModuleIcon,
+  FavoriteBorder as FavoriteBorderIcon,
+  Favorite as FavoriteIcon,
 } from '@material-ui/icons';
 import toast from 'react-hot-toast';
 
@@ -46,6 +48,7 @@ import OfferModal from 'components/OfferModal';
 import AuctionModal from 'components/AuctionModal';
 import BidModal from 'components/BidModal';
 import OwnersModal from 'components/OwnersModal';
+import LikesModal from 'components/LikesModal';
 import Header from 'components/header';
 import SuspenseImg from 'components/SuspenseImg';
 import ModalActions from 'actions/modal.actions';
@@ -91,6 +94,14 @@ const NFTItem = () => {
     getTokenType,
     get1155Info,
     getTokenHolders,
+    getItemLikes,
+    getBundleLikes,
+    isLikingItem,
+    isLikingBundle,
+    likeItem,
+    likeBundle,
+    getItemLikeUsers,
+    getBundleLikeUsers,
   } = useApi();
   const { getNFTContract } = useNFTContract();
   const {
@@ -164,6 +175,7 @@ const NFTItem = () => {
   const tokenType = useRef();
   const [tokenInfo, setTokenInfo] = useState();
   const holders = useRef([]);
+  const likeUsers = useRef([]);
   const [collections, setCollections] = useState([]);
   const [collection, setCollection] = useState();
   const [collectionLoading, setCollectionLoading] = useState(false);
@@ -173,6 +185,7 @@ const NFTItem = () => {
   const [auctionModalVisible, setAuctionModalVisible] = useState(false);
   const [bidModalVisible, setBidModalVisible] = useState(false);
   const [ownersModalVisible, setOwnersModalVisible] = useState(false);
+  const [likesModalVisible, setLikesModalVisible] = useState(false);
 
   const [listingItem, setListingItem] = useState(false);
   const [cancelingListing, setCancelingListing] = useState(false);
@@ -189,6 +202,11 @@ const NFTItem = () => {
   const [resulting, setResulting] = useState(false);
   const [resulted, setResulted] = useState(false);
   const [historyLoading, setHistoryLoading] = useState(false);
+  const [likeUsersFetching, setLikeUsersFetching] = useState(false);
+  const [likeFetching, setLikeFetching] = useState(false);
+  const [isLiking, setIsLiking] = useState(false);
+  const [isLike, setIsLike] = useState(false);
+  const [liked, setLiked] = useState();
 
   const [bid, setBid] = useState(null);
   const [winner, setWinner] = useState(null);
@@ -208,7 +226,7 @@ const NFTItem = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const isMenuOpen = Boolean(anchorEl);
 
-  const { isConnected: isWalletConnected } = useSelector(
+  const { isConnected: isWalletConnected, authToken } = useSelector(
     state => state.ConnectWallet
   );
 
@@ -908,6 +926,8 @@ const NFTItem = () => {
   useEffect(() => {
     if (!chainId) return;
 
+    setLiked(null);
+
     if (bundleID) {
       listings.current = [];
 
@@ -917,6 +937,12 @@ const NFTItem = () => {
 
       increaseBundleViewCount(bundleID).then(({ data }) => {
         setViews(data);
+      });
+      getBundleLikes(bundleID).then(({ data }) => {
+        setLiked(data);
+      });
+      isLikingBundle(bundleID, account).then(({ data }) => {
+        setIsLike(data);
       });
     } else {
       bundleListing.current = null;
@@ -932,7 +958,15 @@ const NFTItem = () => {
       increaseViewCount(address, tokenID).then(({ data }) => {
         setViews(data);
       });
+      getItemLikes(address, tokenID).then(({ data }) => {
+        setLiked(data);
+      });
+      isLikingItem(address, tokenID, account).then(({ data }) => {
+        setIsLike(data);
+      });
     }
+
+    getLikeInfo();
   }, [chainId, address, tokenID, bundleID]);
 
   useEffect(() => {
@@ -948,6 +982,61 @@ const NFTItem = () => {
   useEffect(() => {
     getOwnerInfo();
   }, [owner]);
+
+  const getLikeInfo = async () => {
+    setLikeFetching(true);
+    try {
+      if (bundleID) {
+        const { data } = await isLikingBundle(bundleID, account);
+        setIsLike(data);
+      } else {
+        const { data } = await isLikingItem(address, tokenID, account);
+        setIsLike(data);
+      }
+    } catch (err) {
+      console.log(err);
+    }
+    setLikeFetching(false);
+  };
+
+  const toggleFavorite = async e => {
+    e.preventDefault();
+    if (isLiking) return;
+
+    setIsLiking(true);
+    try {
+      if (bundleID) {
+        const { data } = await likeBundle(bundleID, authToken);
+        setLiked(data);
+      } else {
+        const { data } = await likeItem(address, tokenID, authToken);
+        setLiked(data);
+      }
+    } catch (err) {
+      console.log(err);
+    }
+    setIsLike(!isLike);
+    setIsLiking(false);
+  };
+
+  const showLikeUsers = async () => {
+    if (likeUsersFetching) return;
+
+    setLikesModalVisible(true);
+    setLikeUsersFetching(true);
+    try {
+      if (bundleID) {
+        const { data } = await getBundleLikeUsers(bundleID);
+        likeUsers.current = data;
+      } else {
+        const { data } = await getItemLikeUsers(address, tokenID);
+        likeUsers.current = data;
+      }
+    } catch (err) {
+      console.log(err);
+    }
+    setLikeUsersFetching(false);
+  };
 
   const getSalesContractStatus = async () => {
     const contract = await getNFTContract(address);
@@ -1774,6 +1863,35 @@ const NFTItem = () => {
             `${formatNumber(views)} View${views > 1 ? 's' : ''}`
           )}
         </div>
+        <div
+          className={cx(
+            styles.itemViews,
+            styles.clickable,
+            isLike && styles.liking
+          )}
+        >
+          {isNaN(liked) || likeFetching ? (
+            <Skeleton width={80} height={24} />
+          ) : (
+            <>
+              {isLike ? (
+                <FavoriteIcon
+                  className={styles.favIcon}
+                  onClick={toggleFavorite}
+                />
+              ) : (
+                <FavoriteBorderIcon
+                  className={styles.favIcon}
+                  onClick={toggleFavorite}
+                />
+              )}
+              &nbsp;
+              <span onClick={liked ? showLikeUsers : null}>
+                {formatNumber(liked)} Like{liked > 1 ? 's' : ''}
+              </span>
+            </>
+          )}
+        </div>
       </div>
     </>
   );
@@ -1815,7 +1933,13 @@ const NFTItem = () => {
               <Loader type="Oval" color="#007BFF" height={32} width={32} />
             }
           >
-            <SuspenseImg src={`${storageUrl()}/image/${item.thumbnailPath}`} />
+            <SuspenseImg
+              src={
+                item.thumbnailPath.length > 10
+                  ? `${storageUrl()}/image/${item.thumbnailPath}`
+                  : item.metadata.image
+              }
+            />
           </Suspense>
         </div>
         <div className={styles.bundleItemInfo}>
@@ -2715,6 +2839,11 @@ const NFTItem = () => {
         visible={ownersModalVisible}
         onClose={() => setOwnersModalVisible(false)}
         holders={holders.current}
+      />
+      <LikesModal
+        visible={likesModalVisible}
+        onClose={() => setLikesModalVisible(false)}
+        users={likeUsersFetching ? new Array(5).fill(null) : likeUsers.current}
       />
     </div>
   );

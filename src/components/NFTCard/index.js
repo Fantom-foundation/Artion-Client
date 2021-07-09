@@ -4,8 +4,13 @@ import { Link } from 'react-router-dom';
 import cx from 'classnames';
 import Skeleton from 'react-loading-skeleton';
 import Typography from '@material-ui/core/Typography';
-import AddIcon from '@material-ui/icons/Add';
+import {
+  Add as AddIcon,
+  FavoriteBorder as FavoriteBorderIcon,
+  Favorite as FavoriteIcon,
+} from '@material-ui/icons';
 import Loader from 'react-loader-spinner';
+import { useWeb3React } from '@web3-react/core';
 import Carousel, { Dots } from '@brainhubeu/react-carousel';
 import '@brainhubeu/react-carousel/lib/style.css';
 import axios from 'axios';
@@ -17,13 +22,26 @@ import { useApi } from 'api';
 import styles from './styles.module.scss';
 
 const BaseCard = ({ item, loading, style, create, onCreate }) => {
-  const { storageUrl } = useApi();
+  const {
+    storageUrl,
+    isLikingItem,
+    isLikingBundle,
+    likeItem,
+    likeBundle,
+  } = useApi();
+
+  const { account } = useWeb3React();
 
   const [fetching, setFetching] = useState(false);
+  const [likeFetching, setLikeFetching] = useState(false);
+  const [isLiking, setIsLiking] = useState(false);
   const [info, setInfo] = useState(null);
   const [index, setIndex] = useState(0);
+  const [isLike, setIsLike] = useState(false);
+  const [liked, setLiked] = useState(0);
 
   const { collections } = useSelector(state => state.Collections);
+  const { authToken } = useSelector(state => state.ConnectWallet);
 
   const collection = collections.find(
     col => col.address === item?.contractAddress
@@ -40,11 +58,59 @@ const BaseCard = ({ item, loading, style, create, onCreate }) => {
     setFetching(false);
   };
 
+  const getLikeInfo = async () => {
+    setLikeFetching(true);
+    try {
+      if (item.items) {
+        const { data } = await isLikingBundle(item._id, account);
+        setIsLike(data);
+      } else {
+        const { data } = await isLikingItem(
+          item.contractAddress,
+          item.tokenID,
+          account
+        );
+        setIsLike(data);
+      }
+    } catch (err) {
+      console.log(err);
+    }
+    setLikeFetching(false);
+  };
+
   useEffect(() => {
     if (item && !item.name) {
       getTokenURI(item.tokenURI);
     }
+    if (item) {
+      setLiked(item.liked);
+      getLikeInfo();
+    }
   }, [item]);
+
+  const toggleFavorite = async e => {
+    e.preventDefault();
+    if (isLiking) return;
+
+    setIsLiking(true);
+    try {
+      if (item.items) {
+        const { data } = await likeBundle(item._id, authToken);
+        setLiked(data);
+      } else {
+        const { data } = await likeItem(
+          item.contractAddress,
+          item.tokenID,
+          authToken
+        );
+        setLiked(data);
+      }
+    } catch (err) {
+      console.log(err);
+    }
+    setIsLike(!isLike);
+    setIsLiking(false);
+  };
 
   const renderSlides = () => {
     return item.items.map((v, idx) => (
@@ -85,6 +151,26 @@ const BaseCard = ({ item, loading, style, create, onCreate }) => {
   const renderContent = () => {
     return (
       <>
+        <div className={cx(styles.cardHeader, isLike && styles.liking)}>
+          {!item || likeFetching ? (
+            <Skeleton width={80} height={20} />
+          ) : (
+            <>
+              {isLike ? (
+                <FavoriteIcon
+                  className={styles.favIcon}
+                  onClick={toggleFavorite}
+                />
+              ) : (
+                <FavoriteBorderIcon
+                  className={styles.favIcon}
+                  onClick={toggleFavorite}
+                />
+              )}
+              <span className={styles.favLabel}>{liked}</span>
+            </>
+          )}
+        </div>
         <div className={styles.mediaBox}>
           <div className={styles.mediaPanel}>
             {loading || fetching ? (

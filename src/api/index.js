@@ -417,6 +417,125 @@ export const useApi = () => {
     return res.data;
   };
 
+  const getItemLikes = async (address, tokenID) => {
+    const res = await axios({
+      method: 'get',
+      url: `${apiUrl()}/nftitems/getLikesCount/${address}/${tokenID}`,
+    });
+    return res.data;
+  };
+
+  const getBundleLikes = async bundleID => {
+    const res = await axios({
+      method: 'get',
+      url: `${apiUrl()}/bundle/getLikesCount/${bundleID}`,
+    });
+    return res.data;
+  };
+
+  const isLikingItem = async (contractAddress, tokenID, follower) => {
+    const data = {
+      type: 'nft',
+      contractAddress,
+      tokenID,
+      follower,
+    };
+    const res = await axios({
+      method: 'post',
+      url: `${apiUrl()}/like/isLiked`,
+      data: JSON.stringify(data),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    return res.data;
+  };
+
+  const isLikingBundle = async (bundleID, follower) => {
+    const data = {
+      type: 'bundle',
+      bundleID,
+      follower,
+    };
+    const res = await axios({
+      method: 'post',
+      url: `${apiUrl()}/like/isLiked`,
+      data: JSON.stringify(data),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    return res.data;
+  };
+
+  const likeItem = async (contractAddress, tokenID, authToken) => {
+    const data = {
+      type: 'nft',
+      contractAddress,
+      tokenID,
+    };
+    const res = await axios({
+      method: 'post',
+      url: `${apiUrl()}/like/update`,
+      data: JSON.stringify(data),
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${authToken}`,
+      },
+    });
+    return res.data;
+  };
+
+  const likeBundle = async (bundleID, authToken) => {
+    const data = {
+      type: 'bundle',
+      bundleID,
+    };
+    const res = await axios({
+      method: 'post',
+      url: `${apiUrl()}/like/update`,
+      data: JSON.stringify(data),
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${authToken}`,
+      },
+    });
+    return res.data;
+  };
+
+  const getItemLikeUsers = async (contractAddress, tokenID) => {
+    const data = {
+      type: 'nft',
+      contractAddress,
+      tokenID,
+    };
+    const res = await axios({
+      method: 'post',
+      url: `${apiUrl()}/like/getLikes`,
+      data: JSON.stringify(data),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    return res.data;
+  };
+
+  const getBundleLikeUsers = async bundleID => {
+    const data = {
+      type: 'bundle',
+      bundleID,
+    };
+    const res = await axios({
+      method: 'post',
+      url: `${apiUrl()}/like/getLikes`,
+      data: JSON.stringify(data),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    return res.data;
+  };
+
   return {
     apiUrl,
     storageUrl,
@@ -451,5 +570,13 @@ export const useApi = () => {
     followUser,
     getFollowers,
     getFollowings,
+    getItemLikes,
+    getBundleLikes,
+    isLikingItem,
+    isLikingBundle,
+    likeItem,
+    likeBundle,
+    getItemLikeUsers,
+    getBundleLikeUsers,
   };
 };

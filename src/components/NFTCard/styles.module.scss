@@ -36,6 +36,32 @@
   }
 }
 
+.cardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 6px 12px;
+  color: rgba(0, 0, 0, .6);
+
+  &.liking {
+    color: #007BFF;
+  }
+}
+
+.favIcon {
+  height: 20px;
+  margin-right: 6px;
+
+  &:hover {
+    color: #007BFF;
+  }
+}
+
+.favLabel {
+  font-size: 16px;
+  line-height: 20px;
+}
+
 .createBtn {
   width: 100%;
   height: 100%;
@@ -86,16 +112,16 @@
 
 .mediaBox {
   position: relative;
-  padding-bottom: 100%;
+  padding-bottom: calc(100% - 16px);
 }
 
 .mediaPanel {
   position: absolute;
   top: 0;
-  left: 0;
-  width: 100%;
+  left: 8px;
+  width: calc(100% - 16px);
   height: 100%;
-  border-radius: 10px;
+  border-radius: 6px;
   overflow: hidden;
 }
 
@@ -124,8 +150,6 @@
   position: relative;
   padding-bottom: 100%;
   box-sizing: border-box;
-  border-radius: 10px;
-  overflow: hidden;
 }
 
 .media {
