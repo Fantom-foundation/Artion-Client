@@ -34,6 +34,7 @@ const ONE_MONTH = ONE_DAY * 30;
 const tabs = [
   'Single Items',
   'Bundles',
+  'My Likes',
   'Listings & Offers',
   'Received Offers',
 ];
@@ -52,6 +53,7 @@ const AccountDetails = () => {
     followUser: _followUser,
     getFollowers,
     getFollowings,
+    getMyLikes,
   } = useApi();
   const { account, chainId } = useWeb3React();
 
@@ -67,6 +69,7 @@ const AccountDetails = () => {
   const [fetching, setFetching] = useState(false);
   const tokens = useRef([]);
   const bundles = useRef([]);
+  const likes = useRef([]);
   const [followersLoading, setFollowersLoading] = useState(false);
   const followers = useRef([]);
   const followings = useRef([]);
@@ -130,6 +133,23 @@ const AccountDetails = () => {
     }
   };
 
+  const fetchLikes = async step => {
+    if (fetching) return;
+
+    setFetching(true);
+    setCount(0);
+
+    try {
+      const { data } = await getMyLikes(step, uid);
+      setFetching(false);
+      likes.current.push(...data.tokens);
+      setCount(data.total);
+      setPage(step);
+    } catch {
+      setFetching(false);
+    }
+  };
+
   useEffect(() => {
     if (!chainId) return;
 
@@ -175,12 +195,17 @@ const AccountDetails = () => {
     if (fetching) return;
     if (tab === 0 && tokens.current.length === count) return;
     if (tab === 1 && bundles.current.length === count) return;
+    if (tab === 2 && likes.current.length === count) return;
 
-    fetchNFTs(page + 1);
+    if (tab === 0 || tab === 1) {
+      fetchNFTs(page + 1);
+    } else {
+      fetchLikes(page + 1);
+    }
   };
 
   const handleScroll = e => {
-    if (tab) return;
+    if (tab > 2) return;
 
     const obj = e.currentTarget;
     if (obj.scrollHeight - obj.clientHeight - obj.scrollTop < 100) {
@@ -198,6 +223,10 @@ const AccountDetails = () => {
       setCount(0);
       fetchNFTs(0);
     } else if (tab === 2) {
+      likes.current = [];
+      setCount(0);
+      fetchLikes(0);
+    } else if (tab === 3) {
       getActivity();
     } else {
       getOffers();
@@ -209,6 +238,14 @@ const AccountDetails = () => {
 
     init();
   }, [tab, chainId]);
+
+  const goToTab = _tab => {
+    tokens.current = [];
+    bundles.current = [];
+    likes.current = [];
+    setCount(0);
+    setTab(_tab);
+  };
 
   const getActivity = async () => {
     try {
@@ -494,7 +531,7 @@ const AccountDetails = () => {
             <div
               key={idx}
               className={cx(styles.tab, idx === tab && styles.selected)}
-              onClick={() => setTab(idx)}
+              onClick={() => goToTab(idx)}
             >
               {t}
             </div>
@@ -529,6 +566,15 @@ const AccountDetails = () => {
               onCreate={handleCreateBundle}
             />
           ) : tab === 2 ? (
+            <NFTsGrid
+              items={likes.current}
+              loading={fetching}
+              onLike={() => {
+                likes.current = [];
+                fetchLikes(0);
+              }}
+            />
+          ) : tab === 3 ? (
             <div className={styles.tableWapper}>
               <div className={styles.activityHeader}>
                 <div className={styles.event}>Event</div>

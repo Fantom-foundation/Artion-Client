@@ -536,6 +536,19 @@ export const useApi = () => {
     return res.data;
   };
 
+  const getMyLikes = async (step, address) => {
+    const data = { step, address };
+    const res = await axios({
+      method: 'post',
+      url: `${apiUrl()}/like/getMyLikes`,
+      data: JSON.stringify(data),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    return res.data;
+  };
+
   return {
     apiUrl,
     storageUrl,
@@ -578,5 +591,6 @@ export const useApi = () => {
     likeBundle,
     getItemLikeUsers,
     getBundleLikeUsers,
+    getMyLikes,
   };
 };
