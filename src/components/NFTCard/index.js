@@ -169,7 +169,7 @@ const BaseCard = ({ item, loading, style, create, onCreate, onLike }) => {
                   onClick={toggleFavorite}
                 />
               )}
-              <span className={styles.favLabel}>{liked}</span>
+              <span className={styles.favLabel}>{liked || 0}</span>
             </>
           )}
         </div>
