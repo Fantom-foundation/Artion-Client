@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState, useRef, Suspense } from 'react';
+import React, { useEffect, useState, useRef, Suspense } from 'react';
 import { useParams, Link, useHistory } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import cx from 'classnames';
@@ -1630,15 +1630,12 @@ const NFTItem = () => {
     }
   };
 
-  const hasMyOffer = useMemo(() => {
-    return (
-      offers.current.findIndex(
-        offer =>
-          offer.creator?.toLowerCase() === account?.toLowerCase() &&
-          offer.deadline >= now.getTime()
-      ) > -1
-    );
-  }, [offers.current]);
+  const hasMyOffer = (() =>
+    offers.current.findIndex(
+      offer =>
+        offer.creator?.toLowerCase() === account?.toLowerCase() &&
+        offer.deadline >= now.getTime()
+    ) > -1)();
 
   const data = [...tradeHistory.current].reverse().map(history => {
     const saleDate = new Date(history.createdAt);
@@ -1718,9 +1715,9 @@ const NFTItem = () => {
     );
   };
 
-  const hasListing = () => {
+  const hasListing = (() => {
     return bundleListing.current || myListing() !== undefined;
-  };
+  })();
 
   const maxSupply = () => {
     let supply = 0;
@@ -2115,7 +2112,7 @@ const NFTItem = () => {
               ) : null}
               {!bundleID &&
                 (!auction.current || !auction.current.resulted) &&
-                !hasListing() &&
+                !hasListing &&
                 tokenType.current !== 1155 && (
                   <div
                     className={cx(
@@ -2129,7 +2126,7 @@ const NFTItem = () => {
                 )}
               {(!auction.current || auction.current.resulted) && (
                 <>
-                  {hasListing() ? (
+                  {hasListing ? (
                     <div
                       className={cx(
                         styles.headerButton,
@@ -2151,7 +2148,7 @@ const NFTItem = () => {
                         : null
                     }
                   >
-                    {hasListing() ? 'Update Listing' : 'Sell'}
+                    {hasListing ? 'Update Listing' : 'Sell'}
                   </div>
                 </>
               )}
@@ -2794,7 +2791,7 @@ const NFTItem = () => {
       <SellModal
         visible={sellModalVisible}
         onClose={() => setSellModalVisible(false)}
-        onSell={hasListing() ? handleUpdatePrice : handleListItem}
+        onSell={hasListing ? handleUpdatePrice : handleListItem}
         startPrice={
           bundleID
             ? bundleListing.current?.price || 0
