@@ -102,6 +102,8 @@ const ExploreAllPage = () => {
   };
 
   useEffect(() => {
+    if (!chainId) return;
+
     if (fetchInterval) {
       clearInterval(fetchInterval);
     }
