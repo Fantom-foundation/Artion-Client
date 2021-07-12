@@ -610,6 +610,10 @@ const NFTItem = () => {
     const tokenIds = _tokenIds.map(val => parseInt(val.toString()));
     const quantities = _quantities.map(val => parseInt(val.toString()));
     if (bundleID.toLowerCase() === _bundleID.toLowerCase()) {
+      if (nfts.length === 0) {
+        history.push('/exploreall');
+      }
+
       const price = parseFloat(_newPrice.toString()) / 10 ** 18;
       bundleListing.current.price = price;
       const newBundleItems = [];
