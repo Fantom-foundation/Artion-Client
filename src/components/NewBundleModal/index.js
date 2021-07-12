@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState, Suspense } from 'react';
 import { useSelector } from 'react-redux';
+import { useParams } from 'react-router-dom';
 import cx from 'classnames';
 import { ClipLoader } from 'react-spinners';
 import Modal from '@material-ui/core/Modal';
@@ -16,7 +17,7 @@ import toast from 'utils/toast';
 
 import styles from './styles.module.scss';
 
-const NFTItem = ({ item, loading, selected, onClick }) => {
+const NFTItem = ({ item, selected, onClick }) => {
   const { storageUrl } = useApi();
 
   return (
@@ -25,7 +26,7 @@ const NFTItem = ({ item, loading, selected, onClick }) => {
       onClick={onClick}
     >
       <div className={styles.imageBox}>
-        {loading ? (
+        {!item ? (
           <Skeleton
             width="100%"
             height="100%"
@@ -57,21 +58,19 @@ const NFTItem = ({ item, loading, selected, onClick }) => {
           )
         )}
       </div>
-      <div className={styles.itemName}>{item.name}</div>
+      <div className={styles.itemName}>
+        {item ? item.name : <Skeleton width={150} height={24} />}
+      </div>
     </div>
   );
 };
 
-const NewBundleModal = ({
-  visible,
-  onClose,
-  items,
-  onLoadNext,
-  onCreateSuccess = () => {},
-}) => {
+const NewBundleModal = ({ visible, onClose, onCreateSuccess = () => {} }) => {
   const { account, chainId } = useWeb3React();
 
-  const { createBundle, deleteBundle } = useApi();
+  const { uid } = useParams();
+
+  const { fetchTokens, createBundle, deleteBundle } = useApi();
   const { getNFTContract } = useNFTContract();
   const { listBundle } = useBundleSalesContract();
 
@@ -85,21 +84,61 @@ const NewBundleModal = ({
   const [approved, setApproved] = useState(true);
   const [approving, setApproving] = useState(false);
 
+  const [fetching, setFetching] = useState(false);
+  const [page, setPage] = useState(0);
+  const tokens = useRef([]);
+  const [count, setCount] = useState(0);
+
   const { authToken } = useSelector(state => state.ConnectWallet);
   const { price: ftmPrice } = useSelector(state => state.Price);
+
+  const fetchNFTs = async step => {
+    if (fetching) return;
+
+    setFetching(true);
+    setCount(0);
+
+    try {
+      const { data } = await fetchTokens(
+        step,
+        'single',
+        [],
+        null,
+        'createdAt',
+        [],
+        uid
+      );
+      setFetching(false);
+      tokens.current.push(...data.tokens);
+      setCount(data.total);
+      setPage(step);
+    } catch {
+      setFetching(false);
+    }
+  };
+
+  const loadNextPage = () => {
+    if (fetching) return;
+    if (tokens.current.length === count) return;
+
+    fetchNFTs(page + 1);
+  };
 
   useEffect(() => {
     if (visible) {
       selected.current = [];
       setName('');
       setPrice('');
+      tokens.current = [];
+      setCount(0);
+      fetchNFTs(0);
     }
   }, [visible]);
 
   const getContractApprovedStatus = async () => {
     setLoadingStatus(true);
     let contractAddresses = selected.current.map(
-      idx => items[idx].contractAddress
+      idx => tokens.current[idx].contractAddress
     );
     contractAddresses = contractAddresses.filter(
       (addr, idx) => contractAddresses.indexOf(addr) === idx
@@ -138,7 +177,7 @@ const NewBundleModal = ({
   const handleScroll = e => {
     const obj = e.currentTarget;
     if (obj.scrollHeight - obj.clientHeight - obj.scrollTop < 100) {
-      onLoadNext();
+      loadNextPage();
     }
   };
 
@@ -155,7 +194,7 @@ const NewBundleModal = ({
   const onApprove = async () => {
     setApproving(true);
     let contractAddresses = selected.current.map(
-      idx => items[idx].contractAddress
+      idx => tokens.current[idx].contractAddress
     );
     contractAddresses = contractAddresses.filter(
       (addr, idx) => contractAddresses.indexOf(addr) === idx
@@ -193,7 +232,7 @@ const NewBundleModal = ({
       setCreating(true);
 
       for (let i = 0; i < selected.current.length; i++) {
-        const item = items[selected.current[i]];
+        const item = tokens.current[selected.current[i]];
         selectedItems.push({
           address: item.contractAddress,
           tokenID: item.tokenID,
@@ -284,7 +323,7 @@ const NewBundleModal = ({
           <div className={styles.formGroup}>
             <p className={styles.formLabel}>Items</p>
             <div className={styles.itemList} onScroll={handleScroll}>
-              {items.map((item, idx) => (
+              {tokens.current.map((item, idx) => (
                 <NFTItem
                   key={idx}
                   item={item}
@@ -292,6 +331,10 @@ const NewBundleModal = ({
                   selected={selected.current.indexOf(idx) > -1}
                 />
               ))}
+              {fetching &&
+                new Array(5)
+                  .fill(null)
+                  .map((item, idx) => <NFTItem key={idx} item={item} />)}
             </div>
           </div>
 

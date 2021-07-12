@@ -736,8 +736,6 @@ const AccountDetails = () => {
       <NewBundleModal
         visible={bundleModalVisible}
         onClose={() => setBundleModalVisible(false)}
-        items={tokens.current}
-        onLoadNext={loadNextPage}
         onCreateSuccess={() => {
           bundles.current = [];
           fetchNFTs(0);
