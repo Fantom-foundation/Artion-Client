@@ -1887,7 +1887,7 @@ const NFTItem = () => {
               )}
               &nbsp;
               <span onClick={liked ? showLikeUsers : null}>
-                {formatNumber(liked)} Like{liked > 1 ? 's' : ''}
+                {formatNumber(liked || 0)} Like{liked > 1 ? 's' : ''}
               </span>
             </>
           )}
