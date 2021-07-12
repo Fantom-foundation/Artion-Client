@@ -367,10 +367,18 @@ const NiftyHeader = ({ light }) => {
                       key={idx}
                       className={styles.result}
                     >
-                      <img
-                        className={styles.resultimg}
-                        src={`https://gateway.pinata.cloud/ipfs/${account.imageHash}`}
-                      />
+                      {account.imageHash ? (
+                        <img
+                          className={styles.resultimg}
+                          src={`https://gateway.pinata.cloud/ipfs/${account.imageHash}`}
+                        />
+                      ) : (
+                        <Identicon
+                          className={styles.resultimg}
+                          account={account.address}
+                          size={40}
+                        />
+                      )}
                       <div className={styles.resulttitle}>{account.alias}</div>
                     </Link>
                   ))}

@@ -60,6 +60,7 @@ const AccountDetails = () => {
   const { uid } = useParams();
 
   const { authToken } = useSelector(state => state.ConnectWallet);
+  const { user: me } = useSelector(state => state.Auth);
 
   const fileInput = useRef();
 
@@ -156,6 +157,12 @@ const AccountDetails = () => {
     getUserDetails(uid);
     setTab(0);
   }, [uid, chainId]);
+
+  useEffect(() => {
+    if (me && me.address.toLowerCase() === uid.toLowerCase()) {
+      setUser(me);
+    }
+  }, [me, uid]);
 
   const updateCollections = async () => {
     try {
