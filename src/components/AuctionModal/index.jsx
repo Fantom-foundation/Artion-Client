@@ -72,7 +72,7 @@ const AuctionModal = ({
         </div>
         <div className={styles.body}>
           <div className={styles.formGroup}>
-            <div className={styles.formLabel}>Reserve Price (in FTM)</div>
+            <div className={styles.formLabel}>Reserve Price (FTM)</div>
             <div
               className={cx(styles.formInputCont, focused && styles.focused)}
             >
