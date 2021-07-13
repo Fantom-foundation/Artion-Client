@@ -72,7 +72,7 @@ const SellModal = ({
         </div>
         <div className={styles.body}>
           <div className={styles.formGroup}>
-            <div className={styles.formLabel}>Price</div>
+            <div className={styles.formLabel}>Price (FTM)</div>
             <div
               className={cx(styles.formInputCont, focused && styles.focused)}
             >
