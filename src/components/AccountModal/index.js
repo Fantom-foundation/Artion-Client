@@ -49,7 +49,7 @@ const AccountModal = () => {
     email.length === 0 || /(.+)@(.+){2,}\.(.+){2,}/.test(email);
 
   const validateEmail = () => {
-    if (email.length > 0 || validEmail(email)) {
+    if (email.length > 0 && validEmail(email)) {
       setEmailError(null);
     } else {
       setEmailError('Invalid email address.');

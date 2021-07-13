@@ -304,7 +304,7 @@ const NewBundleModal = ({ visible, onClose, onCreateSuccess = () => {} }) => {
             <div className={styles.lengthIndicator}>{name.length}/20</div>
           </div>
           <div className={styles.formGroup}>
-            <div className={styles.formLabel}>Price</div>
+            <div className={styles.formLabel}>Price (FTM)</div>
             <div className={styles.formInputCont}>
               <input
                 className={styles.formInput}

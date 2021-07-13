@@ -64,6 +64,7 @@ const AccountDetails = () => {
 
   const fileInput = useRef();
 
+  const [prevUID, setPrevUID] = useState(null);
   const [bundleModalVisible, setBundleModalVisible] = useState(false);
   const [followingsModalVisible, setFollowingsModalVisible] = useState(false);
   const [followersModalVisible, setFollowersModalVisible] = useState(false);
@@ -154,13 +155,21 @@ const AccountDetails = () => {
   useEffect(() => {
     if (!chainId) return;
 
-    getUserDetails(uid);
-    setTab(0);
-  }, [uid, chainId]);
+    if (prevUID !== uid) {
+      setPrevUID(uid);
+      getUserDetails(uid);
+      setTab(0);
+      if (tab === 0) {
+        init();
+      }
+    } else {
+      init();
+    }
+  }, [uid, tab, chainId]);
 
   useEffect(() => {
-    if (me && me.address?.toLowerCase() === uid.toLowerCase()) {
-      setUser(me);
+    if (me && user && me.address?.toLowerCase() === uid.toLowerCase()) {
+      setUser({ ...user, ...me });
     }
   }, [me, uid]);
 
@@ -239,12 +248,6 @@ const AccountDetails = () => {
       getOffers();
     }
   };
-
-  useEffect(() => {
-    if (!chainId) return;
-
-    init();
-  }, [tab, chainId]);
 
   const goToTab = _tab => {
     tokens.current = [];
@@ -367,14 +370,14 @@ const AccountDetails = () => {
   };
 
   const showFollowers = () => {
-    if (loading || user.followers === 0) return;
+    if (loading || !user.followers || user.followers === 0) return;
 
     setFollowersModalVisible(true);
     fetchFollowers();
   };
 
   const showFollowings = () => {
-    if (loading || user.followings === 0) return;
+    if (loading || !user.followings || user.followings === 0) return;
 
     setFollowingsModalVisible(true);
     fetchFollowings();
@@ -553,7 +556,7 @@ const AccountDetails = () => {
             )
           </div>
           <div className={styles.tab} onClick={showFollowings}>
-            Followings(
+            Followings (
             {loading ? (
               <Skeleton width={30} height={24} />
             ) : (
