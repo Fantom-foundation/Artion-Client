@@ -26,6 +26,16 @@ export const formatNumber = num => {
   return parts.join('.');
 };
 
+const intlFormat = num => {
+  return new Intl.NumberFormat().format(Math.round(num * 10) / 10);
+};
+
+export const formatFollowers = num => {
+  if (num >= 1000000) return intlFormat(num / 1000000) + 'M';
+  if (num >= 1000) return intlFormat(num / 1000) + 'k';
+  return intlFormat(num);
+};
+
 export const calculateGasMargin = value => {
   return value
     .mul(ethers.BigNumber.from(10000).add(ethers.BigNumber.from(1000)))

@@ -14,7 +14,7 @@ import Header from 'components/header';
 import Identicon from 'components/Identicon';
 import NewBundleModal from 'components/NewBundleModal';
 import FollowersModal from 'components/FollowersModal';
-import { isAddress, shortenAddress } from 'utils';
+import { isAddress, shortenAddress, formatFollowers } from 'utils';
 import toast from 'utils/toast';
 import { useApi } from 'api';
 import HeaderActions from 'actions/header.actions';
@@ -422,16 +422,6 @@ const AccountDetails = () => {
       return `${h} Min${h > 1 ? 's' : ''} Ago`;
     }
     return `${diff} Second${diff > 1 ? 's' : ''} Ago`;
-  };
-
-  const intlFormat = num => {
-    return new Intl.NumberFormat().format(Math.round(num * 10) / 10);
-  };
-
-  const formatFollowers = num => {
-    if (num >= 1000000) return intlFormat(num / 1000000) + 'M';
-    if (num >= 1000) return intlFormat(num / 1000) + 'k';
-    return intlFormat(num);
   };
 
   if (!isAddress(uid)) {

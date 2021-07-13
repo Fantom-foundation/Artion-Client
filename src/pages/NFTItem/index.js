@@ -288,8 +288,15 @@ const NFTItem = () => {
       const { data } = await axios.get(tokenURI);
       setInfo(data);
     } catch {
-      console.log('Token URI not available');
-      history.replace('/404');
+      try {
+        const contract = await getNFTContract(address);
+        const tokenURI = await contract.tokenURI(tokenID);
+        const { data } = await axios.get(tokenURI);
+        setInfo(data);
+      } catch {
+        console.log('Token URI not available');
+        history.replace('/404');
+      }
     }
     setLoading(false);
   };
