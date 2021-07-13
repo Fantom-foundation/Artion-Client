@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import Skeleton from 'react-loading-skeleton';
 
 import closeIcon from 'assets/svgs/close.svg';
-import { shortenAddress, formatNumber } from 'utils';
+import { shortenAddress, formatFollowers } from 'utils';
 import Identicon from 'components/Identicon';
 
 import styles from './styles.module.scss';
@@ -78,7 +78,7 @@ const FollowersModal = ({ visible, onClose, title, users }) => {
               </div>
               <div className={styles.followers}>
                 {user ? (
-                  `${formatNumber(user.followers)} follower${
+                  `${formatFollowers(user.followers)} follower${
                     user.followers !== 1 ? 's' : ''
                   }`
                 ) : (
