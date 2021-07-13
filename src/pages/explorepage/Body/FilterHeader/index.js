@@ -59,7 +59,7 @@ const ExploreFilterHeader = ({ loading }) => {
           {loading ? (
             <Skeleton width={100} height={24} />
           ) : (
-            `${formatNumber(count)} result${count > 1 ? 's' : ''}`
+            `${formatNumber(count)} result${count !== 1 ? 's' : ''}`
           )}
         </label>
         {selectedCollections().map((item, idx) => (

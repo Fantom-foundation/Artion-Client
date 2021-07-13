@@ -79,7 +79,7 @@ const FollowersModal = ({ visible, onClose, title, users }) => {
               <div className={styles.followers}>
                 {user ? (
                   `${formatNumber(user.followers)} follower${
-                    user.followers > 1 ? 's' : ''
+                    user.followers !== 1 ? 's' : ''
                   }`
                 ) : (
                   <Skeleton width={80} height={24} />

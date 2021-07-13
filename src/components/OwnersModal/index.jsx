@@ -63,7 +63,7 @@ const OwnersModal = ({ visible, onClose, holders }) => {
               </div>
               <div className={styles.holdCount}>
                 {`${formatNumber(holder.supply)} item${
-                  holder.supply > 1 ? 's' : ''
+                  holder.supply !== 1 ? 's' : ''
                 }`}
               </div>
             </Holder>

@@ -254,7 +254,7 @@ const BaseCard = ({ item, loading, style, create, onCreate, onLike }) => {
               <Typography component="h4" className={styles.label}>
                 {item.items
                   ? `${item.items.length} item${
-                      item.items.length > 1 ? 's' : ''
+                      item.items.length !== 1 ? 's' : ''
                     }`
                   : `${formatNumber(
                       item?.holderSupply || item?.supply || 1

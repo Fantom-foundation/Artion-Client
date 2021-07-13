@@ -1861,7 +1861,7 @@ const NFTItem = () => {
           {isNaN(views) ? (
             <Skeleton width={80} height={24} />
           ) : (
-            `${formatNumber(views)} View${views > 1 ? 's' : ''}`
+            `${formatNumber(views)} View${views !== 1 ? 's' : ''}`
           )}
         </div>
         <div
@@ -1888,7 +1888,7 @@ const NFTItem = () => {
               )}
               &nbsp;
               <span onClick={liked ? showLikeUsers : null}>
-                {formatNumber(liked || 0)} Like{liked > 1 ? 's' : ''}
+                {formatNumber(liked || 0)} Like{liked !== 1 ? 's' : ''}
               </span>
             </>
           )}
