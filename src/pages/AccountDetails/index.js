@@ -159,7 +159,7 @@ const AccountDetails = () => {
   }, [uid, chainId]);
 
   useEffect(() => {
-    if (me && me.address.toLowerCase() === uid.toLowerCase()) {
+    if (me && me.address?.toLowerCase() === uid.toLowerCase()) {
       setUser(me);
     }
   }, [me, uid]);

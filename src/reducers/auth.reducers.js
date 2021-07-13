@@ -3,7 +3,7 @@ import { AuthConstants } from '../constants/auth.constants';
 export function Auth(
   state = {
     fetching: false,
-    user: {},
+    user: null,
   },
   action
 ) {
