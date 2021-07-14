@@ -11,12 +11,14 @@ import toast from 'react-hot-toast';
 import { useWFTMContract } from 'contracts';
 import showToast from 'utils/toast';
 import { formatNumber } from 'utils';
+import { useApi } from 'api';
 import { FTM_TOTAL_SUPPLY } from 'constants/index';
 
 import styles from './styles.module.scss';
 
 const WFTMModal = ({ visible, onClose }) => {
   const { account, chainId } = useWeb3React();
+  const { explorerUrl } = useApi();
   const { getWFTMBalance, wrapFTM, unwrapFTM } = useWFTMContract();
 
   const [loading, setLoading] = useState(false);
@@ -93,7 +95,7 @@ const WFTMModal = ({ visible, onClose }) => {
           '',
           () => {
             toast.dismiss(toastId);
-            window.open(`https://ftmscan.com/tx/${tx.hash}`, '_blank');
+            window.open(`${explorerUrl()}/tx/${tx.hash}`, '_blank');
           }
         );
       } else {
@@ -105,7 +107,7 @@ const WFTMModal = ({ visible, onClose }) => {
           '',
           () => {
             toast.dismiss(toastId);
-            window.open(`https://ftmscan.com/tx/${tx.hash}`, '_blank');
+            window.open(`${explorerUrl()}/tx/${tx.hash}`, '_blank');
           }
         );
       }

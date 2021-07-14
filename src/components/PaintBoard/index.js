@@ -42,7 +42,7 @@ const PaintBoard = () => {
   const dispatch = useDispatch();
   const history = useHistory();
 
-  const { apiUrl } = useApi();
+  const { explorerUrl, apiUrl } = useApi();
   const { registerRoyalty } = useSalesContract();
   const { loadContract } = useContract();
 
@@ -381,7 +381,7 @@ const PaintBoard = () => {
                 className={styles.tnxAnchor}
                 target="_blank"
                 rel="noopener noreferrer"
-                href={`https://ftmscan.com/tx/${lastMintedTnxId}`}
+                href={`${explorerUrl()}/tx/${lastMintedTnxId}`}
               >
                 You can track the last transaction here ...
               </a>

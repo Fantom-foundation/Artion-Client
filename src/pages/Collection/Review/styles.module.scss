@@ -6,14 +6,47 @@
   box-sizing: border-box;
   overflow-y: auto;
   position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.loadingPanel {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .inner {
   width: 100%;
-  max-width: 600px;
+  max-width: 750px;
   margin-left: 100px;
   padding: 40px 0;
   box-sizing: border-box;
+}
+
+.collection {
+  border-radius: 8px;
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+
+  &:hover {
+    box-shadow: 0 0 4px rgba(0, 0, 0, .4);
+  }
+}
+
+.collectionLogo {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+}
+
+.collectionName {
+  margin-left: 20px;
+  font-size: 30px;
+  color: #3D3D3D;
 }
 
 .title {
@@ -42,43 +75,14 @@
   align-items: center;
 }
 
-.inputSubTitle {
-  margin-top: 7px;
-  font-weight: 600;
-  font-size: 16px;
-  line-height: 25.6px;
-  color: rgba(0, 0, 0, .6);
-}
-
 .inputWrapper {
   margin-top: 16px;
-}
-
-.lengthIndicator {
-  margin-top: 6px;
-  margin-right: 6px;
-  text-align: right;
-  color: rgba(0, 0, 0, .6);
-
-  & + .error {
-    margin-top: -20px;
-  }
-}
-
-.error {
-  margin: 6px 0 0 6px;
-  color: rgba(235, 87, 87);
-}
-
-.hasError {
-  border-color: rgb(235, 87, 87) !important;
 }
 
 .logoUploadBox {
   width: 160px;
   height: 160px;
   box-sizing: border-box;
-  border: 4px dashed rgba(0, 0, 0, .4);
   border-radius: 8px;
   position: relative;
 
@@ -92,25 +96,6 @@
     object-fit: cover;
     border: none;
   }
-}
-
-.uploadOverlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  cursor: pointer;
-  transition: opacity ease 0.1s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.uploadIcon {
-  width: 40px !important;
-  height: 40px !important;
-  color: rgba(0, 0, 0, .6);
 }
 
 .input {
@@ -186,20 +171,15 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-left: 16px;
+  margin-right: 16px;
   padding: 8px 12px;
   font-size: 16px;
   line-height: 20px;
   box-sizing: border-box;
   border: 1.5px solid rgba(0, 0, 0, .4);
   border-radius: 8px;
-  cursor: pointer;
   user-select: none;
   white-space: nowrap;
-
-  &:hover {
-    box-shadow: 0 0 8px rgba(0, 0, 0, 0.25);
-  }
 }
 
 .closeIcon {
@@ -272,7 +252,9 @@
   display: flex;
 }
 
-.createButton {
+.createButton,
+.rejectButton {
+  margin-right: 20px;
   width: 200px;
   height: 56px;
   border-radius: 8px;
@@ -287,6 +269,31 @@
 
   &:hover {
     box-shadow: 0 0 8px rgba(0, 0, 0, 0.4);
+  }
+}
+
+.rejectButton {
+  background-color: #E15A5A !important;
+}
+
+.cancelButton {
+  box-sizing: border-box;
+  width: 200px;
+  height: 56px;
+  border-radius: 8px;
+  background-color: transparent;
+  color: #1969FF;
+  border: 2px solid #1969FF;
+  font-weight: 700;
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+
+  &:hover {
+    background-color: transparent;
   }
 }
 

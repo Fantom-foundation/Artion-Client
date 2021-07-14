@@ -17,6 +17,7 @@ import { shortenAddress } from 'utils';
 import { injected } from 'connectors';
 import { useApi } from 'api';
 import { NETWORK_LABEL } from 'constants/networks';
+import { ADMIN_ADDRESS } from 'constants/index';
 import WFTMModal from 'components/WFTMModal';
 import BanItemModal from 'components/BanItemModal';
 import BoostCollectionModal from 'components/BoostCollectionModal';
@@ -32,8 +33,6 @@ import iconSwap from 'assets/svgs/swap.svg';
 import iconExit from 'assets/svgs/exit.svg';
 
 import styles from './styles.module.scss';
-
-const adminAddress = '0xB7bC6D2666e73F8Cd143a929DB5404e2fc03eA89';
 
 // eslint-disable-next-line no-undef
 const ENV = process.env.REACT_APP_ENV;
@@ -263,6 +262,11 @@ const NiftyHeader = ({ light }) => {
     handleMenuClose();
   };
 
+  const reviewCollections = () => {
+    history.push('/collection/review');
+    handleMenuClose();
+  };
+
   const banItem = () => {
     setBanItemModalVisible(true);
     handleMenuClose();
@@ -304,8 +308,11 @@ const NiftyHeader = ({ light }) => {
         FTM / WFTM Station
       </div>
       <div className={styles.menuSeparator} />
-      {account?.toLowerCase() === adminAddress.toLowerCase() && (
+      {account?.toLowerCase() === ADMIN_ADDRESS.toLowerCase() && (
         <>
+          <div className={styles.menuItem} onClick={reviewCollections}>
+            Review Collections
+          </div>
           <div className={styles.menuItem} onClick={banItem}>
             Ban Item (Admin only)
           </div>

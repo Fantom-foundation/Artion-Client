@@ -6,6 +6,13 @@ import { ChainId } from '@sushiswap/sdk';
 export const useApi = () => {
   const { chainId } = useWeb3React();
 
+  const explorerUrl = useCallback(() => {
+    if (chainId === ChainId.FANTOM) {
+      return 'https://ftmscan.com';
+    }
+    return 'https://testnet.ftmscan.com';
+  }, [chainId]);
+
   const apiUrl = useCallback(() => {
     if (chainId === ChainId.FANTOM) {
       return 'https://api.artion.io';
@@ -134,6 +141,50 @@ export const useApi = () => {
       },
     });
     return res.data;
+  };
+
+  const fetchPendingCollections = async authToken => {
+    const res = await axios({
+      method: 'post',
+      url: `${apiUrl()}/collection/getReviewApplications`,
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+      },
+    });
+    return res.data;
+  };
+
+  const approveCollection = async (contractAddress, authToken) => {
+    const data = {
+      contractAddress,
+      status: 1,
+    };
+    await axios({
+      method: 'post',
+      url: `${apiUrl()}/collection/reviewApplication`,
+      data: JSON.stringify(data),
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+        'Content-Type': 'application/json',
+      },
+    });
+  };
+
+  const rejectCollection = async (contractAddress, reason, authToken) => {
+    const data = {
+      contractAddress,
+      status: 0,
+      reason,
+    };
+    await axios({
+      method: 'post',
+      url: `${apiUrl()}/collection/reviewApplication`,
+      data: JSON.stringify(data),
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+        'Content-Type': 'application/json',
+      },
+    });
   };
 
   const fetchTokens = async (
@@ -550,6 +601,7 @@ export const useApi = () => {
   };
 
   return {
+    explorerUrl,
     apiUrl,
     storageUrl,
     getAuthToken,
@@ -562,6 +614,9 @@ export const useApi = () => {
     getTokenHolders,
     fetchCollections,
     fetchCollection,
+    fetchPendingCollections,
+    approveCollection,
+    rejectCollection,
     fetchTokens,
     getBundleDetails,
     increaseBundleViewCount,
