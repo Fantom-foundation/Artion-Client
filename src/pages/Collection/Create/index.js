@@ -30,7 +30,7 @@ const CollectionCreate = () => {
   const dispatch = useDispatch();
   const history = useHistory();
 
-  const { apiUrl } = useApi();
+  const { explorerUrl, apiUrl } = useApi();
 
   const inputRef = useRef(null);
 
@@ -44,6 +44,8 @@ const CollectionCreate = () => {
   const [nameError, setNameError] = useState(null);
   const [description, setDescription] = useState('');
   const [descriptionError, setDescriptionError] = useState(null);
+  const [email, setEmail] = useState('');
+  const [emailError, setEmailError] = useState(null);
   const [address, setAddress] = useState('');
   const [addressError, setAddressError] = useState('');
   const [siteUrl, setSiteUrl] = useState('');
@@ -92,6 +94,18 @@ const CollectionCreate = () => {
       setDescriptionError("This field can't be blank");
     } else {
       setDescriptionError(null);
+    }
+  };
+
+  const validEmail = email => /(.+)@(.+){2,}\.(.+){2,}/.test(email);
+
+  const validateEmail = () => {
+    if (email.length === 0) {
+      setEmailError("This field can't be blank");
+    } else if (validEmail(email)) {
+      setEmailError(null);
+    } else {
+      setEmailError('Invalid email address.');
     }
   };
 
@@ -191,6 +205,7 @@ const CollectionCreate = () => {
 
           const logoImageHash = result.data.data;
           const data = {
+            email,
             erc721Address: address,
             collectionName: name,
             description,
@@ -203,7 +218,6 @@ const CollectionCreate = () => {
             mediumHandle,
             telegram,
           };
-          console.log(data);
 
           await axios({
             method: 'post',
@@ -215,7 +229,11 @@ const CollectionCreate = () => {
             },
           });
 
-          toast('success', 'Collection created successfully!');
+          toast(
+            'success',
+            'Application submitted!',
+            'Your collection registration application is successfully submitted for review.\nOnce approved, you will get an email notification.'
+          );
 
           history.push('/exploreall');
         } catch (e) {
@@ -384,7 +402,7 @@ const CollectionCreate = () => {
                   <img src={nftIcon} className={styles.linkIcon} />
                 </div>
                 <div className={styles.inputPrefix}>
-                  https://ftmscan.com/address/
+                  {explorerUrl()}/address/
                 </div>
                 <input
                   className={styles.linkInput}
@@ -479,6 +497,28 @@ const CollectionCreate = () => {
           </div>
         </div>
 
+        <div className={styles.inputGroup}>
+          <div className={styles.inputTitle1}>
+            Contact Email&nbsp;
+            <BootstrapTooltip
+              title="We will use this email to notify you about your collection application. This will not be shared with others."
+              placement="top"
+            >
+              <HelpOutlineIcon />
+            </BootstrapTooltip>
+          </div>
+          <div className={styles.inputWrapper}>
+            <input
+              className={cx(styles.input, emailError && styles.hasError)}
+              placeholder="Email Address"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              onBlur={validateEmail}
+            />
+            {emailError && <div className={styles.error}>{emailError}</div>}
+          </div>
+        </div>
+
         <div className={styles.buttonsWrapper}>
           <div
             className={cx(
@@ -487,7 +527,7 @@ const CollectionCreate = () => {
             )}
             onClick={isValid() ? handleSave : null}
           >
-            {creating ? <ClipLoader color="#FFF" size={16} /> : 'Register'}
+            {creating ? <ClipLoader color="#FFF" size={16} /> : 'Submit'}
           </div>
         </div>
       </div>

@@ -6,6 +6,13 @@ import { ChainId } from '@sushiswap/sdk';
 export const useApi = () => {
   const { chainId } = useWeb3React();
 
+  const explorerUrl = useCallback(() => {
+    if (chainId === ChainId.FANTOM) {
+      return 'https://ftmscan.com';
+    }
+    return 'https://testnet.ftmscan.com';
+  }, [chainId]);
+
   const apiUrl = useCallback(() => {
     if (chainId === ChainId.FANTOM) {
       return 'https://api.artion.io';
@@ -550,6 +557,7 @@ export const useApi = () => {
   };
 
   return {
+    explorerUrl,
     apiUrl,
     storageUrl,
     getAuthToken,

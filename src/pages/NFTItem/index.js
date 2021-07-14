@@ -78,6 +78,7 @@ const NFTItem = () => {
   const history = useHistory();
 
   const {
+    explorerUrl,
     storageUrl,
     getBundleDetails,
     fetchTokenURI,
@@ -1791,7 +1792,7 @@ const NFTItem = () => {
                 <a
                   target="_blank"
                   rel="noopener noreferrer"
-                  href={`https://ftmscan.com/address/${properties[key]}`}
+                  href={`${explorerUrl()}/address/${properties[key]}`}
                 >
                   {shortenAddress(properties[key])}
                 </a>
@@ -2077,7 +2078,7 @@ const NFTItem = () => {
         <div className={styles.panelLine}>
           <div className={styles.panelLabel}>Collection</div>
           <a
-            href={`https://ftmscan.com/token/${address}`}
+            href={`${explorerUrl()}/token/${address}`}
             target="_blank"
             rel="noopener noreferrer"
             className={styles.panelValue}
