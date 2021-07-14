@@ -143,6 +143,50 @@ export const useApi = () => {
     return res.data;
   };
 
+  const fetchPendingCollections = async authToken => {
+    const res = await axios({
+      method: 'post',
+      url: `${apiUrl()}/collection/getReviewApplications`,
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+      },
+    });
+    return res.data;
+  };
+
+  const approveCollection = async (contractAddress, authToken) => {
+    const data = {
+      contractAddress,
+      status: 1,
+    };
+    await axios({
+      method: 'post',
+      url: `${apiUrl()}/collection/reviewApplication`,
+      data: JSON.stringify(data),
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+        'Content-Type': 'application/json',
+      },
+    });
+  };
+
+  const rejectCollection = async (contractAddress, reason, authToken) => {
+    const data = {
+      contractAddress,
+      status: 0,
+      reason,
+    };
+    await axios({
+      method: 'post',
+      url: `${apiUrl()}/collection/reviewApplication`,
+      data: JSON.stringify(data),
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+        'Content-Type': 'application/json',
+      },
+    });
+  };
+
   const fetchTokens = async (
     step,
     type = 'all',
@@ -570,6 +614,9 @@ export const useApi = () => {
     getTokenHolders,
     fetchCollections,
     fetchCollection,
+    fetchPendingCollections,
+    approveCollection,
+    rejectCollection,
     fetchTokens,
     getBundleDetails,
     increaseBundleViewCount,
