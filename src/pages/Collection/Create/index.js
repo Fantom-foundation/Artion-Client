@@ -196,8 +196,11 @@ const CollectionCreate = ({ isRegister }) => {
     if (nameError) return false;
     if (descriptionError) return false;
     if (addressError) return false;
+    if (isRegister && (symbol.length === 0 || symbol.includes(' ')))
+      return false;
     if (siteUrl.length === 0) return false;
     if (email.length === 0) return false;
+    if (!validEmail(email)) return false;
     return true;
   })();
 
