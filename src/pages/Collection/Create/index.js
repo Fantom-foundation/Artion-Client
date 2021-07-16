@@ -315,9 +315,7 @@ const CollectionCreate = ({ isRegister }) => {
           setDeploying(false);
           setCreating(true);
 
-          const address = ethers.utils.hexStripZeros(
-            ethers.utils.hexDataSlice(evt.data, 32)
-          );
+          const address = ethers.utils.hexDataSlice(evt.data, 44);
 
           const img = new Image();
           img.onload = function() {
