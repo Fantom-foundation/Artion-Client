@@ -301,6 +301,7 @@ const PaintBoard = () => {
             <p className={styles.formLabel}>Collection</p>
             <Select
               options={collections}
+              disabled={isMinting}
               values={selected}
               onChange={([col]) => {
                 setSelected([col]);
