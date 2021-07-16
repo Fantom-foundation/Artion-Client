@@ -738,7 +738,7 @@ const CollectionCreate = ({ isRegister }) => {
         {!isRegister && (
           <div className={styles.fee}>
             <InfoIcon />
-            &nbsp;50 FTMs are charged to create a new NFT.
+            &nbsp;50 FTMs are charged to create a new collection.
           </div>
         )}
       </div>
