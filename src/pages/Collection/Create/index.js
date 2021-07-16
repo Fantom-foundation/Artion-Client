@@ -196,8 +196,11 @@ const CollectionCreate = ({ isRegister }) => {
     if (nameError) return false;
     if (descriptionError) return false;
     if (addressError) return false;
+    if (isRegister && (symbol.length === 0 || symbol.includes(' ')))
+      return false;
     if (siteUrl.length === 0) return false;
     if (email.length === 0) return false;
+    if (!validEmail(email)) return false;
     return true;
   })();
 
@@ -312,9 +315,7 @@ const CollectionCreate = ({ isRegister }) => {
           setDeploying(false);
           setCreating(true);
 
-          const address = ethers.utils.hexStripZeros(
-            ethers.utils.hexDataSlice(evt.data, 32)
-          );
+          const address = ethers.utils.hexDataSlice(evt.data, 44);
 
           const img = new Image();
           img.onload = function() {
