@@ -32,5 +32,7 @@ export const Contracts = {
     auction: '0xa5568193Ba09dbb934A9Af33A9e8639d1eaC6F43',
     sales: '0xBA8A36804a6BaE272fe4C8A2F5Cf551b03C26A01',
     bundleSales: '0x03b0Dd901E3366f6666c2eb411D14c469b8E8727',
+    factory: '0xa92cBC72eef9254909A3f0eB9E2716eBD28171AE',
+    privateFactory: '0x9dA8d9Cc8A7C79e46A3006f55ED98e915b390F5D',
   },
 };

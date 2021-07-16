@@ -4,3 +4,4 @@ export * from './sales';
 export * from './bundleSales';
 export * from './nft';
 export * from './wftm';
+export * from './factory';

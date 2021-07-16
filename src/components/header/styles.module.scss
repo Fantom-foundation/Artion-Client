@@ -265,6 +265,23 @@
   margin-right: 8px;
 }
 
+.subMenuItem {
+  padding: 0 0 0 24px !important;
+  font-weight: 500;
+  font-size: 15px;
+  line-height: 16px;
+  color: #3D3D3D;
+  margin-bottom: 25px !important;
+  display: flex;
+  align-items: center;
+  background-color: transparent !important;
+  cursor: pointer;
+
+  &:last-child {
+    margin-bottom: 0 !important;
+  }
+}
+
 .menuSeparator {
   width: 100%;
   height: 0.5px;

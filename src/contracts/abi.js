@@ -1,17 +1,5 @@
 export const SALES_CONTRACT_ABI = [
   {
-    inputs: [
-      {
-        internalType: 'address payable',
-        name: '_feeRecipient',
-        type: 'address',
-      },
-      { internalType: 'uint256', name: '_platformFee', type: 'uint256' },
-    ],
-    stateMutability: 'nonpayable',
-    type: 'constructor',
-  },
-  {
     anonymous: false,
     inputs: [
       {
@@ -268,15 +256,6 @@ export const SALES_CONTRACT_ABI = [
     type: 'function',
   },
   {
-    inputs: [],
-    name: 'auction',
-    outputs: [
-      { internalType: 'contract IFantomAuction', name: '', type: 'address' },
-    ],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
     inputs: [
       { internalType: 'address', name: '_nftAddress', type: 'address' },
       { internalType: 'uint256', name: '_tokenId', type: 'uint256' },
@@ -372,7 +351,10 @@ export const SALES_CONTRACT_ABI = [
     type: 'function',
   },
   {
-    inputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+    inputs: [
+      { internalType: 'address', name: '', type: 'address' },
+      { internalType: 'uint256', name: '', type: 'uint256' },
+    ],
     name: 'minters',
     outputs: [{ internalType: 'address', name: '', type: 'address' }],
     stateMutability: 'view',
@@ -410,6 +392,7 @@ export const SALES_CONTRACT_ABI = [
   },
   {
     inputs: [
+      { internalType: 'address', name: '_nftAddress', type: 'address' },
       { internalType: 'uint256', name: '_tokenId', type: 'uint256' },
       { internalType: 'uint8', name: '_royalty', type: 'uint8' },
     ],
@@ -426,7 +409,10 @@ export const SALES_CONTRACT_ABI = [
     type: 'function',
   },
   {
-    inputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+    inputs: [
+      { internalType: 'address', name: '', type: 'address' },
+      { internalType: 'uint256', name: '', type: 'uint256' },
+    ],
     name: 'royalties',
     outputs: [{ internalType: 'uint8', name: '', type: 'uint8' }],
     stateMutability: 'view',
@@ -995,17 +981,6 @@ export const BUNDLE_SALES_CONTRACT_ABI = [
 
 export const AUCTION_CONTRACT_ABI = [
   {
-    inputs: [
-      {
-        internalType: 'address payable',
-        name: '_platformFeeRecipient',
-        type: 'address',
-      },
-    ],
-    stateMutability: 'nonpayable',
-    type: 'constructor',
-  },
-  {
     anonymous: false,
     inputs: [
       {
@@ -1412,19 +1387,6 @@ export const AUCTION_CONTRACT_ABI = [
   },
   {
     inputs: [],
-    name: 'marketplace',
-    outputs: [
-      {
-        internalType: 'contract IFantomMarketplace',
-        name: '',
-        type: 'address',
-      },
-    ],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [],
     name: 'minBidIncrement',
     outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
     stateMutability: 'view',
@@ -1764,10 +1726,31 @@ export const WFTM_ABI = [
   },
 ];
 
+export const FACTORY_ABI = [
+  {
+    inputs: [
+      { internalType: 'string', name: '_name', type: 'string' },
+      { internalType: 'string', name: '_symbol', type: 'string' },
+    ],
+    name: 'createNFTContract',
+    outputs: [{ internalType: 'address', name: '', type: 'address' }],
+    stateMutability: 'payable',
+    type: 'function',
+  },
+  {
+    inputs: [],
+    name: 'platformFee',
+    outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+    stateMutability: 'view',
+    type: 'function',
+  },
+];
+
 export default {
   SALES_CONTRACT_ABI,
   BUNDLE_SALES_CONTRACT_ABI,
   AUCTION_CONTRACT_ABI,
   NFT_CONTRACT_ABI,
   WFTM_ABI,
+  FACTORY_ABI,
 };

@@ -184,10 +184,9 @@ const PaintBoard = () => {
 
       const jsonHash = result.data.jsonHash;
 
-      const contract = await loadContract(
-        FantomNFTConstants.ADDRESS[chainId],
-        FantomNFTConstants.ABI
-      );
+      const nftAddress = FantomNFTConstants.ADDRESS[chainId];
+
+      const contract = await loadContract(nftAddress, FantomNFTConstants.ABI);
 
       try {
         const args = [account, jsonHash];
@@ -207,6 +206,7 @@ const PaintBoard = () => {
         const mintedTkId = BigNumber.from(evtCaught[3]);
 
         const royaltyTx = await registerRoyalty(
+          nftAddress,
           mintedTkId.toNumber(),
           isNaN(_royalty) ? 0 : _royalty
         );

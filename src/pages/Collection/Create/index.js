@@ -8,6 +8,8 @@ import PublishIcon from '@material-ui/icons/Publish';
 import CloseIcon from '@material-ui/icons/Close';
 import HelpOutlineIcon from '@material-ui/icons/HelpOutline';
 import { ClipLoader } from 'react-spinners';
+import { useWeb3React } from '@web3-react/core';
+import { ethers } from 'ethers';
 
 import { Categories } from 'constants/filter.constants';
 import HeaderActions from 'actions/header.actions';
@@ -15,6 +17,7 @@ import Header from 'components/header';
 import BootstrapTooltip from 'components/BootstrapTooltip';
 import toast from 'utils/toast';
 import { useApi } from 'api';
+import { useFactoryContract } from 'contracts';
 
 import webIcon from 'assets/svgs/web.svg';
 import discordIcon from 'assets/svgs/discord.svg';
@@ -26,22 +29,27 @@ import nftIcon from 'assets/svgs/nft_active.svg';
 
 import styles from './styles.module.scss';
 
-const CollectionCreate = () => {
+const CollectionCreate = ({ isRegister }) => {
   const dispatch = useDispatch();
   const history = useHistory();
 
+  const { account } = useWeb3React();
   const { explorerUrl, apiUrl } = useApi();
+  const { createNFTContract, createPrivateNFTContract } = useFactoryContract();
 
   const inputRef = useRef(null);
 
   const { authToken } = useSelector(state => state.ConnectWallet);
 
+  const [deploying, setDeploying] = useState(false);
   const [creating, setCreating] = useState(false);
   const [logo, setLogo] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
   const [selected, setSelected] = useState([]);
   const [name, setName] = useState('');
   const [nameError, setNameError] = useState(null);
+  const [symbol, setSymbol] = useState('');
+  const [symbolError, setSymbolError] = useState(null);
   const [description, setDescription] = useState('');
   const [descriptionError, setDescriptionError] = useState(null);
   const [email, setEmail] = useState('');
@@ -55,12 +63,36 @@ const CollectionCreate = () => {
   const [instagramHandle, setInstagramHandle] = useState('');
   const [mediumHandle, setMediumHandle] = useState('');
   const [telegram, setTelegram] = useState('');
+  const [isPrivate, setIsPrivate] = useState(false);
 
   const isMenuOpen = Boolean(anchorEl);
 
   useEffect(() => {
     dispatch(HeaderActions.toggleSearchbar(false));
   }, []);
+
+  useEffect(() => {
+    setLogo(null);
+    setAnchorEl(null);
+    setSelected([]);
+    setName('');
+    setNameError(null);
+    setSymbol('');
+    setSymbolError(null);
+    setDescription('');
+    setDescriptionError(null);
+    setEmail('');
+    setEmailError(null);
+    setAddress('');
+    setAddressError(null);
+    setSiteUrl('');
+    setSiteUrlError(null);
+    setDiscord('');
+    setTwitterHandle('');
+    setInstagramHandle('');
+    setMediumHandle('');
+    setTelegram('');
+  }, [isRegister]);
 
   const options = Categories.filter(cat => selected.indexOf(cat.id) === -1);
   const selectedCategories = Categories.filter(
@@ -86,6 +118,16 @@ const CollectionCreate = () => {
       setNameError("This field can't be blank");
     } else {
       setNameError(null);
+    }
+  };
+
+  const validateSymbol = () => {
+    if (symbol.length === 0) {
+      setSymbolError("This field can't be blank");
+    } else if (symbol.includes(' ')) {
+      setSymbolError("Symbol can't include spaces");
+    } else {
+      setSymbolError(null);
     }
   };
 
@@ -146,14 +188,15 @@ const CollectionCreate = () => {
     setSelected(selected.filter(id => id !== catId));
   };
 
-  const isValid = () => {
+  const isValid = (() => {
     if (!logo) return false;
     if (nameError) return false;
     if (descriptionError) return false;
     if (addressError) return false;
     if (siteUrl.length === 0) return false;
+    if (email.length === 0) return false;
     return true;
-  };
+  })();
 
   const clipImage = (image, clipX, clipY, clipWidth, clipHeight, cb) => {
     const CANVAS_SIZE = 128;
@@ -175,7 +218,7 @@ const CollectionCreate = () => {
     cb(canvas.toDataURL());
   };
 
-  const handleSave = async () => {
+  const handleRegister = async () => {
     if (creating) return;
 
     setCreating(true);
@@ -246,6 +289,96 @@ const CollectionCreate = () => {
     img.src = logo;
   };
 
+  const handleCreate = async () => {
+    setDeploying(true);
+    try {
+      const tx = await (isPrivate
+        ? createPrivateNFTContract
+        : createNFTContract)(
+        name,
+        symbol,
+        ethers.utils.parseEther('50'),
+        account
+      );
+      const res = await tx.wait();
+      res.events.map(evt => {
+        if (
+          evt.topics[0] ===
+          '0x2d49c67975aadd2d389580b368cfff5b49965b0bd5da33c144922ce01e7a4d7b'
+        ) {
+          setDeploying(false);
+          setCreating(true);
+
+          const address = ethers.utils.hexStripZeros(
+            ethers.utils.hexDataSlice(evt.data, 32)
+          );
+
+          const img = new Image();
+          img.onload = function() {
+            const w = this.width;
+            const h = this.height;
+            const size = Math.min(w, h);
+            const x = (w - size) / 2;
+            const y = (h - size) / 2;
+            clipImage(img, x, y, size, size, async logodata => {
+              try {
+                const formData = new FormData();
+                formData.append('collectionName', name);
+                formData.append('erc721Address', address);
+                formData.append('imgData', logodata);
+                const result = await axios({
+                  method: 'post',
+                  url: `${apiUrl()}/ipfs/uploadCollectionImage2Server`,
+                  data: formData,
+                  headers: {
+                    'Content-Type': 'multipart/form-data',
+                    Authorization: `Bearer ${authToken}`,
+                  },
+                });
+                const logoImageHash = result.data.data;
+                const data = {
+                  email,
+                  erc721Address: address,
+                  collectionName: name,
+                  description,
+                  categories: selected.join(','),
+                  logoImageHash,
+                  siteUrl,
+                  discord,
+                  twitterHandle,
+                  instagramHandle,
+                  mediumHandle,
+                  telegram,
+                };
+                await axios({
+                  method: 'post',
+                  url: `${apiUrl()}/collection/collectiondetails`,
+                  data: JSON.stringify(data),
+                  headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${authToken}`,
+                  },
+                });
+
+                toast('success', 'Collection created successfully!');
+
+                setCreating(false);
+
+                history.push('/exploreall');
+              } catch (e) {
+                setCreating(false);
+              }
+            });
+          };
+          img.src = logo;
+        }
+      });
+    } catch (err) {
+      console.log(err);
+      setDeploying(false);
+    }
+  };
+
   const menuId = 'select-category-menu';
   const renderMenu = (
     <Menu
@@ -277,7 +410,27 @@ const CollectionCreate = () => {
     <div className={styles.container}>
       <Header light />
       <div className={styles.inner}>
-        <div className={styles.title}>Register Collection</div>
+        <div className={styles.title}>
+          {isRegister ? 'Register' : 'Create New'} Collection
+        </div>
+
+        <div className={styles.inputGroup}>
+          <div className={styles.inputTitle}>Your Own Collection *</div>
+          <div className={styles.inputWrapper}>
+            <div
+              className={cx(styles.radioButton, !isPrivate && styles.active)}
+              onClick={() => setIsPrivate(false)}
+            >
+              Allow others mint NFTs under my collection
+            </div>
+            <div
+              className={cx(styles.radioButton, isPrivate && styles.active)}
+              onClick={() => setIsPrivate(true)}
+            >
+              Only I can mint NFTs under my collection
+            </div>
+          </div>
+        </div>
 
         <div className={styles.inputGroup}>
           <div className={styles.inputTitle}>Logo image *</div>
@@ -310,7 +463,7 @@ const CollectionCreate = () => {
             <input
               className={cx(styles.input, nameError && styles.hasError)}
               maxLength={20}
-              placeholder="Type your name here"
+              placeholder="Collection Name"
               value={name}
               onChange={e => setName(e.target.value)}
               onBlur={validateName}
@@ -319,6 +472,24 @@ const CollectionCreate = () => {
             {nameError && <div className={styles.error}>{nameError}</div>}
           </div>
         </div>
+
+        {!isRegister && (
+          <div className={styles.inputGroup}>
+            <div className={styles.inputTitle1}>Symbol *</div>
+            <div className={styles.inputWrapper}>
+              <input
+                className={cx(styles.input, symbolError && styles.hasError)}
+                maxLength={20}
+                placeholder="Collection Symbol"
+                value={symbol}
+                onChange={e => setSymbol(e.target.value)}
+                onBlur={validateSymbol}
+              />
+              <div className={styles.lengthIndicator}>{symbol.length}/20</div>
+              {symbolError && <div className={styles.error}>{symbolError}</div>}
+            </div>
+          </div>
+        )}
 
         <div className={styles.inputGroup}>
           <div className={styles.inputTitle1}>Description *</div>
@@ -395,25 +566,32 @@ const CollectionCreate = () => {
           <div className={styles.inputTitle}>Links</div>
           <div className={styles.inputWrapper}>
             <div className={styles.linksWrapper}>
-              <div
-                className={cx(styles.linkItem, addressError && styles.hasError)}
-              >
-                <div className={styles.linkIconWrapper}>
-                  <img src={nftIcon} className={styles.linkIcon} />
-                </div>
-                <div className={styles.inputPrefix}>
-                  {explorerUrl()}/address/
-                </div>
-                <input
-                  className={styles.linkInput}
-                  placeholder="0x..."
-                  value={address}
-                  onChange={e => setAddress(e.target.value)}
-                  onBlur={validateAddress}
-                />
-              </div>
-              {addressError && (
-                <div className={styles.error}>{addressError}</div>
+              {isRegister && (
+                <>
+                  <div
+                    className={cx(
+                      styles.linkItem,
+                      addressError && styles.hasError
+                    )}
+                  >
+                    <div className={styles.linkIconWrapper}>
+                      <img src={nftIcon} className={styles.linkIcon} />
+                    </div>
+                    <div className={styles.inputPrefix}>
+                      {explorerUrl()}/address/
+                    </div>
+                    <input
+                      className={styles.linkInput}
+                      placeholder="0x..."
+                      value={address}
+                      onChange={e => setAddress(e.target.value)}
+                      onBlur={validateAddress}
+                    />
+                  </div>
+                  {addressError && (
+                    <div className={styles.error}>{addressError}</div>
+                  )}
+                </>
               )}
               <div
                 className={cx(styles.linkItem, siteUrlError && styles.hasError)}
@@ -520,15 +698,33 @@ const CollectionCreate = () => {
         </div>
 
         <div className={styles.buttonsWrapper}>
-          <div
-            className={cx(
-              styles.createButton,
-              (creating || !isValid()) && styles.disabled
-            )}
-            onClick={isValid() ? handleSave : null}
-          >
-            {creating ? <ClipLoader color="#FFF" size={16} /> : 'Submit'}
-          </div>
+          {isRegister ? (
+            <div
+              className={cx(
+                styles.createButton,
+                (creating || !isValid) && styles.disabled
+              )}
+              onClick={isValid ? handleRegister : null}
+            >
+              {creating ? <ClipLoader color="#FFF" size={16} /> : 'Submit'}
+            </div>
+          ) : (
+            <div
+              className={cx(
+                styles.createButton,
+                (creating || !isValid) && styles.disabled
+              )}
+              onClick={isValid ? handleCreate : null}
+            >
+              {creating ? (
+                <ClipLoader color="#FFF" size={16} />
+              ) : deploying ? (
+                'Deploying Contract'
+              ) : (
+                'Create'
+              )}
+            </div>
+          )}
         </div>
       </div>
       {renderMenu}

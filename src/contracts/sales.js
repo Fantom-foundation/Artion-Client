@@ -97,9 +97,9 @@ export const useSalesContract = () => {
     return await contract.acceptOffer(nftAddress, tokenId, creator);
   };
 
-  const registerRoyalty = async (tokenId, royalty) => {
+  const registerRoyalty = async (nftAddress, tokenId, royalty) => {
     const contract = await getSalesContract();
-    return await contract.registerRoyalty(tokenId, royalty);
+    return await contract.registerRoyalty(nftAddress, tokenId, royalty);
   };
 
   return {
