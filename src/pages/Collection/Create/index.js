@@ -712,9 +712,9 @@ const CollectionCreate = ({ isRegister }) => {
             <div
               className={cx(
                 styles.createButton,
-                (creating || !isValid) && styles.disabled
+                (creating || deploying || !isValid) && styles.disabled
               )}
-              onClick={isValid ? handleCreate : null}
+              onClick={isValid && !creating && !deploying ? handleCreate : null}
             >
               {creating ? (
                 <ClipLoader color="#FFF" size={16} />

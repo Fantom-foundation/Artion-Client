@@ -92,6 +92,36 @@
   left: 22px;
 }
 
+.select {
+  width: 100% !important;
+  outline: none !important;
+  height: 50px !important;
+  border-radius: 10px !important;
+  border: 2px solid rgba(0, 0, 0, 0.1) !important;
+  box-sizing: border-box !important;
+  font-size: 16px !important;
+  padding-right: 12px !important;
+}
+
+.collection {
+  display: flex;
+  align-items: center;
+  padding: 5px 10px;
+}
+
+.collectionLogo {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+}
+
+.collectionName {
+  margin-left: 12px;
+  font-weight: 500;
+  font-size: 16px;
+  color: #3D3D3D;
+}
+
 .button {
   margin-left: auto;
   margin-right: auto;
