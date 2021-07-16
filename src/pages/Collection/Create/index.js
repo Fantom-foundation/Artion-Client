@@ -4,6 +4,9 @@ import { useHistory } from 'react-router';
 import cx from 'classnames';
 import axios from 'axios';
 import { Menu, MenuItem } from '@material-ui/core';
+import Radio from '@material-ui/core/Radio';
+import RadioGroup from '@material-ui/core/RadioGroup';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
 import PublishIcon from '@material-ui/icons/Publish';
 import CloseIcon from '@material-ui/icons/Close';
 import HelpOutlineIcon from '@material-ui/icons/HelpOutline';
@@ -416,20 +419,22 @@ const CollectionCreate = ({ isRegister }) => {
 
         <div className={styles.inputGroup}>
           <div className={styles.inputTitle}>Your Own Collection *</div>
-          <div className={styles.inputWrapper}>
-            <div
-              className={cx(styles.radioButton, !isPrivate && styles.active)}
-              onClick={() => setIsPrivate(false)}
-            >
-              Allow others mint NFTs under my collection
-            </div>
-            <div
-              className={cx(styles.radioButton, isPrivate && styles.active)}
-              onClick={() => setIsPrivate(true)}
-            >
-              Only I can mint NFTs under my collection
-            </div>
-          </div>
+          <RadioGroup
+            className={styles.inputWrapper}
+            value={JSON.stringify(isPrivate)}
+            onChange={e => setIsPrivate(e.currentTarget.value === 'true')}
+          >
+            <FormControlLabel
+              value="false"
+              control={<Radio color="primary" />}
+              label="Allow others mint NFTs under my collection"
+            />
+            <FormControlLabel
+              value="true"
+              control={<Radio color="primary" />}
+              label="Only I can mint NFTs under my collection"
+            />
+          </RadioGroup>
         </div>
 
         <div className={styles.inputGroup}>

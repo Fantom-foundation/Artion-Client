@@ -75,11 +75,6 @@ const PaintBoard = () => {
   const getFee = async () => {
     setFee(null);
 
-    if (selected.length && selected[0].isOwnable) {
-      setFee(0);
-      return;
-    }
-
     try {
       const contract = await loadContract(nft, FantomNFTConstants.ABI);
       const _fee = await contract.platformFee();
@@ -222,7 +217,7 @@ const PaintBoard = () => {
         const args = [account, jsonHash];
 
         let tx;
-        if (selected.length && selected[0].isOwnable) {
+        if (!fee) {
           tx = await contract.mint(...args);
         } else {
           const options = {
