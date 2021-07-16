@@ -2019,7 +2019,7 @@ const NFTItem = () => {
         <div className={styles.socialLinks}>
           {collection?.siteUrl?.length > 0 && (
             <a
-              href={collection?.siteUrl}
+              href={`https://${collection?.siteUrl}`}
               target="_blank"
               rel="noopener noreferrer"
               className={styles.socialLink}
