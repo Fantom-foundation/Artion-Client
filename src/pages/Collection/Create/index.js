@@ -10,6 +10,7 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import PublishIcon from '@material-ui/icons/Publish';
 import CloseIcon from '@material-ui/icons/Close';
 import HelpOutlineIcon from '@material-ui/icons/HelpOutline';
+import InfoIcon from '@material-ui/icons/Info';
 import { ClipLoader } from 'react-spinners';
 import { useWeb3React } from '@web3-react/core';
 import { ethers } from 'ethers';
@@ -418,25 +419,27 @@ const CollectionCreate = ({ isRegister }) => {
           {isRegister ? 'Register' : 'Create New'} Collection
         </div>
 
-        <div className={styles.inputGroup}>
-          <div className={styles.inputTitle}>Your Own Collection *</div>
-          <RadioGroup
-            className={styles.inputWrapper}
-            value={JSON.stringify(isPrivate)}
-            onChange={e => setIsPrivate(e.currentTarget.value === 'true')}
-          >
-            <FormControlLabel
-              value="false"
-              control={<Radio color="primary" />}
-              label="Allow others mint NFTs under my collection"
-            />
-            <FormControlLabel
-              value="true"
-              control={<Radio color="primary" />}
-              label="Only I can mint NFTs under my collection"
-            />
-          </RadioGroup>
-        </div>
+        {!isRegister && (
+          <div className={styles.inputGroup}>
+            <div className={styles.inputTitle}>Your Own Collection *</div>
+            <RadioGroup
+              className={styles.inputWrapper}
+              value={JSON.stringify(isPrivate)}
+              onChange={e => setIsPrivate(e.currentTarget.value === 'true')}
+            >
+              <FormControlLabel
+                value="false"
+                control={<Radio color="primary" />}
+                label="Allow others mint NFTs under my collection"
+              />
+              <FormControlLabel
+                value="true"
+                control={<Radio color="primary" />}
+                label="Only I can mint NFTs under my collection"
+              />
+            </RadioGroup>
+          </div>
+        )}
 
         <div className={styles.inputGroup}>
           <div className={styles.inputTitle}>Logo image *</div>
@@ -732,6 +735,12 @@ const CollectionCreate = ({ isRegister }) => {
             </div>
           )}
         </div>
+        {!isRegister && (
+          <div className={styles.fee}>
+            <InfoIcon />
+            &nbsp;50 FTMs are charged to create a new NFT.
+          </div>
+        )}
       </div>
       {renderMenu}
     </div>
