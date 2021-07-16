@@ -9,6 +9,7 @@ import { BigNumber, ethers } from 'ethers';
 import { useDropzone } from 'react-dropzone';
 import Skeleton from 'react-loading-skeleton';
 import { ChainId } from '@sushiswap/sdk';
+import Select from 'react-dropdown-select';
 
 import CloseIcon from '@material-ui/icons/Close';
 import Stepper from '@material-ui/core/Stepper';
@@ -42,7 +43,7 @@ const PaintBoard = () => {
   const dispatch = useDispatch();
   const history = useHistory();
 
-  const { explorerUrl, apiUrl } = useApi();
+  const { explorerUrl, apiUrl, fetchMintableCollections } = useApi();
   const { registerRoyalty } = useSalesContract();
   const { loadContract } = useContract();
 
@@ -50,6 +51,9 @@ const PaintBoard = () => {
 
   const imageRef = useRef();
 
+  const [selected, setSelected] = useState([]);
+  const [collections, setCollections] = useState([]);
+  const [nft, setNft] = useState();
   const [image, setImage] = useState(null);
   const [fee, setFee] = useState(null);
 
@@ -71,19 +75,42 @@ const PaintBoard = () => {
   const getFee = async () => {
     setFee(null);
 
-    const contract = await loadContract(
-      FantomNFTConstants.ADDRESS[chainId],
-      FantomNFTConstants.ABI
-    );
-    const _fee = await contract.platformFee();
-    setFee(parseFloat(_fee.toString()) / 10 ** 18);
+    try {
+      const contract = await loadContract(nft, FantomNFTConstants.ABI);
+      const _fee = await contract.platformFee();
+      setFee(parseFloat(_fee.toString()) / 10 ** 18);
+    } catch {
+      setFee(0);
+    }
+  };
+
+  const getCollections = async () => {
+    try {
+      const { data } = await fetchMintableCollections(authToken);
+      setCollections(data);
+      setSelected([data[0]]);
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   useEffect(() => {
     if (!chainId) return;
 
-    getFee();
+    setNft(FantomNFTConstants.ADDRESS[chainId]);
   }, [chainId]);
+
+  useEffect(() => {
+    if (authToken) {
+      getCollections();
+    }
+  }, [authToken]);
+
+  useEffect(() => {
+    if (!nft) return;
+
+    getFee();
+  }, [nft]);
 
   useEffect(() => {
     dispatch(HeaderActions.toggleSearchbar(false));
@@ -184,19 +211,22 @@ const PaintBoard = () => {
 
       const jsonHash = result.data.jsonHash;
 
-      const contract = await loadContract(
-        FantomNFTConstants.ADDRESS[chainId],
-        FantomNFTConstants.ABI
-      );
+      const contract = await loadContract(nft, FantomNFTConstants.ABI);
 
       try {
         const args = [account, jsonHash];
-        const options = {
-          value: ethers.utils.parseEther(fee.toString()),
-        };
-        const gasEstimate = await contract.estimateGas.mint(...args, options);
-        options.gasLimit = calculateGasMargin(gasEstimate);
-        const tx = await contract.mint(...args, options);
+
+        let tx;
+        if (!fee) {
+          tx = await contract.mint(...args);
+        } else {
+          const options = {
+            value: ethers.utils.parseEther(fee.toString()),
+          };
+          const gasEstimate = await contract.estimateGas.mint(...args, options);
+          options.gasLimit = calculateGasMargin(gasEstimate);
+          tx = await contract.mint(...args, options);
+        }
         setCurrentMintingStep(1);
         setLastMintedTnxId(tx.hash);
 
@@ -207,6 +237,7 @@ const PaintBoard = () => {
         const mintedTkId = BigNumber.from(evtCaught[3]);
 
         const royaltyTx = await registerRoyalty(
+          nft,
           mintedTkId.toNumber(),
           isNaN(_royalty) ? 0 : _royalty
         );
@@ -219,11 +250,7 @@ const PaintBoard = () => {
         setDescription('');
 
         setTimeout(() => {
-          history.push(
-            `/explore/${
-              FantomNFTConstants.ADDRESS[chainId]
-            }/${mintedTkId.toNumber()}`
-          );
+          history.push(`/explore/${nft}/${mintedTkId.toNumber()}`);
         }, 1000 + Math.random() * 2000);
       } catch (error) {
         showToast('error', error.message);
@@ -270,6 +297,52 @@ const PaintBoard = () => {
           </div>
         </div>
         <div className={styles.panel}>
+          <div className={styles.formGroup}>
+            <p className={styles.formLabel}>Collection</p>
+            <Select
+              options={collections}
+              values={selected}
+              onChange={([col]) => {
+                setSelected([col]);
+                setNft(col.erc721Address);
+              }}
+              className={styles.select}
+              placeholder="Choose Collection"
+              itemRenderer={({ item, methods }) => (
+                <div
+                  key={item.erc721Address}
+                  className={styles.collection}
+                  onClick={() => {
+                    methods.clearAll();
+                    methods.addItem(item);
+                  }}
+                >
+                  <img
+                    src={`https://gateway.pinata.cloud/ipfs/${item.logoImageHash}`}
+                    className={styles.collectionLogo}
+                  />
+                  <div className={styles.collectionName}>
+                    {item.collectionName}
+                  </div>
+                </div>
+              )}
+              contentRenderer={({ props: { values } }) =>
+                values.length > 0 ? (
+                  <div className={styles.collection}>
+                    <img
+                      src={`https://gateway.pinata.cloud/ipfs/${values[0].logoImageHash}`}
+                      className={styles.collectionLogo}
+                    />
+                    <div className={styles.collectionName}>
+                      {values[0].collectionName}
+                    </div>
+                  </div>
+                ) : (
+                  <div className={styles.collection} />
+                )
+              }
+            />
+          </div>
           <div className={styles.formGroup}>
             <p className={styles.formLabel}>Name</p>
             <input
@@ -366,7 +439,7 @@ const PaintBoard = () => {
             )}
           </div>
           <div className={styles.fee}>
-            {fee ? (
+            {fee !== null ? (
               <>
                 <InfoIcon />
                 &nbsp;{fee} FTMs are charged to create a new NFT.

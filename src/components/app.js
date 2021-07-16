@@ -80,7 +80,14 @@ const App = () => {
           <Route path="/explore/:addr/:id" component={NFTItem} />
           <Route path="/bundle/:bundleID" component={NFTItem} />
           <Route path="/account/:uid" component={AccountDetails} />
-          <Route path="/collection/add" component={CollectionCreate} />
+          <Route
+            path="/collection/create"
+            component={() => <CollectionCreate isRegister={false} />}
+          />
+          <Route
+            path="/collection/register"
+            component={() => <CollectionCreate isRegister />}
+          />
           <Route path="/collection/review" component={CollectionReview} />
           <Route path="/404" component={NotFound} />
           <Route path="*">

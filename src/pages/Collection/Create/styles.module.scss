@@ -54,6 +54,22 @@
   margin-top: 16px;
 }
 
+.radioButton {
+  width: 350px;
+  height: 50px;
+  border: 2px solid rgba(0, 0, 0, .4);
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+
+  &.active {
+    border-color: #1969FF;
+    background-color: #1969FF22;
+  }
+}
+
 .lengthIndicator {
   margin-top: 6px;
   margin-right: 6px;

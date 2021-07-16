@@ -187,6 +187,18 @@ export const useApi = () => {
     });
   };
 
+  const fetchMintableCollections = async authToken => {
+    const res = await axios({
+      method: 'post',
+      url: `${apiUrl()}/collection/getMintableCollections`,
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+      },
+    });
+
+    return res.data;
+  };
+
   const fetchTokens = async (
     step,
     type = 'all',
@@ -617,6 +629,7 @@ export const useApi = () => {
     fetchPendingCollections,
     approveCollection,
     rejectCollection,
+    fetchMintableCollections,
     fetchTokens,
     getBundleDetails,
     increaseBundleViewCount,

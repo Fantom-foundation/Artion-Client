@@ -68,6 +68,7 @@ const NiftyHeader = ({ light }) => {
   const [bundles, setBundles] = useState([]);
   const [tokenDetailsLoading, setTokenDetailsLoading] = useState(false);
   const timer = useRef(null);
+  const [collectionMenuVisible, setCollectionMenuVisible] = useState(false);
 
   const isMenuOpen = Boolean(anchorEl);
 
@@ -245,6 +246,7 @@ const NiftyHeader = ({ light }) => {
 
   const handleMenuClose = () => {
     setAnchorEl(null);
+    setCollectionMenuVisible(false);
   };
 
   const goToMyProfile = () => {
@@ -253,8 +255,17 @@ const NiftyHeader = ({ light }) => {
   };
 
   const handleCreateCollection = () => {
-    history.push('/collection/add');
+    history.push('/collection/create');
     handleMenuClose();
+  };
+
+  const handleRegisterCollection = () => {
+    history.push('/collection/register');
+    handleMenuClose();
+  };
+
+  const handleToggleCollectionMenu = () => {
+    setCollectionMenuVisible(!collectionMenuVisible);
   };
 
   const openWrapStation = () => {
@@ -299,10 +310,23 @@ const NiftyHeader = ({ light }) => {
           My Profile
         </div>
       )}
-      <div className={styles.menuItem} onClick={handleCreateCollection}>
+      <div className={styles.menuItem} onClick={handleToggleCollectionMenu}>
         <img src={iconAdd} className={styles.menuIcon} />
-        Register Collection
+        Add Collection
       </div>
+      {collectionMenuVisible && (
+        <>
+          <div className={styles.subMenuItem} onClick={handleCreateCollection}>
+            Create New Collection
+          </div>
+          <div
+            className={styles.subMenuItem}
+            onClick={handleRegisterCollection}
+          >
+            Register Existing Collection
+          </div>
+        </>
+      )}
       <div className={styles.menuItem} onClick={openWrapStation}>
         <img src={iconSwap} className={styles.menuIcon} />
         FTM / WFTM Station
