@@ -442,14 +442,17 @@ const CollectionCreate = ({ isRegister }) => {
         )}
 
         <div className={styles.inputGroup}>
-          <div className={styles.inputTitle}>Logo image *</div>
+          <div className={styles.inputTitle}>Logo Image *</div>
           <div className={styles.inputSubTitle}>
             This image will also be used for navigation. 300x300 recommended.
           </div>
           <div className={styles.inputWrapper}>
             <div className={styles.logoUploadBox}>
               {logo && <img src={logo} />}
-              <div className={styles.uploadOverlay}>
+              <div
+                className={styles.uploadOverlay}
+                onClick={() => inputRef.current?.click()}
+              >
                 <input
                   ref={inputRef}
                   type="file"
@@ -457,10 +460,7 @@ const CollectionCreate = ({ isRegister }) => {
                   hidden
                   onChange={handleFileSelect}
                 />
-                <PublishIcon
-                  onClick={() => inputRef.current?.click()}
-                  className={styles.uploadIcon}
-                />
+                <PublishIcon className={styles.uploadIcon} />
               </div>
             </div>
           </div>
@@ -686,7 +686,7 @@ const CollectionCreate = ({ isRegister }) => {
 
         <div className={styles.inputGroup}>
           <div className={styles.inputTitle1}>
-            Contact Email&nbsp;
+            Contact Email *&nbsp;
             <BootstrapTooltip
               title="We will use this email to notify you about your collection application. This will not be shared with others."
               placement="top"
