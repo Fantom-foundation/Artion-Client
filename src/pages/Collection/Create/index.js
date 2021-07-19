@@ -225,22 +225,6 @@ const CollectionCreate = ({ isRegister }) => {
     cb(canvas.toDataURL());
   };
 
-  const getSignature = async () => {
-    const { data: nonce } = await getNonce(account, authToken);
-
-    let signature;
-    try {
-      const signer = await getSigner();
-      signature = await signer.signMessage(
-        `Approve Signature on Artion.io with nonce ${nonce}`
-      );
-    } catch (err) {
-      toast('error', 'You need to sign the message to be able to log in.');
-    }
-
-    return signature;
-  };
-
   const handleRegister = async () => {
     if (creating) return;
 
@@ -255,7 +239,23 @@ const CollectionCreate = ({ isRegister }) => {
       const y = (h - size) / 2;
       clipImage(img, x, y, size, size, async logodata => {
         try {
-          const signature = await getSignature();
+          const { data: nonce } = await getNonce(account, authToken);
+
+          let signature;
+          try {
+            const signer = await getSigner();
+            signature = await signer.signMessage(
+              `Approve Signature on Artion.io with nonce ${nonce}`
+            );
+          } catch (err) {
+            toast(
+              'error',
+              'You need to sign the message to be able to register a collection.'
+            );
+            setCreating(false);
+            return;
+          }
+
           const formData = new FormData();
           formData.append('collectionName', name);
           formData.append('erc721Address', address);
@@ -345,7 +345,23 @@ const CollectionCreate = ({ isRegister }) => {
             const y = (h - size) / 2;
             clipImage(img, x, y, size, size, async logodata => {
               try {
-                const signature = await getSignature();
+                const { data: nonce } = await getNonce(account, authToken);
+
+                let signature;
+                try {
+                  const signer = await getSigner();
+                  signature = await signer.signMessage(
+                    `Approve Signature on Artion.io with nonce ${nonce}`
+                  );
+                } catch (err) {
+                  toast(
+                    'error',
+                    'You need to sign the message to be able to create a collection.'
+                  );
+                  setCreating(false);
+                  return;
+                }
+
                 const formData = new FormData();
                 formData.append('collectionName', name);
                 formData.append('erc721Address', address);

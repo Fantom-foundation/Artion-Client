@@ -113,7 +113,12 @@ const AccountModal = () => {
           `Approve Signature on Artion.io with nonce ${nonce}`
         );
       } catch (err) {
-        toast('error', 'You need to sign the message to be able to log in.');
+        toast(
+          'error',
+          'You need to sign the message to be able to update account settings.'
+        );
+        setSaving(false);
+        return;
       }
 
       if (!avatar || avatar.startsWith('https')) {
