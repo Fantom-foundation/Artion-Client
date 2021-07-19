@@ -27,6 +27,17 @@ export const useApi = () => {
     return 'https://storage.testnet.artion.io';
   }, [chainId]);
 
+  const getNonce = async (address, authToken) => {
+    const res = await axios({
+      method: 'get',
+      url: `${apiUrl()}/account/nonce/${address}`,
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+      },
+    });
+    return res.data;
+  };
+
   const getAuthToken = async address => {
     let result = await axios({
       method: 'post',
@@ -67,7 +78,14 @@ export const useApi = () => {
     return res.data;
   };
 
-  const updateAccountDetails = async (alias, email, bio, avatar, authToken) => {
+  const updateAccountDetails = async (
+    alias,
+    email,
+    bio,
+    avatar,
+    authToken,
+    signature
+  ) => {
     const formData = new FormData();
     formData.append('alias', alias);
     formData.append('email', email);
@@ -77,6 +95,7 @@ export const useApi = () => {
     if (avatar) {
       formData.append('imgData', avatar);
     }
+    formData.append('signature', signature);
 
     const res = await axios({
       method: 'post',
@@ -616,6 +635,7 @@ export const useApi = () => {
     explorerUrl,
     apiUrl,
     storageUrl,
+    getNonce,
     getAuthToken,
     getAccountDetails,
     getUserAccountDetails,

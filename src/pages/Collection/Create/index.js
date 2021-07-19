@@ -21,7 +21,7 @@ import Header from 'components/header';
 import BootstrapTooltip from 'components/BootstrapTooltip';
 import toast from 'utils/toast';
 import { useApi } from 'api';
-import { useFactoryContract } from 'contracts';
+import { useFactoryContract, getSigner } from 'contracts';
 
 import webIcon from 'assets/svgs/web.svg';
 import discordIcon from 'assets/svgs/discord.svg';
@@ -38,7 +38,7 @@ const CollectionCreate = ({ isRegister }) => {
   const history = useHistory();
 
   const { account } = useWeb3React();
-  const { explorerUrl, apiUrl } = useApi();
+  const { explorerUrl, apiUrl, getNonce } = useApi();
   const { createNFTContract, createPrivateNFTContract } = useFactoryContract();
 
   const inputRef = useRef(null);
@@ -197,7 +197,7 @@ const CollectionCreate = ({ isRegister }) => {
     if (nameError) return false;
     if (descriptionError) return false;
     if (addressError) return false;
-    if (isRegister && (symbol.length === 0 || symbol.includes(' ')))
+    if (!isRegister && (symbol.length === 0 || symbol.includes(' ')))
       return false;
     if (siteUrl.length === 0) return false;
     if (email.length === 0) return false;
@@ -225,6 +225,22 @@ const CollectionCreate = ({ isRegister }) => {
     cb(canvas.toDataURL());
   };
 
+  const getSignature = async () => {
+    const { data: nonce } = await getNonce(account, authToken);
+
+    let signature;
+    try {
+      const signer = await getSigner();
+      signature = await signer.signMessage(
+        `Approve Signature on Artion.io with nonce ${nonce}`
+      );
+    } catch (err) {
+      toast('error', 'You need to sign the message to be able to log in.');
+    }
+
+    return signature;
+  };
+
   const handleRegister = async () => {
     if (creating) return;
 
@@ -239,6 +255,7 @@ const CollectionCreate = ({ isRegister }) => {
       const y = (h - size) / 2;
       clipImage(img, x, y, size, size, async logodata => {
         try {
+          const signature = await getSignature();
           const formData = new FormData();
           formData.append('collectionName', name);
           formData.append('erc721Address', address);
@@ -267,6 +284,7 @@ const CollectionCreate = ({ isRegister }) => {
             instagramHandle,
             mediumHandle,
             telegram,
+            signature,
           };
 
           await axios({
@@ -327,6 +345,7 @@ const CollectionCreate = ({ isRegister }) => {
             const y = (h - size) / 2;
             clipImage(img, x, y, size, size, async logodata => {
               try {
+                const signature = await getSignature();
                 const formData = new FormData();
                 formData.append('collectionName', name);
                 formData.append('erc721Address', address);
@@ -354,6 +373,7 @@ const CollectionCreate = ({ isRegister }) => {
                   instagramHandle,
                   mediumHandle,
                   telegram,
+                  signature,
                 };
                 await axios({
                   method: 'post',
@@ -442,14 +462,17 @@ const CollectionCreate = ({ isRegister }) => {
         )}
 
         <div className={styles.inputGroup}>
-          <div className={styles.inputTitle}>Logo image *</div>
+          <div className={styles.inputTitle}>Logo Image *</div>
           <div className={styles.inputSubTitle}>
             This image will also be used for navigation. 300x300 recommended.
           </div>
           <div className={styles.inputWrapper}>
             <div className={styles.logoUploadBox}>
               {logo && <img src={logo} />}
-              <div className={styles.uploadOverlay}>
+              <div
+                className={styles.uploadOverlay}
+                onClick={() => inputRef.current?.click()}
+              >
                 <input
                   ref={inputRef}
                   type="file"
@@ -457,10 +480,7 @@ const CollectionCreate = ({ isRegister }) => {
                   hidden
                   onChange={handleFileSelect}
                 />
-                <PublishIcon
-                  onClick={() => inputRef.current?.click()}
-                  className={styles.uploadIcon}
-                />
+                <PublishIcon className={styles.uploadIcon} />
               </div>
             </div>
           </div>
@@ -686,7 +706,7 @@ const CollectionCreate = ({ isRegister }) => {
 
         <div className={styles.inputGroup}>
           <div className={styles.inputTitle1}>
-            Contact Email&nbsp;
+            Contact Email *&nbsp;
             <BootstrapTooltip
               title="We will use this email to notify you about your collection application. This will not be shared with others."
               placement="top"
