@@ -4,17 +4,20 @@ import cx from 'classnames';
 import { ClipLoader } from 'react-spinners';
 import Modal from '@material-ui/core/Modal';
 import CreateIcon from '@material-ui/icons/Create';
+import { useWeb3React } from '@web3-react/core';
 
 import ModalActions from 'actions/modal.actions';
 import AuthActions from 'actions/auth.actions';
 import { useApi } from 'api';
 import toast from 'utils/toast';
+import { getSigner } from 'contracts';
 
 import styles from './styles.module.scss';
 
 const AccountModal = () => {
-  const { updateAccountDetails } = useApi();
+  const { getNonce, updateAccountDetails } = useApi();
   const dispatch = useDispatch();
+  const { account } = useWeb3React();
 
   const { fetching, user } = useSelector(state => state.Auth);
 
@@ -101,13 +104,26 @@ const AccountModal = () => {
     try {
       setSaving(true);
 
+      const { data: nonce } = await getNonce(account, authToken);
+
+      let signature;
+      try {
+        const signer = await getSigner();
+        signature = await signer.signMessage(
+          `Approve Signature on Artion.io with nonce ${nonce}`
+        );
+      } catch (err) {
+        toast('error', 'You need to sign the message to be able to log in.');
+      }
+
       if (!avatar || avatar.startsWith('https')) {
         const res = await updateAccountDetails(
           alias,
           email,
           bio,
           avatar,
-          authToken
+          authToken,
+          signature
         );
         dispatch(AuthActions.fetchSuccess(res.data));
         toast('success', 'Account details saved!');
@@ -128,7 +144,8 @@ const AccountModal = () => {
               email,
               bio,
               data,
-              authToken
+              authToken,
+              signature
             );
             dispatch(AuthActions.fetchSuccess(res.data));
             toast('success', 'Account details saved!');
