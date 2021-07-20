@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import axios from 'axios';
+import cx from 'classnames';
 import { useWeb3React } from '@web3-react/core';
 
 import StatusFilter from 'components/StatusFilter';
 import CollectionsFilter from 'components/CollectionsFilter';
-import ExploreHeader from './Header';
+import CategoriesFilter from 'components/CategoriesFilter';
 import ExploreFilterHeader from './Body/FilterHeader';
 import NFTsGrid from 'components/NFTsGrid';
 import Header from 'components/header';
@@ -14,6 +15,8 @@ import CollectionsActions from 'actions/collections.actions';
 import TokensActions from 'actions/tokens.actions';
 import HeaderActions from 'actions/header.actions';
 import useWindowDimensions from 'hooks/useWindowDimensions';
+
+import iconCollapse from 'assets/svgs/collapse.svg';
 
 import styles from './styles.module.scss';
 
@@ -26,6 +29,7 @@ const ExploreAllPage = () => {
 
   const { width } = useWindowDimensions();
 
+  const [collapsed, setCollapsed] = useState(false);
   const [page, setPage] = useState(0);
   const [fetchInterval, setFetchInterval] = useState(null);
   const [cancelSource, setCancelSource] = useState(null);
@@ -144,14 +148,22 @@ const ExploreAllPage = () => {
         className={styles.container}
         onScroll={width <= 600 ? handleScroll : null}
       >
-        <div className={styles.sidebar}>
-          <StatusFilter />
-          <CollectionsFilter />
+        <div className={cx(styles.sidebar, collapsed && styles.collapsed)}>
+          <div className={styles.sidebarHeader}>
+            {!collapsed && <div className={styles.sidebarTitle}>Filters</div>}
+            <img
+              src={iconCollapse}
+              className={styles.iconCollapse}
+              onClick={() => setCollapsed(!collapsed)}
+            />
+          </div>
+          <div className={styles.filterList}>
+            <StatusFilter />
+            <CollectionsFilter />
+            <CategoriesFilter />
+          </div>
         </div>
         <div className={styles.body}>
-          <div className={styles.header}>
-            <ExploreHeader />
-          </div>
           <div className={styles.filterHeader}>
             <ExploreFilterHeader loading={fetching} />
           </div>

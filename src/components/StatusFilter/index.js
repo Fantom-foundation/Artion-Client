@@ -50,7 +50,7 @@ const ExploreStatus = () => {
   };
 
   return (
-    <FilterWrapper title="Status" className={classes.body}>
+    <FilterWrapper title="Status" classes={{ body: classes.body }}>
       <div
         className={cx(
           classes.formControl,

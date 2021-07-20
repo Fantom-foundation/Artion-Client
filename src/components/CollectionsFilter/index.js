@@ -10,9 +10,10 @@ import {
 } from '@material-ui/icons';
 
 import FilterWrapper from 'components/FilterWrapper';
-import FilterActions from '../../actions/filter.actions';
-import nftIcon from '../../assets/svgs/nft.svg';
-import nftActiveIcon from '../../assets/svgs/nft_active.svg';
+import FilterActions from 'actions/filter.actions';
+import nftIcon from 'assets/svgs/nft.svg';
+import nftActiveIcon from 'assets/svgs/nft_active.svg';
+import iconCheck from 'assets/svgs/check_blue.svg';
 
 import './styles.scss';
 
@@ -63,7 +64,7 @@ const useStyles = makeStyles(() => ({
   collectionsList: {
     overflowY: 'auto',
     marginTop: 20,
-    flexGrow: 1,
+    maxHeight: 260,
   },
   collection: {
     height: 40,
@@ -75,15 +76,23 @@ const useStyles = makeStyles(() => ({
     alignItems: 'center',
     cursor: 'pointer',
   },
-  selected: {
-    color: '#007bff !important',
-    opacity: '1 !important',
-  },
   logo: {
     width: 40,
     height: 40,
     borderRadius: '50%',
     marginRight: 14,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+
+    '& img': {
+      width: 24,
+      height: 24,
+    },
+  },
+  withBorder: {
+    boxSizing: 'border-box',
+    border: '1px solid #D9E1EE',
   },
   name: {
     fontWeight: 700,
@@ -140,7 +149,7 @@ const ExploreCollections = () => {
   };
 
   return (
-    <FilterWrapper title="Collections" className={classes.body}>
+    <FilterWrapper title="Collections" classes={{ body: classes.body }}>
       <div className={classes.collectionExpandDiv}>
         <SearchIcon className={classes.iconButton} />
         <InputBase
@@ -172,22 +181,23 @@ const ExploreCollections = () => {
               className={classes.collection}
               onClick={() => handleSelectCollection(item.address)}
             >
-              <img
-                className={classes.logo}
-                src={
-                  item.isVerified
-                    ? `https://gateway.pinata.cloud/ipfs/${item.logoImageHash}`
-                    : collections.includes(item.address)
-                    ? nftActiveIcon
-                    : nftIcon
-                }
-              />
-              <span
-                className={cx(
-                  classes.name,
-                  collections.includes(item.address) ? classes.selected : null
-                )}
-              >
+              {collections.includes(item.address) ? (
+                <div className={cx(classes.logo, classes.withBorder)}>
+                  <img src={iconCheck} />
+                </div>
+              ) : (
+                <img
+                  className={classes.logo}
+                  src={
+                    item.isVerified
+                      ? `https://gateway.pinata.cloud/ipfs/${item.logoImageHash}`
+                      : collections.includes(item.address)
+                      ? nftActiveIcon
+                      : nftIcon
+                  }
+                />
+              )}
+              <span className={classes.name}>
                 {item.name || item.collectionName}
               </span>
               {item.isVerified && (

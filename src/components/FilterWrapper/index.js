@@ -47,7 +47,7 @@ const useStyles = makeStyles(() => ({
   },
 }));
 
-const FilterWrapper = ({ title, className, children }) => {
+const FilterWrapper = ({ title, classes: classnames, children }) => {
   const classes = useStyles();
   const [expanded, setExpanded] = useState(false);
 
@@ -56,7 +56,7 @@ const FilterWrapper = ({ title, className, children }) => {
   };
 
   return (
-    <div className={classes.root}>
+    <div className={cx(classes.root, classnames.root)}>
       <Accordion
         className={classes.wrapper}
         expanded={expanded}
@@ -70,7 +70,7 @@ const FilterWrapper = ({ title, className, children }) => {
             <span className={classes.heading}>{title}</span>
           </div>
         </AccordionSummary>
-        <AccordionDetails className={cx(classes.body, className)}>
+        <AccordionDetails className={cx(classes.body, classnames.body)}>
           {children}
         </AccordionDetails>
       </Accordion>
