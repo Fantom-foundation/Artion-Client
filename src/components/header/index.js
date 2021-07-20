@@ -12,7 +12,6 @@ import { ChainId } from '@sushiswap/sdk';
 import WalletConnectActions from 'actions/walletconnect.actions';
 import AuthActions from 'actions/auth.actions';
 import ModalActions from 'actions/modal.actions';
-import HeaderActions from 'actions/header.actions';
 import { shortenAddress } from 'utils';
 import { injected } from 'connectors';
 import { useApi } from 'api';
@@ -164,8 +163,6 @@ const NiftyHeader = ({ light }) => {
   };
 
   useEffect(() => {
-    dispatch(HeaderActions.toggleSearchbar(false));
-
     if (!isWalletConnected) {
       handleConnectWallet();
     }
@@ -359,7 +356,7 @@ const NiftyHeader = ({ light }) => {
         <div className={styles.searchbar}>
           <SearchIcon className={styles.searchicon} />
           <input
-            placeholder="Search"
+            placeholder="Search items, collections and accounts"
             className={styles.searchinput}
             onChange={e => handleSearch(e.target.value)}
             onFocus={() => setSearchBarActive(true)}
