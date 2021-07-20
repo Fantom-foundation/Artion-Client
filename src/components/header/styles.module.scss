@@ -3,11 +3,13 @@
   top: 0;
   left: 0;
   right: 0;
-  padding: 20px;
+  padding: 12px 48px 12px 24px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   z-index: 100;
+  border-bottom: 1px solid #D9E1EE;
+  box-sizing: border-box;
 }
 
 .left {
@@ -36,15 +38,16 @@
   max-width: 400px;
   height: 50px;
   box-sizing: border-box;
-  border-radius: 10px;
-  background-color: rgba(190, 190, 190, .1);
+  border-radius: 4px;
+  border: 1px solid #D9E1EE;
   position: relative;
 
   &.active {
     .searchcontinner {
-      border-radius: 10px;
-      background: #F6F7F9;
+      border-radius: 4px;
       box-shadow: 0px 4px 40px rgba(0, 0, 0, 0.15);
+      border: 1px solid #D9E1EE;
+      background-color: #FFF;
     }
 
     .searchicon {
@@ -55,7 +58,7 @@
 
 .searchbar {
   width: 100%;
-  height: 50px;
+  height: 48px;
   display: flex;
   align-items: center;
   padding: 0 14px;
@@ -81,12 +84,15 @@
 }
 
 .resultcont {
-  padding: 6px 14px;
+  padding: 0 14px;
 }
 
 .resultsection {
   margin-bottom: 6px;
 
+  &:first-child {
+    margin-top: 6px;
+  }
   &:last-child {
     margin-bottom: 0;
   }
@@ -187,10 +193,10 @@
 }
 
 .avatar {
-  width: 36px !important;
-  height: 36px !important;
-  border-radius: 18px !important;
-  margin-right: 8px;
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 50% !important;
+  margin-right: 12px;
   overflow: hidden;
 }
 
@@ -214,9 +220,9 @@
 
 .account,
 .connect {
-  padding: 11px 18px;
-  border-radius: 10px;
-  border: 1px solid #FFF;
+  padding: 8px 12px 11px 24px;
+  border-radius: 4px;
+  border: 1px solid #D9E1EE;
 
   &:hover {
     box-shadow: 0 0 6px rgba(0, 0, 0, 0.3);
