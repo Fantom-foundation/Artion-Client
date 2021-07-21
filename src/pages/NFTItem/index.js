@@ -2099,9 +2099,7 @@ const NFTItem = () => {
   );
 
   return (
-    <div
-      className={cx(styles.container, isLoggedIn() ? styles.withHeader : '')}
-    >
+    <div className={styles.container}>
       <Header light />
       {isLoggedIn() && (
         <div className={styles.header}>
