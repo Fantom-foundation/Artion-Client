@@ -27,6 +27,12 @@ import {
   ViewModule as ViewModuleIcon,
   FavoriteBorder as FavoriteBorderIcon,
   Favorite as FavoriteIcon,
+  Timeline as TimelineIcon,
+  LocalOffer as LocalOfferIcon,
+  Toc as TocIcon,
+  Label as LabelIcon,
+  Ballot as BallotIcon,
+  VerticalSplit as VerticalSplitIcon,
 } from '@material-ui/icons';
 import toast from 'react-hot-toast';
 
@@ -2000,6 +2006,7 @@ const NFTItem = () => {
 
   const renderAboutPanel = () => (
     <Panel
+      icon={VerticalSplitIcon}
       title={
         <div className={styles.panelTitle}>
           About&nbsp;
@@ -2073,7 +2080,7 @@ const NFTItem = () => {
   );
 
   const renderCollectionPanel = () => (
-    <Panel title="Chain Info">
+    <Panel title="Chain Info" icon={BallotIcon}>
       <div className={styles.panelBody}>
         <div className={styles.panelLine}>
           <div className={styles.panelLabel}>Collection</div>
@@ -2261,7 +2268,7 @@ const NFTItem = () => {
             <div className={styles.itemInfo}>{renderItemInfo()}</div>
             <div className={styles.itemInfoCont}>
               {info?.properties && (
-                <Panel title="Properties">
+                <Panel title="Properties" icon={LabelIcon}>
                   <div className={styles.panelBody}>
                     {renderProperties(info.properties)}
                   </div>
@@ -2410,7 +2417,7 @@ const NFTItem = () => {
             )}
             {!bundleID && (
               <div className={styles.panelWrapper}>
-                <Panel title="Price History">
+                <Panel title="Price History" icon={TimelineIcon}>
                   <ReactResizeDetector>
                     {({ width }) =>
                       width > 0 ? (
@@ -2448,7 +2455,7 @@ const NFTItem = () => {
               </div>
             )}
             <div className={styles.panelWrapper}>
-              <Panel title="Listings" expanded>
+              <Panel title="Listings" icon={LocalOfferIcon} expanded>
                 <div className={styles.listings}>
                   <div className={cx(styles.listing, styles.heading)}>
                     <div className={styles.owner}>From</div>
@@ -2567,7 +2574,7 @@ const NFTItem = () => {
               </Panel>
             </div>
             <div className={styles.panelWrapper}>
-              <Panel title="Offers" expanded>
+              <Panel title="Offers" icon={TocIcon} expanded>
                 <div className={styles.offers}>
                   <div className={cx(styles.offer, styles.heading)}>
                     <div className={styles.owner}>From</div>
@@ -2788,6 +2795,31 @@ const NFTItem = () => {
                 </div>
               );
             })}
+          </div>
+          <div className={styles.panelWrapper}>
+            <Panel title="More from this collection" icon={ViewModuleIcon}>
+              <div className={styles.panelBody}>
+                <div className={styles.panelLine}>
+                  <div className={styles.panelLabel}>Collection</div>
+                  <a
+                    href={`${explorerUrl()}/token/${address}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={styles.panelValue}
+                  >
+                    {shortenAddress(address)}
+                  </a>
+                </div>
+                <div className={styles.panelLine}>
+                  <div className={styles.panelLabel}>Network</div>
+                  <div className={styles.panelValue}>Fantom Opera</div>
+                </div>
+                <div className={styles.panelLine}>
+                  <div className={styles.panelLabel}>Chain ID</div>
+                  <div className={styles.panelValue}>250</div>
+                </div>
+              </div>
+            </Panel>
           </div>
         </div>
       </div>
