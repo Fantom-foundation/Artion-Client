@@ -28,15 +28,13 @@
 
 .groupOptions {
   padding-left: 24px;
+  display: flex;
+  flex-direction: column;
 }
 
 .groupTitle {
   font-size: 18px;
   font-weight: 700;
-}
-
-.formControl {
-  display: flex;
 }
 
 .buttonsWrapper {
