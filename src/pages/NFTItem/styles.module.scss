@@ -201,7 +201,7 @@
 .itemInfoCont {
   margin: 40px 0;
   border-radius: 10px;
-  border: 1px solid #2479FA80;
+  border: 1px solid #EAEAF1;
   overflow: hidden;
 }
 
@@ -329,14 +329,15 @@
 .listing,
 .offer,
 .bundleItem {
-  padding-left: 14px;
+  padding-left: 21px;
   height: 50px;
   box-sizing: border-box;
   border-bottom: 1px solid #BBB;
   display: flex;
   align-items: center;
-  font-size: 20px;
-  color: #3D3D3D;
+  font-size: 14px;
+  font-weight: 400;
+  color: #121223;
 }
 
 .items {
@@ -525,8 +526,8 @@
 
 .tradeHistoryTitle {
   font-weight: 700;
-  font-size: 22px;
-  color: #3D3D3D;
+  font-size: 16px;
+  color: #121223;
 }
 
 .filter {
@@ -551,8 +552,9 @@
   display: flex;
   align-items: center;
   padding: 0 14px;
-  font-size: 20px;
-  color: #3D3D3D;
+  font-size: 14px;
+  font-weight: 400;
+  color: #121223;
   border-bottom: 1px solid rgba(0, 0, 0, .1);
 
   &.heading {
@@ -595,7 +597,7 @@
   min-width: 550px;
   margin: 40px 0;
   border-radius: 10px;
-  border: 1px solid #2479FA80;
+  border: 1px solid #EAEAF1;
   box-sizing: border-box;
   overflow: hidden;
 }
