@@ -8,7 +8,6 @@
   align-items: center;
   justify-content: space-between;
   z-index: 100;
-  border-bottom: 1px solid #D9E1EE;
   box-sizing: border-box;
 }
 
@@ -38,15 +37,15 @@
   max-width: 400px;
   height: 50px;
   box-sizing: border-box;
-  border-radius: 4px;
-  border: 1px solid #D9E1EE;
+  border-radius: 10px;
+  border: 1px solid #EAEAF1;
   position: relative;
 
   &.active {
     .searchcontinner {
-      border-radius: 4px;
+      border-radius: 10px;
       box-shadow: 0px 4px 40px rgba(0, 0, 0, 0.15);
-      border: 1px solid #D9E1EE;
+      border: 1px solid #EAEAF1;
       background-color: #FFF;
     }
 
@@ -220,8 +219,8 @@
 
 .account,
 .connect {
-  padding: 8px 12px 11px 24px;
-  border-radius: 4px;
+  padding: 8px 12px 11px 12px;
+  border-radius: 50px;
   border: 1px solid #D9E1EE;
 
   &:hover {
@@ -297,6 +296,7 @@
 
 .lightBg {
   background-color: #FFF;
+  border-bottom: 1px solid #D9E1EE;
   .menuLink {
     color: #3D3D3D;
     opacity: 0.6;

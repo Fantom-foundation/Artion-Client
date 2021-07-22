@@ -22,6 +22,7 @@ import AccountDetails from '../pages/AccountDetails';
 import NFTItem from '../pages/NFTItem';
 import CollectionCreate from '../pages/Collection/Create';
 import CollectionReview from '../pages/Collection/Review';
+import NotificationSetting from '../pages/NotificationSetting';
 import PriceActions from 'actions/price.actions';
 
 const App = () => {
@@ -89,6 +90,10 @@ const App = () => {
             component={() => <CollectionCreate isRegister />}
           />
           <Route path="/collection/review" component={CollectionReview} />
+          <Route
+            path="/settings/notification"
+            component={NotificationSetting}
+          />
           <Route path="/404" component={NotFound} />
           <Route path="*">
             <Redirect to="/404" />

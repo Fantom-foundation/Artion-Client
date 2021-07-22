@@ -631,6 +631,30 @@ export const useApi = () => {
     return res.data;
   };
 
+  const getNotificationSettings = async authToken => {
+    const res = await axios({
+      method: 'get',
+      url: `${apiUrl()}/account/getnotificationsettings`,
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+      },
+    });
+    return res.data;
+  };
+
+  const updateNotificationSettings = async (settings, authToken, signature) => {
+    const res = await axios({
+      method: 'post',
+      url: `${apiUrl()}/account/notificationsettings`,
+      data: JSON.stringify({ settings: JSON.stringify(settings), signature }),
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${authToken}`,
+      },
+    });
+    return res.data;
+  };
+
   return {
     explorerUrl,
     apiUrl,
@@ -680,5 +704,7 @@ export const useApi = () => {
     getItemLikeUsers,
     getBundleLikeUsers,
     getMyLikes,
+    getNotificationSettings,
+    updateNotificationSettings,
   };
 };
