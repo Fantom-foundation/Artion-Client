@@ -30,6 +30,7 @@ import iconUser from 'assets/svgs/user.svg';
 import iconAdd from 'assets/svgs/add.svg';
 import iconSwap from 'assets/svgs/swap.svg';
 import iconExit from 'assets/svgs/exit.svg';
+import iconSettings from 'assets/svgs/settings.svg';
 
 import styles from './styles.module.scss';
 
@@ -251,6 +252,11 @@ const NiftyHeader = ({ light }) => {
     handleMenuClose();
   };
 
+  const goToNotificationSettings = () => {
+    history.push(`/settings/notification`);
+    handleMenuClose();
+  };
+
   const handleCreateCollection = () => {
     history.push('/collection/create');
     handleMenuClose();
@@ -307,6 +313,10 @@ const NiftyHeader = ({ light }) => {
           My Profile
         </div>
       )}
+      <div className={styles.menuItem} onClick={goToNotificationSettings}>
+        <img src={iconSettings} className={styles.menuIcon} />
+        Notification Settings
+      </div>
       <div className={styles.menuItem} onClick={handleToggleCollectionMenu}>
         <img src={iconAdd} className={styles.menuIcon} />
         Add Collection

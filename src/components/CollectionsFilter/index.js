@@ -41,11 +41,11 @@ const useStyles = makeStyles(() => ({
     height: '100%',
   },
   collectionExpandDiv: {
-    borderRadius: 4,
+    borderRadius: 10,
     width: '100%',
     flex: '0 0 48px',
     backgroundColor: '#FFF',
-    border: '1px solid #D9E1EE',
+    border: '1px solid #EAEAF1',
     padding: '0 14px',
     boxSizing: 'border-box',
     display: 'flex',

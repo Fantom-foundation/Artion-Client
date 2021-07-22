@@ -38,7 +38,7 @@ const CollectionCreate = ({ isRegister }) => {
   const history = useHistory();
 
   const { account } = useWeb3React();
-  const { explorerUrl, apiUrl, getNonce } = useApi();
+  const { apiUrl, getNonce } = useApi();
   const { createNFTContract, createPrivateNFTContract } = useFactoryContract();
 
   const inputRef = useRef(null);
@@ -622,12 +622,9 @@ const CollectionCreate = ({ isRegister }) => {
                     <div className={styles.linkIconWrapper}>
                       <img src={nftIcon} className={styles.linkIcon} />
                     </div>
-                    <div className={styles.inputPrefix}>
-                      {explorerUrl()}/address/
-                    </div>
                     <input
                       className={styles.linkInput}
-                      placeholder="0x..."
+                      placeholder="Enter your collection's address"
                       value={address}
                       onChange={e => setAddress(e.target.value)}
                       onBlur={validateAddress}
@@ -644,10 +641,9 @@ const CollectionCreate = ({ isRegister }) => {
                 <div className={styles.linkIconWrapper}>
                   <img src={webIcon} className={styles.linkIcon} />
                 </div>
-                <div className={styles.inputPrefix}>https://</div>
                 <input
                   className={styles.linkInput}
-                  placeholder="yoursite.io"
+                  placeholder="Enter your website url"
                   value={siteUrl}
                   onChange={e => setSiteUrl(e.target.value)}
                   onBlur={validateSiteUrl}
@@ -660,10 +656,9 @@ const CollectionCreate = ({ isRegister }) => {
                 <div className={styles.linkIconWrapper}>
                   <img src={discordIcon} className={styles.linkIcon} />
                 </div>
-                <div className={styles.inputPrefix}>https://discord.gg/</div>
                 <input
                   className={styles.linkInput}
-                  placeholder="abcdef"
+                  placeholder="Enter your Discord url"
                   value={discord}
                   onChange={e => setDiscord(e.target.value)}
                 />
@@ -672,10 +667,9 @@ const CollectionCreate = ({ isRegister }) => {
                 <div className={styles.linkIconWrapper}>
                   <img src={twitterIcon} className={styles.linkIcon} />
                 </div>
-                <div className={styles.inputPrefix}>@</div>
                 <input
                   className={styles.linkInput}
-                  placeholder="yourTwitterHandle"
+                  placeholder="Enter your Twitter profile link"
                   value={twitterHandle}
                   onChange={e => setTwitterHandle(e.target.value)}
                 />
@@ -684,10 +678,9 @@ const CollectionCreate = ({ isRegister }) => {
                 <div className={styles.linkIconWrapper}>
                   <img src={instagramIcon} className={styles.linkIcon} />
                 </div>
-                <div className={styles.inputPrefix}>@</div>
                 <input
                   className={styles.linkInput}
-                  placeholder="yourInstagramHandle"
+                  placeholder="Enter your Instagram profile link"
                   value={instagramHandle}
                   onChange={e => setInstagramHandle(e.target.value)}
                 />
@@ -696,10 +689,9 @@ const CollectionCreate = ({ isRegister }) => {
                 <div className={styles.linkIconWrapper}>
                   <img src={mediumIcon} className={styles.linkIcon} />
                 </div>
-                <div className={styles.inputPrefix}>@</div>
                 <input
                   className={styles.linkInput}
-                  placeholder="yourMediumHandle"
+                  placeholder="Enter your Medium profile link"
                   value={mediumHandle}
                   onChange={e => setMediumHandle(e.target.value)}
                 />
@@ -708,10 +700,9 @@ const CollectionCreate = ({ isRegister }) => {
                 <div className={styles.linkIconWrapper}>
                   <img src={telegramIcon} className={styles.linkIcon} />
                 </div>
-                <div className={styles.inputPrefix}>https://t.me/</div>
                 <input
                   className={styles.linkInput}
-                  placeholder="abcdef"
+                  placeholder="Enter your Telegram profile link"
                   value={telegram}
                   onChange={e => setTelegram(e.target.value)}
                 />
