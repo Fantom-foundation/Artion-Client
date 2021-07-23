@@ -66,6 +66,7 @@ import twitterIcon from 'assets/svgs/twitter.svg';
 import mediumIcon from 'assets/svgs/medium.svg';
 import filterIcon from 'assets/svgs/filter.svg';
 import checkIcon from 'assets/svgs/check.svg';
+import ftmIcon from 'assets/svgs/ftm.svg';
 
 import styles from './styles.module.scss';
 
@@ -96,6 +97,7 @@ const NFTItem = () => {
     getTradeHistory,
     getBundleTradeHistory: _getBundleTradeHistory,
     getTransferHistory,
+    getMoreFromCollection,
     fetchCollection,
     getUserAccountDetails,
     getTokenType,
@@ -221,6 +223,7 @@ const NFTItem = () => {
   const [views, setViews] = useState();
   const [now, setNow] = useState(new Date());
   const [loading, setLoading] = useState(true);
+  const [loadingMoreItems, setLoadingMoreItems] = useState(true);
   const auction = useRef(null);
   const listings = useRef([]);
   const bundleListing = useRef(null);
@@ -236,6 +239,7 @@ const NFTItem = () => {
   const { isConnected: isWalletConnected, authToken } = useSelector(
     state => state.ConnectWallet
   );
+  const { price: ftmPrice } = useSelector(state => state.Price);
 
   const isLoggedIn = () => {
     return (
@@ -451,6 +455,17 @@ const NFTItem = () => {
     }
   };
 
+  const getMoreFromThisCollection = async () => {
+    setLoadingMoreItems(true);
+    try {
+      const moreItems = await getMoreFromCollection(address);
+      console.log(moreItems);
+    } catch (e) {
+      console.log(e);
+    }
+    setLoadingMoreItems(false);
+  };
+
   const eventMatches = (nft, id) => {
     return (
       address?.toLowerCase() === nft?.toLowerCase() &&
@@ -481,6 +496,9 @@ const NFTItem = () => {
       } catch {
         listings.current.push(newListing);
       }
+      listings.current = listings.current.sort((a, b) =>
+        a.price > b.price ? 1 : -1
+      );
     }
   };
 
@@ -972,6 +990,7 @@ const NFTItem = () => {
       getItemTradeHistory();
       getAuctions();
       getBid();
+      getMoreFromThisCollection();
 
       increaseViewCount(address, tokenID).then(({ data }) => {
         setViews(data);
@@ -1733,6 +1752,19 @@ const NFTItem = () => {
     return bundleListing.current || myListing() !== undefined;
   })();
 
+  const bestListing = (() => {
+    if (bundleID) return bundleListing.current;
+    let idx = 0;
+    while (
+      idx < listings.current.length &&
+      listings.current[idx].owner.toLowerCase() === account.toLowerCase()
+    ) {
+      idx++;
+    }
+    if (idx < listings.current.length) return listings.current[idx];
+    return null;
+  })();
+
   const maxSupply = () => {
     let supply = 0;
     holders.current.map(holder => {
@@ -1829,7 +1861,7 @@ const NFTItem = () => {
         {(ownerInfoLoading || tokenOwnerLoading || owner || tokenInfo) && (
           <div className={styles.itemOwner}>
             {ownerInfoLoading || tokenOwnerLoading ? (
-              <Skeleton width={180} height={25} />
+              <Skeleton width={150} height={20} />
             ) : tokenType.current === 721 || bundleID ? (
               <>
                 <div className={styles.ownerAvatar}>
@@ -1870,12 +1902,12 @@ const NFTItem = () => {
           </div>
         )}
         <div className={styles.itemViews}>
-          <FontAwesomeIcon icon={faEye} color="#00000099" />
+          <FontAwesomeIcon icon={faEye} color="#A2A2AD" />
           &nbsp;
           {isNaN(views) ? (
-            <Skeleton width={80} height={24} />
+            <Skeleton width={80} height={20} />
           ) : (
-            `${formatNumber(views)} View${views !== 1 ? 's' : ''}`
+            `${formatNumber(views)} view${views !== 1 ? 's' : ''}`
           )}
         </div>
         <div
@@ -1886,7 +1918,7 @@ const NFTItem = () => {
           )}
         >
           {isNaN(liked) || likeFetching ? (
-            <Skeleton width={80} height={24} />
+            <Skeleton width={80} height={20} />
           ) : (
             <>
               {isLike ? (
@@ -1902,12 +1934,34 @@ const NFTItem = () => {
               )}
               &nbsp;
               <span onClick={liked ? showLikeUsers : null}>
-                {formatNumber(liked || 0)} Like{liked !== 1 ? 's' : ''}
+                {formatNumber(liked || 0)} favorite{liked !== 1 ? 's' : ''}
               </span>
             </>
           )}
         </div>
       </div>
+      {bestListing && (
+        <div className={styles.bestBuy}>
+          <div className={styles.currentPriceLabel}>Current price</div>
+          <div className={styles.currentPriceWrapper}>
+            <div className={styles.tokenLogo}>
+              <img src={ftmIcon} />
+            </div>
+            <div className={styles.currentPrice}>{bestListing.price}</div>
+            <div className={styles.currentPriceUSD}>
+              (${(bestListing.price * ftmPrice).toFixed(2)})
+            </div>
+          </div>
+          <div
+            className={cx(styles.buyNow, buyingItem && styles.disabled)}
+            onClick={
+              bundleID ? handleBuyBundle : () => handleBuyItem(bestListing)
+            }
+          >
+            {buyingItem ? <ClipLoader color="#FFF" size={16} /> : 'Buy Now'}
+          </div>
+        </div>
+      )}
     </>
   );
 
@@ -1975,7 +2029,7 @@ const NFTItem = () => {
     >
       <div className={styles.panelBody}>
         {creatorInfoLoading ? (
-          <Skeleton width={180} height={25} />
+          <Skeleton width={150} height={20} />
         ) : (
           <div className={styles.itemOwner}>
             <div className={styles.ownerAvatar}>
@@ -1987,7 +2041,7 @@ const NFTItem = () => {
               ) : (
                 <Identicon
                   account={creator}
-                  size={32}
+                  size={24}
                   className={styles.avatar}
                 />
               )}
@@ -2470,7 +2524,7 @@ const NFTItem = () => {
                         <div className={styles.listing}>
                           <div className={styles.owner}>
                             {loading ? (
-                              <Skeleton width={120} height={24} />
+                              <Skeleton width={100} height={20} />
                             ) : (
                               <Link to={`/account/${owner}`}>
                                 <div className={styles.userAvatarWrapper}>
@@ -2495,7 +2549,7 @@ const NFTItem = () => {
                           </div>
                           <div className={styles.price}>
                             {loading ? (
-                              <Skeleton width={100} height={24} />
+                              <Skeleton width={100} height={20} />
                             ) : (
                               `${formatNumber(bundleListing.current.price)} FTM`
                             )}
@@ -2505,8 +2559,7 @@ const NFTItem = () => {
                               <div
                                 className={cx(
                                   styles.buyButton,
-                                  (salesContractApproving || buyingItem) &&
-                                    styles.disabled
+                                  buyingItem && styles.disabled
                                 )}
                                 onClick={handleBuyBundle}
                               >
@@ -2555,8 +2608,7 @@ const NFTItem = () => {
                               <div
                                 className={cx(
                                   styles.buyButton,
-                                  (salesContractApproving || buyingItem) &&
-                                    styles.disabled
+                                  buyingItem && styles.disabled
                                 )}
                                 onClick={() => handleBuyItem(listing)}
                               >
@@ -2576,106 +2628,132 @@ const NFTItem = () => {
             <div className={styles.panelWrapper}>
               <Panel title="Offers" icon={TocIcon} expanded>
                 <div className={styles.offers}>
-                  <div className={cx(styles.offer, styles.heading)}>
-                    <div className={styles.owner}>From</div>
-                    <div className={styles.price}>Price</div>
-                    {tokenInfo?.totalSupply > 1 && (
-                      <div className={styles.quantity}>Quantity</div>
-                    )}
-                    <div className={styles.deadline}>Expires In</div>
-                    <div className={styles.buy} />
-                  </div>
-                  {offers.current
-                    .filter(offer => offer.deadline > now.getTime())
-                    .sort((a, b) => (a.pricePerItem < b.pricePerItem ? 1 : -1))
-                    .map((offer, idx) => (
-                      <div className={styles.offer} key={idx}>
-                        <div className={styles.owner}>
-                          <Link to={`/account/${offer.creator}`}>
-                            <div className={styles.userAvatarWrapper}>
-                              {offer.image ? (
-                                <img
-                                  src={`https://gateway.pinata.cloud/ipfs/${offer.image}`}
-                                  className={styles.userAvatar}
-                                />
-                              ) : (
-                                <Identicon
-                                  account={offer.creator}
-                                  size={24}
-                                  className={styles.userAvatar}
-                                />
-                              )}
-                            </div>
-                            {offer.alias || offer.creator.substr(0, 6)}
-                          </Link>
-                        </div>
-                        <div className={styles.price}>
-                          {formatNumber(offer.pricePerItem || offer.price)} FTM
-                        </div>
+                  {offers.current.length ? (
+                    <>
+                      <div className={cx(styles.offer, styles.heading)}>
+                        <div className={styles.owner}>From</div>
+                        <div className={styles.price}>Price</div>
                         {tokenInfo?.totalSupply > 1 && (
-                          <div className={styles.quantity}>
-                            {formatNumber(offer.quantity)}
-                          </div>
+                          <div className={styles.quantity}>Quantity</div>
                         )}
-                        <div className={styles.deadline}>
-                          {formatExpiration(offer.deadline)}
-                        </div>
-                        <div className={styles.buy}>
-                          {(isMine ||
-                            (myHolding &&
-                              myHolding.supply >= offer.quantity)) &&
-                            offer.creator?.toLowerCase() !==
-                              account?.toLowerCase() && (
-                              <div
-                                className={cx(
-                                  styles.buyButton,
-                                  (salesContractApproving || offerAccepting) &&
-                                    styles.disabled
-                                )}
-                                onClick={
-                                  bundleID
-                                    ? isBundleContractApproved
-                                      ? () => handleAcceptOffer(offer)
-                                      : handleApproveBundleSalesContract
-                                    : salesContractApproved
-                                    ? () => handleAcceptOffer(offer)
-                                    : handleApproveSalesContract
-                                }
-                              >
-                                {!(bundleID
-                                  ? isBundleContractApproved
-                                  : salesContractApproved) ? (
-                                  salesContractApproving ? (
-                                    <ClipLoader color="#FFF" size={16} />
+                        <div className={styles.deadline}>Expires In</div>
+                        <div className={styles.buy} />
+                      </div>
+                      {offers.current
+                        .filter(offer => offer.deadline > now.getTime())
+                        .sort((a, b) =>
+                          a.pricePerItem < b.pricePerItem ? 1 : -1
+                        )
+                        .map((offer, idx) => (
+                          <div className={styles.offer} key={idx}>
+                            <div className={styles.owner}>
+                              <Link to={`/account/${offer.creator}`}>
+                                <div className={styles.userAvatarWrapper}>
+                                  {offer.image ? (
+                                    <img
+                                      src={`https://gateway.pinata.cloud/ipfs/${offer.image}`}
+                                      className={styles.userAvatar}
+                                    />
                                   ) : (
-                                    'Approve'
-                                  )
-                                ) : offerAccepting ? (
-                                  <ClipLoader color="#FFF" size={16} />
-                                ) : (
-                                  'Accept'
-                                )}
+                                    <Identicon
+                                      account={offer.creator}
+                                      size={24}
+                                      className={styles.userAvatar}
+                                    />
+                                  )}
+                                </div>
+                                {offer.alias || offer.creator.substr(0, 6)}
+                              </Link>
+                            </div>
+                            <div className={styles.price}>
+                              {formatNumber(offer.pricePerItem || offer.price)}
+                              &nbsp;FTM
+                            </div>
+                            {tokenInfo?.totalSupply > 1 && (
+                              <div className={styles.quantity}>
+                                {formatNumber(offer.quantity)}
                               </div>
                             )}
-                          {offer.creator?.toLowerCase() ===
-                            account?.toLowerCase() && (
-                            <div
-                              className={cx(
-                                styles.buyButton,
-                                offerCanceling && styles.disabled
-                              )}
-                              onClick={() => handleCancelOffer()}
-                            >
-                              {offerCanceling ? (
-                                <ClipLoader color="#FFF" size={16} />
-                              ) : (
-                                'Withdraw'
+                            <div className={styles.deadline}>
+                              {formatExpiration(offer.deadline)}
+                            </div>
+                            <div className={styles.buy}>
+                              {(isMine ||
+                                (myHolding &&
+                                  myHolding.supply >= offer.quantity)) &&
+                                offer.creator?.toLowerCase() !==
+                                  account?.toLowerCase() && (
+                                  <div
+                                    className={cx(
+                                      styles.buyButton,
+                                      (salesContractApproving ||
+                                        offerAccepting) &&
+                                        styles.disabled
+                                    )}
+                                    onClick={
+                                      bundleID
+                                        ? isBundleContractApproved
+                                          ? () => handleAcceptOffer(offer)
+                                          : handleApproveBundleSalesContract
+                                        : salesContractApproved
+                                        ? () => handleAcceptOffer(offer)
+                                        : handleApproveSalesContract
+                                    }
+                                  >
+                                    {!(bundleID
+                                      ? isBundleContractApproved
+                                      : salesContractApproved) ? (
+                                      salesContractApproving ? (
+                                        <ClipLoader color="#FFF" size={16} />
+                                      ) : (
+                                        'Approve'
+                                      )
+                                    ) : offerAccepting ? (
+                                      <ClipLoader color="#FFF" size={16} />
+                                    ) : (
+                                      'Accept'
+                                    )}
+                                  </div>
+                                )}
+                              {offer.creator?.toLowerCase() ===
+                                account?.toLowerCase() && (
+                                <div
+                                  className={cx(
+                                    styles.buyButton,
+                                    offerCanceling && styles.disabled
+                                  )}
+                                  onClick={() => handleCancelOffer()}
+                                >
+                                  {offerCanceling ? (
+                                    <ClipLoader color="#FFF" size={16} />
+                                  ) : (
+                                    'Withdraw'
+                                  )}
+                                </div>
                               )}
                             </div>
-                          )}
-                        </div>
-                      </div>
-                    ))}
+                          </div>
+                        ))}
+                    </>
+                  ) : (
+                    <div className={styles.noOffers}>
+                      <div className={styles.noOffersLabel}>No Offers Yet</div>
+                      {(!isMine ||
+                        (tokenType.current === 1155 &&
+                          myHolding.supply < tokenInfo.totalSupply)) &&
+                        (!auction.current || auction.current.resulted) && (
+                          <div
+                            className={cx(
+                              styles.makeOffer,
+                              offerPlacing && styles.disabled
+                            )}
+                            onClick={() => setOfferModalVisible(true)}
+                          >
+                            Make Offer
+                          </div>
+                        )}
+                    </div>
+                  )}
                 </div>
               </Panel>
             </div>
@@ -2726,7 +2804,7 @@ const NFTItem = () => {
                       {history ? (
                         `${formatNumber(history.price)} FTM`
                       ) : (
-                        <Skeleton width={120} height={25} />
+                        <Skeleton width={100} height={20} />
                       )}
                     </div>
                   )}
@@ -2735,7 +2813,7 @@ const NFTItem = () => {
                       {history ? (
                         formatNumber(history.value)
                       ) : (
-                        <Skeleton width={120} height={25} />
+                        <Skeleton width={100} height={20} />
                       )}
                     </div>
                   )}
@@ -2759,7 +2837,7 @@ const NFTItem = () => {
                         {history.fromAlias || history.from.substr(0, 6)}
                       </Link>
                     ) : (
-                      <Skeleton width={200} height={25} />
+                      <Skeleton width={180} height={20} />
                     )}
                   </div>
                   <div className={styles.to}>
@@ -2782,14 +2860,14 @@ const NFTItem = () => {
                         {history.toAlias || history.to.substr(0, 6)}
                       </Link>
                     ) : (
-                      <Skeleton width={200} height={25} />
+                      <Skeleton width={180} height={20} />
                     )}
                   </div>
                   <div className={styles.saleDate}>
                     {saleDate ? (
                       formatDate(saleDate)
                     ) : (
-                      <Skeleton width={180} height={25} />
+                      <Skeleton width={150} height={20} />
                     )}
                   </div>
                 </div>
@@ -2799,25 +2877,13 @@ const NFTItem = () => {
           <div className={styles.panelWrapper}>
             <Panel title="More from this collection" icon={ViewModuleIcon}>
               <div className={styles.panelBody}>
-                <div className={styles.panelLine}>
-                  <div className={styles.panelLabel}>Collection</div>
-                  <a
-                    href={`${explorerUrl()}/token/${address}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={styles.panelValue}
-                  >
-                    {shortenAddress(address)}
-                  </a>
-                </div>
-                <div className={styles.panelLine}>
-                  <div className={styles.panelLabel}>Network</div>
-                  <div className={styles.panelValue}>Fantom Opera</div>
-                </div>
-                <div className={styles.panelLine}>
-                  <div className={styles.panelLabel}>Chain ID</div>
-                  <div className={styles.panelValue}>250</div>
-                </div>
+                {loadingMoreItems ? (
+                  <div className={styles.loadingIndicator}>
+                    <ClipLoader color="#007BFF" size={16} />
+                  </div>
+                ) : (
+                  <div>More Items</div>
+                )}
               </div>
             </Panel>
           </div>

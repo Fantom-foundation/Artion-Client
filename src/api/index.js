@@ -384,6 +384,19 @@ export const useApi = () => {
     return res.data;
   };
 
+  const getMoreFromCollection = async address => {
+    const data = { address };
+    const res = await axios({
+      method: 'post',
+      url: `${apiUrl()}/nftItems/getMoreItemsFromCollection`,
+      data: JSON.stringify(data),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    return res.data;
+  };
+
   const getAccountActivity = async address => {
     const res = await axios({
       method: 'get',
@@ -685,6 +698,7 @@ export const useApi = () => {
     getTradeHistory,
     getBundleTradeHistory,
     getTransferHistory,
+    getMoreFromCollection,
     getAccountActivity,
     getActivityFromOthers,
     banItem,
