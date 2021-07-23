@@ -236,16 +236,14 @@ const BaseCard = ({ item, loading, style, create, onCreate, onLike }) => {
           {loading || fetching ? (
             <Skeleton width="100%" height={20} />
           ) : (
-            <Typography component="h4" className={styles.collection}>
+            <div className={styles.collection}>
               {collection?.collectionName || collection?.name}
-            </Typography>
+            </div>
           )}
           {loading || fetching ? (
             <Skeleton width="100%" height={20} />
           ) : (
-            <Typography component="h4" className={styles.name}>
-              {item?.name || info?.name}
-            </Typography>
+            <div className={styles.name}>{item?.name || info?.name}</div>
           )}
           <div className={styles.alignBottom}>
             {loading || fetching ? (
