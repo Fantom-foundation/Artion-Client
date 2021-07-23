@@ -97,6 +97,7 @@ const NFTItem = () => {
     getTradeHistory,
     getBundleTradeHistory: _getBundleTradeHistory,
     getTransferHistory,
+    getMoreFromCollection,
     fetchCollection,
     getUserAccountDetails,
     getTokenType,
@@ -222,6 +223,7 @@ const NFTItem = () => {
   const [views, setViews] = useState();
   const [now, setNow] = useState(new Date());
   const [loading, setLoading] = useState(true);
+  const [loadingMoreItems, setLoadingMoreItems] = useState(true);
   const auction = useRef(null);
   const listings = useRef([]);
   const bundleListing = useRef(null);
@@ -451,6 +453,17 @@ const NFTItem = () => {
     } catch (e) {
       console.log(e);
     }
+  };
+
+  const getMoreFromThisCollection = async () => {
+    setLoadingMoreItems(true);
+    try {
+      const moreItems = await getMoreFromCollection(address);
+      console.log(moreItems);
+    } catch (e) {
+      console.log(e);
+    }
+    setLoadingMoreItems(false);
   };
 
   const eventMatches = (nft, id) => {
@@ -977,6 +990,7 @@ const NFTItem = () => {
       getItemTradeHistory();
       getAuctions();
       getBid();
+      getMoreFromThisCollection();
 
       increaseViewCount(address, tokenID).then(({ data }) => {
         setViews(data);
@@ -2863,25 +2877,13 @@ const NFTItem = () => {
           <div className={styles.panelWrapper}>
             <Panel title="More from this collection" icon={ViewModuleIcon}>
               <div className={styles.panelBody}>
-                <div className={styles.panelLine}>
-                  <div className={styles.panelLabel}>Collection</div>
-                  <a
-                    href={`${explorerUrl()}/token/${address}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={styles.panelValue}
-                  >
-                    {shortenAddress(address)}
-                  </a>
-                </div>
-                <div className={styles.panelLine}>
-                  <div className={styles.panelLabel}>Network</div>
-                  <div className={styles.panelValue}>Fantom Opera</div>
-                </div>
-                <div className={styles.panelLine}>
-                  <div className={styles.panelLabel}>Chain ID</div>
-                  <div className={styles.panelValue}>250</div>
-                </div>
+                {loadingMoreItems ? (
+                  <div className={styles.loadingIndicator}>
+                    <ClipLoader color="#007BFF" size={16} />
+                  </div>
+                ) : (
+                  <div>More Items</div>
+                )}
               </div>
             </Panel>
           </div>

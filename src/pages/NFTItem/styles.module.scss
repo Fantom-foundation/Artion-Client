@@ -402,10 +402,10 @@
   font-weight: 400;
   font-size: 14px;
   color: #A2A2AD;
-  margin-bottom: 27px;
 }
 
 .makeOffer {
+  margin-top: 27px;
   width: 168px;
   height: 48px;
   border-radius: 10px;
@@ -613,6 +613,13 @@
 
 .saleDate {
   flex: 2;
+}
+
+.loadingIndicator {
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .itemInfoWrapper {
