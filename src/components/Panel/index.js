@@ -5,7 +5,7 @@ import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 
 import styles from './styles.module.scss';
 
-const Panel = ({ title, icon, expanded, fixed, children }) => {
+const Panel = ({ title, icon, expanded, fixed, responsive, children }) => {
   const [open, setOpen] = useState(!!expanded || !!fixed);
 
   const handleOpen = () => {
@@ -30,7 +30,13 @@ const Panel = ({ title, icon, expanded, fixed, children }) => {
             <ExpandMoreIcon className={styles.icon} />
           ))}
       </div>
-      <div className={cx(styles.body, open ? styles.open : null)}>
+      <div
+        className={cx(
+          styles.body,
+          open ? styles.open : null,
+          responsive && styles.responsive
+        )}
+      >
         {children}
       </div>
     </div>
