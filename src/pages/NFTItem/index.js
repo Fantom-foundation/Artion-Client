@@ -49,6 +49,7 @@ import {
 import { shortenAddress, formatNumber } from 'utils';
 import { Contracts } from 'constants/networks';
 import showToast from 'utils/toast';
+import NFTCard from 'components/NFTCard';
 import SellModal from 'components/SellModal';
 import OfferModal from 'components/OfferModal';
 import AuctionModal from 'components/AuctionModal';
@@ -231,6 +232,7 @@ const NFTItem = () => {
   const offers = useRef([]);
   const tradeHistory = useRef([]);
   const transferHistory = useRef([]);
+  const moreItems = useRef([]);
 
   const [filter, setFilter] = useState(0);
   const [anchorEl, setAnchorEl] = useState(null);
@@ -458,8 +460,8 @@ const NFTItem = () => {
   const getMoreFromThisCollection = async () => {
     setLoadingMoreItems(true);
     try {
-      const moreItems = await getMoreFromCollection(address);
-      console.log(moreItems);
+      const { data } = await getMoreFromCollection(address);
+      moreItems.current = data;
     } catch (e) {
       console.log(e);
     }
@@ -2875,14 +2877,24 @@ const NFTItem = () => {
             })}
           </div>
           <div className={styles.panelWrapper}>
-            <Panel title="More from this collection" icon={ViewModuleIcon}>
+            <Panel
+              title="More from this collection"
+              icon={ViewModuleIcon}
+              responsive
+            >
               <div className={styles.panelBody}>
                 {loadingMoreItems ? (
                   <div className={styles.loadingIndicator}>
                     <ClipLoader color="#007BFF" size={16} />
                   </div>
                 ) : (
-                  <div>More Items</div>
+                  <div className={styles.itemsList}>
+                    {moreItems.current.map((item, idx) => (
+                      <div key={idx} className={styles.moreItem}>
+                        <NFTCard item={item} />
+                      </div>
+                    ))}
+                  </div>
                 )}
               </div>
             </Panel>

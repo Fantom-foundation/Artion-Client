@@ -622,6 +622,19 @@
   justify-content: center;
 }
 
+.itemsList {
+  display: flex;
+  overflow-x: auto;
+  padding-bottom: 20px;
+  margin-bottom: -20px;
+}
+
+.moreItem {
+  width: 240px;
+  flex: 0 0 240px;
+  margin-right: 20px;
+}
+
 .itemInfoWrapper {
   margin: 40px 0;
 }
@@ -901,5 +914,10 @@
   .listings,
   .offers {
     min-width: 550px;
+  }
+
+  .moreItem {
+    width: calc(100vw - 130px);
+    flex-basis: calc(100vw - 130px);
   }
 }

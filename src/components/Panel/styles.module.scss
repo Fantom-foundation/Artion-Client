@@ -47,6 +47,10 @@
     max-height: 500px;
   }
 
+  &.responsive.open {
+    max-height: 800px;
+  }
+
   &:not(.open) {
     border-top: none;
   }
