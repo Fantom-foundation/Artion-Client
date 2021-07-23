@@ -390,6 +390,35 @@
   font-size: 18px;
 }
 
+.noOffers {
+  padding-top: 40px;
+  padding-bottom: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.noOffersLabel {
+  font-weight: 400;
+  font-size: 14px;
+  color: #A2A2AD;
+  margin-bottom: 27px;
+}
+
+.makeOffer {
+  width: 168px;
+  height: 48px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #2479FA;
+  font-size: 16px;
+  font-weight: 700;
+  color: #FFF;
+  cursor: pointer;
+}
+
 .heading {
   background-color: #F6F7F9;
 }

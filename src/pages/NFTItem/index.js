@@ -2614,106 +2614,132 @@ const NFTItem = () => {
             <div className={styles.panelWrapper}>
               <Panel title="Offers" icon={TocIcon} expanded>
                 <div className={styles.offers}>
-                  <div className={cx(styles.offer, styles.heading)}>
-                    <div className={styles.owner}>From</div>
-                    <div className={styles.price}>Price</div>
-                    {tokenInfo?.totalSupply > 1 && (
-                      <div className={styles.quantity}>Quantity</div>
-                    )}
-                    <div className={styles.deadline}>Expires In</div>
-                    <div className={styles.buy} />
-                  </div>
-                  {offers.current
-                    .filter(offer => offer.deadline > now.getTime())
-                    .sort((a, b) => (a.pricePerItem < b.pricePerItem ? 1 : -1))
-                    .map((offer, idx) => (
-                      <div className={styles.offer} key={idx}>
-                        <div className={styles.owner}>
-                          <Link to={`/account/${offer.creator}`}>
-                            <div className={styles.userAvatarWrapper}>
-                              {offer.image ? (
-                                <img
-                                  src={`https://gateway.pinata.cloud/ipfs/${offer.image}`}
-                                  className={styles.userAvatar}
-                                />
-                              ) : (
-                                <Identicon
-                                  account={offer.creator}
-                                  size={24}
-                                  className={styles.userAvatar}
-                                />
-                              )}
-                            </div>
-                            {offer.alias || offer.creator.substr(0, 6)}
-                          </Link>
-                        </div>
-                        <div className={styles.price}>
-                          {formatNumber(offer.pricePerItem || offer.price)} FTM
-                        </div>
+                  {offers.current.length ? (
+                    <>
+                      <div className={cx(styles.offer, styles.heading)}>
+                        <div className={styles.owner}>From</div>
+                        <div className={styles.price}>Price</div>
                         {tokenInfo?.totalSupply > 1 && (
-                          <div className={styles.quantity}>
-                            {formatNumber(offer.quantity)}
-                          </div>
+                          <div className={styles.quantity}>Quantity</div>
                         )}
-                        <div className={styles.deadline}>
-                          {formatExpiration(offer.deadline)}
-                        </div>
-                        <div className={styles.buy}>
-                          {(isMine ||
-                            (myHolding &&
-                              myHolding.supply >= offer.quantity)) &&
-                            offer.creator?.toLowerCase() !==
-                              account?.toLowerCase() && (
-                              <div
-                                className={cx(
-                                  styles.buyButton,
-                                  (salesContractApproving || offerAccepting) &&
-                                    styles.disabled
-                                )}
-                                onClick={
-                                  bundleID
-                                    ? isBundleContractApproved
-                                      ? () => handleAcceptOffer(offer)
-                                      : handleApproveBundleSalesContract
-                                    : salesContractApproved
-                                    ? () => handleAcceptOffer(offer)
-                                    : handleApproveSalesContract
-                                }
-                              >
-                                {!(bundleID
-                                  ? isBundleContractApproved
-                                  : salesContractApproved) ? (
-                                  salesContractApproving ? (
-                                    <ClipLoader color="#FFF" size={16} />
+                        <div className={styles.deadline}>Expires In</div>
+                        <div className={styles.buy} />
+                      </div>
+                      {offers.current
+                        .filter(offer => offer.deadline > now.getTime())
+                        .sort((a, b) =>
+                          a.pricePerItem < b.pricePerItem ? 1 : -1
+                        )
+                        .map((offer, idx) => (
+                          <div className={styles.offer} key={idx}>
+                            <div className={styles.owner}>
+                              <Link to={`/account/${offer.creator}`}>
+                                <div className={styles.userAvatarWrapper}>
+                                  {offer.image ? (
+                                    <img
+                                      src={`https://gateway.pinata.cloud/ipfs/${offer.image}`}
+                                      className={styles.userAvatar}
+                                    />
                                   ) : (
-                                    'Approve'
-                                  )
-                                ) : offerAccepting ? (
-                                  <ClipLoader color="#FFF" size={16} />
-                                ) : (
-                                  'Accept'
-                                )}
+                                    <Identicon
+                                      account={offer.creator}
+                                      size={24}
+                                      className={styles.userAvatar}
+                                    />
+                                  )}
+                                </div>
+                                {offer.alias || offer.creator.substr(0, 6)}
+                              </Link>
+                            </div>
+                            <div className={styles.price}>
+                              {formatNumber(offer.pricePerItem || offer.price)}
+                              &nbsp;FTM
+                            </div>
+                            {tokenInfo?.totalSupply > 1 && (
+                              <div className={styles.quantity}>
+                                {formatNumber(offer.quantity)}
                               </div>
                             )}
-                          {offer.creator?.toLowerCase() ===
-                            account?.toLowerCase() && (
-                            <div
-                              className={cx(
-                                styles.buyButton,
-                                offerCanceling && styles.disabled
-                              )}
-                              onClick={() => handleCancelOffer()}
-                            >
-                              {offerCanceling ? (
-                                <ClipLoader color="#FFF" size={16} />
-                              ) : (
-                                'Withdraw'
+                            <div className={styles.deadline}>
+                              {formatExpiration(offer.deadline)}
+                            </div>
+                            <div className={styles.buy}>
+                              {(isMine ||
+                                (myHolding &&
+                                  myHolding.supply >= offer.quantity)) &&
+                                offer.creator?.toLowerCase() !==
+                                  account?.toLowerCase() && (
+                                  <div
+                                    className={cx(
+                                      styles.buyButton,
+                                      (salesContractApproving ||
+                                        offerAccepting) &&
+                                        styles.disabled
+                                    )}
+                                    onClick={
+                                      bundleID
+                                        ? isBundleContractApproved
+                                          ? () => handleAcceptOffer(offer)
+                                          : handleApproveBundleSalesContract
+                                        : salesContractApproved
+                                        ? () => handleAcceptOffer(offer)
+                                        : handleApproveSalesContract
+                                    }
+                                  >
+                                    {!(bundleID
+                                      ? isBundleContractApproved
+                                      : salesContractApproved) ? (
+                                      salesContractApproving ? (
+                                        <ClipLoader color="#FFF" size={16} />
+                                      ) : (
+                                        'Approve'
+                                      )
+                                    ) : offerAccepting ? (
+                                      <ClipLoader color="#FFF" size={16} />
+                                    ) : (
+                                      'Accept'
+                                    )}
+                                  </div>
+                                )}
+                              {offer.creator?.toLowerCase() ===
+                                account?.toLowerCase() && (
+                                <div
+                                  className={cx(
+                                    styles.buyButton,
+                                    offerCanceling && styles.disabled
+                                  )}
+                                  onClick={() => handleCancelOffer()}
+                                >
+                                  {offerCanceling ? (
+                                    <ClipLoader color="#FFF" size={16} />
+                                  ) : (
+                                    'Withdraw'
+                                  )}
+                                </div>
                               )}
                             </div>
-                          )}
-                        </div>
-                      </div>
-                    ))}
+                          </div>
+                        ))}
+                    </>
+                  ) : (
+                    <div className={styles.noOffers}>
+                      <div className={styles.noOffersLabel}>No Offers Yet</div>
+                      {(!isMine ||
+                        (tokenType.current === 1155 &&
+                          myHolding.supply < tokenInfo.totalSupply)) &&
+                        (!auction.current || auction.current.resulted) && (
+                          <div
+                            className={cx(
+                              styles.makeOffer,
+                              offerPlacing && styles.disabled
+                            )}
+                            onClick={() => setOfferModalVisible(true)}
+                          >
+                            Make Offer
+                          </div>
+                        )}
+                    </div>
+                  )}
                 </div>
               </Panel>
             </div>
