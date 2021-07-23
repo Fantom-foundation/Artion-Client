@@ -66,6 +66,7 @@ import twitterIcon from 'assets/svgs/twitter.svg';
 import mediumIcon from 'assets/svgs/medium.svg';
 import filterIcon from 'assets/svgs/filter.svg';
 import checkIcon from 'assets/svgs/check.svg';
+import ftmIcon from 'assets/svgs/ftm.svg';
 
 import styles from './styles.module.scss';
 
@@ -236,6 +237,7 @@ const NFTItem = () => {
   const { isConnected: isWalletConnected, authToken } = useSelector(
     state => state.ConnectWallet
   );
+  const { price: ftmPrice } = useSelector(state => state.Price);
 
   const isLoggedIn = () => {
     return (
@@ -481,6 +483,9 @@ const NFTItem = () => {
       } catch {
         listings.current.push(newListing);
       }
+      listings.current = listings.current.sort((a, b) =>
+        a.price > b.price ? 1 : -1
+      );
     }
   };
 
@@ -1733,6 +1738,19 @@ const NFTItem = () => {
     return bundleListing.current || myListing() !== undefined;
   })();
 
+  const bestListing = (() => {
+    if (bundleID) return bundleListing.current;
+    let idx = 0;
+    while (
+      idx < listings.current.length &&
+      listings.current[idx].owner.toLowerCase() === account.toLowerCase()
+    ) {
+      idx++;
+    }
+    if (idx < listings.current.length) return listings.current[idx];
+    return null;
+  })();
+
   const maxSupply = () => {
     let supply = 0;
     holders.current.map(holder => {
@@ -1829,7 +1847,7 @@ const NFTItem = () => {
         {(ownerInfoLoading || tokenOwnerLoading || owner || tokenInfo) && (
           <div className={styles.itemOwner}>
             {ownerInfoLoading || tokenOwnerLoading ? (
-              <Skeleton width={180} height={25} />
+              <Skeleton width={150} height={20} />
             ) : tokenType.current === 721 || bundleID ? (
               <>
                 <div className={styles.ownerAvatar}>
@@ -1870,12 +1888,12 @@ const NFTItem = () => {
           </div>
         )}
         <div className={styles.itemViews}>
-          <FontAwesomeIcon icon={faEye} color="#00000099" />
+          <FontAwesomeIcon icon={faEye} color="#A2A2AD" />
           &nbsp;
           {isNaN(views) ? (
-            <Skeleton width={80} height={24} />
+            <Skeleton width={80} height={20} />
           ) : (
-            `${formatNumber(views)} View${views !== 1 ? 's' : ''}`
+            `${formatNumber(views)} view${views !== 1 ? 's' : ''}`
           )}
         </div>
         <div
@@ -1886,7 +1904,7 @@ const NFTItem = () => {
           )}
         >
           {isNaN(liked) || likeFetching ? (
-            <Skeleton width={80} height={24} />
+            <Skeleton width={80} height={20} />
           ) : (
             <>
               {isLike ? (
@@ -1902,12 +1920,34 @@ const NFTItem = () => {
               )}
               &nbsp;
               <span onClick={liked ? showLikeUsers : null}>
-                {formatNumber(liked || 0)} Like{liked !== 1 ? 's' : ''}
+                {formatNumber(liked || 0)} favorite{liked !== 1 ? 's' : ''}
               </span>
             </>
           )}
         </div>
       </div>
+      {bestListing && (
+        <div className={styles.bestBuy}>
+          <div className={styles.currentPriceLabel}>Current price</div>
+          <div className={styles.currentPriceWrapper}>
+            <div className={styles.tokenLogo}>
+              <img src={ftmIcon} />
+            </div>
+            <div className={styles.currentPrice}>{bestListing.price}</div>
+            <div className={styles.currentPriceUSD}>
+              (${(bestListing.price * ftmPrice).toFixed(2)})
+            </div>
+          </div>
+          <div
+            className={cx(styles.buyNow, buyingItem && styles.disabled)}
+            onClick={
+              bundleID ? handleBuyBundle : () => handleBuyItem(bestListing)
+            }
+          >
+            {buyingItem ? <ClipLoader color="#FFF" size={16} /> : 'Buy Now'}
+          </div>
+        </div>
+      )}
     </>
   );
 
@@ -1975,7 +2015,7 @@ const NFTItem = () => {
     >
       <div className={styles.panelBody}>
         {creatorInfoLoading ? (
-          <Skeleton width={180} height={25} />
+          <Skeleton width={150} height={20} />
         ) : (
           <div className={styles.itemOwner}>
             <div className={styles.ownerAvatar}>
@@ -1987,7 +2027,7 @@ const NFTItem = () => {
               ) : (
                 <Identicon
                   account={creator}
-                  size={32}
+                  size={24}
                   className={styles.avatar}
                 />
               )}
@@ -2470,7 +2510,7 @@ const NFTItem = () => {
                         <div className={styles.listing}>
                           <div className={styles.owner}>
                             {loading ? (
-                              <Skeleton width={120} height={24} />
+                              <Skeleton width={100} height={20} />
                             ) : (
                               <Link to={`/account/${owner}`}>
                                 <div className={styles.userAvatarWrapper}>
@@ -2495,7 +2535,7 @@ const NFTItem = () => {
                           </div>
                           <div className={styles.price}>
                             {loading ? (
-                              <Skeleton width={100} height={24} />
+                              <Skeleton width={100} height={20} />
                             ) : (
                               `${formatNumber(bundleListing.current.price)} FTM`
                             )}
@@ -2505,8 +2545,7 @@ const NFTItem = () => {
                               <div
                                 className={cx(
                                   styles.buyButton,
-                                  (salesContractApproving || buyingItem) &&
-                                    styles.disabled
+                                  buyingItem && styles.disabled
                                 )}
                                 onClick={handleBuyBundle}
                               >
@@ -2555,8 +2594,7 @@ const NFTItem = () => {
                               <div
                                 className={cx(
                                   styles.buyButton,
-                                  (salesContractApproving || buyingItem) &&
-                                    styles.disabled
+                                  buyingItem && styles.disabled
                                 )}
                                 onClick={() => handleBuyItem(listing)}
                               >
@@ -2726,7 +2764,7 @@ const NFTItem = () => {
                       {history ? (
                         `${formatNumber(history.price)} FTM`
                       ) : (
-                        <Skeleton width={120} height={25} />
+                        <Skeleton width={100} height={20} />
                       )}
                     </div>
                   )}
@@ -2735,7 +2773,7 @@ const NFTItem = () => {
                       {history ? (
                         formatNumber(history.value)
                       ) : (
-                        <Skeleton width={120} height={25} />
+                        <Skeleton width={100} height={20} />
                       )}
                     </div>
                   )}
@@ -2759,7 +2797,7 @@ const NFTItem = () => {
                         {history.fromAlias || history.from.substr(0, 6)}
                       </Link>
                     ) : (
-                      <Skeleton width={200} height={25} />
+                      <Skeleton width={180} height={20} />
                     )}
                   </div>
                   <div className={styles.to}>
@@ -2782,14 +2820,14 @@ const NFTItem = () => {
                         {history.toAlias || history.to.substr(0, 6)}
                       </Link>
                     ) : (
-                      <Skeleton width={200} height={25} />
+                      <Skeleton width={180} height={20} />
                     )}
                   </div>
                   <div className={styles.saleDate}>
                     {saleDate ? (
                       formatDate(saleDate)
                     ) : (
-                      <Skeleton width={180} height={25} />
+                      <Skeleton width={150} height={20} />
                     )}
                   </div>
                 </div>
