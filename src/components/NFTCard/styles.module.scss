@@ -10,7 +10,6 @@
   min-height: 300px;
   flex-grow: 1;
   cursor: pointer;
-  border-radius: 10px;
   transition: transform ease 0.1s;
   border: 1px solid rgba(0, 0, 0, .1);
   display: flex;
@@ -103,10 +102,9 @@
 .name {
   flex: 1;
   font-weight: 700;
-  font-size: 18px;
-  line-height: 18px;
+  font-size: 16px;
   margin: 0;
-  color: #3D3D3D;
+  color: #121223;
   overflow: hidden;
   text-overflow: ellipsis;
   display: -webkit-box;
@@ -117,15 +115,15 @@
 .mediaBox {
   position: relative;
   padding-bottom: calc(100% - 16px);
+  border-bottom: 1px solid #EAEAF1;
 }
 
 .mediaPanel {
   position: absolute;
   top: 0;
-  left: 8px;
-  width: calc(100% - 16px);
-  height: 100%;
-  border-radius: 6px;
+  left: 16px;
+  width: calc(100% - 32px);
+  height: calc(100% - 16px);
   overflow: hidden;
 }
 
@@ -199,16 +197,15 @@
 }
 
 .content {
-  padding: 32px 24px 24px !important;
+  padding: 18px 18px 15px 18px !important;
   flex-grow: 1;
   display: flex;
   flex-direction: column;
 }
 
 .collection {
-  font-size: 16px;
-  line-height: 16px;
-  color: rgba(0, 0, 0, .56);
+  font-size: 14px;
+  color: #A2A2AD;
   overflow: hidden;
   text-overflow: ellipsis;
   display: -webkit-box;
