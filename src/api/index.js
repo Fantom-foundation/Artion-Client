@@ -124,13 +124,6 @@ export const useApi = () => {
     return res.data;
   };
 
-  const getTokenType = async contractAddress => {
-    const { data } = await axios.get(
-      `${apiUrl()}/info/getTokenType/${contractAddress}`
-    );
-    return data.data;
-  };
-
   const get1155Info = async (contractAddress, tokenID) => {
     const { data } = await axios.get(
       `${apiUrl()}/info/get1155info/${contractAddress}/${tokenID}`
@@ -280,11 +273,11 @@ export const useApi = () => {
     return res.data;
   };
 
-  const fetchTokenURI = async (contractAddress, tokenID) => {
+  const fetchItemDetails = async (contractAddress, tokenID) => {
     const data = { contractAddress, tokenID };
     const res = await axios({
       method: 'post',
-      url: `${apiUrl()}/nftitems/getTokenURI`,
+      url: `${apiUrl()}/nftItems/getSingleItemDetails`,
       data: JSON.stringify(data),
       headers: {
         'Content-Type': 'application/json',
@@ -306,50 +299,11 @@ export const useApi = () => {
     return res.data;
   };
 
-  const getListings = async (contractAddress, tokenID) => {
-    const data = { contractAddress, tokenID };
-    const res = await axios({
-      method: 'post',
-      url: `${apiUrl()}/listing/getListings`,
-      data: JSON.stringify(data),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-    return res.data;
-  };
-
-  const getOffers = async (contractAddress, tokenID) => {
-    const data = { contractAddress, tokenID };
-    const res = await axios({
-      method: 'post',
-      url: `${apiUrl()}/offer/getOffers`,
-      data: JSON.stringify(data),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-    return res.data;
-  };
-
   const getBundleOffers = async bundleID => {
     const data = { bundleID };
     const res = await axios({
       method: 'post',
       url: `${apiUrl()}/offer/getBundleOffer`,
-      data: JSON.stringify(data),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-    return res.data;
-  };
-
-  const getTradeHistory = async (contractAddress, tokenID) => {
-    const data = { contractAddress, tokenID };
-    const res = await axios({
-      method: 'post',
-      url: `${apiUrl()}/tradehistory/getTradeHistory`,
       data: JSON.stringify(data),
       headers: {
         'Content-Type': 'application/json',
@@ -376,19 +330,6 @@ export const useApi = () => {
     const res = await axios({
       method: 'post',
       url: `${apiUrl()}/nftitems/transfer${tokenType}History`,
-      data: JSON.stringify(data),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-    return res.data;
-  };
-
-  const getMoreFromCollection = async address => {
-    const data = { address };
-    const res = await axios({
-      method: 'post',
-      url: `${apiUrl()}/nftItems/getMoreItemsFromCollection`,
       data: JSON.stringify(data),
       headers: {
         'Content-Type': 'application/json',
@@ -508,14 +449,6 @@ export const useApi = () => {
     const res = await axios({
       method: 'get',
       url: `${apiUrl()}/follow/getFollowings/${address}`,
-    });
-    return res.data;
-  };
-
-  const getItemLikes = async (address, tokenID) => {
-    const res = await axios({
-      method: 'get',
-      url: `${apiUrl()}/nftitems/getLikesCount/${address}/${tokenID}`,
     });
     return res.data;
   };
@@ -678,7 +611,6 @@ export const useApi = () => {
     getUserAccountDetails,
     updateAccountDetails,
     updateBanner,
-    getTokenType,
     get1155Info,
     getTokenHolders,
     fetchCollections,
@@ -690,15 +622,11 @@ export const useApi = () => {
     fetchTokens,
     getBundleDetails,
     increaseBundleViewCount,
-    fetchTokenURI,
+    fetchItemDetails,
     increaseViewCount,
-    getListings,
-    getOffers,
     getBundleOffers,
-    getTradeHistory,
     getBundleTradeHistory,
     getTransferHistory,
-    getMoreFromCollection,
     getAccountActivity,
     getActivityFromOthers,
     banItem,
@@ -709,7 +637,6 @@ export const useApi = () => {
     followUser,
     getFollowers,
     getFollowings,
-    getItemLikes,
     getBundleLikes,
     isLikingItem,
     isLikingBundle,
