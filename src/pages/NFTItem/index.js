@@ -2251,11 +2251,13 @@ const NFTItem = () => {
                     className={styles.loader}
                   />
                 ) : !bundleID || bundleItems.current.length ? (
-                  renderMedia(
-                    bundleID
-                      ? bundleItems.current[previewIndex].metadata?.image
-                      : info?.image,
-                    contentType.current
+                  bundleID ? (
+                    renderMedia(
+                      bundleItems.current[previewIndex].metadata?.image,
+                      bundleItems.current[previewIndex].contentType
+                    )
+                  ) : (
+                    renderMedia(info?.image, contentType.current)
                   )
                 ) : null}
               </div>
