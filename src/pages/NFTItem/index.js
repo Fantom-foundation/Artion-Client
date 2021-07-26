@@ -8,6 +8,7 @@ import Loader from 'react-loader-spinner';
 import 'react-loader-spinner/dist/loader/css/react-spinner-loader.css';
 import Skeleton from 'react-loading-skeleton';
 import ReactResizeDetector from 'react-resize-detector';
+import ReactPlayer from 'react-player';
 import {
   LineChart,
   XAxis,
@@ -33,6 +34,7 @@ import {
   Label as LabelIcon,
   Ballot as BallotIcon,
   VerticalSplit as VerticalSplitIcon,
+  Subject as SubjectIcon,
 } from '@material-ui/icons';
 import toast from 'react-hot-toast';
 
@@ -89,22 +91,16 @@ const NFTItem = () => {
     explorerUrl,
     storageUrl,
     getBundleDetails,
-    fetchTokenURI,
+    fetchItemDetails,
     increaseBundleViewCount,
     increaseViewCount,
-    getListings,
-    getOffers,
     getBundleOffers: _getBundleOffers,
-    getTradeHistory,
     getBundleTradeHistory: _getBundleTradeHistory,
     getTransferHistory,
-    getMoreFromCollection,
     fetchCollection,
     getUserAccountDetails,
-    getTokenType,
     get1155Info,
     getTokenHolders,
-    getItemLikes,
     getBundleLikes,
     isLikingItem,
     isLikingBundle,
@@ -183,6 +179,7 @@ const NFTItem = () => {
   const [ownerInfoLoading, setOwnerInfoLoading] = useState(false);
   const [tokenOwnerLoading, setTokenOwnerLoading] = useState(false);
   const tokenType = useRef();
+  const contentType = useRef();
   const [tokenInfo, setTokenInfo] = useState();
   const holders = useRef([]);
   const likeUsers = useRef([]);
@@ -224,7 +221,6 @@ const NFTItem = () => {
   const [views, setViews] = useState();
   const [now, setNow] = useState(new Date());
   const [loading, setLoading] = useState(true);
-  const [loadingMoreItems, setLoadingMoreItems] = useState(true);
   const auction = useRef(null);
   const listings = useRef([]);
   const bundleListing = useRef(null);
@@ -294,11 +290,56 @@ const NFTItem = () => {
     setLoading(false);
   };
 
-  const getTokenURI = async () => {
+  const getItemDetails = async () => {
     setLoading(true);
+    setTokenOwnerLoading(true);
+    setHistoryLoading(true);
+    tradeHistory.current = [];
     try {
-      const { data: tokenURI } = await fetchTokenURI(address, tokenID);
-      const { data } = await axios.get(tokenURI);
+      const {
+        data: {
+          contentType: _contentType,
+          history,
+          likes,
+          listings: _listings,
+          offers: _offers,
+          nfts,
+          tokenType: type,
+          uri,
+        },
+      } = await fetchItemDetails(address, tokenID);
+
+      contentType.current = _contentType;
+      tradeHistory.current = history.sort((a, b) =>
+        a.createdAt < b.createdAt ? 1 : -1
+      );
+      setLiked(likes);
+      listings.current = _listings;
+      offers.current = _offers;
+      moreItems.current = nfts;
+
+      try {
+        tokenType.current = type;
+        if (type === 721) {
+          const contract = await getNFTContract(address);
+          const res = await contract.ownerOf(tokenID);
+          setOwner(res);
+        } else if (type === 1155) {
+          const { data: _tokenInfo } = await get1155Info(address, tokenID);
+          setTokenInfo(_tokenInfo);
+          try {
+            const { data: _holders } = await getTokenHolders(address, tokenID);
+            holders.current = _holders;
+          } catch {
+            holders.current = [];
+          }
+          setOwner(null);
+        }
+      } catch {
+        setOwner(null);
+      }
+
+      const { data } = await axios.get(uri);
       setInfo(data);
     } catch {
       try {
@@ -312,33 +353,8 @@ const NFTItem = () => {
       }
     }
     setLoading(false);
-  };
-
-  const getTokenOwner = async () => {
-    try {
-      setTokenOwnerLoading(true);
-      const type = await getTokenType(address);
-      tokenType.current = type;
-      if (type === 721) {
-        const contract = await getNFTContract(address);
-        const res = await contract.ownerOf(tokenID);
-        setOwner(res);
-      } else if (type === 1155) {
-        const { data: _tokenInfo } = await get1155Info(address, tokenID);
-        setTokenInfo(_tokenInfo);
-        try {
-          const { data: _holders } = await getTokenHolders(address, tokenID);
-          holders.current = _holders;
-        } catch {
-          holders.current = [];
-        }
-        setOwner(null);
-      }
-    } catch {
-      setOwner(null);
-    } finally {
-      setTokenOwnerLoading(false);
-    }
+    setTokenOwnerLoading(false);
+    setHistoryLoading(false);
   };
 
   const getCreatorInfo = async () => {
@@ -363,24 +379,6 @@ const NFTItem = () => {
     setOwnerInfoLoading(false);
   };
 
-  const getItemListings = async () => {
-    try {
-      const { data } = await getListings(address, tokenID);
-      listings.current = data;
-    } catch (e) {
-      console.log(e);
-    }
-  };
-
-  const getCurrentOffers = async () => {
-    try {
-      const { data } = await getOffers(address, tokenID);
-      offers.current = data;
-    } catch (e) {
-      console.log(e);
-    }
-  };
-
   const getBundleOffers = async () => {
     try {
       const { data } = await _getBundleOffers(bundleID);
@@ -388,20 +386,6 @@ const NFTItem = () => {
     } catch (e) {
       console.log(e);
     }
-  };
-
-  const getItemTradeHistory = async () => {
-    setHistoryLoading(true);
-    tradeHistory.current = [];
-    try {
-      const { data } = await getTradeHistory(address, tokenID);
-      tradeHistory.current = data.sort((a, b) =>
-        a.createdAt < b.createdAt ? 1 : -1
-      );
-    } catch (e) {
-      console.log(e);
-    }
-    setHistoryLoading(false);
   };
 
   const getBundleTradeHistory = async () => {
@@ -455,17 +439,6 @@ const NFTItem = () => {
     } catch (e) {
       console.log(e);
     }
-  };
-
-  const getMoreFromThisCollection = async () => {
-    setLoadingMoreItems(true);
-    try {
-      const { data } = await getMoreFromCollection(address);
-      moreItems.current = data;
-    } catch (e) {
-      console.log(e);
-    }
-    setLoadingMoreItems(false);
   };
 
   const eventMatches = (nft, id) => {
@@ -985,20 +958,12 @@ const NFTItem = () => {
     } else {
       bundleListing.current = null;
 
-      getTokenURI();
-      getTokenOwner();
-      getItemListings();
-      getCurrentOffers();
-      getItemTradeHistory();
+      getItemDetails();
       getAuctions();
       getBid();
-      getMoreFromThisCollection();
 
       increaseViewCount(address, tokenID).then(({ data }) => {
         setViews(data);
-      });
-      getItemLikes(address, tokenID).then(({ data }) => {
-        setLiked(data);
       });
       isLikingItem(address, tokenID, account).then(({ data }) => {
         setIsLike(data);
@@ -1820,6 +1785,36 @@ const NFTItem = () => {
     </Menu>
   );
 
+  const renderMedia = (image, contentType) => {
+    if (contentType === 'image') {
+      return (
+        <Suspense
+          fallback={
+            <Loader
+              type="Oval"
+              color="#007BFF"
+              height={32}
+              width={32}
+              className={styles.loader}
+            />
+          }
+        >
+          <SuspenseImg className={styles.content} src={image} />
+        </Suspense>
+      );
+    } else if (contentType === 'video') {
+      return (
+        <ReactPlayer
+          className={styles.content}
+          url={image}
+          controls={true}
+          width="100%"
+          height="100%"
+        />
+      );
+    }
+  };
+
   const renderProperties = properties => {
     const res = [];
     Object.keys(properties).map((key, idx) => {
@@ -2025,10 +2020,7 @@ const NFTItem = () => {
   };
 
   const renderBundleInfoPanel = () => (
-    <Panel
-      title={<div className={styles.panelTitle}>Bundle Description</div>}
-      expanded
-    >
+    <Panel title="Bundle Description" icon={SubjectIcon} expanded>
       <div className={styles.panelBody}>
         {creatorInfoLoading ? (
           <Skeleton width={150} height={20} />
@@ -2257,25 +2249,14 @@ const NFTItem = () => {
                     className={styles.loader}
                   />
                 ) : !bundleID || bundleItems.current.length ? (
-                  <Suspense
-                    fallback={
-                      <Loader
-                        type="Oval"
-                        color="#007BFF"
-                        height={32}
-                        width={32}
-                        className={styles.loader}
-                      />
-                    }
-                  >
-                    <SuspenseImg
-                      src={
-                        bundleID
-                          ? bundleItems.current[previewIndex].metadata?.image
-                          : info?.image
-                      }
-                    />
-                  </Suspense>
+                  bundleID ? (
+                    renderMedia(
+                      bundleItems.current[previewIndex].metadata?.image,
+                      bundleItems.current[previewIndex].contentType
+                    )
+                  ) : (
+                    renderMedia(info?.image, contentType.current)
+                  )
                 ) : null}
               </div>
               {bundleID && (
@@ -2761,7 +2742,7 @@ const NFTItem = () => {
             </div>
             {bundleID && (
               <div className={styles.panelWrapper}>
-                <Panel title="Items" expanded>
+                <Panel title="Items" icon={ViewModuleIcon} expanded>
                   <div className={styles.items}>
                     {(loading
                       ? [null, null, null]
@@ -2876,29 +2857,31 @@ const NFTItem = () => {
               );
             })}
           </div>
-          <div className={styles.panelWrapper}>
-            <Panel
-              title="More from this collection"
-              icon={ViewModuleIcon}
-              responsive
-            >
-              <div className={styles.panelBody}>
-                {loadingMoreItems ? (
-                  <div className={styles.loadingIndicator}>
-                    <ClipLoader color="#007BFF" size={16} />
-                  </div>
-                ) : (
-                  <div className={styles.itemsList}>
-                    {moreItems.current.map((item, idx) => (
-                      <div key={idx} className={styles.moreItem}>
-                        <NFTCard item={item} />
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </Panel>
-          </div>
+          {!bundleID && (
+            <div className={styles.panelWrapper}>
+              <Panel
+                title="More from this collection"
+                icon={ViewModuleIcon}
+                responsive
+              >
+                <div className={styles.panelBody}>
+                  {loading ? (
+                    <div className={styles.loadingIndicator}>
+                      <ClipLoader color="#007BFF" size={16} />
+                    </div>
+                  ) : (
+                    <div className={styles.itemsList}>
+                      {moreItems.current.map((item, idx) => (
+                        <div key={idx} className={styles.moreItem}>
+                          <NFTCard item={item} />
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </Panel>
+            </div>
+          )}
         </div>
       </div>
 
