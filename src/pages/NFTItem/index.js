@@ -61,6 +61,7 @@ import LikesModal from 'components/LikesModal';
 import Header from 'components/header';
 import SuspenseImg from 'components/SuspenseImg';
 import ModalActions from 'actions/modal.actions';
+import CollectionsActions from 'actions/collections.actions';
 
 import webIcon from 'assets/svgs/web.svg';
 import discordIcon from 'assets/svgs/discord.svg';
@@ -98,6 +99,7 @@ const NFTItem = () => {
     getBundleTradeHistory: _getBundleTradeHistory,
     getTransferHistory,
     fetchCollection,
+    fetchCollections,
     getUserAccountDetails,
     get1155Info,
     getTokenHolders,
@@ -186,6 +188,7 @@ const NFTItem = () => {
   const [collections, setCollections] = useState([]);
   const [collection, setCollection] = useState();
   const [collectionLoading, setCollectionLoading] = useState(false);
+  const [fetchInterval, setFetchInterval] = useState(null);
 
   const [sellModalVisible, setSellModalVisible] = useState(false);
   const [offerModalVisible, setOfferModalVisible] = useState(false);
@@ -907,12 +910,37 @@ const NFTItem = () => {
     setCollectionLoading(false);
   };
 
+  const updateCollections = async () => {
+    try {
+      dispatch(CollectionsActions.fetchStart());
+      const res = await fetchCollections();
+      if (res.status === 'success') {
+        const verified = [];
+        const unverified = [];
+        res.data.map(item => {
+          if (item.isVerified) verified.push(item);
+          else unverified.push(item);
+        });
+        dispatch(CollectionsActions.fetchSuccess([...verified, ...unverified]));
+      }
+    } catch {
+      dispatch(CollectionsActions.fetchFailed());
+    }
+  };
+
   useEffect(() => {
     if (!chainId) return;
 
     if (address && tokenID) {
       addEventListeners();
       getAuctionConfiguration();
+
+      if (fetchInterval) {
+        clearInterval(fetchInterval);
+      }
+
+      updateCollections();
+      setFetchInterval(setInterval(updateCollections, 1000 * 60 * 10));
     }
 
     if (bundleID) {
