@@ -1786,7 +1786,7 @@ const NFTItem = () => {
   );
 
   const renderMedia = (image, contentType) => {
-    if (contentType === 'image') {
+    if (contentType === 'image' || contentType === 'gif') {
       return (
         <Suspense
           fallback={
