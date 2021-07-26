@@ -8,6 +8,7 @@ import Loader from 'react-loader-spinner';
 import 'react-loader-spinner/dist/loader/css/react-spinner-loader.css';
 import Skeleton from 'react-loading-skeleton';
 import ReactResizeDetector from 'react-resize-detector';
+import ReactPlayer from 'react-player';
 import {
   LineChart,
   XAxis,
@@ -177,6 +178,7 @@ const NFTItem = () => {
   const [ownerInfoLoading, setOwnerInfoLoading] = useState(false);
   const [tokenOwnerLoading, setTokenOwnerLoading] = useState(false);
   const tokenType = useRef();
+  const contentType = useRef();
   const [tokenInfo, setTokenInfo] = useState();
   const holders = useRef([]);
   const likeUsers = useRef([]);
@@ -295,6 +297,7 @@ const NFTItem = () => {
     try {
       const {
         data: {
+          contentType: _contentType,
           history,
           likes,
           listings: _listings,
@@ -305,6 +308,7 @@ const NFTItem = () => {
         },
       } = await fetchItemDetails(address, tokenID);
 
+      contentType.current = _contentType;
       tradeHistory.current = history.sort((a, b) =>
         a.createdAt < b.createdAt ? 1 : -1
       );
@@ -1780,6 +1784,36 @@ const NFTItem = () => {
     </Menu>
   );
 
+  const renderMedia = (image, contentType) => {
+    if (contentType === 'image') {
+      return (
+        <Suspense
+          fallback={
+            <Loader
+              type="Oval"
+              color="#007BFF"
+              height={32}
+              width={32}
+              className={styles.loader}
+            />
+          }
+        >
+          <SuspenseImg className={styles.content} src={image} />
+        </Suspense>
+      );
+    } else if (contentType === 'video') {
+      return (
+        <ReactPlayer
+          className={styles.content}
+          url={image}
+          controls={true}
+          width="100%"
+          height="100%"
+        />
+      );
+    }
+  };
+
   const renderProperties = properties => {
     const res = [];
     Object.keys(properties).map((key, idx) => {
@@ -2217,25 +2251,12 @@ const NFTItem = () => {
                     className={styles.loader}
                   />
                 ) : !bundleID || bundleItems.current.length ? (
-                  <Suspense
-                    fallback={
-                      <Loader
-                        type="Oval"
-                        color="#007BFF"
-                        height={32}
-                        width={32}
-                        className={styles.loader}
-                      />
-                    }
-                  >
-                    <SuspenseImg
-                      src={
-                        bundleID
-                          ? bundleItems.current[previewIndex].metadata?.image
-                          : info?.image
-                      }
-                    />
-                  </Suspense>
+                  renderMedia(
+                    bundleID
+                      ? bundleItems.current[previewIndex].metadata?.image
+                      : info?.image,
+                    contentType.current
+                  )
                 ) : null}
               </div>
               {bundleID && (
