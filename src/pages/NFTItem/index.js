@@ -34,6 +34,7 @@ import {
   Label as LabelIcon,
   Ballot as BallotIcon,
   VerticalSplit as VerticalSplitIcon,
+  Subject as SubjectIcon,
 } from '@material-ui/icons';
 import toast from 'react-hot-toast';
 
@@ -2019,10 +2020,7 @@ const NFTItem = () => {
   };
 
   const renderBundleInfoPanel = () => (
-    <Panel
-      title={<div className={styles.panelTitle}>Bundle Description</div>}
-      expanded
-    >
+    <Panel title="Bundle Description" icon={SubjectIcon} expanded>
       <div className={styles.panelBody}>
         {creatorInfoLoading ? (
           <Skeleton width={150} height={20} />
@@ -2744,7 +2742,7 @@ const NFTItem = () => {
             </div>
             {bundleID && (
               <div className={styles.panelWrapper}>
-                <Panel title="Items" expanded>
+                <Panel title="Items" icon={ViewModuleIcon} expanded>
                   <div className={styles.items}>
                     {(loading
                       ? [null, null, null]
