@@ -2859,29 +2859,31 @@ const NFTItem = () => {
               );
             })}
           </div>
-          <div className={styles.panelWrapper}>
-            <Panel
-              title="More from this collection"
-              icon={ViewModuleIcon}
-              responsive
-            >
-              <div className={styles.panelBody}>
-                {loading ? (
-                  <div className={styles.loadingIndicator}>
-                    <ClipLoader color="#007BFF" size={16} />
-                  </div>
-                ) : (
-                  <div className={styles.itemsList}>
-                    {moreItems.current.map((item, idx) => (
-                      <div key={idx} className={styles.moreItem}>
-                        <NFTCard item={item} />
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </Panel>
-          </div>
+          {!bundleID && (
+            <div className={styles.panelWrapper}>
+              <Panel
+                title="More from this collection"
+                icon={ViewModuleIcon}
+                responsive
+              >
+                <div className={styles.panelBody}>
+                  {loading ? (
+                    <div className={styles.loadingIndicator}>
+                      <ClipLoader color="#007BFF" size={16} />
+                    </div>
+                  ) : (
+                    <div className={styles.itemsList}>
+                      {moreItems.current.map((item, idx) => (
+                        <div key={idx} className={styles.moreItem}>
+                          <NFTCard item={item} />
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </Panel>
+            </div>
+          )}
         </div>
       </div>
 
