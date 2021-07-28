@@ -101,10 +101,11 @@
 
 .exploreAll {
   height: 92%;
-  overflow-y: auto;
+  overflow-y: scroll;
   margin-left: -40px;
   padding-left: 40px;
   padding-right: 10px;
+  padding-bottom: 20px;
 }
 
 .filterHeader {

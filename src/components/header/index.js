@@ -152,7 +152,7 @@ const NiftyHeader = ({ light }) => {
     }
   }, [account, chainId]);
 
-  const handleConnectWallet = () => {
+  const handleConnectWallet = (showError = true) => {
     activate(injected, undefined, true)
       .then(() => {
         if (account) login();
@@ -162,14 +162,22 @@ const NiftyHeader = ({ light }) => {
           await activate(injected);
           if (account) login();
         } else if (error instanceof NoEthereumProviderError) {
-          toast(
-            'error',
-            'No Provider Found!',
-            'You need to install Metamask on your browser to browse Artion.'
-          );
+          if (showError) {
+            toast(
+              'error',
+              'No Provider Found!',
+              'You need to install Metamask on your browser to browse Artion.'
+            );
+          }
         }
       });
   };
+
+  useEffect(() => {
+    if (!isWalletConnected) {
+      handleConnectWallet(false);
+    }
+  }, []);
 
   const resetResults = () => {
     setAccounts([]);
