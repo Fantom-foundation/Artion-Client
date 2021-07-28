@@ -14,6 +14,7 @@ import { formatNumber } from 'utils';
 import { useApi } from 'api';
 import { FTM_TOTAL_SUPPLY } from 'constants/index';
 
+import Modal from '../Modal';
 import styles from './styles.module.scss';
 
 const WFTMModal = ({ visible, onClose }) => {
@@ -55,11 +56,6 @@ const WFTMModal = ({ visible, onClose }) => {
       getBalances();
     }
   }, [visible, chainId]);
-
-  const handleClick = e => {
-    e.preventDefault();
-    e.stopPropagation();
-  };
 
   const parseBalance = bal => {
     return bal.toFixed(4);
@@ -121,141 +117,110 @@ const WFTMModal = ({ visible, onClose }) => {
   };
 
   return (
-    <div
-      className={cx(styles.container, visible ? styles.visible : null)}
-      onClick={onClose}
+    <Modal
+      visible={visible}
+      title="FTM / WFTM Station"
+      submitDisabled={
+        confirming ||
+        loading ||
+        amount.length === 0 ||
+        parseFloat(amount) === 0 ||
+        parseFloat(amount) > (wrap ? balance - 0.01 : wrappedBalance)
+      }
+      submitLabel={
+        confirming || loading ? (
+          <ClipLoader color="#FFF" size={16} />
+        ) : wrap ? (
+          'Wrap'
+        ) : (
+          'Unwrap'
+        )
+      }
+      onSubmit={() =>
+        amount.length &&
+        parseFloat(amount) > 0 &&
+        parseFloat(amount) <= (wrap ? balance - 0.01 : wrappedBalance) &&
+        handleWrapFTM()
+      }
+      cancelDisabled={confirming}
+      onCancel={!confirming && onClose}
     >
-      <div className={styles.modal} onClick={handleClick}>
-        <div className={styles.header}>
-          <div className={styles.title}>FTM / WFTM Station</div>
-        </div>
-
-        <div className={styles.body}>
-          <div className={cx(styles.swapContainer, !wrap && styles.reverse)}>
-            <div className={styles.swapBox}>
-              <div className={styles.symbol}>FTM</div>
-              <div className={styles.swapBoxInner}>
-                <div className={styles.balance}>
-                  Balance:{' '}
-                  {loading ? (
-                    <Skeleton width={60} height={20} />
-                  ) : (
-                    parseBalance(balance)
-                  )}
-                  {wrap && !isMax() && !loading && balance > 0 && (
-                    <div className={styles.max} onClick={onMax}>
-                      (Max)
-                    </div>
-                  )}
+      <div className={cx(styles.swapContainer, !wrap && styles.reverse)}>
+        <div className={styles.swapBox}>
+          <div className={styles.symbol}>FTM</div>
+          <div className={styles.swapBoxInner}>
+            <div className={styles.balance}>
+              Balance:{' '}
+              {loading ? (
+                <Skeleton width={60} height={20} />
+              ) : (
+                parseBalance(balance)
+              )}
+              {wrap && !isMax() && !loading && balance > 0 && (
+                <div className={styles.max} onClick={onMax}>
+                  (Max)
                 </div>
-                <div className={styles.rightBox}>
-                  <input
-                    className={styles.input}
-                    placeholder="0.0"
-                    value={amount}
-                    onChange={e =>
-                      setAmount(
-                        isNaN(e.target.value)
-                          ? amount
-                          : Math.min(
-                              e.target.value,
-                              FTM_TOTAL_SUPPLY
-                            ).toString()
-                      )
-                    }
-                  />
-                  <div className={styles.usdVal}>
-                    $
-                    {formatNumber(
-                      ((parseFloat(amount) || 0) * price).toFixed(2)
-                    )}
-                  </div>
-                </div>
-              </div>
+              )}
             </div>
-            <div className={styles.swapbtn} onClick={() => setWrap(!wrap)}>
-              <SwapVertIcon className={styles.icon} />
-            </div>
-            <div className={styles.swapBox}>
-              <div className={styles.symbol}>WFTM</div>
-              <div className={styles.swapBoxInner}>
-                <div className={styles.balance}>
-                  Balance:{' '}
-                  {loading ? (
-                    <Skeleton width={60} height={20} />
-                  ) : (
-                    parseBalance(wrappedBalance)
-                  )}
-                  {!wrap && !isMax() && !loading && balance > 0 && (
-                    <div className={styles.max} onClick={onMax}>
-                      (Max)
-                    </div>
-                  )}
-                </div>
-                <div className={styles.rightBox}>
-                  <input
-                    className={styles.input}
-                    placeholder="0.0"
-                    value={amount}
-                    onChange={e =>
-                      setAmount(
-                        isNaN(e.target.value)
-                          ? amount
-                          : Math.min(
-                              e.target.value,
-                              FTM_TOTAL_SUPPLY
-                            ).toString()
-                      )
-                    }
-                  />
-                  <div className={styles.usdVal}>
-                    $
-                    {formatNumber(
-                      ((parseFloat(amount) || 0) * price).toFixed(2)
-                    )}
-                  </div>
-                </div>
+            <div className={styles.rightBox}>
+              <input
+                className={styles.input}
+                placeholder="0.0"
+                value={amount}
+                onChange={e =>
+                  setAmount(
+                    isNaN(e.target.value)
+                      ? amount
+                      : Math.min(e.target.value, FTM_TOTAL_SUPPLY).toString()
+                  )
+                }
+              />
+              <div className={styles.usdVal}>
+                ${formatNumber(((parseFloat(amount) || 0) * price).toFixed(2))}
               </div>
             </div>
           </div>
         </div>
-
-        <div className={styles.footer}>
-          <div
-            className={cx(
-              styles.listButton,
-              (confirming ||
-                loading ||
-                amount.length === 0 ||
-                parseFloat(amount) === 0 ||
-                parseFloat(amount) >
-                  (wrap ? balance - 0.01 : wrappedBalance)) &&
-                styles.disabled
-            )}
-            onClick={() =>
-              amount.length &&
-              parseFloat(amount) > 0 &&
-              parseFloat(amount) <= (wrap ? balance - 0.01 : wrappedBalance) &&
-              handleWrapFTM()
-            }
-          >
-            {confirming || loading ? (
-              <ClipLoader color="#FFF" size={16} />
-            ) : wrap ? (
-              'Wrap'
-            ) : (
-              'Unwrap'
-            )}
-          </div>
-          <div
-            className={cx(styles.cancelButton, confirming && styles.disabled)}
-            onClick={!confirming && onClose}
-          >
-            Cancel
+        <div className={styles.swapbtn} onClick={() => setWrap(!wrap)}>
+          <SwapVertIcon className={styles.icon} />
+        </div>
+        <div className={styles.swapBox}>
+          <div className={styles.symbol}>WFTM</div>
+          <div className={styles.swapBoxInner}>
+            <div className={styles.balance}>
+              Balance:{' '}
+              {loading ? (
+                <Skeleton width={60} height={20} />
+              ) : (
+                parseBalance(wrappedBalance)
+              )}
+              {!wrap && !isMax() && !loading && balance > 0 && (
+                <div className={styles.max} onClick={onMax}>
+                  (Max)
+                </div>
+              )}
+            </div>
+            <div className={styles.rightBox}>
+              <input
+                className={styles.input}
+                placeholder="0.0"
+                value={amount}
+                onChange={e =>
+                  setAmount(
+                    isNaN(e.target.value)
+                      ? amount
+                      : Math.min(e.target.value, FTM_TOTAL_SUPPLY).toString()
+                  )
+                }
+              />
+              <div className={styles.usdVal}>
+                ${formatNumber(((parseFloat(amount) || 0) * price).toFixed(2))}
+              </div>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 };
 

@@ -1,45 +1,3 @@
-.container {
-  display: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  right: 0;
-  background-color: rgba(0, 0, 0, 0.4);
-  z-index: 9999;
-  align-items: center;
-  justify-content: center;
-
-  &.visible {
-    display: flex;
-  }
-}
-
-.modal {
-  max-width: 90%;
-  width: 600px;
-  padding: 40px;
-  box-sizing: border-box;
-  border-radius: 10px;
-  background-color: #FFF;
-  box-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
-}
-
-.header {
-  margin-bottom: 25px;
-}
-
-.title {
-  font-weight: 900;
-  font-size: 28px;
-  text-align: center;
-  color: #3D3D3D;
-}
-
-.body {
-  margin-bottom: 40px;
-}
-
 .swapContainer {
   display: flex;
   flex-direction: column;
@@ -133,59 +91,7 @@
   color: rgba(0, 0, 0, 0.4);
 }
 
-.footer {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.listButton,
-.cancelButton {
-  min-width: 200px;
-  height: 56px;
-  padding: 0 12px;
-  box-sizing: border-box;
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  font-weight: 700;
-  font-size: 18px;
-  user-select: none;
-
-  &:hover {
-    box-shadow: 0 0 8px rgba(0, 0, 0, 0.4);
-  }
-}
-
-.listButton {
-  background-color: #007BFF;
-  color: #FFF;
-  margin-right: 40px;
-}
-
-.cancelButton {
-  background-color: #FFF;
-  color: #007BFF;
-  border: 1px solid #007BFF;
-}
-
-.disabled {
-  cursor: not-allowed;
-  box-shadow: none !important;
-  opacity: 0.7;
-}
-
 @media only screen and (max-width: 600px) {
-  .modal {
-    padding: 40px 20px;
-  }
-
-  .title {
-    font-size: 20px;
-  }
-
   .swapBoxInner {
     flex-direction: column;
   }
@@ -194,19 +100,5 @@
     width: 100%;
     flex: 0 0 50px;
     border-top: 1.5px solid rgba(0, 0, 0, 0.1);
-  }
-
-  .footer {
-    flex-direction: column;
-  }
-
-  .listButton,
-  .cancelButton {
-    width: calc(100% - 48px);
-  }
-
-  .listButton {
-    margin-right: 0;
-    margin-bottom: 20px;
   }
 }
