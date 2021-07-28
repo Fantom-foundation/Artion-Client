@@ -52,6 +52,17 @@ export const useApi = () => {
     return null;
   };
 
+  const getIsModerator = async address => {
+    const { data } = await axios({
+      method: 'get',
+      url: `${apiUrl()}/mod/isModerator/${address}`,
+    });
+    if (data.status == 'success') {
+      return data.data;
+    }
+    return false;
+  };
+
   const getAccountDetails = async authToken => {
     const res = await axios({
       method: 'get',
@@ -382,11 +393,11 @@ export const useApi = () => {
     return res.data;
   };
 
-  const banItem = async (address, tokenID, authToken) => {
-    const data = { address, tokenID };
+  const banItems = async (address, tokenIDs, authToken, signature) => {
+    const data = { address, tokenIDs, signature };
     const res = await axios({
       method: 'post',
-      url: `${apiUrl()}/ban/banItem`,
+      url: `${apiUrl()}/ban/banItems`,
       data: JSON.stringify(data),
       headers: {
         'Content-Type': 'application/json',
@@ -635,6 +646,7 @@ export const useApi = () => {
     storageUrl,
     getNonce,
     getAuthToken,
+    getIsModerator,
     getAccountDetails,
     getUserAccountDetails,
     updateAccountDetails,
@@ -659,7 +671,7 @@ export const useApi = () => {
     getActivityFromOthers,
     addMod,
     removeMod,
-    banItem,
+    banItems,
     boostCollection,
     createBundle,
     deleteBundle,

@@ -44,12 +44,18 @@ const NiftyHeader = ({ light }) => {
   const history = useHistory();
   const dispatch = useDispatch();
 
-  const { apiUrl, storageUrl, getAuthToken, getAccountDetails } = useApi();
+  const {
+    apiUrl,
+    storageUrl,
+    getAuthToken,
+    getAccountDetails,
+    getIsModerator,
+  } = useApi();
   const { account, chainId, activate } = useWeb3React();
 
   const { user } = useSelector(state => state.Auth);
   let isSearchbarShown = useSelector(state => state.HeaderOptions.isShown);
-  const { isConnected: isWalletConnected } = useSelector(
+  const { isConnected: isWalletConnected, isModerator } = useSelector(
     state => state.ConnectWallet
   );
   const { wftmModalVisible } = useSelector(state => state.Modal);
@@ -81,8 +87,9 @@ const NiftyHeader = ({ light }) => {
     try {
       setLoading(true);
       const token = await getAuthToken(account);
+      const isModerator = await getIsModerator(account);
 
-      dispatch(WalletConnectActions.connectWallet(token));
+      dispatch(WalletConnectActions.connectWallet(token, isModerator));
       dispatch(AuthActions.fetchStart());
       try {
         const { data } = await getAccountDetails(token);
@@ -306,7 +313,7 @@ const NiftyHeader = ({ light }) => {
     handleMenuClose();
   };
 
-  const banItem = () => {
+  const banItems = () => {
     setBanItemModalVisible(true);
     handleMenuClose();
   };
@@ -364,24 +371,37 @@ const NiftyHeader = ({ light }) => {
         FTM / WFTM Station
       </div>
       <div className={styles.menuSeparator} />
-      {account?.toLowerCase() === ADMIN_ADDRESS.toLowerCase() && [
-        <div key={0} className={styles.menuItem} onClick={addMod}>
-          Add Mod
-        </div>,
-        <div key={1} className={styles.menuItem} onClick={removeMod}>
-          Remove Mod
-        </div>,
-        <div key={2} className={styles.menuItem} onClick={reviewCollections}>
-          Review Collections
-        </div>,
-        <div key={3} className={styles.menuItem} onClick={banItem}>
-          Ban Item (Admin only)
-        </div>,
-        <div key={4} className={styles.menuItem} onClick={boostCollection}>
-          Boost Collection (Admin only)
-        </div>,
-        <div key={5} className={styles.menuSeparator} />,
-      ]}
+      {account?.toLowerCase() === ADMIN_ADDRESS.toLowerCase()
+        ? [
+            <div key={0} className={styles.menuItem} onClick={addMod}>
+              Add Mod
+            </div>,
+            <div key={1} className={styles.menuItem} onClick={removeMod}>
+              Remove Mod
+            </div>,
+            <div
+              key={2}
+              className={styles.menuItem}
+              onClick={reviewCollections}
+            >
+              Review Collections
+            </div>,
+            <div key={3} className={styles.menuItem} onClick={banItems}>
+              Ban Items
+            </div>,
+            <div key={4} className={styles.menuItem} onClick={boostCollection}>
+              Boost Collection
+            </div>,
+            <div key={5} className={styles.menuSeparator} />,
+          ]
+        : isModerator
+        ? [
+            <div key={3} className={styles.menuItem} onClick={banItems}>
+              Ban Items
+            </div>,
+            <div key={5} className={styles.menuSeparator} />,
+          ]
+        : null}
       <div className={styles.menuItem} onClick={handleSignOut}>
         <img src={iconExit} className={styles.menuIcon} />
         Sign Out
