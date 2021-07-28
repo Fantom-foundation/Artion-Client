@@ -6,7 +6,8 @@ import { ClipLoader } from 'react-spinners';
 import { formatNumber } from 'utils';
 import { FTM_TOTAL_SUPPLY } from 'constants/index';
 
-import styles from './styles.module.scss';
+import Modal from '../Modal';
+import styles from '../Modal/common.module.scss';
 
 const SellModal = ({
   visible,
@@ -29,11 +30,6 @@ const SellModal = ({
     setPrice(startPrice > 0 ? startPrice.toString() : '');
     setQuantity('1');
   }, [visible]);
-
-  const handleClick = e => {
-    e.preventDefault();
-    e.stopPropagation();
-  };
 
   const handleQuantityChange = e => {
     const val = e.target.value;
@@ -63,100 +59,77 @@ const SellModal = ({
   };
 
   return (
-    <div className={cx(styles.container, visible ? styles.visible : null)}>
-      <div className={styles.modal} onClick={handleClick}>
-        <div className={styles.header}>
-          <div className={styles.title}>
-            {startPrice > 0 ? 'Update Your Listing' : 'Sell Your Item'}
-          </div>
-        </div>
-        <div className={styles.body}>
-          <div className={styles.formGroup}>
-            <div className={styles.formLabel}>Price (FTM)</div>
-            <div
-              className={cx(styles.formInputCont, focused && styles.focused)}
-            >
-              <input
-                className={styles.formInput}
-                placeholder="0.00"
-                value={price}
-                onChange={e =>
-                  setPrice(
-                    isNaN(e.target.value)
-                      ? price
-                      : Math.min(e.target.value, FTM_TOTAL_SUPPLY).toString()
-                  )
-                }
-                onFocus={() => setFocused(true)}
-                onBlur={() => setFocused(false)}
-                disabled={contractApproving || confirming}
-              />
-              <div className={styles.usdPrice}>
-                $
-                {formatNumber(((parseFloat(price) || 0) * ftmPrice).toFixed(2))}
-              </div>
-            </div>
-          </div>
-          {totalSupply !== null && (
-            <div className={styles.formGroup}>
-              <div className={styles.formLabel}>Quantity</div>
-              <div className={styles.formInputCont}>
-                <input
-                  className={styles.formInput}
-                  placeholder={totalSupply}
-                  value={quantity}
-                  onChange={handleQuantityChange}
-                  disabled={
-                    contractApproving || confirming || totalSupply === 1
-                  }
-                />
-              </div>
-            </div>
-          )}
-        </div>
-        <div className={styles.footer}>
-          <div
-            className={cx(
-              styles.listButton,
-              (contractApproving ||
-                confirming ||
-                (contractApproved && !validateInput())) &&
-                styles.disabled
-            )}
-            onClick={() =>
-              contractApproved
-                ? !confirming && validateInput()
-                  ? handleSellItem()
-                  : null
-                : approveContract()
-            }
-          >
-            {contractApproved ? (
-              confirming ? (
-                <ClipLoader color="#FFF" size={16} />
-              ) : startPrice > 0 ? (
-                'Update Price'
-              ) : (
-                'List Item'
+    <Modal
+      visible={visible}
+      title={startPrice > 0 ? 'Update Your Listing' : 'Sell Your Item'}
+      submitDisabled={
+        contractApproving ||
+        confirming ||
+        (contractApproved && !validateInput())
+      }
+      submitLabel={
+        contractApproved ? (
+          confirming ? (
+            <ClipLoader color="#FFF" size={16} />
+          ) : startPrice > 0 ? (
+            'Update Price'
+          ) : (
+            'List Item'
+          )
+        ) : contractApproving ? (
+          'Approving Item'
+        ) : (
+          'Approve Item'
+        )
+      }
+      onSubmit={() =>
+        contractApproved
+          ? !confirming && validateInput()
+            ? handleSellItem()
+            : null
+          : approveContract()
+      }
+      cancelDisabled={contractApproving || confirming}
+      onCancel={!(contractApproving || confirming) ? onClose : null}
+    >
+      <div className={styles.formGroup}>
+        <div className={styles.formLabel}>Price (FTM)</div>
+        <div className={cx(styles.formInputCont, focused && styles.focused)}>
+          <input
+            className={styles.formInput}
+            placeholder="0.00"
+            value={price}
+            onChange={e =>
+              setPrice(
+                isNaN(e.target.value)
+                  ? price
+                  : Math.min(e.target.value, FTM_TOTAL_SUPPLY).toString()
               )
-            ) : contractApproving ? (
-              'Approving Item'
-            ) : (
-              'Approve Item'
-            )}
-          </div>
-          <div
-            className={cx(
-              styles.cancelButton,
-              (contractApproving || confirming) && styles.disabled
-            )}
-            onClick={!(contractApproving || confirming) ? onClose : null}
-          >
-            Cancel
+            }
+            onFocus={() => setFocused(true)}
+            onBlur={() => setFocused(false)}
+            disabled={contractApproving || confirming}
+          />
+          <div className={styles.usdPrice}>
+            ${formatNumber(((parseFloat(price) || 0) * ftmPrice).toFixed(2))}
           </div>
         </div>
       </div>
-    </div>
+      {totalSupply !== null && (
+        <div className={styles.formGroup}>
+          <div className={styles.formLabel}>Quantity</div>
+          <div className={styles.formInputCont}>
+            <input
+              className={styles.formInput}
+              placeholder={totalSupply}
+              value={quantity}
+              onChange={handleQuantityChange}
+              disabled={contractApproving || confirming || totalSupply === 1}
+            />
+          </div>
+        </div>
+      )}
+    </Modal>
   );
 };
 

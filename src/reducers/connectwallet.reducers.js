@@ -1,7 +1,7 @@
 import { WalletConnectConstants } from '../constants/walletconnect.constants';
 
 export function ConnectWallet(
-  state = { isConnected: false, authToken: null },
+  state = { isConnected: false, authToken: null, isModerator: false },
   action
 ) {
   switch (action.type) {
@@ -10,6 +10,7 @@ export function ConnectWallet(
         ...state,
         isConnected: true,
         authToken: action.token,
+        isModerator: action.isModerator,
       };
     }
     case WalletConnectConstants.WALLETDISCONNECTED: {
@@ -17,6 +18,7 @@ export function ConnectWallet(
         ...state,
         isConnected: false,
         authToken: null,
+        isModerator: false,
       };
     }
     default: {

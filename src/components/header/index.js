@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useHistory, withRouter, NavLink, Link } from 'react-router-dom';
 import cx from 'classnames';
 import Skeleton from 'react-loading-skeleton';
-import Menu from '@material-ui/core/Menu';
+import { Menu } from '@material-ui/core';
 import { UnsupportedChainIdError, useWeb3React } from '@web3-react/core';
 import { ExpandMore, Search as SearchIcon } from '@material-ui/icons';
 import { useDispatch, useSelector } from 'react-redux';
@@ -18,6 +18,7 @@ import { useApi } from 'api';
 import { NETWORK_LABEL } from 'constants/networks';
 import { ADMIN_ADDRESS } from 'constants/index';
 import WFTMModal from 'components/WFTMModal';
+import ModModal from 'components/ModModal';
 import BanItemModal from 'components/BanItemModal';
 import BoostCollectionModal from 'components/BoostCollectionModal';
 import Identicon from 'components/Identicon';
@@ -33,6 +34,8 @@ import iconExit from 'assets/svgs/exit.svg';
 import iconSettings from 'assets/svgs/settings.svg';
 
 import styles from './styles.module.scss';
+import { NoEthereumProviderError } from '@web3-react/injected-connector';
+import toast from 'utils/toast';
 
 // eslint-disable-next-line no-undef
 const ENV = process.env.REACT_APP_ENV;
@@ -41,12 +44,18 @@ const NiftyHeader = ({ light }) => {
   const history = useHistory();
   const dispatch = useDispatch();
 
-  const { apiUrl, storageUrl, getAuthToken, getAccountDetails } = useApi();
+  const {
+    apiUrl,
+    storageUrl,
+    getAuthToken,
+    getAccountDetails,
+    getIsModerator,
+  } = useApi();
   const { account, chainId, activate } = useWeb3React();
 
   const { user } = useSelector(state => state.Auth);
   let isSearchbarShown = useSelector(state => state.HeaderOptions.isShown);
-  const { isConnected: isWalletConnected } = useSelector(
+  const { isConnected: isWalletConnected, isModerator } = useSelector(
     state => state.ConnectWallet
   );
   const { wftmModalVisible } = useSelector(state => state.Modal);
@@ -54,6 +63,8 @@ const NiftyHeader = ({ light }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [loading, setLoading] = useState(false);
   const [searchBarActive, setSearchBarActive] = useState(false);
+  const [isAdding, setIsAdding] = useState(false);
+  const [modModalVisible, setModModalVisible] = useState(false);
   const [banItemModalVisible, setBanItemModalVisible] = useState(false);
   const [
     boostCollectionModalVisible,
@@ -76,8 +87,9 @@ const NiftyHeader = ({ light }) => {
     try {
       setLoading(true);
       const token = await getAuthToken(account);
+      const isModerator = await getIsModerator(account);
 
-      dispatch(WalletConnectActions.connectWallet(token));
+      dispatch(WalletConnectActions.connectWallet(token, isModerator));
       dispatch(AuthActions.fetchStart());
       try {
         const { data } = await getAccountDetails(token);
@@ -150,7 +162,7 @@ const NiftyHeader = ({ light }) => {
     }
   }, [account, chainId]);
 
-  const handleConnectWallet = () => {
+  const handleConnectWallet = (showError = true) => {
     activate(injected, undefined, true)
       .then(() => {
         if (account) login();
@@ -159,13 +171,21 @@ const NiftyHeader = ({ light }) => {
         if (error instanceof UnsupportedChainIdError) {
           await activate(injected);
           if (account) login();
+        } else if (error instanceof NoEthereumProviderError) {
+          if (showError) {
+            toast(
+              'error',
+              'No Provider Found!',
+              'You need to install Metamask on your browser to browse Artion.'
+            );
+          }
         }
       });
   };
 
   useEffect(() => {
     if (!isWalletConnected) {
-      handleConnectWallet();
+      handleConnectWallet(false);
     }
   }, []);
 
@@ -276,12 +296,24 @@ const NiftyHeader = ({ light }) => {
     handleMenuClose();
   };
 
+  const addMod = () => {
+    setIsAdding(true);
+    setModModalVisible(true);
+    handleMenuClose();
+  };
+
+  const removeMod = () => {
+    setIsAdding(false);
+    setModModalVisible(true);
+    handleMenuClose();
+  };
+
   const reviewCollections = () => {
     history.push('/collection/review');
     handleMenuClose();
   };
 
-  const banItem = () => {
+  const banItems = () => {
     setBanItemModalVisible(true);
     handleMenuClose();
   };
@@ -339,20 +371,37 @@ const NiftyHeader = ({ light }) => {
         FTM / WFTM Station
       </div>
       <div className={styles.menuSeparator} />
-      {account?.toLowerCase() === ADMIN_ADDRESS.toLowerCase() && (
-        <>
-          <div className={styles.menuItem} onClick={reviewCollections}>
-            Review Collections
-          </div>
-          <div className={styles.menuItem} onClick={banItem}>
-            Ban Item (Admin only)
-          </div>
-          <div className={styles.menuItem} onClick={boostCollection}>
-            Boost Collection (Admin only)
-          </div>
-          <div className={styles.menuSeparator} />
-        </>
-      )}
+      {account?.toLowerCase() === ADMIN_ADDRESS.toLowerCase()
+        ? [
+            <div key={0} className={styles.menuItem} onClick={addMod}>
+              Add Mod
+            </div>,
+            <div key={1} className={styles.menuItem} onClick={removeMod}>
+              Remove Mod
+            </div>,
+            <div
+              key={2}
+              className={styles.menuItem}
+              onClick={reviewCollections}
+            >
+              Review Collections
+            </div>,
+            <div key={3} className={styles.menuItem} onClick={banItems}>
+              Ban Items
+            </div>,
+            <div key={4} className={styles.menuItem} onClick={boostCollection}>
+              Boost Collection
+            </div>,
+            <div key={5} className={styles.menuSeparator} />,
+          ]
+        : isModerator
+        ? [
+            <div key={3} className={styles.menuItem} onClick={banItems}>
+              Ban Items
+            </div>,
+            <div key={5} className={styles.menuSeparator} />,
+          ]
+        : null}
       <div className={styles.menuItem} onClick={handleSignOut}>
         <img src={iconExit} className={styles.menuIcon} />
         Sign Out
@@ -585,6 +634,11 @@ const NiftyHeader = ({ light }) => {
       <WFTMModal
         visible={wftmModalVisible}
         onClose={() => dispatch(ModalActions.hideWFTMModal())}
+      />
+      <ModModal
+        isAdding={isAdding}
+        visible={modModalVisible}
+        onClose={() => setModModalVisible(false)}
       />
       <BanItemModal
         visible={banItemModalVisible}

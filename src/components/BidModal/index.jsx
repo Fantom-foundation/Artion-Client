@@ -6,7 +6,8 @@ import { ClipLoader } from 'react-spinners';
 import { formatNumber } from 'utils';
 import { FTM_TOTAL_SUPPLY } from 'constants/index';
 
-import styles from './styles.module.scss';
+import Modal from '../Modal';
+import styles from '../Modal/common.module.scss';
 
 const BidModal = ({
   visible,
@@ -24,70 +25,46 @@ const BidModal = ({
     setPrice(minBidAmount);
   }, [visible]);
 
-  const handleClick = e => {
-    e.preventDefault();
-    e.stopPropagation();
-  };
-
   const validateInput = () => {
     return price.length > 0;
   };
 
   return (
-    <div className={cx(styles.container, visible ? styles.visible : null)}>
-      <div className={styles.modal} onClick={handleClick}>
-        <div className={styles.header}>
-          <div className={styles.title}>Place Bid</div>
-        </div>
-        <div className={styles.body}>
-          <div className={styles.formGroup}>
-            <div className={styles.formLabel}>Price (FTM)</div>
-            <div
-              className={cx(styles.formInputCont, focused && styles.focused)}
-            >
-              <input
-                className={styles.formInput}
-                placeholder="0.00"
-                value={price}
-                onChange={e =>
-                  setPrice(
-                    isNaN(e.target.value)
-                      ? price
-                      : Math.min(e.target.value, FTM_TOTAL_SUPPLY).toString()
-                  )
-                }
-                onFocus={() => setFocused(true)}
-                onBlur={() => setFocused(false)}
-                disabled={confirming}
-              />
-              <div className={styles.usdPrice}>
-                $
-                {formatNumber(((parseFloat(price) || 0) * ftmPrice).toFixed(2))}
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className={styles.footer}>
-          <div
-            className={cx(
-              styles.listButton,
-              (confirming || !validateInput()) && styles.disabled
-            )}
-            onClick={() =>
-              !confirming && validateInput() ? onPlaceBid(price) : null
+    <Modal
+      visible={visible}
+      title="Place Bid"
+      submitDisabled={confirming || !validateInput()}
+      submitLabel={confirming ? <ClipLoader color="#FFF" size={16} /> : 'Place'}
+      onSubmit={() =>
+        !confirming && validateInput() ? onPlaceBid(price) : null
+      }
+      cancelDisabled={confirming}
+      onCancel={!confirming ? onClose : null}
+    >
+      <div className={styles.formGroup}>
+        <div className={styles.formLabel}>Price (FTM)</div>
+        <div className={cx(styles.formInputCont, focused && styles.focused)}>
+          <input
+            className={styles.formInput}
+            placeholder="0.00"
+            value={price}
+            onChange={e =>
+              setPrice(
+                isNaN(e.target.value)
+                  ? price
+                  : Math.min(e.target.value, FTM_TOTAL_SUPPLY).toString()
+              )
             }
-          >
-            {confirming ? <ClipLoader color="#FFF" size={16} /> : 'Place'}
-          </div>
-          <div
-            className={cx(styles.cancelButton, confirming && styles.disabled)}
-            onClick={!confirming ? onClose : null}
-          >
-            Cancel
+            onFocus={() => setFocused(true)}
+            onBlur={() => setFocused(false)}
+            disabled={confirming}
+          />
+          <div className={styles.usdPrice}>
+            ${formatNumber(((parseFloat(price) || 0) * ftmPrice).toFixed(2))}
           </div>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 };
 
