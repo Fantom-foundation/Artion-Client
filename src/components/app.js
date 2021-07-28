@@ -12,6 +12,7 @@ import { useWeb3React } from '@web3-react/core';
 import { ChainId } from '@sushiswap/sdk';
 import { Client } from '@bandprotocol/bandchain.js';
 
+import ProtectedRoute from './ProtectedRoute';
 import AccountModal from './AccountModal';
 import WFTMModal from './WFTMModal';
 import NotFound from './NotFound';
@@ -76,21 +77,24 @@ const App = () => {
       <Router>
         <Switch>
           <Route exact path="/" component={LandingPage} />
-          <Route exact path="/exploreall" component={ExplorePage} />
-          <Route exact path="/create" component={PaintBoard} />
-          <Route path="/explore/:addr/:id" component={NFTItem} />
-          <Route path="/bundle/:bundleID" component={NFTItem} />
-          <Route path="/account/:uid" component={AccountDetails} />
-          <Route
+          <ProtectedRoute exact path="/exploreall" component={ExplorePage} />
+          <ProtectedRoute exact path="/create" component={PaintBoard} />
+          <ProtectedRoute path="/explore/:addr/:id" component={NFTItem} />
+          <ProtectedRoute path="/bundle/:bundleID" component={NFTItem} />
+          <ProtectedRoute path="/account/:uid" component={AccountDetails} />
+          <ProtectedRoute
             path="/collection/create"
             component={() => <CollectionCreate isRegister={false} />}
           />
-          <Route
+          <ProtectedRoute
             path="/collection/register"
             component={() => <CollectionCreate isRegister />}
           />
-          <Route path="/collection/review" component={CollectionReview} />
-          <Route
+          <ProtectedRoute
+            path="/collection/review"
+            component={CollectionReview}
+          />
+          <ProtectedRoute
             path="/settings/notification"
             component={NotificationSetting}
           />

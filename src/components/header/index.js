@@ -33,6 +33,8 @@ import iconExit from 'assets/svgs/exit.svg';
 import iconSettings from 'assets/svgs/settings.svg';
 
 import styles from './styles.module.scss';
+import { NoEthereumProviderError } from '@web3-react/injected-connector';
+import toast from 'utils/toast';
 
 // eslint-disable-next-line no-undef
 const ENV = process.env.REACT_APP_ENV;
@@ -159,15 +161,15 @@ const NiftyHeader = ({ light }) => {
         if (error instanceof UnsupportedChainIdError) {
           await activate(injected);
           if (account) login();
+        } else if (error instanceof NoEthereumProviderError) {
+          toast(
+            'error',
+            'No Provider Found!',
+            'You need to install Metamask on your browser to browse Artion.'
+          );
         }
       });
   };
-
-  useEffect(() => {
-    if (!isWalletConnected) {
-      handleConnectWallet();
-    }
-  }, []);
 
   const resetResults = () => {
     setAccounts([]);

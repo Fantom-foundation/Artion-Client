@@ -219,7 +219,6 @@
 
 .account,
 .connect {
-  height: 55px;
   box-sizing: border-box;
   padding: 8px 12px 11px 12px;
   border-radius: 50px;
@@ -228,6 +227,14 @@
   &:hover {
     box-shadow: 0 0 6px rgba(0, 0, 0, 0.3);
   }
+}
+
+.connect {
+  height: 55px;
+  display: flex;
+  align-items: center;
+  padding-left: 20px;
+  padding-right: 20px;
 }
 
 .expand {
