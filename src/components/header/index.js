@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useHistory, withRouter, NavLink, Link } from 'react-router-dom';
 import cx from 'classnames';
 import Skeleton from 'react-loading-skeleton';
-import Menu from '@material-ui/core/Menu';
+import { Menu } from '@material-ui/core';
 import { UnsupportedChainIdError, useWeb3React } from '@web3-react/core';
 import { ExpandMore, Search as SearchIcon } from '@material-ui/icons';
 import { useDispatch, useSelector } from 'react-redux';
@@ -18,6 +18,7 @@ import { useApi } from 'api';
 import { NETWORK_LABEL } from 'constants/networks';
 import { ADMIN_ADDRESS } from 'constants/index';
 import WFTMModal from 'components/WFTMModal';
+import ModModal from 'components/ModModal';
 import BanItemModal from 'components/BanItemModal';
 import BoostCollectionModal from 'components/BoostCollectionModal';
 import Identicon from 'components/Identicon';
@@ -56,6 +57,8 @@ const NiftyHeader = ({ light }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [loading, setLoading] = useState(false);
   const [searchBarActive, setSearchBarActive] = useState(false);
+  const [isAdding, setIsAdding] = useState(false);
+  const [modModalVisible, setModModalVisible] = useState(false);
   const [banItemModalVisible, setBanItemModalVisible] = useState(false);
   const [
     boostCollectionModalVisible,
@@ -286,6 +289,18 @@ const NiftyHeader = ({ light }) => {
     handleMenuClose();
   };
 
+  const addMod = () => {
+    setIsAdding(true);
+    setModModalVisible(true);
+    handleMenuClose();
+  };
+
+  const removeMod = () => {
+    setIsAdding(false);
+    setModModalVisible(true);
+    handleMenuClose();
+  };
+
   const reviewCollections = () => {
     history.push('/collection/review');
     handleMenuClose();
@@ -349,20 +364,24 @@ const NiftyHeader = ({ light }) => {
         FTM / WFTM Station
       </div>
       <div className={styles.menuSeparator} />
-      {account?.toLowerCase() === ADMIN_ADDRESS.toLowerCase() && (
-        <>
-          <div className={styles.menuItem} onClick={reviewCollections}>
-            Review Collections
-          </div>
-          <div className={styles.menuItem} onClick={banItem}>
-            Ban Item (Admin only)
-          </div>
-          <div className={styles.menuItem} onClick={boostCollection}>
-            Boost Collection (Admin only)
-          </div>
-          <div className={styles.menuSeparator} />
-        </>
-      )}
+      {account?.toLowerCase() === ADMIN_ADDRESS.toLowerCase() && [
+        <div key={0} className={styles.menuItem} onClick={addMod}>
+          Add Mod
+        </div>,
+        <div key={1} className={styles.menuItem} onClick={removeMod}>
+          Remove Mod
+        </div>,
+        <div key={2} className={styles.menuItem} onClick={reviewCollections}>
+          Review Collections
+        </div>,
+        <div key={3} className={styles.menuItem} onClick={banItem}>
+          Ban Item (Admin only)
+        </div>,
+        <div key={4} className={styles.menuItem} onClick={boostCollection}>
+          Boost Collection (Admin only)
+        </div>,
+        <div key={5} className={styles.menuSeparator} />,
+      ]}
       <div className={styles.menuItem} onClick={handleSignOut}>
         <img src={iconExit} className={styles.menuIcon} />
         Sign Out
@@ -595,6 +614,11 @@ const NiftyHeader = ({ light }) => {
       <WFTMModal
         visible={wftmModalVisible}
         onClose={() => dispatch(ModalActions.hideWFTMModal())}
+      />
+      <ModModal
+        isAdding={isAdding}
+        visible={modModalVisible}
+        onClose={() => setModModalVisible(false)}
       />
       <BanItemModal
         visible={banItemModalVisible}

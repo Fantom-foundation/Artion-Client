@@ -354,6 +354,34 @@ export const useApi = () => {
     return res.data;
   };
 
+  const addMod = async (name, address, authToken, signature) => {
+    const data = { name, address, signature };
+    const res = await axios({
+      method: 'post',
+      url: `${apiUrl()}/mod/add`,
+      data: JSON.stringify(data),
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${authToken}`,
+      },
+    });
+    return res.data;
+  };
+
+  const removeMod = async (address, authToken, signature) => {
+    const data = { address, signature };
+    const res = await axios({
+      method: 'post',
+      url: `${apiUrl()}/mod/remove`,
+      data: JSON.stringify(data),
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${authToken}`,
+      },
+    });
+    return res.data;
+  };
+
   const banItem = async (address, tokenID, authToken) => {
     const data = { address, tokenID };
     const res = await axios({
@@ -629,6 +657,8 @@ export const useApi = () => {
     getTransferHistory,
     getAccountActivity,
     getActivityFromOthers,
+    addMod,
+    removeMod,
     banItem,
     boostCollection,
     createBundle,
