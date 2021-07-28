@@ -1977,14 +1977,16 @@ const NFTItem = () => {
               (${(bestListing.price * ftmPrice).toFixed(2)})
             </div>
           </div>
-          <div
-            className={cx(styles.buyNow, buyingItem && styles.disabled)}
-            onClick={
-              bundleID ? handleBuyBundle : () => handleBuyItem(bestListing)
-            }
-          >
-            {buyingItem ? <ClipLoader color="#FFF" size={16} /> : 'Buy Now'}
-          </div>
+          {!isMine && (
+            <div
+              className={cx(styles.buyNow, buyingItem && styles.disabled)}
+              onClick={
+                bundleID ? handleBuyBundle : () => handleBuyItem(bestListing)
+              }
+            >
+              {buyingItem ? <ClipLoader color="#FFF" size={16} /> : 'Buy Now'}
+            </div>
+          )}
         </div>
       )}
     </>
@@ -2602,7 +2604,7 @@ const NFTItem = () => {
                                   />
                                 )}
                               </div>
-                              {listing.alias || listing.owner.substr(0, 6)}
+                              {listing.alias || listing.owner?.substr(0, 6)}
                             </Link>
                           </div>
                           <div className={styles.price}>
@@ -2673,7 +2675,7 @@ const NFTItem = () => {
                                     />
                                   )}
                                 </div>
-                                {offer.alias || offer.creator.substr(0, 6)}
+                                {offer.alias || offer.creator?.substr(0, 6)}
                               </Link>
                             </div>
                             <div className={styles.price}>
@@ -2845,7 +2847,7 @@ const NFTItem = () => {
                             />
                           )}
                         </div>
-                        {history.fromAlias || history.from.substr(0, 6)}
+                        {history.fromAlias || history.from?.substr(0, 6)}
                       </Link>
                     ) : (
                       <Skeleton width={180} height={20} />
@@ -2868,7 +2870,7 @@ const NFTItem = () => {
                             />
                           )}
                         </div>
-                        {history.toAlias || history.to.substr(0, 6)}
+                        {history.toAlias || history.to?.substr(0, 6)}
                       </Link>
                     ) : (
                       <Skeleton width={180} height={20} />
