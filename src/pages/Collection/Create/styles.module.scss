@@ -228,14 +228,17 @@
 }
 
 .categoryButton {
-  flex: 0 0 200px;
-  height: 56px;
+  flex: 0 0 120px;
+  height: 48px;
   padding: 8px 12px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 16px;
-  border: 1.5px solid rgba(0, 0, 0, .4);
+  font-size: 14px;
+  font-weight: 400;
+  color: #121223;
+  letter-spacing: -0.02em;
+  border: 1px solid #EAEAF1;
   box-sizing: border-box;
   border-radius: 8px;
   cursor: pointer;
@@ -267,17 +270,19 @@
 }
 
 .selectedCategory {
-  flex: 0 0 200px;
-  height: 56px;
+  flex: 0 0 150px;
+  height: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
   margin-left: 16px;
   padding: 8px 12px;
-  font-size: 16px;
+  font-size: 14px;
+  font-weight: 400;
+  color: #121223;
   line-height: 20px;
   box-sizing: border-box;
-  border: 1.5px solid rgba(0, 0, 0, .4);
+  border: 1px solid #EAEAF1;
   border-radius: 8px;
   cursor: pointer;
   user-select: none;
@@ -308,7 +313,6 @@
   height: 56px;
   border-bottom: 1px solid #EAEAF1;
   box-sizing: border-box;
-  border-radius: 5px;
   overflow: hidden;
 
   &:last-child {
