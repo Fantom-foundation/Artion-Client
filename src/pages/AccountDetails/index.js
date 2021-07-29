@@ -23,6 +23,7 @@ import CollectionsActions from 'actions/collections.actions';
 
 import iconCopy from 'assets/svgs/copy.svg';
 import iconSettings from 'assets/svgs/settings.svg';
+import iconShare from 'assets/svgs/share.svg';
 
 import styles from './styles.module.scss';
 
@@ -428,6 +429,16 @@ const AccountDetails = () => {
     return <Redirect to="/404" />;
   }
 
+  const renderTab = idx => (
+    <div
+      key={idx}
+      className={cx(styles.tab, idx === tab && styles.selected)}
+      onClick={() => goToTab(idx)}
+    >
+      {tabs[idx]}
+    </div>
+  );
+
   return (
     <div className={styles.container}>
       <Header light />
@@ -457,103 +468,106 @@ const AccountDetails = () => {
             </div>
           )}
         </div>
-        {isMe && (
-          <div className={styles.settings} onClick={openAccountSettings}>
-            <img src={iconSettings} className={styles.settingsIcon} />
-          </div>
-        )}
-        <div className={styles.avatarWrapper}>
-          {loading ? (
-            <Skeleton width={150} height={150} className={styles.avatar} />
-          ) : user.imageHash ? (
-            <img
-              src={`https://gateway.pinata.cloud/ipfs/${user.imageHash}`}
-              className={styles.avatar}
-            />
-          ) : (
-            <Identicon className={styles.avatar} account={uid} size={150} />
-          )}
-        </div>
-        <div className={styles.usernameWrapper}>
-          <div className={styles.username}>
-            {loading ? (
-              <Skeleton width={120} height={24} />
-            ) : (
-              user.alias || 'Unnamed'
-            )}
-          </div>
-          {isMe ? null : loading ? (
-            <Skeleton width={80} height={26} />
-          ) : (
-            <div
-              className={cx(
-                styles.followBtn,
-                followingInProgress && styles.disabled
-              )}
-              onClick={followUser}
-            >
-              {followingInProgress ? (
-                <ClipLoader color="#FFF" size={14} />
-              ) : following ? (
-                'Unfollow'
-              ) : (
-                'Follow'
-              )}
+        <div className={styles.buttonsWrapper}>
+          {isMe && (
+            <div className={styles.settings} onClick={openAccountSettings}>
+              <img src={iconSettings} className={styles.settingsIcon} />
             </div>
           )}
+          <div className={styles.settings}>
+            <img src={iconShare} className={styles.settingsIcon} />
+          </div>
         </div>
-        <div className={styles.addressWrapper}>
-          {loading ? (
-            <Skeleton width={160} height={20} />
-          ) : (
-            <Tooltip
-              title={copied ? 'Copied!' : 'Copy'}
-              open={tooltipOpen}
-              arrow
-              classes={{ tooltip: styles.tooltip }}
-            >
-              <div className={styles.address}>{shortenAddress(uid)}</div>
-            </Tooltip>
-          )}
-          <CopyToClipboard text={uid} onCopy={handleCopyAddress}>
-            <img
-              src={iconCopy}
-              onMouseOver={handleMouseOver}
-              onMouseLeave={handleMouseLeave}
-            />
-          </CopyToClipboard>
+        <div className={styles.wrapper}>
+          <div className={styles.avatarWrapper}>
+            {loading ? (
+              <Skeleton width={150} height={150} className={styles.avatar} />
+            ) : user.imageHash ? (
+              <img
+                src={`https://gateway.pinata.cloud/ipfs/${user.imageHash}`}
+                className={styles.avatar}
+              />
+            ) : (
+              <Identicon className={styles.avatar} account={uid} size={150} />
+            )}
+          </div>
+          <div className={styles.usernameWrapper}>
+            <div className={styles.username}>
+              {loading ? (
+                <Skeleton width={120} height={24} />
+              ) : (
+                user.alias || 'Unnamed'
+              )}
+            </div>
+            {isMe ? null : loading ? (
+              <Skeleton width={80} height={26} />
+            ) : (
+              <div
+                className={cx(
+                  styles.followBtn,
+                  followingInProgress && styles.disabled
+                )}
+                onClick={followUser}
+              >
+                {followingInProgress ? (
+                  <ClipLoader color="#FFF" size={14} />
+                ) : following ? (
+                  'Unfollow'
+                ) : (
+                  'Follow'
+                )}
+              </div>
+            )}
+          </div>
+          <div className={styles.bio}>{user.bio || ''}</div>
+          <div className={styles.bottomWrapper}>
+            <div className={styles.addressWrapper}>
+              {loading ? (
+                <Skeleton width={160} height={20} />
+              ) : (
+                <Tooltip
+                  title={copied ? 'Copied!' : 'Copy'}
+                  open={tooltipOpen}
+                  arrow
+                  classes={{ tooltip: styles.tooltip }}
+                >
+                  <div className={styles.address}>{shortenAddress(uid)}</div>
+                </Tooltip>
+              )}
+              <CopyToClipboard text={uid} onCopy={handleCopyAddress}>
+                <div className={styles.copyIcon}>
+                  <img
+                    src={iconCopy}
+                    onMouseOver={handleMouseOver}
+                    onMouseLeave={handleMouseLeave}
+                  />
+                </div>
+              </CopyToClipboard>
+            </div>
+            <div className={styles.followers} onClick={showFollowers}>
+              {loading ? (
+                <Skeleton width={30} height={24} />
+              ) : (
+                <>
+                  <b>{formatFollowers(user.followers || 0)}</b> Followers
+                </>
+              )}
+            </div>
+            <div className={styles.followers} onClick={showFollowings}>
+              {loading ? (
+                <Skeleton width={30} height={24} />
+              ) : (
+                <>
+                  <b>{formatFollowers(user.followings || 0)}</b> Following
+                </>
+              )}
+            </div>
+          </div>
         </div>
-        <div className={styles.bio}>{user.bio || ''}</div>
       </div>
       <div className={styles.content}>
-        <div className={styles.contentHeader}>
-          {tabs.map((t, idx) => (
-            <div
-              key={idx}
-              className={cx(styles.tab, idx === tab && styles.selected)}
-              onClick={() => goToTab(idx)}
-            >
-              {t}
-            </div>
-          ))}
-          <div className={styles.tab} onClick={showFollowers}>
-            Followers (
-            {loading ? (
-              <Skeleton width={30} height={24} />
-            ) : (
-              formatFollowers(user.followers || 0)
-            )}
-            )
-          </div>
-          <div className={styles.tab} onClick={showFollowings}>
-            Followings (
-            {loading ? (
-              <Skeleton width={30} height={24} />
-            ) : (
-              formatFollowers(user.followings || 0)
-            )}
-            )
-          </div>
+        <div className={styles.contentSidebar}>
+          {tabs.map((_, idx) => renderTab(idx))}
         </div>
         <div className={styles.contentBody} onScroll={handleScroll}>
           {tab === 0 ? (
