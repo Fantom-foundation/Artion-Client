@@ -3,11 +3,11 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useHistory } from 'react-router';
 import cx from 'classnames';
 import axios from 'axios';
+import { withStyles } from '@material-ui/core/styles';
 import { Menu, MenuItem } from '@material-ui/core';
 import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
-import PublishIcon from '@material-ui/icons/Publish';
 import CloseIcon from '@material-ui/icons/Close';
 import HelpOutlineIcon from '@material-ui/icons/HelpOutline';
 import InfoIcon from '@material-ui/icons/Info';
@@ -30,8 +30,20 @@ import twitterIcon from 'assets/svgs/twitter.svg';
 import instagramIcon from 'assets/svgs/instagram.svg';
 import mediumIcon from 'assets/svgs/medium.svg';
 import nftIcon from 'assets/svgs/nft_active.svg';
+import uploadIcon from 'assets/imgs/upload.png';
+import plusIcon from 'assets/svgs/plus.svg';
+import closeIcon from 'assets/svgs/close.svg';
 
 import styles from './styles.module.scss';
+
+const CustomRadio = withStyles({
+  root: {
+    '&$checked': {
+      color: '#1969FF',
+    },
+  },
+  checked: {},
+})(props => <Radio color="default" {...props} />);
 
 const CollectionCreate = ({ isRegister }) => {
   const dispatch = useDispatch();
@@ -102,6 +114,10 @@ const CollectionCreate = ({ isRegister }) => {
   const selectedCategories = Categories.filter(
     cat => selected.indexOf(cat.id) > -1
   );
+
+  const removeImage = () => {
+    setLogo(null);
+  };
 
   const handleFileSelect = e => {
     if (e.target.files.length > 0) {
@@ -322,7 +338,7 @@ const CollectionCreate = ({ isRegister }) => {
         : createNFTContract)(
         name,
         symbol,
-        ethers.utils.parseEther('50'),
+        ethers.utils.parseEther('10'),
         account
       );
       const res = await tx.wait();
@@ -457,20 +473,27 @@ const CollectionCreate = ({ isRegister }) => {
 
         {!isRegister && (
           <div className={styles.inputGroup}>
-            <div className={styles.inputTitle}>Your Own Collection *</div>
             <RadioGroup
               className={styles.inputWrapper}
               value={JSON.stringify(isPrivate)}
               onChange={e => setIsPrivate(e.currentTarget.value === 'true')}
             >
               <FormControlLabel
+                classes={{
+                  root: cx(styles.option, !isPrivate && styles.active),
+                  label: styles.optionLabel,
+                }}
                 value="false"
-                control={<Radio color="primary" />}
+                control={<CustomRadio color="primary" />}
                 label="Allow others mint NFTs under my collection"
               />
               <FormControlLabel
+                classes={{
+                  root: cx(styles.option, isPrivate && styles.active),
+                  label: styles.optionLabel,
+                }}
                 value="true"
-                control={<Radio color="primary" />}
+                control={<CustomRadio color="primary" />}
                 label="Only I can mint NFTs under my collection"
               />
             </RadioGroup>
@@ -484,26 +507,43 @@ const CollectionCreate = ({ isRegister }) => {
           </div>
           <div className={styles.inputWrapper}>
             <div className={styles.logoUploadBox}>
-              {logo && <img src={logo} />}
-              <div
-                className={styles.uploadOverlay}
-                onClick={() => inputRef.current?.click()}
-              >
-                <input
-                  ref={inputRef}
-                  type="file"
-                  accept="image/*"
-                  hidden
-                  onChange={handleFileSelect}
-                />
-                <PublishIcon className={styles.uploadIcon} />
-              </div>
+              {logo ? (
+                <>
+                  <img src={logo} />
+                  <div className={styles.removeOverlay}>
+                    <div className={styles.removeIcon} onClick={removeImage}>
+                      <img src={closeIcon} />
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <div
+                  className={styles.uploadOverlay}
+                  onClick={() => inputRef.current?.click()}
+                >
+                  <input
+                    ref={inputRef}
+                    type="file"
+                    accept="image/*"
+                    hidden
+                    onChange={handleFileSelect}
+                  />
+                  <div className={styles.upload}>
+                    <div className={styles.uploadInner}>
+                      <img src={uploadIcon} />
+                    </div>
+                    <div className={styles.plusIcon}>
+                      <img src={plusIcon} />
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
 
         <div className={styles.inputGroup}>
-          <div className={styles.inputTitle1}>Name *</div>
+          <div className={styles.inputTitle}>Name *</div>
           <div className={styles.inputWrapper}>
             <input
               className={cx(styles.input, nameError && styles.hasError)}
@@ -520,7 +560,7 @@ const CollectionCreate = ({ isRegister }) => {
 
         {!isRegister && (
           <div className={styles.inputGroup}>
-            <div className={styles.inputTitle1}>Symbol *</div>
+            <div className={styles.inputTitle}>Symbol *</div>
             <div className={styles.inputWrapper}>
               <input
                 className={cx(styles.input, symbolError && styles.hasError)}
@@ -537,7 +577,7 @@ const CollectionCreate = ({ isRegister }) => {
         )}
 
         <div className={styles.inputGroup}>
-          <div className={styles.inputTitle1}>Description *</div>
+          <div className={styles.inputTitle}>Description *</div>
           <div className={styles.inputWrapper}>
             <textarea
               className={cx(
@@ -712,7 +752,7 @@ const CollectionCreate = ({ isRegister }) => {
         </div>
 
         <div className={styles.inputGroup}>
-          <div className={styles.inputTitle1}>
+          <div className={styles.inputTitle}>
             Contact Email *&nbsp;
             <BootstrapTooltip
               title="We will use this email to notify you about your collection application. This will not be shared with others."
@@ -765,7 +805,7 @@ const CollectionCreate = ({ isRegister }) => {
         {!isRegister && (
           <div className={styles.fee}>
             <InfoIcon />
-            &nbsp;50 FTMs are charged to create a new collection.
+            &nbsp;10 FTMs are charged to create a new collection.
           </div>
         )}
       </div>
