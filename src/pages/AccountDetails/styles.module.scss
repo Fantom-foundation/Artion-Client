@@ -13,16 +13,15 @@
   width: 100%;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  margin-bottom: 40px;
+  margin-bottom: 17px;
   position: relative;
 }
 
 .banner {
   width: 100%;
-  height: 200px;
+  height: 250px;
   position: relative;
-  margin-bottom: -30px;
+  margin-bottom: -86px;
 }
 
 .bannerImg {
@@ -39,11 +38,11 @@
 
 .editBanner {
   position: absolute;
-  top: 16px;
-  right: 16px;
-  width: 40px;
-  height: 40px;
-  border-radius: 6px;
+  top: 32px;
+  right: 32px;
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
   background-color: #FFF;
   display: flex;
   align-items: center;
@@ -56,34 +55,49 @@
 }
 
 .editIcon {
-  width: 24px;
-  height: 24px;
-  color: rgb(138, 147, 155);
+  width: 20px;
+  height: 20px;
+  color: #A2A2AD;
+}
+
+.buttonsWrapper {
+  position: absolute;
+  top: 282px;
+  right: 32px;
+  display: flex;
+  align-items: center;
 }
 
 .settings {
-  position: absolute;
-  top: 216px;
-  right: 16px;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  border: 1px solid #EAEAF1;
+  box-sizing: border-box;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  background-color: rgba(36, 121, 250, .1);
+  margin-right: 17px;
+
+  &:last-child {
+    margin-right: 0;
+  }
 }
 
 .settingsIcon {
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
+}
+
+.wrapper {
+  margin-left: 80px;
 }
 
 .avatarWrapper {
-  width: 150px;
-  height: 150px;
-  border-radius: 10px;
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
   border: 6px solid #FFF;
   z-index: 1;
   overflow: hidden;
@@ -94,21 +108,20 @@
   position: absolute;
   top: 0;
   left: 0;
-  width: 150px;
-  height: 150px;
+  width: 160px;
+  height: 160px;
 }
 
 .usernameWrapper {
-  margin-top: 16px;
+  margin-top: 26px;
   display: flex;
   align-items: center;
 }
 
 .username {
-  margin-right: 16px;
-  font-size: 24px;
-  font-weight: 600;
-  color: #3D3D3D;
+  font-size: 32px;
+  font-weight: 700;
+  color: #121223;
 }
 
 .followBtn {
@@ -126,32 +139,62 @@
   user-select: none;
 }
 
-.addressWrapper {
-  margin-top: 8px;
+.bottomWrapper {
+  margin-top: 6px;
   display: flex;
   align-items: center;
+}
 
-  img {
-    margin-left: 6px;
-    cursor: pointer;
-  }
+.addressWrapper {
+  width: fit-content;
+  height: 40px;
+  padding-left: 16px;
+  padding-right: 4px;
+  background-color: #FAFAFB;
+  display: flex;
+  align-items: center;
+  border-radius: 30px;
 }
 
 .address {
-  font-size: 18px;
-  font-weight: 500;
-  color: rgba(0, 0, 0, .6);
+  font-size: 14px;
+  font-weight: 700;
+  color: #1969FF;
+}
+
+.copyIcon {
+  width: 32px;
+  height: 32px;
+  border-radius: 16px;
+  background-color: #1969FF;
+  margin-left: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  img {
+    width: 16px;
+    height: 16px;
+  }
 }
 
 .tooltip {
   font-size: 16px;
 }
 
+.followers {
+  margin-left: 56px;
+  font-size: 16px;
+  font-weight: 400;
+  color: #121223;
+  cursor: pointer;
+}
+
 .bio {
   width: 90%;
   max-width: 700px;
-  text-align: center;
-  margin-top: 8px;
+  margin-top: 6px;
   font-size: 18px;
   font-weight: 400;
   color: rgba(0, 0, 0, .6);
@@ -159,32 +202,34 @@
 
 .content {
   width: 100%;
-  max-height: calc(100vh - 100px);
+  max-height: calc(100vh - 80px);
   box-sizing: border-box;
-  padding: 0 40px 40px;
+  border: 1px solid #EAEAF1;
   display: flex;
-  flex-direction: column;
 }
 
-.contentHeader {
+.contentSidebar {
   margin-bottom: 24px;
-  width: 100%;
+  width: 288px;
+  flex: 0 0 288px;
+  border-right: 1px solid #EAEAF1;
+  box-sizing: border-box;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  flex-wrap: wrap;
 }
 
 .contentBody {
-  width: 100%;
+  flex-grow: 1;
   height: fit-content;
+  padding: 24px 32px 32px;
+  box-sizing: border-box;
   max-height: 100%;
   overflow-y: auto;
   overflow-x: auto;
 }
 
 .tab {
-  margin-right: 40px;
-  margin-bottom: 16px;
   font-weight: 700;
   font-size: 22px;
   line-height: 27px;
