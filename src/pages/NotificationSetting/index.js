@@ -18,86 +18,126 @@ import styles from './styles.module.scss';
 const selfSettings = [
   {
     value: 'sBundleBuy',
-    label: 'Bundle Purchased',
+    title: 'Bundle Purchased',
+    description:
+      'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.',
   },
   {
     value: 'sBundleSell',
-    label: 'Bundle Sold',
+    title: 'Bundle Sold',
+    description:
+      'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.',
   },
   {
     value: 'sBundleOffer',
-    label: 'Get a new offer for your bundle',
+    title: 'Get a new offer for your bundle',
+    description:
+      'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.',
   },
   {
     value: 'sBundleOfferCancel',
-    label: 'An offer to you bundle called off',
+    title: 'An offer to you bundle called off',
+    description:
+      'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.',
   },
   {
     value: 'sNftAuctionPrice',
-    label: "Your bid's Auction Price update",
+    title: "Your bid's Auction Price update",
+    description:
+      'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.',
   },
   {
     value: 'sNftBidToAuction',
-    label: 'A bid to your NFT auction',
+    title: 'A bid to your NFT auction',
+    description:
+      'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.',
   },
   {
     value: 'sNftBidToAuctionCancel',
-    label: 'A bid to your NFT called off',
+    title: 'A bid to your NFT called off',
+    description:
+      'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.',
   },
   {
     value: 'sAuctionWin',
-    label: 'You won the auction',
+    title: 'You won the auction',
+    description:
+      'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.',
   },
   {
     value: 'sAuctionOfBidCancel',
-    label: "Your bid's auction called off",
+    title: "Your bid's auction called off",
+    description:
+      'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.',
   },
   {
     value: 'sNftSell',
-    label: 'NFT Sold',
+    title: 'NFT Sold',
+    description:
+      'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.',
   },
   {
     value: 'sNftBuy',
-    label: 'NFT Purchased',
+    title: 'NFT Purchased',
+    description:
+      'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.',
   },
   {
     value: 'sNftOffer',
-    label: 'Get a new offer for your NFT',
+    title: 'Get a new offer for your NFT',
+    description:
+      'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.',
   },
   {
     value: 'sNftOfferCancel',
-    label: 'An offer to your NFT called off',
+    title: 'An offer to your NFT called off',
+    description:
+      'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.',
   },
 ];
 
 const followerSettings = [
   {
     value: 'fBundleCreation',
-    label: 'New bundle creation by follower',
+    title: 'New bundle creation by follower',
+    description:
+      'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.',
   },
   {
     value: 'fBundleList',
-    label: 'Bundle Listing by follower',
+    title: 'Bundle Listing by follower',
+    description:
+      'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.',
   },
   {
     value: 'fBundlePrice',
-    label: 'Bundle Price Update by follower',
+    title: 'Bundle Price Update by follower',
+    description:
+      'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.',
   },
   {
     value: 'fNftAuctionPrice',
-    label: 'NFT Auction Price update by follower',
+    title: 'NFT Auction Price update by follower',
+    description:
+      'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.',
   },
   {
     value: 'fNftList',
-    label: 'NFT Listing by follower',
+    title: 'NFT Listing by follower',
+    description:
+      'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.',
   },
   {
     value: 'fNftAuction',
-    label: 'New NFT Auction',
+    title: 'New NFT Auction',
+    description:
+      'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.',
   },
   {
     value: 'fNftPrice',
-    label: 'NFT Price Update by follower',
+    title: 'NFT Price Update by follower',
+    description:
+      'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.',
   },
 ];
 
@@ -110,9 +150,16 @@ const CustomCheckbox = withStyles({
   checked: {},
 })(props => <Checkbox color="default" {...props} />);
 
-const SettingOption = ({ name, label, checked, disabled, onChange }) => (
+const SettingOption = ({
+  name,
+  title,
+  description,
+  checked,
+  disabled,
+  onChange,
+}) => (
   <FormControlLabel
-    className={cx(styles.formControl, checked && styles.selected)}
+    classes={{ root: styles.optionPanel }}
     control={
       <CustomCheckbox
         checked={checked}
@@ -121,7 +168,12 @@ const SettingOption = ({ name, label, checked, disabled, onChange }) => (
         name={name}
       />
     }
-    label={label}
+    label={
+      <div className={styles.option}>
+        <div className={styles.optionTitle}>{title}</div>
+        <div className={styles.optionDesc}>{description}</div>
+      </div>
+    }
   />
 );
 
@@ -202,61 +254,65 @@ const NotificationSetting = () => {
       <div className={styles.inner}>
         <div className={styles.title}>Notification Settings</div>
 
-        <div className={styles.group}>
-          <FormControlLabel
-            className={cx(styles.formControl, styles.selected)}
-            classes={{ label: styles.groupTitle }}
-            control={
-              <CustomCheckbox
-                checked={getSetting('fNotification')}
-                onChange={handleChange}
-                name="fNotification"
-              />
-            }
-            label="Your Activity Notifications"
-          />
-          <div className={styles.groupOptions}>
-            {selfSettings.map((option, idx) => (
-              <SettingOption
-                key={idx}
-                name={option.value}
-                label={option.label}
-                disabled={!getSetting('fNotification')}
-                checked={
-                  getSetting('fNotification') && getSetting(option.value)
-                }
-                onChange={handleChange}
-              />
-            ))}
+        <div className={styles.body}>
+          <div className={styles.group}>
+            <FormControlLabel
+              className={cx(styles.formControl, styles.selected)}
+              classes={{ label: styles.groupTitle }}
+              control={
+                <CustomCheckbox
+                  checked={getSetting('fNotification')}
+                  onChange={handleChange}
+                  name="fNotification"
+                />
+              }
+              label="Your Activity Notifications"
+            />
+            <div className={styles.groupOptions}>
+              {selfSettings.map((option, idx) => (
+                <SettingOption
+                  key={idx}
+                  name={option.value}
+                  title={option.title}
+                  description={option.description}
+                  disabled={!getSetting('fNotification')}
+                  checked={
+                    getSetting('fNotification') && getSetting(option.value)
+                  }
+                  onChange={handleChange}
+                />
+              ))}
+            </div>
           </div>
-        </div>
 
-        <div className={styles.group}>
-          <FormControlLabel
-            className={cx(styles.formControl, styles.selected)}
-            classes={{ label: styles.groupTitle }}
-            control={
-              <CustomCheckbox
-                checked={getSetting('sNotification')}
-                onChange={handleChange}
-                name="sNotification"
-              />
-            }
-            label="Follower Activity Notifications"
-          />
-          <div className={styles.groupOptions}>
-            {followerSettings.map((option, idx) => (
-              <SettingOption
-                key={idx}
-                name={option.value}
-                label={option.label}
-                disabled={!getSetting('sNotification')}
-                checked={
-                  getSetting('sNotification') && getSetting(option.value)
-                }
-                onChange={handleChange}
-              />
-            ))}
+          <div className={styles.group}>
+            <FormControlLabel
+              className={cx(styles.formControl, styles.selected)}
+              classes={{ label: styles.groupTitle }}
+              control={
+                <CustomCheckbox
+                  checked={getSetting('sNotification')}
+                  onChange={handleChange}
+                  name="sNotification"
+                />
+              }
+              label="Follower Activity Notifications"
+            />
+            <div className={styles.groupOptions}>
+              {followerSettings.map((option, idx) => (
+                <SettingOption
+                  key={idx}
+                  name={option.value}
+                  title={option.title}
+                  description={option.description}
+                  disabled={!getSetting('sNotification')}
+                  checked={
+                    getSetting('sNotification') && getSetting(option.value)
+                  }
+                  onChange={handleChange}
+                />
+              ))}
+            </div>
           </div>
         </div>
 

@@ -11,25 +11,70 @@
 .inner {
   width: 100%;
   max-width: 600px;
-  margin-left: 100px;
-  padding: 40px 0;
+  margin-left: 80px;
+  padding: 54px 0;
   box-sizing: border-box;
 }
 
 .title {
-  font-size: 28px;
-  font-weight: 900;
-  color: #3D3D3D;
+  font-weight: 700;
+  font-size: 32px;
+  line-height: 39px;
+  letter-spacing: -0.02em;
+  color: #121223;
+}
+
+.body {
+  margin-top: 50px;
+  display: flex;
 }
 
 .group {
-  margin-top: 40px;
+  width: 448px;
+  flex: 0 0 448px;
+  margin-right: 120px;
+  color: #121223;
+
+  &:last-child {
+    margin-right: 0;
+  }
 }
 
 .groupOptions {
-  padding-left: 24px;
   display: flex;
   flex-direction: column;
+  border: 1px solid #EAEAF1;
+  border-radius: 10px;
+  margin-top: 19px;
+}
+
+.optionPanel {
+  padding: 24px 12px;
+  margin: 0;
+  border-bottom: 1px solid #EAEAF1;
+  align-items: flex-start;
+
+  &:last-child {
+    border-bottom: 0;
+  }
+}
+
+.option {
+  margin-left: 5px;
+}
+
+.optionTitle {
+  font-size: 14px;
+  line-height: 17px;
+  font-weight: 700;
+}
+
+.optionDesc {
+  font-size: 12px;
+  line-height: 140%;
+  font-weight: 400;
+  color: #A2A2AD;
+  margin-top: 7px;
 }
 
 .groupTitle {
