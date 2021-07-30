@@ -5,7 +5,6 @@ import cx from 'classnames';
 import Skeleton from 'react-loading-skeleton';
 import Typography from '@material-ui/core/Typography';
 import {
-  Add as AddIcon,
   FavoriteBorder as FavoriteBorderIcon,
   Favorite as FavoriteIcon,
 } from '@material-ui/icons';
@@ -18,6 +17,8 @@ import axios from 'axios';
 import SuspenseImg from 'components/SuspenseImg';
 import { formatNumber } from 'utils';
 import { useApi } from 'api';
+
+import iconPlus from 'assets/svgs/plus.svg';
 
 import styles from './styles.module.scss';
 
@@ -287,7 +288,10 @@ const BaseCard = ({ item, loading, style, create, onCreate, onLike }) => {
       <div className={styles.card}>
         {create ? (
           <div className={styles.createBtn}>
-            <AddIcon className={styles.createIcon} />
+            <div className={styles.createIcon}>
+              <img src={iconPlus} />
+            </div>
+            <div className={styles.createLabel}>Create Bundle</div>
           </div>
         ) : item ? (
           <Link

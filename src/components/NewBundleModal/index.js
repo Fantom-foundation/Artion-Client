@@ -15,6 +15,8 @@ import { useBundleSalesContract, useNFTContract } from 'contracts';
 import { Contracts } from 'constants/networks';
 import toast from 'utils/toast';
 
+import closeIcon from 'assets/svgs/close.svg';
+
 import styles from './styles.module.scss';
 
 const NFTItem = ({ item, selected, onClick }) => {
@@ -277,64 +279,67 @@ const NewBundleModal = ({ visible, onClose, onCreateSuccess = () => {} }) => {
     }
   };
 
-  const onCancel = () => {
-    closeModal();
-  };
-
   if (!visible) return null;
 
   return (
     <div className={styles.root} ref={rootRef}>
       <Modal open className={styles.modal} container={() => rootRef.current}>
         <div className={styles.paper}>
-          <h2 className={styles.title}>Create Bundle</h2>
-          <div className={styles.formGroup}>
-            <p className={styles.formLabel}>Name</p>
-            <div className={styles.formInputCont}>
-              <input
-                type="text"
-                className={styles.formInput}
-                maxLength={20}
-                placeholder="Bundle Name"
-                value={name}
-                onChange={e => setName(e.target.value)}
-                disabled={creating}
-              />
+          <div className={styles.header}>
+            <div className={styles.title}>Create Bundle</div>
+            <div className={styles.closeButton} onClick={onClose}>
+              <img src={closeIcon} />
             </div>
-            <div className={styles.lengthIndicator}>{name.length}/20</div>
           </div>
-          <div className={styles.formGroup}>
-            <div className={styles.formLabel}>Price (FTM)</div>
-            <div className={styles.formInputCont}>
-              <input
-                className={styles.formInput}
-                placeholder="0.00"
-                value={price}
-                onChange={e =>
-                  setPrice(isNaN(e.target.value) ? price : e.target.value)
-                }
-                disabled={creating}
-              />
-              <div className={styles.usdPrice}>
-                ${((parseFloat(price) || 0) * ftmPrice).toFixed(2)}
+          <div className={styles.body}>
+            <div className={styles.formGroup}>
+              <p className={styles.formLabel}>Name</p>
+              <div className={styles.formInputCont}>
+                <input
+                  type="text"
+                  className={styles.formInput}
+                  maxLength={20}
+                  placeholder="Bundle Name"
+                  value={name}
+                  onChange={e => setName(e.target.value)}
+                  disabled={creating}
+                />
+              </div>
+              <div className={styles.lengthIndicator}>{name.length}/20</div>
+            </div>
+            <div className={styles.formGroup}>
+              <div className={styles.formLabel}>Price (FTM)</div>
+              <div className={styles.formInputCont}>
+                <input
+                  className={styles.formInput}
+                  placeholder="0.00"
+                  value={price}
+                  onChange={e =>
+                    setPrice(isNaN(e.target.value) ? price : e.target.value)
+                  }
+                  disabled={creating}
+                />
+                <div className={styles.usdPrice}>
+                  ${((parseFloat(price) || 0) * ftmPrice).toFixed(2)}
+                </div>
               </div>
             </div>
-          </div>
-          <div className={styles.formGroup}>
-            <p className={styles.formLabel}>Items</p>
-            <div className={styles.itemList} onScroll={handleScroll}>
-              {tokens.current.map((item, idx) => (
-                <NFTItem
-                  key={idx}
-                  item={item}
-                  onClick={() => handleItemClick(idx)}
-                  selected={selected.current.indexOf(idx) > -1}
-                />
-              ))}
-              {fetching &&
-                new Array(5)
-                  .fill(null)
-                  .map((item, idx) => <NFTItem key={idx} item={item} />)}
+            <div className={styles.formGroup}>
+              <p className={styles.formLabel}>Items</p>
+              <div className={styles.itemList} onScroll={handleScroll}>
+                {tokens.current.map((item, idx) => (
+                  <NFTItem
+                    key={idx}
+                    item={item}
+                    onClick={() => handleItemClick(idx)}
+                    selected={selected.current.indexOf(idx) > -1}
+                  />
+                ))}
+                {fetching &&
+                  new Array(5)
+                    .fill(null)
+                    .map((item, idx) => <NFTItem key={idx} item={item} />)}
+              </div>
             </div>
           </div>
 
@@ -361,17 +366,6 @@ const NewBundleModal = ({ visible, onClose, onCreateSuccess = () => {} }) => {
               ) : (
                 'Approve Items'
               )}
-            </div>
-
-            <div
-              className={cx(
-                styles.button,
-                styles.cancel,
-                creating && styles.disabled
-              )}
-              onClick={!creating ? onCancel : null}
-            >
-              Cancel
             </div>
           </div>
         </div>
