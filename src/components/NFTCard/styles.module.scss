@@ -69,14 +69,30 @@
   width: 100%;
   height: 100%;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
 }
 
 .createIcon {
-  width: 100px !important;
-  height: 100px !important;
-  color: rgba(0, 0, 0, .4);
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background-color: #1969FF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  img {
+    width: 12px;
+  }
+}
+
+.createLabel {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1969FF;
+  margin-top: 21px;
 }
 
 .link {
