@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useParams, Link, Redirect } from 'react-router-dom';
 import cx from 'classnames';
 import { Edit as EditIcon } from '@material-ui/icons';
-import Tooltip from '@material-ui/core/Tooltip';
+import { Tooltip, Menu, MenuItem } from '@material-ui/core';
 import { useWeb3React } from '@web3-react/core';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import Skeleton from 'react-loading-skeleton';
@@ -24,6 +24,9 @@ import CollectionsActions from 'actions/collections.actions';
 import iconCopy from 'assets/svgs/copy.svg';
 import iconSettings from 'assets/svgs/settings.svg';
 import iconShare from 'assets/svgs/share.svg';
+import iconArtion from 'assets/svgs/logo_small_blue.svg';
+import iconFacebook from 'assets/imgs/facebook.png';
+import iconTwitter from 'assets/svgs/twitter_blue.svg';
 import IconList from 'assets/icons/iconList';
 import IconBundle from 'assets/icons/iconBundle';
 import IconHeart from 'assets/icons/iconHeart';
@@ -62,6 +65,7 @@ const AccountDetails = () => {
 
   const fileInput = useRef();
 
+  const [anchorEl, setAnchorEl] = useState(null);
   const [prevUID, setPrevUID] = useState(null);
   const [bundleModalVisible, setBundleModalVisible] = useState(false);
   const [followingsModalVisible, setFollowingsModalVisible] = useState(false);
@@ -282,6 +286,31 @@ const AccountDetails = () => {
     } else {
       getOffers();
     }
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleCopyLink = () => {
+    handleClose();
+    toast('success', 'Link copied to clipboard!');
+  };
+
+  const handleShareOnFacebook = () => {
+    handleClose();
+    window.open(
+      `https://www.facebook.com/sharer/sharer.php?u=${window.location.href}`,
+      '_blank'
+    );
+  };
+
+  const handleShareToTwitter = () => {
+    handleClose();
+    window.open(
+      `https://twitter.com/intent/tweet?text=Check%20out%20this%20account%20on%20Artion&url=${window.location.href}`,
+      '_blank'
+    );
   };
 
   const goToTab = _tab => {
@@ -514,7 +543,10 @@ const AccountDetails = () => {
               <img src={iconSettings} className={styles.settingsIcon} />
             </div>
           )}
-          <div className={styles.settings}>
+          <div
+            className={styles.settings}
+            onClick={e => setAnchorEl(e.currentTarget)}
+          >
             <img src={iconShare} className={styles.settingsIcon} />
           </div>
         </div>
@@ -797,6 +829,35 @@ const AccountDetails = () => {
           )}
         </div>
       </div>
+      <Menu
+        id="simple-menu"
+        anchorEl={anchorEl}
+        keepMounted
+        open={Boolean(anchorEl)}
+        onClose={handleClose}
+        classes={{ paper: styles.shareMenu, list: styles.shareMenuList }}
+      >
+        <CopyToClipboard text={window.location.href} onCopy={handleCopyLink}>
+          <MenuItem classes={{ root: styles.menuItem }}>
+            <img src={iconArtion} />
+            Copy Link
+          </MenuItem>
+        </CopyToClipboard>
+        <MenuItem
+          classes={{ root: styles.menuItem }}
+          onClick={handleShareOnFacebook}
+        >
+          <img src={iconFacebook} />
+          Share on Facebook
+        </MenuItem>
+        <MenuItem
+          classes={{ root: styles.menuItem }}
+          onClick={handleShareToTwitter}
+        >
+          <img src={iconTwitter} />
+          Share to Twitter
+        </MenuItem>
+      </Menu>
       <NewBundleModal
         visible={bundleModalVisible}
         onClose={() => setBundleModalVisible(false)}
