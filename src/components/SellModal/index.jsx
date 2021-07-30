@@ -62,6 +62,7 @@ const SellModal = ({
     <Modal
       visible={visible}
       title={startPrice > 0 ? 'Update Your Listing' : 'Sell Your Item'}
+      onClose={onClose}
       submitDisabled={
         contractApproving ||
         confirming ||
@@ -89,8 +90,6 @@ const SellModal = ({
             : null
           : approveContract()
       }
-      cancelDisabled={contractApproving || confirming}
-      onCancel={!(contractApproving || confirming) ? onClose : null}
     >
       <div className={styles.formGroup}>
         <div className={styles.formLabel}>Price (FTM)</div>

@@ -62,6 +62,7 @@ const AuctionModal = ({
     <Modal
       visible={visible}
       title={auction ? 'Update Auction' : 'Start Auction'}
+      onClose={onClose}
       submitDisabled={
         contractApproving || confirming || (contractApproved && !validateInput)
       }
@@ -87,8 +88,6 @@ const AuctionModal = ({
             : null
           : approveContract()
       }
-      cancelDisabled={contractApproving || confirming}
-      onCancel={!(contractApproving || confirming) ? onClose : null}
     >
       <div className={styles.formGroup}>
         <div className={styles.formLabel}>Reserve Price (FTM)</div>

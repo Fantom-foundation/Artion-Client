@@ -33,13 +33,12 @@ const BidModal = ({
     <Modal
       visible={visible}
       title="Place Bid"
+      onClose={onClose}
       submitDisabled={confirming || !validateInput()}
       submitLabel={confirming ? <ClipLoader color="#FFF" size={16} /> : 'Place'}
       onSubmit={() =>
         !confirming && validateInput() ? onPlaceBid(price) : null
       }
-      cancelDisabled={confirming}
-      onCancel={!confirming ? onClose : null}
     >
       <div className={styles.formGroup}>
         <div className={styles.formLabel}>Price (FTM)</div>

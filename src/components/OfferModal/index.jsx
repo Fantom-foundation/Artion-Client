@@ -63,6 +63,7 @@ const OfferModal = ({
     <Modal
       visible={visible}
       title="Place your offer"
+      onClose={onClose}
       submitDisabled={confirming || !validateInput()}
       submitLabel={
         confirming ? <ClipLoader color="#FFF" size={16} /> : 'Place Offer'
@@ -70,8 +71,6 @@ const OfferModal = ({
       onSubmit={() =>
         !confirming && validateInput() ? handleMakeOffer() : null
       }
-      cancelDisabled={confirming}
-      onCancel={!confirming ? onClose : null}
     >
       <div className={styles.formGroup}>
         <div className={styles.formLabel}>Price (wFTM)</div>

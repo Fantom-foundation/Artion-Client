@@ -31,16 +31,18 @@
 
 .symbol {
   font-weight: 400;
-  font-size: 22px;
-  line-height: 26.8px;
-  margin-bottom: 7px;
+  font-size: 18px;
+  letter-spacing: -0.2px;
+  color: #121223;
+  margin-bottom: 11px;
+  margin-left: 10px;
 }
 
 .swapBoxInner {
   display: flex;
   align-items: center;
   border-radius: 10px;
-  border: 2px solid rgba(0, 0, 0, 0.1);
+  border: 1px solid #EAEAF1;
 }
 
 .rightBox {
@@ -85,7 +87,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border-left: 1.5px solid rgba(0, 0, 0, 0.1);
+  border-left: 1px solid #EAEAF1;
   font-weight: 500;
   font-size: 16px;
   color: rgba(0, 0, 0, 0.4);
@@ -99,6 +101,6 @@
   .rightBox {
     width: 100%;
     flex: 0 0 50px;
-    border-top: 1.5px solid rgba(0, 0, 0, 0.1);
+    border-top: 1px solid #EAEAF1;
   }
 }

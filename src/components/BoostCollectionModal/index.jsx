@@ -38,11 +38,10 @@ const BoostCollectionModal = ({ visible, onClose }) => {
     <Modal
       visible={visible}
       title="Boost Collection"
+      onClose={onClose}
       submitDisabled={boosting}
       submitLabel={boosting ? <ClipLoader color="#FFF" size={16} /> : 'Boost'}
       onSubmit={!boosting ? () => handleBoostCollection() : null}
-      cancelDisabled={boosting}
-      onCancel={!boosting ? onClose : null}
     >
       <div className={styles.formGroup}>
         <div className={styles.formLabel}>Contract Address</div>

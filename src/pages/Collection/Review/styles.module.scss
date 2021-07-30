@@ -108,7 +108,7 @@
   border-radius: 10px;
   border: none;
   outline: none;
-  border: 2px solid rgba(0, 0, 0, .2);
+  border: 1px solid #EAEAF1;
 
   &:focus {
     box-shadow: 0 0 8px rgba(0, 0, 0, 0.25);
@@ -127,14 +127,14 @@
 }
 
 .categoryButton {
-  flex: 0 0 200px;
-  height: 56px;
+  flex: 0 0 120px;
+  height: 48px;
   padding: 8px 12px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   font-size: 16px;
-  border: 1.5px solid rgba(0, 0, 0, .4);
+  border: 1px solid #EAEAF1;
   box-sizing: border-box;
   border-radius: 8px;
   cursor: pointer;
@@ -166,8 +166,8 @@
 }
 
 .selectedCategory {
-  flex: 0 0 200px;
-  height: 56px;
+  flex: 0 0 150px;
+  height: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -176,7 +176,7 @@
   font-size: 16px;
   line-height: 20px;
   box-sizing: border-box;
-  border: 1.5px solid rgba(0, 0, 0, .4);
+  border: 1px solid #EAEAF1;
   border-radius: 8px;
   user-select: none;
   white-space: nowrap;
@@ -197,7 +197,7 @@
   display: flex;
   flex-direction: row;
   height: 56px;
-  border: 2px solid rgba(0, 0, 0, .1);
+  border: 1px solid #EAEAF1;
   box-sizing: border-box;
   margin-top: 16px;
   border-radius: 5px;
@@ -210,7 +210,7 @@
 
 .linkIconWrapper {
   flex: 0 0 76px;
-  border-right: 1.5px solid rgba(0, 0, 0, .1);
+  border-right: 1px solid #EAEAF1;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -255,8 +255,8 @@
 .createButton,
 .rejectButton {
   margin-right: 20px;
-  width: 200px;
-  height: 56px;
+  width: 168px;
+  height: 48px;
   border-radius: 8px;
   background-color: #1969FF !important;
   color: #FFF;
@@ -278,8 +278,8 @@
 
 .cancelButton {
   box-sizing: border-box;
-  width: 200px;
-  height: 56px;
+  width: 168px;
+  height: 48px;
   border-radius: 8px;
   background-color: transparent;
   color: #1969FF;
@@ -316,7 +316,7 @@
 
   .categoryButton,
   .selectedCategory {
-    flex: 0 0 56px;
+    flex: 0 0 48px;
   }
 
   .selectedCategory {

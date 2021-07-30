@@ -61,11 +61,10 @@ const BanItemModal = ({ visible, onClose }) => {
     <Modal
       visible={visible}
       title="Ban NFT ITems"
+      onClose={onClose}
       submitDisabled={banning}
       submitLabel={banning ? <ClipLoader color="#FFF" size={16} /> : 'Ban'}
       onSubmit={!banning ? () => handleBanItem() : null}
-      cancelDisabled={banning}
-      onCancel={!banning && onClose}
     >
       <div className={styles.formGroup}>
         <div className={styles.formLabel}>Contract Address</div>

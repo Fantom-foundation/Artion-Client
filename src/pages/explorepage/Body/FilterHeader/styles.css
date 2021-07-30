@@ -145,10 +145,24 @@
     .filterHeaderRoot {
         padding-right: 0;
         flex-direction: column-reverse;
-        align-items: flex-start;
+        align-items: center;
     }
 
     .filterHeaderLeft {
         margin-top: 6px;
+    }
+
+    .filterSelectGroup {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .filterHeaderFormControl {
+        margin-right: 0 !important;
+        margin-bottom: 12px !important;
+    }
+
+    .filterHeaderFormControl:last-child {
+        margin-bottom: 0 !important;
     }
 }
