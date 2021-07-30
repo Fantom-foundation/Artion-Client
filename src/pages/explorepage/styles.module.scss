@@ -119,7 +119,7 @@
 
 @media only screen and (max-width: 768px) {
   .container {
-    padding-top: 155px;
+    padding-top: 133px;
   }
 
   .sidebar {
@@ -130,8 +130,6 @@
 @media only screen and (max-width: 600px) {
   .container {
     flex-direction: column;
-    padding-left: 30px;
-    padding-right: 30px;
 
     /* width */
     &::-webkit-scrollbar {
@@ -140,7 +138,26 @@
   }
 
   .sidebar {
-    flex-basis: 0;
+    flex-basis: unset;
+    flex-grow: 1;
+  }
+
+  .collapsed {
+    flex-basis: unset;
+    flex-grow: 1;
+
+    .filterList {
+      display: block;
+    }
+  }
+
+  .sidebarHeader {
+    display: none;
+  }
+
+  .filterHeader {
+    padding-left: 24px;
+    padding-right: 24px;
   }
 
   .body {
