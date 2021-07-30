@@ -18,7 +18,6 @@
 .modal {
   max-width: 90%;
   width: 600px;
-  padding: 40px;
   box-sizing: border-box;
   border-radius: 10px;
   background-color: #FFF;
@@ -27,19 +26,27 @@
 }
 
 .header {
-  margin-bottom: 40px;
+  height: 70px;
+  border-bottom: 1px solid #EAEAF1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+}
+
+.body {
+  padding: 40px 24px;
 }
 
 .title {
-  font-weight: 600;
-  font-size: 24px;
-  text-align: center;
+  font-weight: 700;
+  font-size: 18px;
+  color: #121223;
 }
 
 .closeButton {
-  position: absolute;
-  top: 40px;
-  right: 40px;
+  width: 16px;
+  height: 16px;
   cursor: pointer;
 
   img {
@@ -49,16 +56,15 @@
 }
 
 .footer {
-  margin-top: 40px;
+  margin-bottom: 32px;
   display: flex;
   align-items: center;
   justify-content: space-evenly;
 }
 
-.submitButton,
-.cancelButton {
-  min-width: 200px;
-  height: 56px;
+.submitButton {
+  min-width: 168px;
+  height: 48px;
   box-sizing: border-box;
   padding: 0 12px;
   border-radius: 8px;
@@ -81,12 +87,6 @@
   color: #FFF;
 }
 
-.cancelButton {
-  background-color: #FFF;
-  color: #007BFF;
-  border: 1px solid #007BFF;
-}
-
 .disabled {
   cursor: not-allowed;
   box-shadow: none !important;
@@ -106,8 +106,7 @@
     flex-direction: column;
   }
 
-  .listButton,
-  .cancelButton {
+  .listButton {
     width: calc(100% - 48px);
   }
 

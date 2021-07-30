@@ -13,9 +13,6 @@ const Modal = ({
   submitDisabled,
   submitLabel,
   onSubmit,
-  cancelDisabled,
-  cancelLabel,
-  onCancel,
 }) => {
   const handleClick = e => {
     e.preventDefault();
@@ -27,14 +24,12 @@ const Modal = ({
       <div className={styles.modal} onClick={handleClick}>
         <div className={styles.header}>
           <div className={styles.title}>{title}</div>
-          {onClose && (
-            <div className={styles.closeButton} onClick={onClose}>
-              <img src={closeIcon} />
-            </div>
-          )}
+          <div className={styles.closeButton} onClick={onClose}>
+            <img src={closeIcon} />
+          </div>
         </div>
         <div className={styles.body}>{children}</div>
-        {(submitLabel || cancelLabel) && (
+        {submitLabel && (
           <div className={styles.footer}>
             <div
               className={cx(
@@ -44,15 +39,6 @@ const Modal = ({
               onClick={onSubmit}
             >
               {submitLabel}
-            </div>
-            <div
-              className={cx(
-                styles.cancelButton,
-                cancelDisabled && styles.disabled
-              )}
-              onClick={onCancel}
-            >
-              {cancelLabel || 'Cancel'}
             </div>
           </div>
         )}

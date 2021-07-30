@@ -68,6 +68,7 @@ const ModModal = ({ visible, onClose, isAdding }) => {
     <Modal
       visible={visible}
       title={isAdding ? 'Add Moderator' : 'Remove Moderator'}
+      onClose={onClose}
       submitDisabled={adding}
       submitLabel={
         adding ? (
@@ -79,8 +80,6 @@ const ModModal = ({ visible, onClose, isAdding }) => {
         )
       }
       onSubmit={!adding ? () => handleAddMod() : null}
-      cancelDisabled={adding}
-      onCancel={!adding && onClose}
     >
       {isAdding && (
         <div className={styles.formGroup}>

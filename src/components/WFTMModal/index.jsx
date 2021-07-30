@@ -120,6 +120,7 @@ const WFTMModal = ({ visible, onClose }) => {
     <Modal
       visible={visible}
       title="FTM / WFTM Station"
+      onClose={onClose}
       submitDisabled={
         confirming ||
         loading ||
@@ -142,8 +143,6 @@ const WFTMModal = ({ visible, onClose }) => {
         parseFloat(amount) <= (wrap ? balance - 0.01 : wrappedBalance) &&
         handleWrapFTM()
       }
-      cancelDisabled={confirming}
-      onCancel={!confirming && onClose}
     >
       <div className={cx(styles.swapContainer, !wrap && styles.reverse)}>
         <div className={styles.swapBox}>
