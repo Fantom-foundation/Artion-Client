@@ -24,6 +24,10 @@ import CollectionsActions from 'actions/collections.actions';
 import iconCopy from 'assets/svgs/copy.svg';
 import iconSettings from 'assets/svgs/settings.svg';
 import iconShare from 'assets/svgs/share.svg';
+import IconList from 'assets/icons/iconList';
+import IconBundle from 'assets/icons/iconBundle';
+import IconHeart from 'assets/icons/iconHeart';
+import IconClock from 'assets/icons/iconClock';
 
 import styles from './styles.module.scss';
 
@@ -32,19 +36,12 @@ const ONE_HOUR = ONE_MIN * 60;
 const ONE_DAY = ONE_HOUR * 24;
 const ONE_MONTH = ONE_DAY * 30;
 
-const tabs = [
-  'Single Items',
-  'Bundles',
-  'My Likes',
-  'Listings & Offers',
-  'Received Offers',
-];
-
 const AccountDetails = () => {
   const dispatch = useDispatch();
 
   const {
     getUserAccountDetails,
+    getUserFigures,
     fetchCollections,
     fetchTokens,
     updateBanner,
@@ -70,6 +67,8 @@ const AccountDetails = () => {
   const [followingsModalVisible, setFollowingsModalVisible] = useState(false);
   const [followersModalVisible, setFollowersModalVisible] = useState(false);
   const [fetching, setFetching] = useState(false);
+  const [bundleFetching, setBundleFetching] = useState(false);
+  const [favFetching, setFavFetching] = useState(false);
   const tokens = useRef([]);
   const bundles = useRef([]);
   const likes = useRef([]);
@@ -79,6 +78,8 @@ const AccountDetails = () => {
   const [following, setFollowing] = useState(false);
   const [followingInProgress, setFollowingInProgress] = useState(false);
   const [count, setCount] = useState(0);
+  const [bundleCount, setBundleCount] = useState(0);
+  const [favCount, setFavCount] = useState(0);
   const [now, setNow] = useState(new Date());
   const [page, setPage] = useState(0);
   const [bannerHash, setBannerHash] = useState();
@@ -110,11 +111,37 @@ const AccountDetails = () => {
     setLoading(false);
   };
 
-  const fetchNFTs = async step => {
-    if (fetching) return;
-
+  const getFigures = async _account => {
     setFetching(true);
-    setCount(0);
+    setBundleFetching(true);
+    setFavFetching(true);
+
+    try {
+      const {
+        data: { single, bundle, fav },
+      } = await getUserFigures(_account);
+      setCount(single);
+      setBundleCount(bundle);
+      setFavCount(fav);
+    } catch {
+      setCount(0);
+      setBundleCount(0);
+      setFavCount(0);
+    }
+
+    setFetching(false);
+    setBundleFetching(false);
+    setFavFetching(false);
+  };
+
+  const fetchNFTs = async step => {
+    if (tab === 0) {
+      if (fetching) return;
+      setFetching(true);
+    } else {
+      if (bundleFetching) return;
+      setBundleFetching(true);
+    }
 
     try {
       const { data } = await fetchTokens(
@@ -127,29 +154,35 @@ const AccountDetails = () => {
         uid
       );
       setFetching(false);
-      if (tab === 0) tokens.current.push(...data.tokens);
-      else bundles.current.push(...data.tokens);
-      setCount(data.total);
+      setBundleFetching(false);
+
+      if (tab === 0) {
+        tokens.current.push(...data.tokens);
+        setCount(data.total);
+      } else {
+        bundles.current.push(...data.tokens);
+        setBundleCount(data.total);
+      }
       setPage(step);
     } catch {
       setFetching(false);
+      setBundleFetching(false);
     }
   };
 
   const fetchLikes = async step => {
     if (fetching) return;
 
-    setFetching(true);
-    setCount(0);
+    setFavFetching(true);
 
     try {
       const { data } = await getMyLikes(step, uid);
-      setFetching(false);
+      setFavFetching(false);
       likes.current.push(...data.tokens);
-      setCount(data.total);
+      setFavCount(data.total);
       setPage(step);
     } catch {
-      setFetching(false);
+      setFavFetching(false);
     }
   };
 
@@ -159,6 +192,7 @@ const AccountDetails = () => {
     if (prevUID !== uid) {
       setPrevUID(uid);
       getUserDetails(uid);
+      getFigures(uid);
       setTab(0);
       if (tab === 0) {
         init();
@@ -211,8 +245,8 @@ const AccountDetails = () => {
   const loadNextPage = () => {
     if (fetching) return;
     if (tab === 0 && tokens.current.length === count) return;
-    if (tab === 1 && bundles.current.length === count) return;
-    if (tab === 2 && likes.current.length === count) return;
+    if (tab === 1 && bundles.current.length === bundleCount) return;
+    if (tab === 2 && likes.current.length === favCount) return;
 
     if (tab === 0 || tab === 1) {
       fetchNFTs(page + 1);
@@ -237,11 +271,11 @@ const AccountDetails = () => {
       fetchNFTs(0);
     } else if (tab === 1) {
       bundles.current = [];
-      setCount(0);
+      setBundleCount(0);
       fetchNFTs(0);
     } else if (tab === 2) {
       likes.current = [];
-      setCount(0);
+      setFavCount(0);
       fetchLikes(0);
     } else if (tab === 3) {
       getActivity();
@@ -254,7 +288,6 @@ const AccountDetails = () => {
     tokens.current = [];
     bundles.current = [];
     likes.current = [];
-    setCount(0);
     setTab(_tab);
   };
 
@@ -429,13 +462,20 @@ const AccountDetails = () => {
     return <Redirect to="/404" />;
   }
 
-  const renderTab = idx => (
+  const renderTab = (label, Icon, idx, count, countLoading) => (
     <div
-      key={idx}
       className={cx(styles.tab, idx === tab && styles.selected)}
       onClick={() => goToTab(idx)}
     >
-      {tabs[idx]}
+      <Icon className={styles.tabIcon} />
+      <div className={styles.tabLabel}>{label}</div>
+      <div className={styles.tabCount}>
+        {countLoading ? (
+          <Skeleton className={styles.tabCountLoading} width={40} height={22} />
+        ) : (
+          count
+        )}
+      </div>
     </div>
   );
 
@@ -481,7 +521,7 @@ const AccountDetails = () => {
         <div className={styles.wrapper}>
           <div className={styles.avatarWrapper}>
             {loading ? (
-              <Skeleton width={150} height={150} className={styles.avatar} />
+              <Skeleton width={160} height={160} className={styles.avatar} />
             ) : user.imageHash ? (
               <img
                 src={`https://gateway.pinata.cloud/ipfs/${user.imageHash}`}
@@ -523,7 +563,7 @@ const AccountDetails = () => {
           <div className={styles.bottomWrapper}>
             <div className={styles.addressWrapper}>
               {loading ? (
-                <Skeleton width={160} height={20} />
+                <Skeleton width={120} height={20} />
               ) : (
                 <Tooltip
                   title={copied ? 'Copied!' : 'Copy'}
@@ -546,7 +586,7 @@ const AccountDetails = () => {
             </div>
             <div className={styles.followers} onClick={showFollowers}>
               {loading ? (
-                <Skeleton width={30} height={24} />
+                <Skeleton width={100} height={24} />
               ) : (
                 <>
                   <b>{formatFollowers(user.followers || 0)}</b> Followers
@@ -555,7 +595,7 @@ const AccountDetails = () => {
             </div>
             <div className={styles.followers} onClick={showFollowings}>
               {loading ? (
-                <Skeleton width={30} height={24} />
+                <Skeleton width={100} height={24} />
               ) : (
                 <>
                   <b>{formatFollowers(user.followings || 0)}</b> Following
@@ -567,7 +607,17 @@ const AccountDetails = () => {
       </div>
       <div className={styles.content}>
         <div className={styles.contentSidebar}>
-          {tabs.map((_, idx) => renderTab(idx))}
+          <div className={styles.tabsGroup}>
+            <div className={styles.groupTitle}>My Items</div>
+            {renderTab('Single Items', IconList, 0, count, fetching)}
+            {renderTab('Bundles', IconBundle, 1, bundleCount, bundleFetching)}
+            {renderTab('Favorited', IconHeart, 2, favCount, favFetching)}
+          </div>
+          <div className={styles.tabsGroup}>
+            <div className={styles.groupTitle}>Account</div>
+            {renderTab('Activity', IconClock, 3)}
+            {renderTab('Offers', IconList, 4)}
+          </div>
         </div>
         <div className={styles.contentBody} onScroll={handleScroll}>
           {tab === 0 ? (

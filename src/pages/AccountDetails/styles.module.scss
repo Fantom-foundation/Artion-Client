@@ -125,6 +125,7 @@
 }
 
 .followBtn {
+  margin-left: 16px;
   width: 80px;
   height: 26px;
   border-radius: 4px;
@@ -209,7 +210,6 @@
 }
 
 .contentSidebar {
-  margin-bottom: 24px;
   width: 288px;
   flex: 0 0 288px;
   border-right: 1px solid #EAEAF1;
@@ -217,6 +217,25 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+
+.tabsGroup {
+  width: 100%;
+  padding: 35px 35px 16px 32px;
+  box-sizing: border-box;
+  border-bottom: 1px solid #EAEAF1;
+
+  &:last-child {
+    border-bottom: 0;
+  }
+}
+
+.groupTitle {
+  font-size: 14px;
+  line-height: 22px;
+  font-weight: 700;
+  color: #A2A2AD;
+  margin-bottom: 16px;
 }
 
 .contentBody {
@@ -230,23 +249,38 @@
 }
 
 .tab {
-  font-weight: 700;
-  font-size: 22px;
+  margin-left: -32px;
+  margin-right: -35px;
+  padding-left: 32px;
+  padding-right: 35px;
+  height: 48px;
+  font-weight: 400;
+  font-size: 16px;
   line-height: 27px;
-  color: #3D3D3D;
-  opacity: 0.6;
+  color: #A2A2AD;
   border-bottom: 2px solid transparent;
   cursor: pointer;
   user-select: none;
-
-  &:last-child {
-    margin-right: 0;
-  }
+  display: flex;
+  align-items: center;
 
   &.selected {
-    opacity: 1;
-    border-bottom-color: #1652C3;
+    background-color: #FAFAFB;
+    color: #121223;
   }
+}
+
+.tabIcon {
+  margin-right: 16px;
+}
+
+.tabLabel {
+  font-weight: 700;
+  margin-right: auto;
+}
+
+.tabCountLoading {
+  transform: translateY(-4px);
 }
 
 .tableWapper {
@@ -261,10 +295,10 @@
   box-sizing: border-box;
   display: flex;
   align-items: center;
-  font-weight: 500;
-  font-size: 20px;
+  font-weight: 400;
+  font-size: 14px;
   line-height: 20px;
-  color: #3D3D3D;
+  color: #121223;
 }
 
 .activityHeader {
@@ -345,20 +379,79 @@
 
 @media only screen and (max-width: 768px) {
   .container {
-    padding-top: 135px;
+    padding-top: 133px;
+  }
+
+  .content {
+    max-height: calc(100vh - 133px);
+  }
+
+  .contentSidebar {
+    width: 240px;
+    flex: 0 0 240px;
   }
 }
 
 @media only screen and (max-width: 600px) {
-  .content {
-    padding: 0 20px 20px;
-  }
-
-  .contentHeader {
+  .buttonsWrapper {
     flex-direction: column;
   }
 
-  .tab {
+  .settings {
     margin-right: 0;
+    margin-bottom: 16px;
+  }
+
+  .bottomWrapper {
+    flex-direction: column;
+  }
+
+  .wrapper {
+    margin-left: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .bio {
+    text-align: center;
+  }
+
+  .followers {
+    margin-left: 0;
+    margin-top: 16px;
+  }
+
+  .contentSidebar {
+    width: 60px;
+    flex: 0 0 60px;
+  }
+
+  .contentBody {
+    padding: 12px 18px 18px;
+    min-height: 100%;
+  }
+
+  .tabsGroup {
+    padding: 32px 0;
+  }
+
+  .tab {
+    padding: 0 12px;
+    margin: 0;
+    justify-content: center;
+  }
+
+  .tabIcon {
+    margin-right: 0;
+  }
+
+  .tabLabel,
+  .tabCount {
+    display: none;
+  }
+
+  .groupTitle {
+    display: none;
   }
 }
