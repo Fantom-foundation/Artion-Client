@@ -9,6 +9,7 @@ import 'react-loader-spinner/dist/loader/css/react-spinner-loader.css';
 import Skeleton from 'react-loading-skeleton';
 import ReactResizeDetector from 'react-resize-detector';
 import ReactPlayer from 'react-player';
+import { CopyToClipboard } from 'react-copy-to-clipboard';
 import {
   LineChart,
   XAxis,
@@ -22,7 +23,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye } from '@fortawesome/free-solid-svg-icons';
 import { useWeb3React } from '@web3-react/core';
 import { ClipLoader } from 'react-spinners';
-import { Tooltip, Menu } from '@material-ui/core';
+import { Tooltip, Menu, MenuItem } from '@material-ui/core';
 import {
   People as PeopleIcon,
   ViewModule as ViewModuleIcon,
@@ -35,6 +36,7 @@ import {
   Ballot as BallotIcon,
   VerticalSplit as VerticalSplitIcon,
   Subject as SubjectIcon,
+  Send as SendIcon,
 } from '@material-ui/icons';
 import toast from 'react-hot-toast';
 
@@ -71,6 +73,10 @@ import mediumIcon from 'assets/svgs/medium.svg';
 import filterIcon from 'assets/svgs/filter.svg';
 import checkIcon from 'assets/svgs/check.svg';
 import ftmIcon from 'assets/svgs/ftm.svg';
+import shareIcon from 'assets/svgs/share.svg';
+import iconArtion from 'assets/svgs/logo_small_blue.svg';
+import iconFacebook from 'assets/imgs/facebook.png';
+import iconTwitter from 'assets/svgs/twitter_blue.svg';
 
 import styles from './styles.module.scss';
 
@@ -234,6 +240,7 @@ const NFTItem = () => {
   const moreItems = useRef([]);
 
   const [filter, setFilter] = useState(0);
+  const [shareAnchorEl, setShareAnchorEl] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
   const isMenuOpen = Boolean(anchorEl);
 
@@ -1781,6 +1788,31 @@ const NFTItem = () => {
     setAnchorEl(null);
   };
 
+  const handleClose = () => {
+    setShareAnchorEl(null);
+  };
+
+  const handleCopyLink = () => {
+    handleClose();
+    showToast('success', 'Link copied to clipboard!');
+  };
+
+  const handleShareOnFacebook = () => {
+    handleClose();
+    window.open(
+      `https://www.facebook.com/sharer/sharer.php?u=${window.location.href}`,
+      '_blank'
+    );
+  };
+
+  const handleShareToTwitter = () => {
+    handleClose();
+    window.open(
+      `https://twitter.com/intent/tweet?text=Check%20out%20this%item%20on%20Artion&url=${window.location.href}`,
+      '_blank'
+    );
+  };
+
   const handleSelectFilter = _filter => {
     setFilter(_filter);
     handleMenuClose();
@@ -1873,6 +1905,19 @@ const NFTItem = () => {
 
   const renderItemInfo = () => (
     <>
+      <div className={styles.itemMenu}>
+        {isMine && (
+          <div className={styles.itemMenuBtn}>
+            <SendIcon src={shareIcon} className={styles.itemMenuIcon} />
+          </div>
+        )}
+        <div
+          className={styles.itemMenuBtn}
+          onClick={e => setShareAnchorEl(e.currentTarget)}
+        >
+          <img src={shareIcon} className={styles.itemMenuIcon} />
+        </div>
+      </div>
       <div className={styles.itemCategory}>
         {collection?.collectionName || collection?.name || ''}
       </div>
@@ -2917,6 +2962,43 @@ const NFTItem = () => {
 
       {renderMenu}
 
+      <Menu
+        id="simple-menu"
+        anchorEl={shareAnchorEl}
+        keepMounted
+        open={Boolean(shareAnchorEl)}
+        onClose={handleClose}
+        classes={{ paper: styles.shareMenu, list: styles.shareMenuList }}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'right',
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'right',
+        }}
+      >
+        <CopyToClipboard text={window.location.href} onCopy={handleCopyLink}>
+          <MenuItem classes={{ root: styles.menuItem }}>
+            <img src={iconArtion} />
+            Copy Link
+          </MenuItem>
+        </CopyToClipboard>
+        <MenuItem
+          classes={{ root: styles.menuItem }}
+          onClick={handleShareOnFacebook}
+        >
+          <img src={iconFacebook} />
+          Share on Facebook
+        </MenuItem>
+        <MenuItem
+          classes={{ root: styles.menuItem }}
+          onClick={handleShareToTwitter}
+        >
+          <img src={iconTwitter} />
+          Share to Twitter
+        </MenuItem>
+      </Menu>
       <SellModal
         visible={sellModalVisible}
         onClose={() => setSellModalVisible(false)}

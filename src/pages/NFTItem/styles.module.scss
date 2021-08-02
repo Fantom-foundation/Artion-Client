@@ -637,6 +637,58 @@
 
 .itemInfoWrapper {
   margin: 40px 0;
+  position: relative;
+}
+
+.itemMenu {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: flex;
+  border: 1px solid #EAEAF1;
+  border-radius: 6px;
+}
+
+.itemMenuBtn {
+  width: 48px;
+  height: 48px;
+  border-right: 1px solid #EAEAF1;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+
+  &:last-child {
+    border-right: 0;
+  }
+}
+
+.itemMenuIcon {
+  width: 16px;
+  color: #A2A2AD;
+}
+
+.shareMenu {
+  transform: translateY(55px) !important;
+}
+
+.shareMenuList {
+  padding: 0 !important;
+}
+
+.menuItem {
+  height: 48px;
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  font-weight: 400;
+  color: #121223;
+
+  img {
+    width: 20px;
+    margin-right: 16px;
+  }
 }
 
 .infoPanel {
