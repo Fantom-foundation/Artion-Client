@@ -73,7 +73,7 @@ const NewBundleModal = ({ visible, onClose, onCreateSuccess = () => {} }) => {
   const { uid } = useParams();
 
   const { fetchTokens, createBundle, deleteBundle } = useApi();
-  const { getNFTContract } = useNFTContract();
+  const { getERC721Contract } = useNFTContract();
   const { listBundle } = useBundleSalesContract();
 
   const rootRef = useRef(null);
@@ -149,7 +149,7 @@ const NewBundleModal = ({ visible, onClose, onCreateSuccess = () => {} }) => {
     try {
       await Promise.all(
         contractAddresses.map(async address => {
-          const contract = await getNFTContract(address);
+          const contract = await getERC721Contract(address);
           try {
             const _approved = await contract.isApprovedForAll(
               account,
@@ -204,7 +204,7 @@ const NewBundleModal = ({ visible, onClose, onCreateSuccess = () => {} }) => {
     try {
       await Promise.all(
         contractAddresses.map(async address => {
-          const contract = await getNFTContract(address);
+          const contract = await getERC721Contract(address);
           const _approved = await contract.isApprovedForAll(
             account,
             Contracts[chainId].bundleSales

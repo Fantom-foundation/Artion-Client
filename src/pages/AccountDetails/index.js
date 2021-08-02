@@ -836,6 +836,14 @@ const AccountDetails = () => {
         open={Boolean(anchorEl)}
         onClose={handleClose}
         classes={{ paper: styles.shareMenu, list: styles.shareMenuList }}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'right',
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'right',
+        }}
       >
         <CopyToClipboard text={window.location.href} onCopy={handleCopyLink}>
           <MenuItem classes={{ root: styles.menuItem }}>

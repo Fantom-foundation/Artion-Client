@@ -9,6 +9,7 @@ import 'react-loader-spinner/dist/loader/css/react-spinner-loader.css';
 import Skeleton from 'react-loading-skeleton';
 import ReactResizeDetector from 'react-resize-detector';
 import ReactPlayer from 'react-player';
+import { CopyToClipboard } from 'react-copy-to-clipboard';
 import {
   LineChart,
   XAxis,
@@ -22,7 +23,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye } from '@fortawesome/free-solid-svg-icons';
 import { useWeb3React } from '@web3-react/core';
 import { ClipLoader } from 'react-spinners';
-import { Tooltip, Menu } from '@material-ui/core';
+import { Tooltip, Menu, MenuItem } from '@material-ui/core';
 import {
   People as PeopleIcon,
   ViewModule as ViewModuleIcon,
@@ -35,6 +36,7 @@ import {
   Ballot as BallotIcon,
   VerticalSplit as VerticalSplitIcon,
   Subject as SubjectIcon,
+  Redeem as RedeemIcon,
 } from '@material-ui/icons';
 import toast from 'react-hot-toast';
 
@@ -52,6 +54,7 @@ import { shortenAddress, formatNumber } from 'utils';
 import { Contracts } from 'constants/networks';
 import showToast from 'utils/toast';
 import NFTCard from 'components/NFTCard';
+import TransferModal from 'components/TransferModal';
 import SellModal from 'components/SellModal';
 import OfferModal from 'components/OfferModal';
 import AuctionModal from 'components/AuctionModal';
@@ -71,6 +74,10 @@ import mediumIcon from 'assets/svgs/medium.svg';
 import filterIcon from 'assets/svgs/filter.svg';
 import checkIcon from 'assets/svgs/check.svg';
 import ftmIcon from 'assets/svgs/ftm.svg';
+import shareIcon from 'assets/svgs/share.svg';
+import iconArtion from 'assets/svgs/logo_small_blue.svg';
+import iconFacebook from 'assets/imgs/facebook.png';
+import iconTwitter from 'assets/svgs/twitter_blue.svg';
 
 import styles from './styles.module.scss';
 
@@ -111,7 +118,7 @@ const NFTItem = () => {
     getItemLikeUsers,
     getBundleLikeUsers,
   } = useApi();
-  const { getNFTContract } = useNFTContract();
+  const { getERC721Contract, getERC1155Contract } = useNFTContract();
   const {
     wftmAddress,
     getWFTMBalance,
@@ -190,6 +197,7 @@ const NFTItem = () => {
   const [collectionLoading, setCollectionLoading] = useState(false);
   const [fetchInterval, setFetchInterval] = useState(null);
 
+  const [transferModalVisible, setTransferModalVisible] = useState(false);
   const [sellModalVisible, setSellModalVisible] = useState(false);
   const [offerModalVisible, setOfferModalVisible] = useState(false);
   const [auctionModalVisible, setAuctionModalVisible] = useState(false);
@@ -197,6 +205,7 @@ const NFTItem = () => {
   const [ownersModalVisible, setOwnersModalVisible] = useState(false);
   const [likesModalVisible, setLikesModalVisible] = useState(false);
 
+  const [transferring, setTransferring] = useState(false);
   const [listingItem, setListingItem] = useState(false);
   const [cancelingListing, setCancelingListing] = useState(false);
   const [priceUpdating, setPriceUpdating] = useState(false);
@@ -234,6 +243,7 @@ const NFTItem = () => {
   const moreItems = useRef([]);
 
   const [filter, setFilter] = useState(0);
+  const [shareAnchorEl, setShareAnchorEl] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
   const isMenuOpen = Boolean(anchorEl);
 
@@ -324,7 +334,7 @@ const NFTItem = () => {
       try {
         tokenType.current = type;
         if (type === 721) {
-          const contract = await getNFTContract(address);
+          const contract = await getERC721Contract(address);
           const res = await contract.ownerOf(tokenID);
           setOwner(res);
         } else if (type === 1155) {
@@ -346,7 +356,7 @@ const NFTItem = () => {
       setInfo(data);
     } catch {
       try {
-        const contract = await getNFTContract(address);
+        const contract = await getERC721Contract(address);
         const tokenURI = await contract.tokenURI(tokenID);
         const { data } = await axios.get(tokenURI);
         setInfo(data);
@@ -1071,7 +1081,7 @@ const NFTItem = () => {
   };
 
   const getSalesContractStatus = async () => {
-    const contract = await getNFTContract(address);
+    const contract = await getERC721Contract(address);
     try {
       const approved = await contract.isApprovedForAll(
         account,
@@ -1093,7 +1103,7 @@ const NFTItem = () => {
     const approved = {};
     await Promise.all(
       contractAddresses.map(async address => {
-        const contract = await getNFTContract(address);
+        const contract = await getERC721Contract(address);
         try {
           const _approved = await contract.isApprovedForAll(
             account,
@@ -1109,7 +1119,7 @@ const NFTItem = () => {
   };
 
   const getAuctionContractStatus = async () => {
-    const contract = await getNFTContract(address);
+    const contract = await getERC721Contract(address);
     try {
       const approved = await contract.isApprovedForAll(
         account,
@@ -1122,7 +1132,7 @@ const NFTItem = () => {
   };
 
   const addNFTContractEventListeners = async () => {
-    const contract = await getNFTContract(address);
+    const contract = await getERC721Contract(address);
 
     contract.on('ApprovalForAll', (owner, operator, approved) => {
       if (account?.toLowerCase() === owner?.toLowerCase()) {
@@ -1158,7 +1168,7 @@ const NFTItem = () => {
   const handleApproveSalesContract = async () => {
     setSalesContractApproving(true);
     try {
-      const contract = await getNFTContract(address);
+      const contract = await getERC721Contract(address);
       const tx = await contract.setApprovalForAll(
         Contracts[chainId].sales,
         true
@@ -1187,7 +1197,7 @@ const NFTItem = () => {
       const approved = {};
       await Promise.all(
         contractAddresses.map(async address => {
-          const contract = await getNFTContract(address);
+          const contract = await getERC721Contract(address);
           const _approved = await contract.isApprovedForAll(
             account,
             Contracts[chainId].bundleSales
@@ -1213,7 +1223,7 @@ const NFTItem = () => {
   const handleApproveAuctionContract = async () => {
     setAuctionContractApproving(true);
     try {
-      const contract = await getNFTContract(address);
+      const contract = await getERC721Contract(address);
       const tx = await contract.setApprovalForAll(
         Contracts[chainId].auction,
         true
@@ -1235,6 +1245,48 @@ const NFTItem = () => {
     tokenType.current === 721 || bundleID
       ? owner?.toLowerCase() === account?.toLowerCase()
       : !!myHolding;
+
+  const handleTransfer = async (to, quantity) => {
+    if (bundleID) return;
+
+    if (!ethers.utils.isAddress(to)) {
+      showToast('error', 'Invalid Aaddress!');
+      return;
+    }
+
+    if (transferring) return;
+
+    setTransferring(true);
+
+    try {
+      if (tokenType.current === 721) {
+        const contract = await getERC721Contract(address);
+        const tx = await contract.safeTransferFrom(account, to, tokenID);
+        await tx.wait();
+        showToast('success', 'Item transferred successfully!');
+        setTransferModalVisible(false);
+        getItemDetails();
+      } else {
+        const contract = await getERC1155Contract(address);
+        const tx = await contract.safeTransferFrom(
+          account,
+          to,
+          tokenID,
+          quantity,
+          '0x'
+        );
+        await tx.wait();
+        showToast('success', 'Item transferred successfully!');
+        setTransferModalVisible(false);
+        getItemDetails();
+      }
+    } catch (err) {
+      console.log(err);
+      showToast('error', 'Failed to transfer item!');
+    }
+
+    setTransferring(false);
+  };
 
   const handleListItem = async (_price, quantity) => {
     if (listingItem) return;
@@ -1773,12 +1825,48 @@ const NFTItem = () => {
     return supply;
   };
 
+  const onTransferClick = async () => {
+    if (hasListing) {
+      showToast(
+        'warning',
+        'You have listed your item. Please cancel listing before transfer.'
+      );
+      return;
+    }
+    setTransferModalVisible(true);
+  };
+
   const handleMenuOpen = e => {
     setAnchorEl(e.currentTarget);
   };
 
   const handleMenuClose = () => {
     setAnchorEl(null);
+  };
+
+  const handleClose = () => {
+    setShareAnchorEl(null);
+  };
+
+  const handleCopyLink = () => {
+    handleClose();
+    showToast('success', 'Link copied to clipboard!');
+  };
+
+  const handleShareOnFacebook = () => {
+    handleClose();
+    window.open(
+      `https://www.facebook.com/sharer/sharer.php?u=${window.location.href}`,
+      '_blank'
+    );
+  };
+
+  const handleShareToTwitter = () => {
+    handleClose();
+    window.open(
+      `https://twitter.com/intent/tweet?text=Check%20out%20this%item%20on%20Artion&url=${window.location.href}`,
+      '_blank'
+    );
   };
 
   const handleSelectFilter = _filter => {
@@ -1873,6 +1961,19 @@ const NFTItem = () => {
 
   const renderItemInfo = () => (
     <>
+      <div className={styles.itemMenu}>
+        {isMine && !bundleID && (
+          <div className={styles.itemMenuBtn} onClick={onTransferClick}>
+            <RedeemIcon src={shareIcon} className={styles.itemMenuIcon} />
+          </div>
+        )}
+        <div
+          className={styles.itemMenuBtn}
+          onClick={e => setShareAnchorEl(e.currentTarget)}
+        >
+          <img src={shareIcon} className={styles.itemMenuIcon} />
+        </div>
+      </div>
       <div className={styles.itemCategory}>
         {collection?.collectionName || collection?.name || ''}
       </div>
@@ -2917,6 +3018,50 @@ const NFTItem = () => {
 
       {renderMenu}
 
+      <Menu
+        id="simple-menu"
+        anchorEl={shareAnchorEl}
+        keepMounted
+        open={Boolean(shareAnchorEl)}
+        onClose={handleClose}
+        classes={{ paper: styles.shareMenu, list: styles.shareMenuList }}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'right',
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'right',
+        }}
+      >
+        <CopyToClipboard text={window.location.href} onCopy={handleCopyLink}>
+          <MenuItem classes={{ root: styles.menuItem }}>
+            <img src={iconArtion} />
+            Copy Link
+          </MenuItem>
+        </CopyToClipboard>
+        <MenuItem
+          classes={{ root: styles.menuItem }}
+          onClick={handleShareOnFacebook}
+        >
+          <img src={iconFacebook} />
+          Share on Facebook
+        </MenuItem>
+        <MenuItem
+          classes={{ root: styles.menuItem }}
+          onClick={handleShareToTwitter}
+        >
+          <img src={iconTwitter} />
+          Share to Twitter
+        </MenuItem>
+      </Menu>
+      <TransferModal
+        visible={transferModalVisible}
+        totalSupply={tokenType.current === 1155 ? myHolding?.supply : null}
+        transferring={transferring}
+        onTransfer={handleTransfer}
+        onClose={() => setTransferModalVisible(false)}
+      />
       <SellModal
         visible={sellModalVisible}
         onClose={() => setSellModalVisible(false)}
