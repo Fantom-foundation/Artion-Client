@@ -103,29 +103,74 @@
 }
 
 .label {
-  font-weight: 500;
-  font-size: 14px;
-  line-height: 14px;
-  margin: 0;
-  color: rgba(61, 61, 61, .56);
+  font-weight: 400;
+  font-size: 15px;
+  line-height: 19px;
+  margin-bottom: 4px;
+  color: #A2A2AD;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .price {
-  margin-top: 9px;
-  color: #3D3D3D;
+  font-weight: 700;
+  font-size: 16px;
+  color: #121223;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  margin: 0;
+
+  img {
+    height: 16px;
+    margin-right: 6px;
+  }
+}
+
+.label2 {
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 16px;
+  margin-bottom: 4px;
+  color: #A2A2AD;
+}
+
+.price2 {
+  font-weight: 700;
+  font-size: 13px;
+  color: #121223;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  margin: 0;
+
+  img {
+    height: 12px;
+    margin-right: 4px;
+  }
 }
 
 .name {
   flex: 1;
   font-weight: 700;
-  font-size: 16px;
+  font-size: 15px;
   margin: 0;
   color: #121223;
   overflow: hidden;
   text-overflow: ellipsis;
-  display: -webkit-box;
-  --webkit-line-camp: 2;
-  -webkit-box-orient: vertical;
+  white-space: nowrap;
+}
+
+.name2 {
+  flex: 1;
+  font-weight: 700;
+  font-size: 12px;
+  margin: 0;
+  color: #121223;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .mediaBox {
@@ -219,14 +264,15 @@
   flex-direction: column;
 }
 
-.collection {
-  font-size: 14px;
-  color: #A2A2AD;
+.topLine {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.itemName {
+  margin-right: 16px;
   overflow: hidden;
-  text-overflow: ellipsis;
-  display: -webkit-box;
-  --webkit-line-camp: 2;
-  -webkit-box-orient: vertical;
 }
 
 .alignBottom {

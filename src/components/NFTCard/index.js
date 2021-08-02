@@ -3,7 +3,6 @@ import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import cx from 'classnames';
 import Skeleton from 'react-loading-skeleton';
-import Typography from '@material-ui/core/Typography';
 import {
   FavoriteBorder as FavoriteBorderIcon,
   Favorite as FavoriteIcon,
@@ -19,6 +18,7 @@ import { formatNumber } from 'utils';
 import { useApi } from 'api';
 
 import iconPlus from 'assets/svgs/plus.svg';
+import ftmIcon from 'assets/svgs/ftm.svg';
 
 import styles from './styles.module.scss';
 
@@ -234,23 +234,59 @@ const BaseCard = ({ item, loading, style, create, onCreate, onLike }) => {
           </div>
         </div>
         <div className={styles.content}>
-          {loading || fetching ? (
-            <Skeleton width="100%" height={20} />
-          ) : (
-            <div className={styles.collection}>
-              {collection?.collectionName || collection?.name}
+          <div className={styles.topLine}>
+            <div className={styles.itemName}>
+              {loading || fetching ? (
+                <Skeleton width={100} height={20} />
+              ) : (
+                <div className={styles.label}>
+                  {collection?.collectionName || collection?.name}
+                </div>
+              )}
+              {loading || fetching ? (
+                <Skeleton width={100} height={20} />
+              ) : (
+                <div className={styles.name}>{item?.name || info?.name}</div>
+              )}
             </div>
-          )}
-          {loading || fetching ? (
-            <Skeleton width="100%" height={20} />
-          ) : (
-            <div className={styles.name}>{item?.name || info?.name}</div>
-          )}
+            <div className={styles.alignRight}>
+              {!loading && <div className={styles.label}>Price</div>}
+              {loading || fetching ? (
+                <Skeleton width={80} height={20} />
+              ) : (
+                <div className={cx(styles.label, styles.price)}>
+                  <img src={ftmIcon} />
+                  {formatNumber(item?.price || 0)}
+                </div>
+              )}
+            </div>
+          </div>
           <div className={styles.alignBottom}>
-            {loading || fetching ? (
+            <div>
+              {!loading && <div className={styles.label2}>Time left</div>}
+              {loading || fetching ? (
+                <Skeleton width="100%" height={20} />
+              ) : (
+                <div className={styles.name2}>1 day</div>
+              )}
+            </div>
+            {item?.lastSalePrice && (
+              <div className={styles.alignRight}>
+                {!loading && <div className={styles.label2}>Last Price</div>}
+                {loading || fetching ? (
+                  <Skeleton width={80} height={20} />
+                ) : (
+                  <div className={cx(styles.label2, styles.price2)}>
+                    <img src={ftmIcon} />
+                    {formatNumber(item?.lastSalePrice || 0)}
+                  </div>
+                )}
+              </div>
+            )}
+            {/* {loading || fetching ? (
               <Skeleton width={80} height={20} />
             ) : (
-              <Typography component="h4" className={styles.label}>
+              <div className={styles.label}>
                 {item.items
                   ? `${item.items.length} item${
                       item.items.length !== 1 ? 's' : ''
@@ -258,25 +294,8 @@ const BaseCard = ({ item, loading, style, create, onCreate, onLike }) => {
                   : `${formatNumber(
                       item?.holderSupply || item?.supply || 1
                     )} of ${formatNumber(item?.supply || 1)}`}
-              </Typography>
-            )}
-            <div className={styles.alignRight}>
-              {!loading && (
-                <Typography component="h4" className={styles.label}>
-                  Price
-                </Typography>
-              )}
-              {loading || fetching ? (
-                <Skeleton width={80} height={20} />
-              ) : (
-                <Typography
-                  component="h4"
-                  className={cx(styles.label, styles.price)}
-                >
-                  {formatNumber(item?.price || 0)} FTM
-                </Typography>
-              )}
-            </div>
+              </div>
+            )} */}
           </div>
         </div>
       </>

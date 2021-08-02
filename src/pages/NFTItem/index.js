@@ -1826,6 +1826,10 @@ const NFTItem = () => {
   };
 
   const onTransferClick = async () => {
+    if (auction.current?.resulted === false) {
+      showToast('warning', 'Please cancel current auction before transfer.');
+      return;
+    }
     if (hasListing) {
       showToast(
         'warning',
