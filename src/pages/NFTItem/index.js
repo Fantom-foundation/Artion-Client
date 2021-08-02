@@ -36,7 +36,7 @@ import {
   Ballot as BallotIcon,
   VerticalSplit as VerticalSplitIcon,
   Subject as SubjectIcon,
-  Send as SendIcon,
+  Redeem as RedeemIcon,
 } from '@material-ui/icons';
 import toast from 'react-hot-toast';
 
@@ -54,6 +54,7 @@ import { shortenAddress, formatNumber } from 'utils';
 import { Contracts } from 'constants/networks';
 import showToast from 'utils/toast';
 import NFTCard from 'components/NFTCard';
+import TransferModal from 'components/TransferModal';
 import SellModal from 'components/SellModal';
 import OfferModal from 'components/OfferModal';
 import AuctionModal from 'components/AuctionModal';
@@ -117,7 +118,7 @@ const NFTItem = () => {
     getItemLikeUsers,
     getBundleLikeUsers,
   } = useApi();
-  const { getNFTContract } = useNFTContract();
+  const { getERC721Contract, getERC1155Contract } = useNFTContract();
   const {
     wftmAddress,
     getWFTMBalance,
@@ -196,6 +197,7 @@ const NFTItem = () => {
   const [collectionLoading, setCollectionLoading] = useState(false);
   const [fetchInterval, setFetchInterval] = useState(null);
 
+  const [transferModalVisible, setTransferModalVisible] = useState(false);
   const [sellModalVisible, setSellModalVisible] = useState(false);
   const [offerModalVisible, setOfferModalVisible] = useState(false);
   const [auctionModalVisible, setAuctionModalVisible] = useState(false);
@@ -203,6 +205,7 @@ const NFTItem = () => {
   const [ownersModalVisible, setOwnersModalVisible] = useState(false);
   const [likesModalVisible, setLikesModalVisible] = useState(false);
 
+  const [transferring, setTransferring] = useState(false);
   const [listingItem, setListingItem] = useState(false);
   const [cancelingListing, setCancelingListing] = useState(false);
   const [priceUpdating, setPriceUpdating] = useState(false);
@@ -331,7 +334,7 @@ const NFTItem = () => {
       try {
         tokenType.current = type;
         if (type === 721) {
-          const contract = await getNFTContract(address);
+          const contract = await getERC721Contract(address);
           const res = await contract.ownerOf(tokenID);
           setOwner(res);
         } else if (type === 1155) {
@@ -353,7 +356,7 @@ const NFTItem = () => {
       setInfo(data);
     } catch {
       try {
-        const contract = await getNFTContract(address);
+        const contract = await getERC721Contract(address);
         const tokenURI = await contract.tokenURI(tokenID);
         const { data } = await axios.get(tokenURI);
         setInfo(data);
@@ -1078,7 +1081,7 @@ const NFTItem = () => {
   };
 
   const getSalesContractStatus = async () => {
-    const contract = await getNFTContract(address);
+    const contract = await getERC721Contract(address);
     try {
       const approved = await contract.isApprovedForAll(
         account,
@@ -1100,7 +1103,7 @@ const NFTItem = () => {
     const approved = {};
     await Promise.all(
       contractAddresses.map(async address => {
-        const contract = await getNFTContract(address);
+        const contract = await getERC721Contract(address);
         try {
           const _approved = await contract.isApprovedForAll(
             account,
@@ -1116,7 +1119,7 @@ const NFTItem = () => {
   };
 
   const getAuctionContractStatus = async () => {
-    const contract = await getNFTContract(address);
+    const contract = await getERC721Contract(address);
     try {
       const approved = await contract.isApprovedForAll(
         account,
@@ -1129,7 +1132,7 @@ const NFTItem = () => {
   };
 
   const addNFTContractEventListeners = async () => {
-    const contract = await getNFTContract(address);
+    const contract = await getERC721Contract(address);
 
     contract.on('ApprovalForAll', (owner, operator, approved) => {
       if (account?.toLowerCase() === owner?.toLowerCase()) {
@@ -1165,7 +1168,7 @@ const NFTItem = () => {
   const handleApproveSalesContract = async () => {
     setSalesContractApproving(true);
     try {
-      const contract = await getNFTContract(address);
+      const contract = await getERC721Contract(address);
       const tx = await contract.setApprovalForAll(
         Contracts[chainId].sales,
         true
@@ -1194,7 +1197,7 @@ const NFTItem = () => {
       const approved = {};
       await Promise.all(
         contractAddresses.map(async address => {
-          const contract = await getNFTContract(address);
+          const contract = await getERC721Contract(address);
           const _approved = await contract.isApprovedForAll(
             account,
             Contracts[chainId].bundleSales
@@ -1220,7 +1223,7 @@ const NFTItem = () => {
   const handleApproveAuctionContract = async () => {
     setAuctionContractApproving(true);
     try {
-      const contract = await getNFTContract(address);
+      const contract = await getERC721Contract(address);
       const tx = await contract.setApprovalForAll(
         Contracts[chainId].auction,
         true
@@ -1242,6 +1245,48 @@ const NFTItem = () => {
     tokenType.current === 721 || bundleID
       ? owner?.toLowerCase() === account?.toLowerCase()
       : !!myHolding;
+
+  const handleTransfer = async (to, quantity) => {
+    if (bundleID) return;
+
+    if (!ethers.utils.isAddress(to)) {
+      showToast('error', 'Invalid Aaddress!');
+      return;
+    }
+
+    if (transferring) return;
+
+    setTransferring(true);
+
+    try {
+      if (tokenType.current === 721) {
+        const contract = await getERC721Contract(address);
+        const tx = await contract.safeTransferFrom(account, to, tokenID);
+        await tx.wait();
+        showToast('success', 'Item transferred successfully!');
+        setTransferModalVisible(false);
+        getItemDetails();
+      } else {
+        const contract = await getERC1155Contract(address);
+        const tx = await contract.safeTransferFrom(
+          account,
+          to,
+          tokenID,
+          quantity,
+          '0x'
+        );
+        await tx.wait();
+        showToast('success', 'Item transferred successfully!');
+        setTransferModalVisible(false);
+        getItemDetails();
+      }
+    } catch (err) {
+      console.log(err);
+      showToast('error', 'Failed to transfer item!');
+    }
+
+    setTransferring(false);
+  };
 
   const handleListItem = async (_price, quantity) => {
     if (listingItem) return;
@@ -1780,6 +1825,17 @@ const NFTItem = () => {
     return supply;
   };
 
+  const onTransferClick = async () => {
+    if (hasListing) {
+      showToast(
+        'warning',
+        'You have listed your item. Please cancel listing before transfer.'
+      );
+      return;
+    }
+    setTransferModalVisible(true);
+  };
+
   const handleMenuOpen = e => {
     setAnchorEl(e.currentTarget);
   };
@@ -1906,9 +1962,9 @@ const NFTItem = () => {
   const renderItemInfo = () => (
     <>
       <div className={styles.itemMenu}>
-        {isMine && (
-          <div className={styles.itemMenuBtn}>
-            <SendIcon src={shareIcon} className={styles.itemMenuIcon} />
+        {isMine && !bundleID && (
+          <div className={styles.itemMenuBtn} onClick={onTransferClick}>
+            <RedeemIcon src={shareIcon} className={styles.itemMenuIcon} />
           </div>
         )}
         <div
@@ -2999,6 +3055,13 @@ const NFTItem = () => {
           Share to Twitter
         </MenuItem>
       </Menu>
+      <TransferModal
+        visible={transferModalVisible}
+        totalSupply={tokenType.current === 1155 ? myHolding?.supply : null}
+        transferring={transferring}
+        onTransfer={handleTransfer}
+        onClose={() => setTransferModalVisible(false)}
+      />
       <SellModal
         visible={sellModalVisible}
         onClose={() => setSellModalVisible(false)}
