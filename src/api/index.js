@@ -402,6 +402,34 @@ export const useApi = () => {
     return res.data;
   };
 
+  const banCollection = async (address, authToken, signature) => {
+    const data = { address, signature };
+    const res = await axios({
+      method: 'post',
+      url: `${apiUrl()}/ban/banCollection`,
+      data: JSON.stringify(data),
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${authToken}`,
+      },
+    });
+    return res.data;
+  };
+
+  const unbanCollection = async (address, authToken, signature) => {
+    const data = { address, signature };
+    const res = await axios({
+      method: 'post',
+      url: `${apiUrl()}/ban/unbanCollection`,
+      data: JSON.stringify(data),
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${authToken}`,
+      },
+    });
+    return res.data;
+  };
+
   const banItems = async (address, tokenIDs, authToken, signature) => {
     const data = { address, tokenIDs, signature };
     const res = await axios({
@@ -681,6 +709,8 @@ export const useApi = () => {
     getActivityFromOthers,
     addMod,
     removeMod,
+    banCollection,
+    unbanCollection,
     banItems,
     boostCollection,
     createBundle,

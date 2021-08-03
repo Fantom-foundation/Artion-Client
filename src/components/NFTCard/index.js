@@ -12,6 +12,7 @@ import { useWeb3React } from '@web3-react/core';
 import Carousel, { Dots } from '@brainhubeu/react-carousel';
 import '@brainhubeu/react-carousel/lib/style.css';
 import axios from 'axios';
+import ReactPlayer from 'react-player';
 
 import SuspenseImg from 'components/SuspenseImg';
 import { formatNumber } from 'utils';
@@ -180,29 +181,38 @@ const BaseCard = ({ item, loading, style, create, onCreate, onLike }) => {
   const renderSlides = () => {
     return item.items.map((v, idx) => (
       <div className={styles.imageBox} key={idx}>
-        {(v.imageURL || v.thumbnailPath?.length > 10) && (
-          <Suspense
-            fallback={
-              <Loader
-                type="Oval"
-                color="#007BFF"
-                height={32}
-                width={32}
-                className={styles.loader}
-              />
-            }
-          >
-            <SuspenseImg
-              src={
-                v.thumbnailPath?.length > 10
-                  ? `${storageUrl()}/image/${v.thumbnailPath}`
-                  : v.imageURL
-              }
+        {(v.imageURL || v.thumbnailPath?.length > 10) &&
+          (v.imageURL?.includes('youtube') ? (
+            <ReactPlayer
               className={styles.media}
-              alt={v.name}
+              url={v.imageURL}
+              controls={true}
+              width="100%"
+              height="100%"
             />
-          </Suspense>
-        )}
+          ) : (
+            <Suspense
+              fallback={
+                <Loader
+                  type="Oval"
+                  color="#007BFF"
+                  height={32}
+                  width={32}
+                  className={styles.loader}
+                />
+              }
+            >
+              <SuspenseImg
+                src={
+                  v.thumbnailPath?.length > 10
+                    ? `${storageUrl()}/image/${v.thumbnailPath}`
+                    : v.imageURL
+                }
+                className={styles.media}
+                alt={v.name}
+              />
+            </Suspense>
+          ))}
       </div>
     ));
   };
@@ -268,29 +278,38 @@ const BaseCard = ({ item, loading, style, create, onCreate, onLike }) => {
               <div className={styles.imageBox}>
                 {(item?.imageURL ||
                   info?.image ||
-                  item?.thumbnailPath?.length > 10) && (
-                  <Suspense
-                    fallback={
-                      <Loader
-                        type="Oval"
-                        color="#007BFF"
-                        height={32}
-                        width={32}
-                        className={styles.loader}
-                      />
-                    }
-                  >
-                    <SuspenseImg
-                      src={
-                        item.thumbnailPath?.length > 10
-                          ? `${storageUrl()}/image/${item.thumbnailPath}`
-                          : item?.imageURL || info?.image
-                      }
+                  item?.thumbnailPath?.length > 10) &&
+                  ((item?.imageURL || info?.image)?.includes('youtube') ? (
+                    <ReactPlayer
                       className={styles.media}
-                      alt={item.name}
+                      url={item?.imageURL || info?.image}
+                      controls={true}
+                      width="100%"
+                      height="100%"
                     />
-                  </Suspense>
-                )}
+                  ) : (
+                    <Suspense
+                      fallback={
+                        <Loader
+                          type="Oval"
+                          color="#007BFF"
+                          height={32}
+                          width={32}
+                          className={styles.loader}
+                        />
+                      }
+                    >
+                      <SuspenseImg
+                        src={
+                          item.thumbnailPath?.length > 10
+                            ? `${storageUrl()}/image/${item.thumbnailPath}`
+                            : item?.imageURL || info?.image
+                        }
+                        className={styles.media}
+                        alt={item.name}
+                      />
+                    </Suspense>
+                  ))}
               </div>
             )}
           </div>
@@ -334,7 +353,7 @@ const BaseCard = ({ item, loading, style, create, onCreate, onLike }) => {
                 </>
               )}
             </div>
-            {item?.lastSalePrice && (
+            {item?.lastSalePrice > 0 && (
               <div className={styles.alignRight}>
                 {!loading && <div className={styles.label2}>Last Price</div>}
                 {loading || fetching ? (
@@ -342,7 +361,7 @@ const BaseCard = ({ item, loading, style, create, onCreate, onLike }) => {
                 ) : (
                   <div className={cx(styles.label2, styles.price2)}>
                     <img src={ftmIcon} />
-                    {formatNumber(item?.lastSalePrice || 0)}
+                    {formatNumber(item.lastSalePrice)}
                   </div>
                 )}
               </div>

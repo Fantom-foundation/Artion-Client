@@ -10,15 +10,14 @@ import { getSigner } from 'contracts';
 import Modal from '../Modal';
 import styles from '../Modal/common.module.scss';
 
-const BanItemModal = ({ visible, onClose }) => {
-  const { getNonce, banItems } = useApi();
+const BanCollectionModal = ({ visible, isBan, onClose }) => {
+  const { getNonce, banCollection, unbanCollection } = useApi();
   const { account } = useWeb3React();
 
   const { authToken } = useSelector(state => state.ConnectWallet);
 
   const [banning, setBanning] = useState(false);
   const [address, setAddress] = useState('');
-  const [tokenIDs, setTokenIDs] = useState('');
 
   useEffect(() => {
     if (visible) {
@@ -43,14 +42,18 @@ const BanItemModal = ({ visible, onClose }) => {
       } catch (err) {
         toast(
           'error',
-          'You need to sign the message to be able to ban NFT items.'
+          'You need to sign the message to be able to ban/unban collection.'
         );
         setBanning(false);
         return;
       }
 
-      await banItems(address, tokenIDs, authToken, signature);
-      toast('success', 'Item banned successfully!');
+      await (isBan ? banCollection : unbanCollection)(
+        address,
+        authToken,
+        signature
+      );
+      toast('success', 'Success!');
     } catch (e) {
       console.log(e);
     }
@@ -60,14 +63,22 @@ const BanItemModal = ({ visible, onClose }) => {
   return (
     <Modal
       visible={visible}
-      title="Ban NFT Items"
+      title={isBan ? 'Ban Collection' : 'Unban Collection'}
       onClose={onClose}
       submitDisabled={banning}
-      submitLabel={banning ? <ClipLoader color="#FFF" size={16} /> : 'Ban'}
+      submitLabel={
+        banning ? (
+          <ClipLoader color="#FFF" size={16} />
+        ) : isBan ? (
+          'Ban'
+        ) : (
+          'Unban'
+        )
+      }
       onSubmit={!banning ? () => handleBanItem() : null}
     >
       <div className={styles.formGroup}>
-        <div className={styles.formLabel}>Contract Address</div>
+        <div className={styles.formLabel}>Collection Address</div>
         <div className={styles.formInputCont}>
           <input
             className={styles.formInput}
@@ -78,20 +89,8 @@ const BanItemModal = ({ visible, onClose }) => {
           />
         </div>
       </div>
-      <div className={styles.formGroup}>
-        <div className={styles.formLabel}>Token ID</div>
-        <div className={styles.formInputCont}>
-          <input
-            className={styles.formInput}
-            placeholder="0"
-            value={tokenIDs}
-            onChange={e => setTokenIDs(e.target.value)}
-            disabled={banning}
-          />
-        </div>
-      </div>
     </Modal>
   );
 };
 
-export default BanItemModal;
+export default BanCollectionModal;

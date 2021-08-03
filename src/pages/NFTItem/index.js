@@ -1906,7 +1906,17 @@ const NFTItem = () => {
   );
 
   const renderMedia = (image, contentType) => {
-    if (contentType === 'image' || contentType === 'gif') {
+    if (contentType === 'video' || image?.includes('youtube')) {
+      return (
+        <ReactPlayer
+          className={styles.content}
+          url={image}
+          controls={true}
+          width="100%"
+          height="100%"
+        />
+      );
+    } else if (contentType === 'image' || contentType === 'gif') {
       return (
         <Suspense
           fallback={
@@ -1921,16 +1931,6 @@ const NFTItem = () => {
         >
           <SuspenseImg className={styles.content} src={image} />
         </Suspense>
-      );
-    } else if (contentType === 'video') {
-      return (
-        <ReactPlayer
-          className={styles.content}
-          url={image}
-          controls={true}
-          width="100%"
-          height="100%"
-        />
       );
     }
   };
