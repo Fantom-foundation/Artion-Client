@@ -19,6 +19,7 @@ import { NETWORK_LABEL } from 'constants/networks';
 import { ADMIN_ADDRESS } from 'constants/index';
 import WFTMModal from 'components/WFTMModal';
 import ModModal from 'components/ModModal';
+import BanCollectionModal from 'components/BanCollectionModal';
 import BanItemModal from 'components/BanItemModal';
 import BoostCollectionModal from 'components/BoostCollectionModal';
 import Identicon from 'components/Identicon';
@@ -65,6 +66,10 @@ const NiftyHeader = ({ light }) => {
   const [searchBarActive, setSearchBarActive] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
   const [modModalVisible, setModModalVisible] = useState(false);
+  const [isBan, setIsBan] = useState(false);
+  const [banCollectionModalVisible, setBanCollectionModalVisible] = useState(
+    false
+  );
   const [banItemModalVisible, setBanItemModalVisible] = useState(false);
   const [
     boostCollectionModalVisible,
@@ -307,6 +312,18 @@ const NiftyHeader = ({ light }) => {
     handleMenuClose();
   };
 
+  const banCollection = () => {
+    setIsBan(true);
+    setBanCollectionModalVisible(true);
+    handleMenuClose();
+  };
+
+  const unbanCollection = () => {
+    setIsBan(false);
+    setBanCollectionModalVisible(true);
+    handleMenuClose();
+  };
+
   const banItems = () => {
     setBanItemModalVisible(true);
     handleMenuClose();
@@ -371,20 +388,29 @@ const NiftyHeader = ({ light }) => {
             >
               Review Collections
             </div>,
-            <div key={3} className={styles.menuItem} onClick={banItems}>
+            <div key={3} className={styles.menuItem} onClick={banCollection}>
+              Ban Collection
+            </div>,
+            <div key={4} className={styles.menuItem} onClick={unbanCollection}>
+              Unban Collection
+            </div>,
+            <div key={5} className={styles.menuItem} onClick={banItems}>
               Ban Items
             </div>,
-            <div key={4} className={styles.menuItem} onClick={boostCollection}>
+            <div key={6} className={styles.menuItem} onClick={boostCollection}>
               Boost Collection
             </div>,
-            <div key={5} className={styles.menuSeparator} />,
+            <div key={7} className={styles.menuSeparator} />,
           ]
         : isModerator
         ? [
-            <div key={3} className={styles.menuItem} onClick={banItems}>
+            <div key={1} className={styles.menuItem} onClick={banCollection}>
+              Ban Collection
+            </div>,
+            <div key={2} className={styles.menuItem} onClick={banItems}>
               Ban Items
             </div>,
-            <div key={5} className={styles.menuSeparator} />,
+            <div key={3} className={styles.menuSeparator} />,
           ]
         : null}
       <div className={styles.signOut} onClick={handleSignOut}>
@@ -623,6 +649,11 @@ const NiftyHeader = ({ light }) => {
         isAdding={isAdding}
         visible={modModalVisible}
         onClose={() => setModModalVisible(false)}
+      />
+      <BanCollectionModal
+        visible={banCollectionModalVisible}
+        isBan={isBan}
+        onClose={() => setBanCollectionModalVisible(false)}
       />
       <BanItemModal
         visible={banItemModalVisible}
