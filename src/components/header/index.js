@@ -28,10 +28,10 @@ import logoBlue from 'assets/svgs/logo_blue.svg';
 import logoSmallWhite from 'assets/svgs/logo_small_white.svg';
 import logoSmallBlue from 'assets/svgs/logo_small_blue.svg';
 import iconUser from 'assets/svgs/user.svg';
+import iconNotification from 'assets/svgs/notification.svg';
 import iconAdd from 'assets/svgs/add.svg';
+import iconEdit from 'assets/svgs/edit.svg';
 import iconSwap from 'assets/svgs/swap.svg';
-import iconExit from 'assets/svgs/exit.svg';
-import iconSettings from 'assets/svgs/settings.svg';
 
 import styles from './styles.module.scss';
 import { NoEthereumProviderError } from '@web3-react/injected-connector';
@@ -79,7 +79,6 @@ const NiftyHeader = ({ light }) => {
   const [bundles, setBundles] = useState([]);
   const [tokenDetailsLoading, setTokenDetailsLoading] = useState(false);
   const timer = useRef(null);
-  const [collectionMenuVisible, setCollectionMenuVisible] = useState(false);
 
   const isMenuOpen = Boolean(anchorEl);
 
@@ -264,7 +263,6 @@ const NiftyHeader = ({ light }) => {
 
   const handleMenuClose = () => {
     setAnchorEl(null);
-    setCollectionMenuVisible(false);
   };
 
   const goToMyProfile = () => {
@@ -285,10 +283,6 @@ const NiftyHeader = ({ light }) => {
   const handleRegisterCollection = () => {
     history.push('/collection/register');
     handleMenuClose();
-  };
-
-  const handleToggleCollectionMenu = () => {
-    setCollectionMenuVisible(!collectionMenuVisible);
   };
 
   const openWrapStation = () => {
@@ -346,26 +340,17 @@ const NiftyHeader = ({ light }) => {
         </div>
       )}
       <div className={styles.menuItem} onClick={goToNotificationSettings}>
-        <img src={iconSettings} className={styles.menuIcon} />
+        <img src={iconNotification} className={styles.menuIcon} />
         Notification Settings
       </div>
-      <div className={styles.menuItem} onClick={handleToggleCollectionMenu}>
+      <div className={styles.menuItem} onClick={handleCreateCollection}>
         <img src={iconAdd} className={styles.menuIcon} />
-        Add Collection
+        Create New Collection
       </div>
-      {collectionMenuVisible && (
-        <>
-          <div className={styles.subMenuItem} onClick={handleCreateCollection}>
-            Create New Collection
-          </div>
-          <div
-            className={styles.subMenuItem}
-            onClick={handleRegisterCollection}
-          >
-            Register Existing Collection
-          </div>
-        </>
-      )}
+      <div className={styles.menuItem} onClick={handleRegisterCollection}>
+        <img src={iconEdit} className={styles.menuIcon} />
+        Register Existing Collection
+      </div>
       <div className={styles.menuItem} onClick={openWrapStation}>
         <img src={iconSwap} className={styles.menuIcon} />
         FTM / WFTM Station
@@ -402,8 +387,7 @@ const NiftyHeader = ({ light }) => {
             <div key={5} className={styles.menuSeparator} />,
           ]
         : null}
-      <div className={styles.menuItem} onClick={handleSignOut}>
-        <img src={iconExit} className={styles.menuIcon} />
+      <div className={styles.signOut} onClick={handleSignOut}>
         Sign Out
       </div>
     </Menu>
