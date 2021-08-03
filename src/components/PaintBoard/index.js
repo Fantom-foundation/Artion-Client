@@ -61,6 +61,7 @@ const PaintBoard = () => {
   const [symbol, setSymbol] = useState('');
   const [description, setDescription] = useState('');
   const [royalty, setRoyalty] = useState(0);
+  const [xtra, setXtra] = useState('');
 
   const [currentMintingStep, setCurrentMintingStep] = useState(0);
   const [isMinting, setIsMinting] = useState(false);
@@ -193,6 +194,7 @@ const PaintBoard = () => {
     formData.append('account', account);
     formData.append('description', description);
     formData.append('symbol', symbol);
+    formData.append('xtra', xtra);
     const _royalty = parseInt(royalty);
     formData.append('royalty', isNaN(_royalty) ? 0 : _royalty);
     try {
@@ -406,6 +408,16 @@ const PaintBoard = () => {
                   setRoyalty(Math.max(Math.min(_royalty, 100), 0));
                 }
               }}
+              disabled={isMinting}
+            />
+          </div>
+          <div className={styles.formGroup}>
+            <p className={styles.formLabel}>Link to IP Rights Document</p>
+            <input
+              className={styles.formInput}
+              placeholder="Enter Link"
+              value={xtra}
+              onChange={e => setXtra(e.target.value)}
               disabled={isMinting}
             />
           </div>
