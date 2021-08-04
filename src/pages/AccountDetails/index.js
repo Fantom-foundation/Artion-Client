@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, Suspense } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams, Link, Redirect } from 'react-router-dom';
 import cx from 'classnames';
@@ -8,12 +8,15 @@ import { useWeb3React } from '@web3-react/core';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import Skeleton from 'react-loading-skeleton';
 import { ClipLoader } from 'react-spinners';
+import ReactPlayer from 'react-player';
+import Loader from 'react-loader-spinner';
 
 import NFTsGrid from 'components/NFTsGrid';
 import Header from 'components/header';
 import Identicon from 'components/Identicon';
 import NewBundleModal from 'components/NewBundleModal';
 import FollowersModal from 'components/FollowersModal';
+import SuspenseImg from 'components/SuspenseImg';
 import { isAddress, shortenAddress, formatFollowers } from 'utils';
 import toast from 'utils/toast';
 import { useApi } from 'api';
@@ -43,6 +46,7 @@ const AccountDetails = () => {
   const dispatch = useDispatch();
 
   const {
+    storageUrl,
     getUserAccountDetails,
     getUserFigures,
     fetchCollections,
@@ -50,6 +54,7 @@ const AccountDetails = () => {
     updateBanner,
     getAccountActivity,
     getActivityFromOthers,
+    getMyOffers,
     getFollowing,
     followUser: _followUser,
     getFollowers,
@@ -94,6 +99,8 @@ const AccountDetails = () => {
   const [tab, setTab] = useState(0);
   const [activityLoading, setActivityLoading] = useState(false);
   const [activities, setActivities] = useState([]);
+  const [bidsLoading, setBidsLoading] = useState(false);
+  const [bids, setBids] = useState([]);
   const [offersLoading, setOffersLoading] = useState(false);
   const [offers, setOffers] = useState([]);
   const [fetchInterval, setFetchInterval] = useState(null);
@@ -283,7 +290,9 @@ const AccountDetails = () => {
       fetchLikes(0);
     } else if (tab === 3) {
       getActivity();
-    } else {
+    } else if (tab === 4) {
+      getOffersFromOthers();
+    } else if (tab === 5) {
       getOffers();
     }
   };
@@ -354,7 +363,7 @@ const AccountDetails = () => {
     }
   };
 
-  const getOffers = async () => {
+  const getOffersFromOthers = async () => {
     try {
       setOffersLoading(true);
       const { data } = await getActivityFromOthers(uid);
@@ -363,6 +372,18 @@ const AccountDetails = () => {
       setOffersLoading(false);
     } catch {
       setOffersLoading(false);
+    }
+  };
+
+  const getOffers = async () => {
+    try {
+      setBidsLoading(true);
+      const { data } = await getMyOffers(uid);
+      data.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
+      setBids(data);
+      setBidsLoading(false);
+    } catch {
+      setBidsLoading(false);
     }
   };
 
@@ -490,6 +511,30 @@ const AccountDetails = () => {
   if (!isAddress(uid)) {
     return <Redirect to="/404" />;
   }
+
+  const renderMedia = image => {
+    if (image?.includes('youtube')) {
+      return (
+        <ReactPlayer
+          className={styles.mediaInner}
+          url={image}
+          controls={true}
+          width="100%"
+          height="100%"
+        />
+      );
+    } else {
+      return (
+        <Suspense
+          fallback={
+            <Loader type="Oval" color="#007BFF" height={32} width={32} />
+          }
+        >
+          <SuspenseImg className={styles.mediaInner} src={image} />
+        </Suspense>
+      );
+    }
+  };
 
   const renderTab = (label, Icon, idx, count, countLoading) => (
     <div
@@ -649,6 +694,7 @@ const AccountDetails = () => {
             <div className={styles.groupTitle}>Account</div>
             {renderTab('Activity', IconClock, 3)}
             {renderTab('Offers', IconList, 4)}
+            {renderTab('Bids', IconList, 5)}
           </div>
         </div>
         <div className={styles.contentBody} onScroll={handleScroll}>
@@ -696,6 +742,15 @@ const AccountDetails = () => {
                           to={`/explore/${activity.contractAddress}/${activity.tokenID}`}
                           className={styles.name}
                         >
+                          <div className={styles.media}>
+                            {renderMedia(
+                              activity.thumbnailPath.length > 10
+                                ? `${storageUrl()}/image/${
+                                    activity.thumbnailPath
+                                  }`
+                                : activity.imageURL
+                            )}
+                          </div>
                           {activity.name}
                         </Link>
                       ) : (
@@ -759,9 +814,10 @@ const AccountDetails = () => {
                 )}
               </div>
             </div>
-          ) : (
+          ) : tab === 4 ? (
             <>
               <div className={styles.activityHeader}>
+                <div className={styles.name}>Item</div>
                 <div className={styles.owner}>From</div>
                 <div className={styles.price}>Price</div>
                 <div className={styles.quantity}>Quantity</div>
@@ -775,6 +831,25 @@ const AccountDetails = () => {
                     )
                 ).map((offer, idx) => (
                   <div key={idx} className={styles.activity}>
+                    {offer ? (
+                      <Link
+                        to={`/explore/${offer.contractAddress}/${offer.tokenID}`}
+                        className={styles.name}
+                      >
+                        <div className={styles.media}>
+                          {renderMedia(
+                            offer.thumbnailPath.length > 10
+                              ? `${storageUrl()}/image/${offer.thumbnailPath}`
+                              : offer.imageURL
+                          )}
+                        </div>
+                        {offer.name}
+                      </Link>
+                    ) : (
+                      <div className={styles.name}>
+                        <Skeleton width={120} height={20} />
+                      </div>
+                    )}
                     {offer ? (
                       <Link
                         to={`/account/${offer.creator}`}
@@ -818,6 +893,60 @@ const AccountDetails = () => {
                     <div className={styles.date}>
                       {offer ? (
                         formatDate(offer.createdAt)
+                      ) : (
+                        <Skeleton width={120} height={20} />
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          ) : (
+            <>
+              <div className={styles.activityHeader}>
+                <div className={styles.name}>Item</div>
+                <div className={styles.price}>Price</div>
+                <div className={styles.quantity}>Quantity</div>
+                <div className={styles.date}>Date</div>
+              </div>
+              <div className={styles.activityList}>
+                {(bidsLoading
+                  ? new Array(5).fill(null)
+                  : bids.filter(bid => bid.deadline * 1000 > now.getTime())
+                ).map((bid, idx) => (
+                  <div key={idx} className={styles.activity}>
+                    {bid ? (
+                      <Link
+                        to={`/explore/${bid.contractAddress}/${bid.tokenID}`}
+                        className={styles.name}
+                      >
+                        <div className={styles.media}>
+                          {renderMedia(
+                            bid.thumbnailPath.length > 10
+                              ? `${storageUrl()}/image/${bid.thumbnailPath}`
+                              : bid.imageURL
+                          )}
+                        </div>
+                        {bid.name}
+                      </Link>
+                    ) : (
+                      <div className={styles.name}>
+                        <Skeleton width={120} height={20} />
+                      </div>
+                    )}
+                    <div className={styles.price}>
+                      {bid ? (
+                        `${bid.pricePerItem} FTM`
+                      ) : (
+                        <Skeleton width={100} height={20} />
+                      )}
+                    </div>
+                    <div className={styles.quantity}>
+                      {bid ? bid.quantity : <Skeleton width={80} height={20} />}
+                    </div>
+                    <div className={styles.date}>
+                      {bid ? (
+                        formatDate(bid.createdAt)
                       ) : (
                         <Skeleton width={120} height={20} />
                       )}

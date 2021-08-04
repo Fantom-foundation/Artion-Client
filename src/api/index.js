@@ -374,6 +374,14 @@ export const useApi = () => {
     return res.data;
   };
 
+  const getMyOffers = async address => {
+    const res = await axios({
+      method: 'get',
+      url: `${apiUrl()}/info/getOffersFromAccount/${address}`,
+    });
+    return res.data;
+  };
+
   const addMod = async (name, address, authToken, signature) => {
     const data = { name, address, signature };
     const res = await axios({
@@ -707,6 +715,7 @@ export const useApi = () => {
     getTransferHistory,
     getAccountActivity,
     getActivityFromOthers,
+    getMyOffers,
     addMod,
     removeMod,
     banCollection,

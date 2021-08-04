@@ -65,6 +65,10 @@ export const SortByOptions = [
     label: 'Recently Created',
   },
   {
+    id: 'oldest',
+    label: 'Oldest',
+  },
+  {
     id: 'listedAt',
     label: 'Recently Listed',
   },
