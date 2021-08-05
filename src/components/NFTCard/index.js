@@ -8,7 +8,6 @@ import {
   Favorite as FavoriteIcon,
 } from '@material-ui/icons';
 import Loader from 'react-loader-spinner';
-import { useWeb3React } from '@web3-react/core';
 import Carousel, { Dots } from '@brainhubeu/react-carousel';
 import '@brainhubeu/react-carousel/lib/style.css';
 import axios from 'axios';
@@ -30,16 +29,8 @@ const ONE_DAY = ONE_HOUR * 24;
 const ONE_MONTH = ONE_DAY * 30;
 
 const BaseCard = ({ item, loading, style, create, onCreate, onLike }) => {
-  const {
-    storageUrl,
-    isLikingItem,
-    isLikingBundle,
-    likeItem,
-    likeBundle,
-  } = useApi();
+  const { storageUrl, likeItem, likeBundle } = useApi();
   const { getAuction } = useAuctionContract();
-
-  const { account } = useWeb3React();
 
   const [now, setNow] = useState(new Date());
   const [fetching, setFetching] = useState(false);
@@ -69,26 +60,6 @@ const BaseCard = ({ item, loading, style, create, onCreate, onLike }) => {
     setFetching(false);
   };
 
-  const getLikeInfo = async () => {
-    setLikeFetching(true);
-    try {
-      if (item.items) {
-        const { data } = await isLikingBundle(item._id, account);
-        setIsLike(data);
-      } else {
-        const { data } = await isLikingItem(
-          item.contractAddress,
-          item.tokenID,
-          account
-        );
-        setIsLike(data);
-      }
-    } catch (err) {
-      console.log(err);
-    }
-    setLikeFetching(false);
-  };
-
   const getCurrentAuction = async () => {
     try {
       const _auction = await getAuction(item.contractAddress, item.tokenID);
@@ -106,7 +77,6 @@ const BaseCard = ({ item, loading, style, create, onCreate, onLike }) => {
     }
     if (item) {
       setLiked(item.liked);
-      getLikeInfo();
       if (item.items) {
         setAuction(null);
       } else {
@@ -114,6 +84,15 @@ const BaseCard = ({ item, loading, style, create, onCreate, onLike }) => {
       }
     }
   }, [item]);
+
+  useEffect(() => {
+    if (item?.isLiked === undefined) {
+      setLikeFetching(true);
+    } else {
+      setLikeFetching(false);
+      setIsLike(item.isLiked);
+    }
+  }, [item?.isLiked]);
 
   useEffect(() => {
     setInterval(() => {

@@ -267,6 +267,20 @@ export const useApi = () => {
     return res.data;
   };
 
+  const getItemsLiked = async (items, authToken) => {
+    const data = { items: JSON.stringify(items) };
+    const res = await axios({
+      method: 'post',
+      url: `${apiUrl()}/like/getPageLiked`,
+      data: JSON.stringify(data),
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${authToken}`,
+      },
+    });
+    return res.data;
+  };
+
   const getBundleDetails = async bundleID => {
     const data = { bundleID };
     const res = await axios({
@@ -706,6 +720,7 @@ export const useApi = () => {
     rejectCollection,
     fetchMintableCollections,
     fetchTokens,
+    getItemsLiked,
     getBundleDetails,
     increaseBundleViewCount,
     fetchItemDetails,

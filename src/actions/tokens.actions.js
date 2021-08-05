@@ -2,6 +2,7 @@ import TokensConstants from '../constants/tokens.constants';
 
 const TokensActions = {
   resetTokens,
+  updateTokens,
   startFetching,
   fetchingSuccess,
   fetchingFailed,
@@ -16,6 +17,21 @@ function resetTokens() {
 const _resetTokens = () => {
   return {
     type: TokensConstants.RESET_TOKENS,
+  };
+};
+
+function updateTokens(tokens) {
+  return dispatch => {
+    dispatch(_updateTokens(tokens));
+  };
+}
+
+const _updateTokens = tokens => {
+  return {
+    type: TokensConstants.UPDATE_TOKENS,
+    payload: {
+      tokens,
+    },
   };
 };
 
