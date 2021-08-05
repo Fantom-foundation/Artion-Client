@@ -21,7 +21,7 @@ import iconCollapse from 'assets/svgs/collapse.svg';
 import styles from './styles.module.scss';
 
 const ExploreAllPage = () => {
-  const { fetchCollections, fetchTokens } = useApi();
+  const { fetchCollections, fetchTokens, getItemsLiked } = useApi();
 
   const dispatch = useDispatch();
 
@@ -33,7 +33,9 @@ const ExploreAllPage = () => {
   const [page, setPage] = useState(0);
   const [fetchInterval, setFetchInterval] = useState(null);
   const [cancelSource, setCancelSource] = useState(null);
+  const [likeCancelSource, setLikeCancelSource] = useState(null);
 
+  const { authToken } = useSelector(state => state.ConnectWallet);
   const { fetching, tokens, count } = useSelector(state => state.Tokens);
   const {
     collections,
@@ -140,6 +142,54 @@ const ExploreAllPage = () => {
     statusOnAuction,
     chainId,
   ]);
+
+  const updateItems = async () => {
+    try {
+      const missingTokens = tokens
+        .map((tk, index) =>
+          tk.items
+            ? {
+                index,
+                isLiked: tk.isLiked,
+                bundleID: tk._id,
+              }
+            : {
+                index,
+                isLiked: tk.isLiked,
+                contractAddress: tk.contractAddress,
+                tokenID: tk.tokenID,
+              }
+        )
+        .filter(tk => tk.isLiked === undefined);
+      const cancelTokenSource = axios.CancelToken.source();
+      setLikeCancelSource(cancelTokenSource);
+      const { data, status } = await getItemsLiked(
+        missingTokens,
+        authToken,
+        cancelTokenSource.token
+      );
+      if (status === 'success') {
+        const newTokens = [...tokens];
+        missingTokens.map((tk, idx) => {
+          newTokens[tk.index].isLiked = data[idx].isLiked;
+        });
+        dispatch(TokensActions.updateTokens(newTokens));
+      }
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setLikeCancelSource(null);
+    }
+  };
+
+  useEffect(() => {
+    if (likeCancelSource) {
+      likeCancelSource.cancel();
+    }
+    if (authToken && tokens.length) {
+      updateItems();
+    }
+  }, [tokens.length, authToken]);
 
   return (
     <>

@@ -10,6 +10,11 @@ export function Tokens(state = initialState, action) {
   switch (action.type) {
     case TokenConstants.RESET_TOKENS:
       return initialState;
+    case TokenConstants.UPDATE_TOKENS:
+      return {
+        ...state,
+        tokens: action.payload.tokens,
+      };
     case TokenConstants.FETCHING_START:
       return {
         ...state,

@@ -267,6 +267,20 @@ export const useApi = () => {
     return res.data;
   };
 
+  const getItemsLiked = async (items, authToken) => {
+    const data = { items: JSON.stringify(items) };
+    const res = await axios({
+      method: 'post',
+      url: `${apiUrl()}/like/getPageLiked`,
+      data: JSON.stringify(data),
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${authToken}`,
+      },
+    });
+    return res.data;
+  };
+
   const getBundleDetails = async bundleID => {
     const data = { bundleID };
     const res = await axios({
@@ -370,6 +384,14 @@ export const useApi = () => {
     const res = await axios({
       method: 'get',
       url: `${apiUrl()}/info/getActivityFromOthers/${address}`,
+    });
+    return res.data;
+  };
+
+  const getMyOffers = async address => {
+    const res = await axios({
+      method: 'get',
+      url: `${apiUrl()}/info/getOffersFromAccount/${address}`,
     });
     return res.data;
   };
@@ -698,6 +720,7 @@ export const useApi = () => {
     rejectCollection,
     fetchMintableCollections,
     fetchTokens,
+    getItemsLiked,
     getBundleDetails,
     increaseBundleViewCount,
     fetchItemDetails,
@@ -707,6 +730,7 @@ export const useApi = () => {
     getTransferHistory,
     getAccountActivity,
     getActivityFromOthers,
+    getMyOffers,
     addMod,
     removeMod,
     banCollection,
