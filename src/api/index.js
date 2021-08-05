@@ -232,7 +232,8 @@ export const useApi = () => {
   };
 
   const fetchTokens = async (
-    step,
+    from,
+    count,
     type = 'all',
     collections = [],
     category = null,
@@ -241,7 +242,7 @@ export const useApi = () => {
     address = null,
     cancelToken
   ) => {
-    const data = { step, type };
+    const data = { from, count, type };
     if (collections.length > 0) {
       data.collectionAddresses = collections;
     }

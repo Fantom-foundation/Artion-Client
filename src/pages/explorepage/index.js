@@ -33,7 +33,7 @@ const ExploreAllPage = () => {
 
   const conRef = useRef();
   const [collapsed, setCollapsed] = useState(false);
-  const [page, setPage] = useState(0);
+  const [from, setFrom] = useState(0);
   const [fetchInterval, setFetchInterval] = useState(null);
   const [cancelSource, setCancelSource] = useState(null);
   const [likeCancelSource, setLikeCancelSource] = useState(null);
@@ -53,6 +53,16 @@ const ExploreAllPage = () => {
     statusHasOffers,
     statusOnAuction,
   } = useSelector(state => state.Filter);
+
+  const numPerRow = Math.floor(gridWidth / 240);
+  const fetchCount =
+    numPerRow <= 3
+      ? 18
+      : numPerRow === 4
+      ? 16
+      : numPerRow === 5
+      ? 15
+      : numPerRow * 2;
 
   useEffect(() => {
     dispatch(HeaderActions.toggleSearchbar(true));
@@ -80,8 +90,7 @@ const ExploreAllPage = () => {
     if (cancelSource) {
       cancelSource.cancel();
     }
-
-    const step = cur + dir;
+    if (isNaN(fetchCount)) return;
 
     dispatch(TokensActions.startFetching(dir));
     setPrevDir(dir);
@@ -95,8 +104,14 @@ const ExploreAllPage = () => {
 
       const cancelTokenSource = axios.CancelToken.source();
       setCancelSource(cancelTokenSource);
+
+      let _count = fetchCount;
+      if (tokens.length % numPerRow) {
+        _count -= tokens.length % numPerRow;
+      }
       const { data } = await fetchTokens(
-        step,
+        cur,
+        _count,
         groupType,
         collections,
         category,
@@ -128,11 +143,13 @@ const ExploreAllPage = () => {
         dispatch(
           TokensActions.fetchingSuccess(
             data.total,
-            dir > 0 ? newTokens.slice(-36) : newTokens.slice(0, 36)
+            dir > 0
+              ? newTokens.slice(-_count * 2)
+              : newTokens.slice(0, _count * 2)
           )
         );
       }
-      setPage(step);
+      setFrom(cur);
     } catch (e) {
       if (!axios.isCancel(e)) {
         dispatch(TokensActions.fetchingFailed());
@@ -159,22 +176,22 @@ const ExploreAllPage = () => {
     const obj = e.target;
     if (obj.scrollHeight - obj.clientHeight - obj.scrollTop < 100) {
       if (prevDir === 1) {
-        fetchNFTs(page, 1);
+        fetchNFTs(from + fetchCount, 1);
       } else {
-        fetchNFTs(page + 1, 1);
+        fetchNFTs(from + fetchCount * 2, 1);
       }
-    } else if (obj.scrollTop < 100 && page) {
+    } else if (obj.scrollTop < 100 && from > fetchCount) {
       if (prevDir === 1) {
-        if (page > 1) fetchNFTs(page - 1, -1);
+        if (from > fetchCount) fetchNFTs(from - fetchCount * 2, -1);
       } else {
-        fetchNFTs(page, -1);
+        fetchNFTs(from - fetchCount, -1);
       }
     }
   };
 
   useEffect(() => {
     dispatch(TokensActions.resetTokens());
-    fetchNFTs(-1, 1);
+    fetchNFTs(0, 1);
   }, [
     collections,
     groupType,
@@ -237,8 +254,6 @@ const ExploreAllPage = () => {
       updateItems();
     }
   }, [tokens, authToken]);
-
-  const numPerRow = Math.floor(gridWidth / 240);
 
   return (
     <>

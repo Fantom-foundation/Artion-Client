@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import HeaderActions from 'actions/header.actions';
 import Header from 'components/header';
 import FakeCard from 'components/FakeCard';
+import toast from 'utils/toast';
 
 import fantomLogo from 'assets/svgs/fantom_logo_white.svg';
 
@@ -26,6 +27,17 @@ const LandingPage = () => {
     dispatch(HeaderActions.toggleSearchbar(false));
   }, []);
 
+  const checkWallet = e => {
+    if (!window.ethereum) {
+      toast(
+        'error',
+        'No Wallet Found!',
+        'Please install Metamask or Coinbase Wallet on your browser to browse Artion.'
+      );
+      e.preventDefault();
+    }
+  };
+
   return (
     <div className={styles.container}>
       <div className={styles.background}>
@@ -39,10 +51,18 @@ const LandingPage = () => {
           Create, Buy, Sell and Discover rare digital assets
         </div>
         <div className={styles.buttonsContainer}>
-          <Link to="/exploreall" className={styles.exploreButton}>
+          <Link
+            to="/exploreall"
+            className={styles.exploreButton}
+            onClick={checkWallet}
+          >
             Explore
           </Link>
-          <Link to="/create" className={styles.createButton}>
+          <Link
+            to="/create"
+            className={styles.createButton}
+            onClick={checkWallet}
+          >
             Create
           </Link>
         </div>

@@ -4,6 +4,7 @@ import cx from 'classnames';
 import Skeleton from 'react-loading-skeleton';
 import { Menu } from '@material-ui/core';
 import { UnsupportedChainIdError, useWeb3React } from '@web3-react/core';
+import { NoEthereumProviderError } from '@web3-react/injected-connector';
 import { ExpandMore, Search as SearchIcon } from '@material-ui/icons';
 import { useDispatch, useSelector } from 'react-redux';
 import axios from 'axios';
@@ -23,6 +24,7 @@ import BanCollectionModal from 'components/BanCollectionModal';
 import BanItemModal from 'components/BanItemModal';
 import BoostCollectionModal from 'components/BoostCollectionModal';
 import Identicon from 'components/Identicon';
+import toast from 'utils/toast';
 
 import logoWhite from 'assets/svgs/logo_white.svg';
 import logoBlue from 'assets/svgs/logo_blue.svg';
@@ -35,8 +37,6 @@ import iconEdit from 'assets/svgs/edit.svg';
 import iconSwap from 'assets/svgs/swap.svg';
 
 import styles from './styles.module.scss';
-import { NoEthereumProviderError } from '@web3-react/injected-connector';
-import toast from 'utils/toast';
 
 // eslint-disable-next-line no-undef
 const ENV = process.env.REACT_APP_ENV;
@@ -179,8 +179,8 @@ const NiftyHeader = ({ light }) => {
           if (showError) {
             toast(
               'error',
-              'No Provider Found!',
-              'You need to install Metamask on your browser to browse Artion.'
+              'No Wallet Found!',
+              'Please install Metamask or Coinbase Wallet on your browser to browse Artion.'
             );
           }
         }
@@ -245,6 +245,17 @@ const NiftyHeader = ({ light }) => {
       console.log(err);
     } finally {
       setCancelSource(null);
+    }
+  };
+
+  const checkWallet = e => {
+    if (!window.ethereum) {
+      toast(
+        'error',
+        'No Wallet Found!',
+        'Please install Metamask or Coinbase Wallet on your browser to browse Artion.'
+      );
+      e.preventDefault();
     }
   };
 
@@ -565,6 +576,7 @@ const NiftyHeader = ({ light }) => {
             to="/exploreall"
             className={cx(styles.menuLink, styles.link)}
             activeClassName={styles.active}
+            onClick={checkWallet}
           >
             Explore
           </NavLink>
@@ -572,6 +584,7 @@ const NiftyHeader = ({ light }) => {
             to="/create"
             className={cx(styles.menuLink, styles.link)}
             activeClassName={styles.active}
+            onClick={checkWallet}
           >
             Create
           </NavLink>
@@ -583,6 +596,7 @@ const NiftyHeader = ({ light }) => {
           to="/exploreall"
           className={cx(styles.menuLink, styles.link)}
           activeClassName={styles.active}
+          onClick={checkWallet}
         >
           Explore
         </NavLink>
@@ -590,6 +604,7 @@ const NiftyHeader = ({ light }) => {
           to="/create"
           className={cx(styles.menuLink, styles.link)}
           activeClassName={styles.active}
+          onClick={checkWallet}
         >
           Create
         </NavLink>
