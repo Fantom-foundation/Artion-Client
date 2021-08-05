@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import axios from 'axios';
 import cx from 'classnames';
 import { useWeb3React } from '@web3-react/core';
+import { useResizeDetector } from 'react-resize-detector';
 
 import StatusFilter from 'components/StatusFilter';
 import CollectionsFilter from 'components/CollectionsFilter';
@@ -27,16 +28,21 @@ const ExploreAllPage = () => {
 
   const { chainId } = useWeb3React();
 
+  const { width: gridWidth, ref } = useResizeDetector();
   const { width } = useWindowDimensions();
 
+  const conRef = useRef();
   const [collapsed, setCollapsed] = useState(false);
-  const [page, setPage] = useState(0);
+  const [from, setFrom] = useState(0);
   const [fetchInterval, setFetchInterval] = useState(null);
   const [cancelSource, setCancelSource] = useState(null);
   const [likeCancelSource, setLikeCancelSource] = useState(null);
+  const [prevDir, setPrevDir] = useState(1);
 
   const { authToken } = useSelector(state => state.ConnectWallet);
-  const { fetching, tokens, count } = useSelector(state => state.Tokens);
+  const { upFetching, downFetching, tokens } = useSelector(
+    state => state.Tokens
+  );
   const {
     collections,
     groupType,
@@ -47,6 +53,16 @@ const ExploreAllPage = () => {
     statusHasOffers,
     statusOnAuction,
   } = useSelector(state => state.Filter);
+
+  const numPerRow = Math.floor(gridWidth / 240);
+  const fetchCount =
+    numPerRow <= 3
+      ? 18
+      : numPerRow === 4
+      ? 16
+      : numPerRow === 5
+      ? 15
+      : numPerRow * 2;
 
   useEffect(() => {
     dispatch(HeaderActions.toggleSearchbar(true));
@@ -70,12 +86,14 @@ const ExploreAllPage = () => {
     }
   };
 
-  const fetchNFTs = async step => {
+  const fetchNFTs = async (cur, dir) => {
     if (cancelSource) {
       cancelSource.cancel();
     }
+    if (isNaN(fetchCount)) return;
 
-    dispatch(TokensActions.startFetching());
+    dispatch(TokensActions.startFetching(dir));
+    setPrevDir(dir);
 
     try {
       const filterBy = [];
@@ -86,8 +104,14 @@ const ExploreAllPage = () => {
 
       const cancelTokenSource = axios.CancelToken.source();
       setCancelSource(cancelTokenSource);
+
+      let _count = fetchCount;
+      if (tokens.length % numPerRow) {
+        _count -= tokens.length % numPerRow;
+      }
       const { data } = await fetchTokens(
-        step,
+        cur,
+        _count,
         groupType,
         collections,
         category,
@@ -96,8 +120,36 @@ const ExploreAllPage = () => {
         null,
         cancelTokenSource.token
       );
-      dispatch(TokensActions.fetchingSuccess(data.total, data.tokens));
-      setPage(step);
+      if (tokens.length <= 18) {
+        dispatch(
+          TokensActions.fetchingSuccess(data.total, [...tokens, ...data.tokens])
+        );
+      } else {
+        let newTokens =
+          dir > 0
+            ? [...tokens, ...data.tokens]
+            : dir < 0
+            ? [...data.tokens, ...tokens]
+            : data.tokens;
+        newTokens = newTokens.filter(
+          (tk, idx) =>
+            newTokens.findIndex(_tk =>
+              tk.items
+                ? tk._id === _tk._id
+                : tk.contractAddress === _tk.contractAddress &&
+                  tk.tokenID === _tk.tokenID
+            ) === idx
+        );
+        dispatch(
+          TokensActions.fetchingSuccess(
+            data.total,
+            dir > 0
+              ? newTokens.slice(-_count * 2)
+              : newTokens.slice(0, _count * 2)
+          )
+        );
+      }
+      setFrom(cur);
     } catch (e) {
       if (!axios.isCancel(e)) {
         dispatch(TokensActions.fetchingFailed());
@@ -119,18 +171,27 @@ const ExploreAllPage = () => {
   }, [chainId]);
 
   const handleScroll = e => {
-    if (fetching) return;
-    if (tokens.length === count) return;
+    if (upFetching || downFetching) return;
 
     const obj = e.target;
     if (obj.scrollHeight - obj.clientHeight - obj.scrollTop < 100) {
-      fetchNFTs(page + 1);
+      if (prevDir === 1) {
+        fetchNFTs(from + fetchCount, 1);
+      } else {
+        fetchNFTs(from + fetchCount * 2, 1);
+      }
+    } else if (obj.scrollTop < 100 && from > fetchCount) {
+      if (prevDir === 1) {
+        if (from > fetchCount) fetchNFTs(from - fetchCount * 2, -1);
+      } else {
+        fetchNFTs(from - fetchCount, -1);
+      }
     }
   };
 
   useEffect(() => {
     dispatch(TokensActions.resetTokens());
-    fetchNFTs(0);
+    fetchNFTs(0, 1);
   }, [
     collections,
     groupType,
@@ -161,6 +222,9 @@ const ExploreAllPage = () => {
               }
         )
         .filter(tk => tk.isLiked === undefined);
+
+      if (missingTokens.length === 0) return;
+
       const cancelTokenSource = axios.CancelToken.source();
       setLikeCancelSource(cancelTokenSource);
       const { data, status } = await getItemsLiked(
@@ -189,12 +253,13 @@ const ExploreAllPage = () => {
     if (authToken && tokens.length) {
       updateItems();
     }
-  }, [tokens.length, authToken]);
+  }, [tokens, authToken]);
 
   return (
     <>
       <Header light />
       <div
+        ref={conRef}
         className={styles.container}
         onScroll={width <= 600 ? handleScroll : null}
       >
@@ -215,13 +280,22 @@ const ExploreAllPage = () => {
         </div>
         <div className={styles.body}>
           <div className={styles.filterHeader}>
-            <ExploreFilterHeader loading={fetching} />
+            <ExploreFilterHeader loading={upFetching || downFetching} />
           </div>
           <div
+            ref={ref}
             className={styles.exploreAll}
             onScroll={width > 600 ? handleScroll : null}
           >
-            <NFTsGrid items={tokens} loading={fetching} />
+            <NFTsGrid
+              items={tokens.slice(
+                0,
+                Math.floor(tokens.length / numPerRow) * numPerRow
+              )}
+              uploading={upFetching}
+              loading={downFetching}
+              numPerRow={numPerRow}
+            />
           </div>
         </div>
       </div>

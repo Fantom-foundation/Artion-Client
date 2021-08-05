@@ -261,9 +261,9 @@ const NotificationSetting = () => {
               classes={{ label: styles.groupTitle }}
               control={
                 <CustomCheckbox
-                  checked={getSetting('fNotification')}
+                  checked={getSetting('sNotification')}
                   onChange={handleChange}
-                  name="fNotification"
+                  name="sNotification"
                 />
               }
               label="Your Activity Notifications"
@@ -275,9 +275,9 @@ const NotificationSetting = () => {
                   name={option.value}
                   title={option.title}
                   description={option.description}
-                  disabled={!getSetting('fNotification')}
+                  disabled={!getSetting('sNotification')}
                   checked={
-                    getSetting('fNotification') && getSetting(option.value)
+                    getSetting('sNotification') && getSetting(option.value)
                   }
                   onChange={handleChange}
                 />
@@ -291,9 +291,9 @@ const NotificationSetting = () => {
               classes={{ label: styles.groupTitle }}
               control={
                 <CustomCheckbox
-                  checked={getSetting('sNotification')}
+                  checked={getSetting('fNotification')}
                   onChange={handleChange}
-                  name="sNotification"
+                  name="fNotification"
                 />
               }
               label="Follower Activity Notifications"
@@ -305,9 +305,9 @@ const NotificationSetting = () => {
                   name={option.value}
                   title={option.title}
                   description={option.description}
-                  disabled={!getSetting('sNotification')}
+                  disabled={!getSetting('fNotification')}
                   checked={
-                    getSetting('sNotification') && getSetting(option.value)
+                    getSetting('fNotification') && getSetting(option.value)
                   }
                   onChange={handleChange}
                 />

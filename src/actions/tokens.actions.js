@@ -35,15 +35,18 @@ const _updateTokens = tokens => {
   };
 };
 
-function startFetching() {
+function startFetching(direction) {
   return dispatch => {
-    dispatch(_startFetching());
+    dispatch(_startFetching(direction));
   };
 }
 
-const _startFetching = () => {
+const _startFetching = direction => {
   return {
     type: TokensConstants.FETCHING_START,
+    payload: {
+      direction,
+    },
   };
 };
 

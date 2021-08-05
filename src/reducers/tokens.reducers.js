@@ -1,9 +1,12 @@
 import TokenConstants from '../constants/tokens.constants';
 
 const initialState = {
-  fetching: false,
+  upFetching: false,
+  downFetching: false,
   count: 0,
   tokens: [],
+  hasPrev: false,
+  hasNext: false,
 };
 
 export function Tokens(state = initialState, action) {
@@ -16,21 +19,28 @@ export function Tokens(state = initialState, action) {
         tokens: action.payload.tokens,
       };
     case TokenConstants.FETCHING_START:
+      if (action.payload.direction < 0) {
+        return {
+          ...state,
+          upFetching: true,
+        };
+      }
       return {
         ...state,
-        fetching: true,
+        downFetching: true,
       };
     case TokenConstants.FETCHING_SUCCESS:
       return {
         ...state,
-        fetching: false,
-        count: action.payload.count,
-        tokens: [...state.tokens, ...action.payload.tokens],
+        upFetching: false,
+        downFetching: false,
+        ...action.payload,
       };
     case TokenConstants.FETCHING_FAILED:
       return {
         ...state,
-        fetching: false,
+        upFetching: false,
+        downFetching: false,
       };
     default: {
       return state;

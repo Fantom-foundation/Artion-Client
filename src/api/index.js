@@ -232,7 +232,8 @@ export const useApi = () => {
   };
 
   const fetchTokens = async (
-    step,
+    from,
+    count,
     type = 'all',
     collections = [],
     category = null,
@@ -241,7 +242,7 @@ export const useApi = () => {
     address = null,
     cancelToken
   ) => {
-    const data = { step, type };
+    const data = { from, count, type };
     if (collections.length > 0) {
       data.collectionAddresses = collections;
     }
@@ -267,7 +268,7 @@ export const useApi = () => {
     return res.data;
   };
 
-  const getItemsLiked = async (items, authToken) => {
+  const getItemsLiked = async (items, authToken, cancelToken) => {
     const data = { items: JSON.stringify(items) };
     const res = await axios({
       method: 'post',
@@ -277,6 +278,7 @@ export const useApi = () => {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${authToken}`,
       },
+      cancelToken,
     });
     return res.data;
   };

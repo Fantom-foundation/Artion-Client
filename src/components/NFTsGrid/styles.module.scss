@@ -12,3 +12,42 @@
   padding-bottom: 32px;
   padding: 4px;
 }
+
+.nft {
+  margin: 12px;
+}
+
+.num1 {
+  width: calc(100% - 24px);
+  flex-basis: calc(100% - 24px);
+}
+
+.num2 {
+  width: calc(50% - 24px);
+  flex-basis: calc(50% - 24px);
+}
+
+.num3 {
+  width: calc(33.33% - 24px);
+  flex-basis: calc(33.33% - 24px);
+}
+
+.num4 {
+  width: calc(25% - 24px);
+  flex-basis: calc(25% - 24px);
+}
+
+.num5 {
+  width: calc(20% - 24px);
+  flex-basis: calc(20% - 24px);
+}
+
+.num6 {
+  width: calc(16.66% - 24px);
+  flex-basis: calc(16.66% - 24px);
+}
+
+.num7 {
+  width: calc(14.28% - 24px);
+  flex-basis: calc(14.28% - 24px);
+}
