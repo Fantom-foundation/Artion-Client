@@ -190,6 +190,7 @@ const ExploreAllPage = () => {
   };
 
   useEffect(() => {
+    if (isNaN(numPerRow)) return;
     dispatch(TokensActions.resetTokens());
     fetchNFTs(0, 1);
   }, [
@@ -202,6 +203,7 @@ const ExploreAllPage = () => {
     statusHasOffers,
     statusOnAuction,
     chainId,
+    numPerRow,
   ]);
 
   const updateItems = async () => {
