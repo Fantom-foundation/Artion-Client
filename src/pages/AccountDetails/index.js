@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect, Suspense } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams, Link, Redirect } from 'react-router-dom';
+import { useResizeDetector } from 'react-resize-detector';
 import cx from 'classnames';
 import { Edit as EditIcon } from '@material-ui/icons';
 import { Tooltip, Menu, MenuItem } from '@material-ui/core';
@@ -10,6 +11,7 @@ import Skeleton from 'react-loading-skeleton';
 import { ClipLoader } from 'react-spinners';
 import ReactPlayer from 'react-player';
 import Loader from 'react-loader-spinner';
+import axios from 'axios';
 
 import NFTsGrid from 'components/NFTsGrid';
 import Header from 'components/header';
@@ -60,8 +62,10 @@ const AccountDetails = () => {
     getFollowers,
     getFollowings,
     getMyLikes,
+    getItemsLiked,
   } = useApi();
   const { account, chainId } = useWeb3React();
+  const { width, ref } = useResizeDetector();
 
   const { uid } = useParams();
 
@@ -78,9 +82,9 @@ const AccountDetails = () => {
   const [fetching, setFetching] = useState(false);
   const [bundleFetching, setBundleFetching] = useState(false);
   const [favFetching, setFavFetching] = useState(false);
-  const tokens = useRef([]);
-  const bundles = useRef([]);
-  const likes = useRef([]);
+  const [tokens, setTokens] = useState([]);
+  const [bundles, setBundles] = useState([]);
+  const [likes, setLikes] = useState([]);
   const [followersLoading, setFollowersLoading] = useState(false);
   const followers = useRef([]);
   const followings = useRef([]);
@@ -104,6 +108,7 @@ const AccountDetails = () => {
   const [offersLoading, setOffersLoading] = useState(false);
   const [offers, setOffers] = useState([]);
   const [fetchInterval, setFetchInterval] = useState(null);
+  const [likeCancelSource, setLikeCancelSource] = useState(null);
 
   const getUserDetails = async _account => {
     setLoading(true);
@@ -168,10 +173,10 @@ const AccountDetails = () => {
       setBundleFetching(false);
 
       if (tab === 0) {
-        tokens.current.push(...data.tokens);
+        setTokens([...tokens, ...data.tokens]);
         setCount(data.total);
       } else {
-        bundles.current.push(...data.tokens);
+        setBundles([...bundles, ...data.tokens]);
         setBundleCount(data.total);
       }
       setPage(step);
@@ -189,7 +194,7 @@ const AccountDetails = () => {
     try {
       const { data } = await getMyLikes(step, uid);
       setFavFetching(false);
-      likes.current.push(...data.tokens);
+      setLikes([...likes, ...data.tokens]);
       setFavCount(data.total);
       setPage(step);
     } catch {
@@ -253,11 +258,75 @@ const AccountDetails = () => {
     setInterval(() => setNow(new Date()), 1000);
   }, []);
 
+  const updateItems = async tokens => {
+    return new Promise((resolve, reject) => {
+      const missingTokens = tokens
+        .map((tk, index) =>
+          tk.items
+            ? {
+                index,
+                isLiked: tk.isLiked,
+                bundleID: tk._id,
+              }
+            : {
+                index,
+                isLiked: tk.isLiked,
+                contractAddress: tk.contractAddress,
+                tokenID: tk.tokenID,
+              }
+        )
+        .filter(tk => tk.isLiked === undefined);
+
+      if (missingTokens.length === 0) {
+        reject();
+        return;
+      }
+
+      const cancelTokenSource = axios.CancelToken.source();
+      setLikeCancelSource(cancelTokenSource);
+      getItemsLiked(missingTokens, authToken, cancelTokenSource.token)
+        .then(({ data, status }) => {
+          setLikeCancelSource(null);
+          if (status === 'success') {
+            const newTokens = [...tokens];
+            missingTokens.map((tk, idx) => {
+              newTokens[tk.index].isLiked = data[idx].isLiked;
+            });
+            resolve(newTokens);
+          }
+        })
+        .catch(() => {
+          reject();
+        });
+    });
+  };
+
+  useEffect(() => {
+    if (likeCancelSource) {
+      likeCancelSource.cancel();
+    }
+    if (!authToken) return;
+
+    if (tab === 0 && tokens.length) {
+      updateItems(tokens)
+        .then(setTokens)
+        .catch();
+    } else if (tab === 1 && bundles.length) {
+      updateItems(bundles)
+        .then(setBundles)
+        .catch();
+    } else if (tab === 2 && likes.length) {
+      updateItems(likes)
+        .then(setLikes)
+        .catch();
+    }
+  }, [tokens, bundles, likes, authToken, tab]);
+
   const loadNextPage = () => {
     if (fetching) return;
-    if (tab === 0 && tokens.current.length === count) return;
-    if (tab === 1 && bundles.current.length === bundleCount) return;
-    if (tab === 2 && likes.current.length === favCount) return;
+    if (tab === 0 && tokens.length === count) return;
+    if (tab === 1 && bundles.length === bundleCount) return;
+    if (tab === 2 && likes.length === favCount) return;
 
     if (tab === 0 || tab === 1) {
       fetchNFTs(page + 1);
@@ -277,15 +346,15 @@ const AccountDetails = () => {
 
   const init = () => {
     if (tab === 0) {
-      tokens.current = [];
+      setTokens([]);
       setCount(0);
       fetchNFTs(0);
     } else if (tab === 1) {
-      bundles.current = [];
+      setBundles([]);
       setBundleCount(0);
       fetchNFTs(0);
     } else if (tab === 2) {
-      likes.current = [];
+      setLikes([]);
       setFavCount(0);
       fetchLikes(0);
     } else if (tab === 3) {
@@ -323,9 +392,10 @@ const AccountDetails = () => {
   };
 
   const goToTab = _tab => {
-    tokens.current = [];
-    bundles.current = [];
-    likes.current = [];
+    setTokens([]);
+    setBundles([]);
+    setLikes([]);
+
     setTab(_tab);
   };
 
@@ -512,6 +582,8 @@ const AccountDetails = () => {
     return <Redirect to="/404" />;
   }
 
+  const numPerRow = Math.floor(width / 240);
+
   const renderMedia = image => {
     if (image?.includes('youtube')) {
       return (
@@ -609,15 +681,13 @@ const AccountDetails = () => {
             )}
           </div>
           <div className={styles.usernameWrapper}>
-            <div className={styles.username}>
-              {loading ? (
-                <Skeleton width={120} height={24} />
-              ) : (
-                user.alias || 'Unnamed'
-              )}
-            </div>
+            {loading ? (
+              <Skeleton width={120} height={24} />
+            ) : (
+              <div className={styles.username}>{user.alias || 'Unnamed'}</div>
+            )}
             {isMe ? null : loading ? (
-              <Skeleton width={80} height={26} />
+              <Skeleton width={80} height={26} style={{ marginLeft: 16 }} />
             ) : (
               <div
                 className={cx(
@@ -697,22 +767,24 @@ const AccountDetails = () => {
             {renderTab('Bids', IconList, 5)}
           </div>
         </div>
-        <div className={styles.contentBody} onScroll={handleScroll}>
+        <div ref={ref} className={styles.contentBody} onScroll={handleScroll}>
           {tab === 0 ? (
-            <NFTsGrid items={tokens.current} loading={fetching} />
+            <NFTsGrid items={tokens} numPerRow={numPerRow} loading={fetching} />
           ) : tab === 1 ? (
             <NFTsGrid
-              items={bundles.current}
+              items={bundles}
+              numPerRow={numPerRow}
               loading={fetching}
               showCreate={isMe}
               onCreate={handleCreateBundle}
             />
           ) : tab === 2 ? (
             <NFTsGrid
-              items={likes.current}
+              items={likes}
+              numPerRow={numPerRow}
               loading={fetching}
               onLike={() => {
-                likes.current = [];
+                setLikes([]);
                 fetchLikes(0);
               }}
             />
@@ -999,7 +1071,7 @@ const AccountDetails = () => {
         visible={bundleModalVisible}
         onClose={() => setBundleModalVisible(false)}
         onCreateSuccess={() => {
-          bundles.current = [];
+          setBundles([]);
           fetchNFTs(0);
         }}
       />

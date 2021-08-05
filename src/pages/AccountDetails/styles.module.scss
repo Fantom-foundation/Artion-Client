@@ -246,6 +246,8 @@
   max-height: 100%;
   overflow-y: auto;
   overflow-x: auto;
+  display: flex;
+  flex-flow: wrap;
 }
 
 .tab {
