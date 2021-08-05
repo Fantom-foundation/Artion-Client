@@ -96,7 +96,7 @@
     "react-player": "^2.9.0",
     "react-range": "^1.4.3",
     "react-redux": "^7.2.2",
-    "react-resize-detector": "^6.7.2",
+    "react-resize-detector": "^6.7.4",
     "react-router-dom": "^5.2.0",
     "react-scripts": "^4.0.2",
     "react-spinners": "^0.10.6",

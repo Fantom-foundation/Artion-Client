@@ -106,6 +106,8 @@
   padding-left: 40px;
   padding-right: 10px;
   padding-bottom: 20px;
+  display: flex;
+  flex-wrap: wrap;
 }
 
 .filterHeader {
@@ -122,7 +124,7 @@
     padding-top: 133px;
   }
 
-  .sidebar {
+  .sidebar:not(.collapsed) {
     flex: 0 0 260px;
   }
 }

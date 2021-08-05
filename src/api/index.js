@@ -267,7 +267,7 @@ export const useApi = () => {
     return res.data;
   };
 
-  const getItemsLiked = async (items, authToken) => {
+  const getItemsLiked = async (items, authToken, cancelToken) => {
     const data = { items: JSON.stringify(items) };
     const res = await axios({
       method: 'post',
@@ -277,6 +277,7 @@ export const useApi = () => {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${authToken}`,
       },
+      cancelToken,
     });
     return res.data;
   };
