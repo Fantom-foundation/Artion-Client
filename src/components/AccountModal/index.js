@@ -5,6 +5,7 @@ import { ClipLoader } from 'react-spinners';
 import Modal from '@material-ui/core/Modal';
 import CreateIcon from '@material-ui/icons/Create';
 import { useWeb3React } from '@web3-react/core';
+import { ethers } from 'ethers';
 
 import ModalActions from 'actions/modal.actions';
 import AuthActions from 'actions/auth.actions';
@@ -107,11 +108,12 @@ const AccountModal = () => {
       const { data: nonce } = await getNonce(account, authToken);
 
       let signature;
+      let addr;
       try {
         const signer = await getSigner();
-        signature = await signer.signMessage(
-          `Approve Signature on Artion.io with nonce ${nonce}`
-        );
+        const msg = `Approve Signature on Artion.io with nonce ${nonce}`;
+        signature = await signer.signMessage(msg);
+        addr = ethers.utils.verifyMessage(msg, signature);
       } catch (err) {
         toast(
           'error',
@@ -128,7 +130,8 @@ const AccountModal = () => {
           bio,
           avatar,
           authToken,
-          signature
+          signature,
+          addr
         );
         dispatch(AuthActions.fetchSuccess(res.data));
         toast('success', 'Account details saved!');
@@ -150,7 +153,8 @@ const AccountModal = () => {
               bio,
               data,
               authToken,
-              signature
+              signature,
+              addr
             );
             dispatch(AuthActions.fetchSuccess(res.data));
             toast('success', 'Account details saved!');
