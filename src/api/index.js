@@ -716,7 +716,7 @@ export const useApi = () => {
     settings,
     authToken,
     signature,
-    address
+    signatureAddress
   ) => {
     const res = await axios({
       method: 'post',
@@ -724,7 +724,7 @@ export const useApi = () => {
       data: JSON.stringify({
         settings: JSON.stringify(settings),
         signature,
-        address,
+        signatureAddress,
       }),
       headers: {
         'Content-Type': 'application/json',
