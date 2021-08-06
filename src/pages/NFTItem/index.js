@@ -1916,6 +1916,8 @@ const NFTItem = () => {
           height="100%"
         />
       );
+    } else if (contentType === 'embed') {
+      return <iframe className={styles.content} src={image} />;
     } else if (contentType === 'image' || contentType === 'gif') {
       return (
         <Suspense

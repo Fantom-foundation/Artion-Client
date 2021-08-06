@@ -257,8 +257,11 @@ const BaseCard = ({ item, loading, style, create, onCreate, onLike }) => {
               <div className={styles.imageBox}>
                 {(item?.imageURL ||
                   info?.image ||
-                  item?.thumbnailPath?.length > 10) &&
-                  ((item?.imageURL || info?.image)?.includes('youtube') ? (
+                  item?.thumbnailPath?.length > 10 ||
+                  item?.thumbnailPath === 'embed') &&
+                  (item?.thumbnailPath === 'embed' ? (
+                    <iframe src={item?.imageURL} className={styles.media} />
+                  ) : (item?.imageURL || info?.image)?.includes('youtube') ? (
                     <ReactPlayer
                       className={styles.media}
                       url={item?.imageURL || info?.image}
