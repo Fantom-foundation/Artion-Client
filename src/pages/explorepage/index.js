@@ -33,14 +33,13 @@ const ExploreAllPage = () => {
 
   const conRef = useRef();
   const [collapsed, setCollapsed] = useState(false);
-  const [from, setFrom] = useState(0);
   const [fetchInterval, setFetchInterval] = useState(null);
   const [cancelSource, setCancelSource] = useState(null);
   const [likeCancelSource, setLikeCancelSource] = useState(null);
-  const [prevDir, setPrevDir] = useState(1);
+  const [prevNumPerRow, setPrevNumPerRow] = useState(null);
 
   const { authToken } = useSelector(state => state.ConnectWallet);
-  const { upFetching, downFetching, tokens } = useSelector(
+  const { upFetching, downFetching, tokens, from, to } = useSelector(
     state => state.Tokens
   );
   const {
@@ -55,14 +54,7 @@ const ExploreAllPage = () => {
   } = useSelector(state => state.Filter);
 
   const numPerRow = Math.floor(gridWidth / 240);
-  const fetchCount =
-    numPerRow <= 3
-      ? 18
-      : numPerRow === 4
-      ? 16
-      : numPerRow === 5
-      ? 15
-      : numPerRow * 2;
+  const fetchCount = numPerRow <= 3 ? 18 : numPerRow === 4 ? 16 : numPerRow * 3;
 
   useEffect(() => {
     dispatch(HeaderActions.toggleSearchbar(true));
@@ -86,14 +78,13 @@ const ExploreAllPage = () => {
     }
   };
 
-  const fetchNFTs = async (cur, dir) => {
+  const fetchNFTs = async dir => {
     if (cancelSource) {
       cancelSource.cancel();
     }
     if (isNaN(fetchCount)) return;
 
     dispatch(TokensActions.startFetching(dir));
-    setPrevDir(dir);
 
     try {
       const filterBy = [];
@@ -105,12 +96,17 @@ const ExploreAllPage = () => {
       const cancelTokenSource = axios.CancelToken.source();
       setCancelSource(cancelTokenSource);
 
+      let start;
       let _count = fetchCount;
-      if (tokens.length % numPerRow) {
+      if (dir !== 0) {
         _count -= tokens.length % numPerRow;
+        start = Math.max(dir < 0 ? from - _count : to, 0);
+      } else {
+        start = from;
+        _count = fetchCount * 2;
       }
       const { data } = await fetchTokens(
-        cur,
+        start,
         _count,
         groupType,
         collections,
@@ -120,36 +116,49 @@ const ExploreAllPage = () => {
         null,
         cancelTokenSource.token
       );
-      if (tokens.length <= 18) {
-        dispatch(
-          TokensActions.fetchingSuccess(data.total, [...tokens, ...data.tokens])
-        );
+
+      let newTokens =
+        dir > 0
+          ? [...tokens, ...data.tokens]
+          : dir < 0
+          ? [...data.tokens, ...tokens]
+          : data.tokens;
+      newTokens = newTokens.filter(
+        (tk, idx) =>
+          newTokens.findIndex(_tk =>
+            tk.items
+              ? tk._id === _tk._id
+              : tk.contractAddress === _tk.contractAddress &&
+                tk.tokenID === _tk.tokenID
+          ) === idx
+      );
+      let _from = from;
+      let _to = to;
+      const newCount = newTokens.length - tokens.length;
+      if (dir > 0) {
+        _to += newCount;
+      } else if (dir < 0) {
+        _from -= newCount;
       } else {
-        let newTokens =
-          dir > 0
-            ? [...tokens, ...data.tokens]
-            : dir < 0
-            ? [...data.tokens, ...tokens]
-            : data.tokens;
-        newTokens = newTokens.filter(
-          (tk, idx) =>
-            newTokens.findIndex(_tk =>
-              tk.items
-                ? tk._id === _tk._id
-                : tk.contractAddress === _tk.contractAddress &&
-                  tk.tokenID === _tk.tokenID
-            ) === idx
-        );
-        dispatch(
-          TokensActions.fetchingSuccess(
-            data.total,
-            dir > 0
-              ? newTokens.slice(-_count * 2)
-              : newTokens.slice(0, _count * 2)
-          )
-        );
+        _to = _from + newTokens.length;
       }
-      setFrom(cur);
+      newTokens =
+        dir > 0
+          ? newTokens.slice(-fetchCount * 2)
+          : newTokens.slice(0, fetchCount * 2);
+      if (dir > 0) {
+        _from = _to - newTokens.length;
+      } else if (dir < 0) {
+        _to = _from + newTokens.length;
+      }
+      dispatch(
+        TokensActions.fetchingSuccess(data.total, newTokens, _from, _to)
+      );
+      if (dir === 0 && from) {
+        // move scrollbar to middle
+        const obj = width > 600 ? ref.current : conRef.current;
+        obj.scrollTop = (obj.scrollHeight - obj.clientHeight) / 2;
+      }
     } catch (e) {
       if (!axios.isCancel(e)) {
         dispatch(TokensActions.fetchingFailed());
@@ -175,24 +184,18 @@ const ExploreAllPage = () => {
 
     const obj = e.target;
     if (obj.scrollHeight - obj.clientHeight - obj.scrollTop < 100) {
-      if (prevDir === 1) {
-        fetchNFTs(from + fetchCount, 1);
-      } else {
-        fetchNFTs(from + fetchCount * 2, 1);
-      }
-    } else if (obj.scrollTop < 100 && from > fetchCount) {
-      if (prevDir === 1) {
-        if (from > fetchCount) fetchNFTs(from - fetchCount * 2, -1);
-      } else {
-        fetchNFTs(from - fetchCount, -1);
-      }
+      fetchNFTs(1);
+    } else if (obj.scrollTop < 100 && from) {
+      fetchNFTs(-1);
     }
   };
 
   useEffect(() => {
-    if (isNaN(numPerRow)) return;
-    dispatch(TokensActions.resetTokens());
-    fetchNFTs(0, 1);
+    setPrevNumPerRow(numPerRow);
+    if (isNaN(numPerRow) || (prevNumPerRow && prevNumPerRow !== numPerRow))
+      return;
+    setPrevNumPerRow(numPerRow);
+    fetchNFTs(0);
   }, [
     collections,
     groupType,
@@ -290,10 +293,7 @@ const ExploreAllPage = () => {
             onScroll={width > 600 ? handleScroll : null}
           >
             <NFTsGrid
-              items={tokens.slice(
-                0,
-                Math.floor(tokens.length / numPerRow) * numPerRow
-              )}
+              items={tokens}
               uploading={upFetching}
               loading={downFetching}
               numPerRow={numPerRow}

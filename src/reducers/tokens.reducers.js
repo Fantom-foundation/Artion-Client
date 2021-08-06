@@ -5,8 +5,8 @@ const initialState = {
   downFetching: false,
   count: 0,
   tokens: [],
-  hasPrev: false,
-  hasNext: false,
+  from: 0,
+  to: 0,
 };
 
 export function Tokens(state = initialState, action) {
