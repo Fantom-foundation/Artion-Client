@@ -102,7 +102,8 @@ const NewBundleModal = ({ visible, onClose, onCreateSuccess = () => {} }) => {
 
     try {
       const { data } = await fetchTokens(
-        step,
+        step * 18,
+        18,
         'single',
         [],
         null,
