@@ -1,4 +1,5 @@
 import TokenConstants from '../constants/tokens.constants';
+import FilterConstants from '../constants/filter.constants';
 
 const initialState = {
   upFetching: false,
@@ -11,6 +12,11 @@ const initialState = {
 
 export function Tokens(state = initialState, action) {
   switch (action.type) {
+    case FilterConstants.UPDATE_STATUS_FILTER:
+    case FilterConstants.UPDATE_COLLECTIONS_FILTER:
+    case FilterConstants.UPDATE_CATEGORIES_FILTER:
+    case FilterConstants.UPDATE_GROUP_TYPE_FILTER:
+    case FilterConstants.UPDATE_SORT_BY_FILTER:
     case TokenConstants.RESET_TOKENS:
       return initialState;
     case TokenConstants.UPDATE_TOKENS:
