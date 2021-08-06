@@ -167,6 +167,7 @@ const NiftyHeader = ({ light }) => {
   }, [account, chainId]);
 
   const handleConnectWallet = (showError = true) => {
+    console.log('===>', window.ethereum, window.web3.currentProvider);
     activate(injected, undefined, true)
       .then(() => {
         if (account) login();

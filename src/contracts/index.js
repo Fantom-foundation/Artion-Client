@@ -10,7 +10,9 @@ export * from './factory';
 
 export const getSigner = async () => {
   await window.ethereum.enable();
-  const provider = new ethers.providers.Web3Provider(window.ethereum);
+  const provider = new ethers.providers.Web3Provider(
+    window.web3.currentProvider
+  );
   const signer = provider.getSigner();
   return signer;
 };
