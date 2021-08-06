@@ -6,6 +6,7 @@ import { ClipLoader } from 'react-spinners';
 import Checkbox from '@material-ui/core/Checkbox';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import { useWeb3React } from '@web3-react/core';
+import { ethers } from 'ethers';
 
 import HeaderActions from 'actions/header.actions';
 import Header from 'components/header';
@@ -14,7 +15,6 @@ import { getSigner } from 'contracts';
 import toast from 'utils/toast';
 
 import styles from './styles.module.scss';
-import { ethers } from 'ethers';
 
 const selfSettings = [
   {
@@ -218,17 +218,13 @@ const NotificationSetting = () => {
     setSaving(true);
     try {
       let signature;
+      let addr;
       try {
         const { data: nonce } = await getNonce(account, authToken);
         const signer = await getSigner();
-        signature = await signer.signMessage(
-          `Approve Signature on Artion.io with nonce ${nonce}`
-        );
-        const addr = ethers.utils.verifyMessage(
-          `Approve Signature on Artion.io with nonce ${nonce}`,
-          signature
-        );
-        console.log('Verified address: ', addr);
+        const msg = `Approve Signature on Artion.io with nonce ${nonce}`;
+        signature = await signer.signMessage(msg);
+        addr = ethers.utils.verifyMessage(msg, signature);
       } catch (err) {
         toast(
           'error',
@@ -240,7 +236,8 @@ const NotificationSetting = () => {
       const { status } = await updateNotificationSettings(
         settings,
         authToken,
-        signature
+        signature,
+        addr
       );
       if (status === 'success') {
         toast('success', 'Notification settings updated!');

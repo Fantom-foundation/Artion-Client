@@ -104,7 +104,8 @@ export const useApi = () => {
     bio,
     avatar,
     authToken,
-    signature
+    signature,
+    signatureAddress
   ) => {
     const formData = new FormData();
     formData.append('alias', alias);
@@ -116,6 +117,7 @@ export const useApi = () => {
       formData.append('imgData', avatar);
     }
     formData.append('signature', signature);
+    formData.append('signatureAddress', signatureAddress);
 
     const res = await axios({
       method: 'post',
@@ -398,8 +400,14 @@ export const useApi = () => {
     return res.data;
   };
 
-  const addMod = async (name, address, authToken, signature) => {
-    const data = { name, address, signature };
+  const addMod = async (
+    name,
+    address,
+    authToken,
+    signature,
+    signatureAddress
+  ) => {
+    const data = { name, address, signature, signatureAddress };
     const res = await axios({
       method: 'post',
       url: `${apiUrl()}/mod/add`,
@@ -412,8 +420,8 @@ export const useApi = () => {
     return res.data;
   };
 
-  const removeMod = async (address, authToken, signature) => {
-    const data = { address, signature };
+  const removeMod = async (address, authToken, signature, signatureAddress) => {
+    const data = { address, signature, signatureAddress };
     const res = await axios({
       method: 'post',
       url: `${apiUrl()}/mod/remove`,
@@ -426,8 +434,13 @@ export const useApi = () => {
     return res.data;
   };
 
-  const banCollection = async (address, authToken, signature) => {
-    const data = { address, signature };
+  const banCollection = async (
+    address,
+    authToken,
+    signature,
+    signatureAddress
+  ) => {
+    const data = { address, signature, signatureAddress };
     const res = await axios({
       method: 'post',
       url: `${apiUrl()}/ban/banCollection`,
@@ -440,8 +453,13 @@ export const useApi = () => {
     return res.data;
   };
 
-  const unbanCollection = async (address, authToken, signature) => {
-    const data = { address, signature };
+  const unbanCollection = async (
+    address,
+    authToken,
+    signature,
+    signatureAddress
+  ) => {
+    const data = { address, signature, signatureAddress };
     const res = await axios({
       method: 'post',
       url: `${apiUrl()}/ban/unbanCollection`,
@@ -454,8 +472,14 @@ export const useApi = () => {
     return res.data;
   };
 
-  const banItems = async (address, tokenIDs, authToken, signature) => {
-    const data = { address, tokenIDs, signature };
+  const banItems = async (
+    address,
+    tokenIDs,
+    authToken,
+    signature,
+    signatureAddress
+  ) => {
+    const data = { address, tokenIDs, signature, signatureAddress };
     const res = await axios({
       method: 'post',
       url: `${apiUrl()}/ban/banItems`,
@@ -688,11 +712,20 @@ export const useApi = () => {
     return res.data;
   };
 
-  const updateNotificationSettings = async (settings, authToken, signature) => {
+  const updateNotificationSettings = async (
+    settings,
+    authToken,
+    signature,
+    address
+  ) => {
     const res = await axios({
       method: 'post',
       url: `${apiUrl()}/account/notificationsettings`,
-      data: JSON.stringify({ settings: JSON.stringify(settings), signature }),
+      data: JSON.stringify({
+        settings: JSON.stringify(settings),
+        signature,
+        address,
+      }),
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${authToken}`,

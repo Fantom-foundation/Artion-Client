@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { ClipLoader } from 'react-spinners';
 import { useWeb3React } from '@web3-react/core';
+import { ethers } from 'ethers';
 
 import toast from 'utils/toast';
 import { useApi } from 'api';
@@ -35,11 +36,12 @@ const ModModal = ({ visible, onClose, isAdding }) => {
       const { data: nonce } = await getNonce(account, authToken);
 
       let signature;
+      let addr;
       try {
         const signer = await getSigner();
-        signature = await signer.signMessage(
-          `Approve Signature on Artion.io with nonce ${nonce}`
-        );
+        const msg = `Approve Signature on Artion.io with nonce ${nonce}`;
+        signature = await signer.signMessage(msg);
+        addr = ethers.utils.verifyMessage(msg, signature);
       } catch (err) {
         toast(
           'error',
@@ -52,10 +54,10 @@ const ModModal = ({ visible, onClose, isAdding }) => {
       }
 
       if (isAdding) {
-        await addMod(name, address, authToken, signature);
+        await addMod(name, address, authToken, signature, addr);
         toast('success', 'Added new moderator!');
       } else {
-        await removeMod(address, authToken, signature);
+        await removeMod(address, authToken, signature, addr);
         toast('success', 'Removed moderator!');
       }
     } catch (e) {

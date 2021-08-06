@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { ClipLoader } from 'react-spinners';
 import { useWeb3React } from '@web3-react/core';
+import { ethers } from 'ethers';
 
 import toast from 'utils/toast';
 import { useApi } from 'api';
@@ -34,11 +35,12 @@ const BanCollectionModal = ({ visible, isBan, onClose }) => {
       const { data: nonce } = await getNonce(account, authToken);
 
       let signature;
+      let addr;
       try {
         const signer = await getSigner();
-        signature = await signer.signMessage(
-          `Approve Signature on Artion.io with nonce ${nonce}`
-        );
+        const msg = `Approve Signature on Artion.io with nonce ${nonce}`;
+        signature = await signer.signMessage(msg);
+        addr = ethers.utils.verifyMessage(msg, signature);
       } catch (err) {
         toast(
           'error',
@@ -51,7 +53,8 @@ const BanCollectionModal = ({ visible, isBan, onClose }) => {
       await (isBan ? banCollection : unbanCollection)(
         address,
         authToken,
-        signature
+        signature,
+        addr
       );
       toast('success', 'Success!');
     } catch (e) {
