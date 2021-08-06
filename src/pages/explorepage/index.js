@@ -194,7 +194,6 @@ const ExploreAllPage = () => {
     setPrevNumPerRow(numPerRow);
     if (isNaN(numPerRow) || (prevNumPerRow && prevNumPerRow !== numPerRow))
       return;
-    setPrevNumPerRow(numPerRow);
     fetchNFTs(0);
   }, [
     collections,
