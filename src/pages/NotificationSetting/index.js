@@ -14,6 +14,7 @@ import { getSigner } from 'contracts';
 import toast from 'utils/toast';
 
 import styles from './styles.module.scss';
+import { ethers } from 'ethers';
 
 const selfSettings = [
   {
@@ -223,6 +224,11 @@ const NotificationSetting = () => {
         signature = await signer.signMessage(
           `Approve Signature on Artion.io with nonce ${nonce}`
         );
+        const addr = ethers.utils.verifyMessage(
+          `Approve Signature on Artion.io with nonce ${nonce}`,
+          signature
+        );
+        console.log('Verified address: ', addr);
       } catch (err) {
         toast(
           'error',

@@ -50,18 +50,20 @@ const _startFetching = direction => {
   };
 };
 
-function fetchingSuccess(count, tokens) {
+function fetchingSuccess(count, tokens, from, to) {
   return dispatch => {
-    dispatch(_fetchingSuccess(count, tokens));
+    dispatch(_fetchingSuccess(count, tokens, from, to));
   };
 }
 
-const _fetchingSuccess = (count, tokens) => {
+const _fetchingSuccess = (count, tokens, from, to) => {
   return {
     type: TokensConstants.FETCHING_SUCCESS,
     payload: {
       count,
       tokens,
+      from,
+      to,
     },
   };
 };

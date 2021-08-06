@@ -109,6 +109,10 @@ const AccountDetails = () => {
   const [offers, setOffers] = useState([]);
   const [fetchInterval, setFetchInterval] = useState(null);
   const [likeCancelSource, setLikeCancelSource] = useState(null);
+  const [prevNumPerRow, setPrevNumPerRow] = useState(null);
+
+  const numPerRow = Math.floor(width / 240);
+  const fetchCount = numPerRow <= 3 ? 18 : numPerRow === 4 ? 16 : numPerRow * 3;
 
   const getUserDetails = async _account => {
     setLoading(true);
@@ -150,7 +154,7 @@ const AccountDetails = () => {
     setFavFetching(false);
   };
 
-  const fetchNFTs = async step => {
+  const fetchNFTs = async () => {
     if (tab === 0) {
       if (fetching) return;
       setFetching(true);
@@ -160,8 +164,12 @@ const AccountDetails = () => {
     }
 
     try {
+      const start = tab === 0 ? tokens.length : bundles.length;
+      const _count =
+        fetchCount - ((tab === 0 ? tokens : bundles).length % numPerRow);
       const { data } = await fetchTokens(
-        step,
+        start,
+        _count,
         tab === 0 ? 'single' : 'bundle',
         [],
         null,
@@ -169,8 +177,6 @@ const AccountDetails = () => {
         [],
         uid
       );
-      setFetching(false);
-      setBundleFetching(false);
 
       if (tab === 0) {
         setTokens([...tokens, ...data.tokens]);
@@ -179,7 +185,9 @@ const AccountDetails = () => {
         setBundles([...bundles, ...data.tokens]);
         setBundleCount(data.total);
       }
-      setPage(step);
+
+      setFetching(false);
+      setBundleFetching(false);
     } catch {
       setFetching(false);
       setBundleFetching(false);
@@ -203,6 +211,10 @@ const AccountDetails = () => {
   };
 
   useEffect(() => {
+    setPrevNumPerRow(numPerRow);
+    if (isNaN(numPerRow) || (prevNumPerRow && prevNumPerRow !== numPerRow))
+      return;
+
     if (!chainId) return;
 
     if (prevUID !== uid) {
@@ -216,7 +228,7 @@ const AccountDetails = () => {
     } else {
       init();
     }
-  }, [uid, tab, chainId]);
+  }, [uid, tab, chainId, numPerRow]);
 
   useEffect(() => {
     if (me && user && me.address?.toLowerCase() === uid.toLowerCase()) {
@@ -323,13 +335,14 @@ const AccountDetails = () => {
   }, [tokens, bundles, likes, authToken, tab]);
 
   const loadNextPage = () => {
-    if (fetching) return;
+    if (fetching || bundleFetching) return;
+
     if (tab === 0 && tokens.length === count) return;
     if (tab === 1 && bundles.length === bundleCount) return;
     if (tab === 2 && likes.length === favCount) return;
 
     if (tab === 0 || tab === 1) {
-      fetchNFTs(page + 1);
+      fetchNFTs();
     } else {
       fetchLikes(page + 1);
     }
@@ -348,11 +361,11 @@ const AccountDetails = () => {
     if (tab === 0) {
       setTokens([]);
       setCount(0);
-      fetchNFTs(0);
+      fetchNFTs();
     } else if (tab === 1) {
       setBundles([]);
       setBundleCount(0);
-      fetchNFTs(0);
+      fetchNFTs();
     } else if (tab === 2) {
       setLikes([]);
       setFavCount(0);
@@ -582,8 +595,6 @@ const AccountDetails = () => {
     return <Redirect to="/404" />;
   }
 
-  const numPerRow = Math.floor(width / 240);
-
   const renderMedia = image => {
     if (image?.includes('youtube')) {
       return (
@@ -677,7 +688,7 @@ const AccountDetails = () => {
                 className={styles.avatar}
               />
             ) : (
-              <Identicon className={styles.avatar} account={uid} size={150} />
+              <Identicon className={styles.avatar} account={uid} size={160} />
             )}
           </div>
           <div className={styles.usernameWrapper}>
