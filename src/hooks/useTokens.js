@@ -2,7 +2,8 @@ import { useCallback, useMemo } from 'react';
 import { ChainId } from '@sushiswap/sdk';
 import { useWeb3React } from '@web3-react/core';
 
-import iconFTM from 'assets/svgs/ftm.svg';
+import iconFTM from 'assets/imgs/ftm.png';
+import iconUSDT from 'assets/imgs/usdt.png';
 import iconUSDC from 'assets/imgs/usdc.png';
 import iconDAI from 'assets/imgs/dai.png';
 
@@ -20,6 +21,13 @@ const Tokens = {
       symbol: 'WFTM',
       decimal: 18,
       icon: iconFTM,
+    },
+    {
+      address: '0x049d68029688eabf473097a2fc38ef61633a3c7a',
+      name: 'Tether USD',
+      symbol: 'USDT',
+      decimals: 6,
+      icon: iconUSDT,
     },
     {
       address: '0x04068DA6C83AFCFA0e13ba15A6696662335D5B75',

@@ -50,3 +50,49 @@
   font-size: 16px;
   color: rgba(0, 0, 0, .4);
 }
+
+.select {
+  margin: 2px;
+  width: 140px !important;
+  outline: none !important;
+  height: 44px !important;
+  border-radius: 8px !important;
+  border: none !important;
+  box-sizing: border-box !important;
+  font-size: 16px !important;
+  padding-right: 12px !important;
+  background-color: #FAFAFB;
+  box-shadow: none !important;
+}
+
+.selectedToken,
+.token {
+  height: 44px;
+  display: flex;
+  align-items: center;
+  padding: 5px 10px;
+  box-sizing: border-box;
+}
+
+.token {
+  width: 138px;
+  padding: 5px 15px;
+
+  &:hover {
+    background-color: #EAEAF1;
+  }
+}
+
+.tokenIcon {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+}
+
+.tokenSymbol {
+  margin-left: 8px;
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: -0.2px;
+  color: #121223;
+}

@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
 import cx from 'classnames';
 import { ClipLoader } from 'react-spinners';
+import Select from 'react-dropdown-select';
+import Skeleton from 'react-loading-skeleton';
+import axios from 'axios';
 
 import { formatNumber } from 'utils';
 import { FTM_TOTAL_SUPPLY } from 'constants/index';
+import useTokens from 'hooks/useTokens';
 
 import Modal from '../Modal';
 import styles from '../Modal/common.module.scss';
@@ -20,16 +23,55 @@ const SellModal = ({
   contractApproved,
   totalSupply,
 }) => {
+  const { tokens } = useTokens();
+
   const [price, setPrice] = useState('');
   const [quantity, setQuantity] = useState('1');
   const [focused, setFocused] = useState(false);
-
-  const { price: ftmPrice } = useSelector(state => state.Price);
+  const [options, setOptions] = useState([]);
+  const [selected, setSelected] = useState([]);
+  const [tokenPrice, setTokenPrice] = useState();
+  const [tokenPriceInterval, setTokenPriceInterval] = useState();
 
   useEffect(() => {
     setPrice(startPrice > 0 ? startPrice.toString() : '');
     setQuantity('1');
+    if (visible && tokens?.length) {
+      setSelected([tokens[0]]);
+    }
   }, [visible]);
+
+  useEffect(() => {
+    if (tokens?.length) {
+      setOptions(tokens);
+    }
+  }, [tokens]);
+
+  const getTokenPrice = () => {
+    if (tokenPriceInterval) clearInterval(tokenPriceInterval);
+    const func = async () => {
+      let tk = selected[0].symbol.toLowerCase();
+      if (!tk.includes('ftm')) {
+        tk = selected[0].address;
+      }
+      try {
+        const { data } = await axios.get(
+          `https://oapi.fantom.network/pricefeed/${tk}`
+        );
+        setTokenPrice(data.price);
+      } catch {
+        setTokenPrice(null);
+      }
+    };
+    func();
+    setTokenPriceInterval(setInterval(func, 60 * 1000));
+  };
+
+  useEffect(() => {
+    if (selected.length === 0) return;
+
+    getTokenPrice();
+  }, [selected]);
 
   const handleQuantityChange = e => {
     const val = e.target.value;
@@ -92,8 +134,41 @@ const SellModal = ({
       }
     >
       <div className={styles.formGroup}>
-        <div className={styles.formLabel}>Price (FTM)</div>
+        <div className={styles.formLabel}>Price</div>
         <div className={cx(styles.formInputCont, focused && styles.focused)}>
+          <Select
+            options={options}
+            disabled={confirming}
+            values={selected}
+            onChange={tk => {
+              setSelected(tk);
+            }}
+            className={styles.select}
+            placeholder=""
+            itemRenderer={({ item, itemIndex, methods }) => (
+              <div
+                key={itemIndex}
+                className={styles.token}
+                onClick={() => {
+                  methods.clearAll();
+                  methods.addItem(item);
+                }}
+              >
+                <img src={item.icon} className={styles.tokenIcon} />
+                <div className={styles.tokenSymbol}>{item.symbol}</div>
+              </div>
+            )}
+            contentRenderer={({ props: { values } }) =>
+              values.length > 0 ? (
+                <div className={styles.selectedToken}>
+                  <img src={values[0].icon} className={styles.tokenIcon} />
+                  <div className={styles.tokenSymbol}>{values[0].symbol}</div>
+                </div>
+              ) : (
+                <div className={styles.selectedToken} />
+              )
+            }
+          />
           <input
             className={styles.formInput}
             placeholder="0.00"
@@ -110,7 +185,13 @@ const SellModal = ({
             disabled={contractApproving || confirming}
           />
           <div className={styles.usdPrice}>
-            ${formatNumber(((parseFloat(price) || 0) * ftmPrice).toFixed(2))}
+            {!isNaN(tokenPrice) && tokenPrice !== null ? (
+              `$${formatNumber(
+                ((parseFloat(price) || 0) * tokenPrice).toFixed(2)
+              )}`
+            ) : (
+              <Skeleton width={100} height={24} />
+            )}
           </div>
         </div>
       </div>
