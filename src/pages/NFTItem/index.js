@@ -73,7 +73,7 @@ import twitterIcon from 'assets/svgs/twitter.svg';
 import mediumIcon from 'assets/svgs/medium.svg';
 import filterIcon from 'assets/svgs/filter.svg';
 import checkIcon from 'assets/svgs/check.svg';
-import ftmIcon from 'assets/svgs/ftm.svg';
+import ftmIcon from 'assets/imgs/ftm.png';
 import shareIcon from 'assets/svgs/share.svg';
 import iconArtion from 'assets/svgs/logo_small_blue.svg';
 import iconFacebook from 'assets/imgs/facebook.png';
@@ -2671,7 +2671,13 @@ const NFTItem = () => {
                             {loading ? (
                               <Skeleton width={100} height={20} />
                             ) : (
-                              `${formatNumber(bundleListing.current.price)} FTM`
+                              <>
+                                <img
+                                  src={ftmIcon}
+                                  className={styles.tokenIcon}
+                                />
+                                {formatNumber(bundleListing.current.price)}
+                              </>
                             )}
                           </div>
                           <div className={styles.buy}>
@@ -2715,7 +2721,8 @@ const NFTItem = () => {
                             </Link>
                           </div>
                           <div className={styles.price}>
-                            {formatNumber(listing.price)} FTM
+                            <img src={ftmIcon} className={styles.tokenIcon} />
+                            {formatNumber(listing.price)}
                           </div>
                           {tokenInfo?.totalSupply > 1 && (
                             <div className={styles.quantity}>
@@ -2786,8 +2793,8 @@ const NFTItem = () => {
                               </Link>
                             </div>
                             <div className={styles.price}>
+                              <img src={ftmIcon} className={styles.tokenIcon} />
                               {formatNumber(offer.pricePerItem || offer.price)}
-                              &nbsp;FTM
                             </div>
                             {tokenInfo?.totalSupply > 1 && (
                               <div className={styles.quantity}>
@@ -2922,7 +2929,10 @@ const NFTItem = () => {
                   {filter === 0 && (
                     <div className={styles.historyPrice}>
                       {history ? (
-                        `${formatNumber(history.price)} FTM`
+                        <>
+                          <img src={ftmIcon} className={styles.tokenIcon} />
+                          {formatNumber(history.price)}
+                        </>
                       ) : (
                         <Skeleton width={100} height={20} />
                       )}
