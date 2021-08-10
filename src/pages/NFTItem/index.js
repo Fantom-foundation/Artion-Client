@@ -117,6 +117,7 @@ const NFTItem = () => {
     likeBundle,
     getItemLikeUsers,
     getBundleLikeUsers,
+    getItemsLiked,
   } = useApi();
   const { getERC721Contract, getERC1155Contract } = useNFTContract();
   const {
@@ -242,6 +243,7 @@ const NFTItem = () => {
   const transferHistory = useRef([]);
   const moreItems = useRef([]);
 
+  const [likeCancelSource, setLikeCancelSource] = useState(null);
   const [filter, setFilter] = useState(0);
   const [shareAnchorEl, setShareAnchorEl] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
@@ -1024,6 +1026,58 @@ const NFTItem = () => {
   useEffect(() => {
     getOwnerInfo();
   }, [owner]);
+
+  const updateItems = async () => {
+    try {
+      const missingTokens = moreItems.current
+        .map((tk, index) =>
+          tk.items
+            ? {
+                index,
+                isLiked: tk.isLiked,
+                bundleID: tk._id,
+              }
+            : {
+                index,
+                isLiked: tk.isLiked,
+                contractAddress: tk.contractAddress,
+                tokenID: tk.tokenID,
+              }
+        )
+        .filter(tk => tk.isLiked === undefined);
+
+      if (missingTokens.length === 0) return;
+
+      const cancelTokenSource = axios.CancelToken.source();
+      setLikeCancelSource(cancelTokenSource);
+      const { data, status } = await getItemsLiked(
+        missingTokens,
+        authToken,
+        cancelTokenSource.token
+      );
+      if (status === 'success') {
+        const newTokens = [...moreItems.current];
+        missingTokens.map((tk, idx) => {
+          newTokens[tk.index].isLiked = data[idx].isLiked;
+        });
+        // eslint-disable-next-line require-atomic-updates
+        moreItems.current = newTokens;
+      }
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setLikeCancelSource(null);
+    }
+  };
+
+  useEffect(() => {
+    if (likeCancelSource) {
+      likeCancelSource.cancel();
+    }
+    if (authToken && moreItems.current.length) {
+      updateItems();
+    }
+  }, [moreItems, authToken]);
 
   const getLikeInfo = async () => {
     setLikeFetching(true);
