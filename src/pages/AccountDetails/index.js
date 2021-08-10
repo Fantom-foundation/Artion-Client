@@ -82,9 +82,9 @@ const AccountDetails = () => {
   const [fetching, setFetching] = useState(false);
   const [bundleFetching, setBundleFetching] = useState(false);
   const [favFetching, setFavFetching] = useState(false);
-  const [tokens, setTokens] = useState([]);
-  const [bundles, setBundles] = useState([]);
-  const [likes, setLikes] = useState([]);
+  const tokens = useRef([]);
+  const bundles = useRef([]);
+  const likes = useRef([]);
   const [followersLoading, setFollowersLoading] = useState(false);
   const followers = useRef([]);
   const followings = useRef([]);
@@ -164,9 +164,10 @@ const AccountDetails = () => {
     }
 
     try {
-      const start = tab === 0 ? tokens.length : bundles.length;
+      const start = tab === 0 ? tokens.current.length : bundles.current.length;
       const _count =
-        fetchCount - ((tab === 0 ? tokens : bundles).length % numPerRow);
+        fetchCount -
+        ((tab === 0 ? tokens.current : bundles.current).length % numPerRow);
       const { data } = await fetchTokens(
         start,
         _count,
@@ -179,11 +180,23 @@ const AccountDetails = () => {
       );
 
       if (tab === 0) {
-        setTokens([...tokens, ...data.tokens]);
+        // eslint-disable-next-line require-atomic-updates
+        tokens.current = [...tokens.current, ...data.tokens];
         setCount(data.total);
+        if (authToken) {
+          updateItems(tokens.current)
+            .then(_tokens => (tokens.current = _tokens))
+            .catch();
+        }
       } else {
-        setBundles([...bundles, ...data.tokens]);
+        // eslint-disable-next-line require-atomic-updates
+        bundles.current = [...bundles.current, ...data.tokens];
         setBundleCount(data.total);
+        if (authToken) {
+          updateItems(bundles.current)
+            .then(_bundles => (bundles.current = _bundles))
+            .catch();
+        }
       }
 
       setFetching(false);
@@ -202,8 +215,13 @@ const AccountDetails = () => {
     try {
       const { data } = await getMyLikes(step, uid);
       setFavFetching(false);
-      setLikes([...likes, ...data.tokens]);
+      likes.current = [...likes.current, ...data.tokens];
       setFavCount(data.total);
+      if (authToken) {
+        updateItems(likes.current)
+          .then(_likes => (likes.current = _likes))
+          .catch();
+      }
       setPage(step);
     } catch {
       setFavFetching(false);
@@ -270,9 +288,9 @@ const AccountDetails = () => {
     setInterval(() => setNow(new Date()), 1000);
   }, []);
 
-  const updateItems = async tokens => {
+  const updateItems = async _tokens => {
     return new Promise((resolve, reject) => {
-      const missingTokens = tokens
+      const missingTokens = _tokens
         .map((tk, index) =>
           tk.items
             ? {
@@ -300,7 +318,7 @@ const AccountDetails = () => {
         .then(({ data, status }) => {
           setLikeCancelSource(null);
           if (status === 'success') {
-            const newTokens = [...tokens];
+            const newTokens = [...tokens.current];
             missingTokens.map((tk, idx) => {
               newTokens[tk.index].isLiked = data[idx].isLiked;
             });
@@ -319,27 +337,29 @@ const AccountDetails = () => {
     }
     if (!authToken) return;
 
-    if (tab === 0 && tokens.length) {
-      updateItems(tokens)
-        .then(setTokens)
-        .catch();
-    } else if (tab === 1 && bundles.length) {
-      updateItems(bundles)
-        .then(setBundles)
-        .catch();
-    } else if (tab === 2 && likes.length) {
-      updateItems(likes)
-        .then(setLikes)
+    if (tokens.current.length) {
+      updateItems(tokens.current)
+        .then(_tokens => (tokens.current = _tokens))
         .catch();
     }
-  }, [tokens, bundles, likes, authToken, tab]);
+    if (bundles.current.length) {
+      updateItems(bundles.current)
+        .then(_bundles => (bundles.current = _bundles))
+        .catch();
+    }
+    if (likes.current.length) {
+      updateItems(likes.current)
+        .then(_likes => (likes.current = _likes))
+        .catch();
+    }
+  }, [authToken]);
 
   const loadNextPage = () => {
     if (fetching || bundleFetching) return;
 
-    if (tab === 0 && tokens.length === count) return;
-    if (tab === 1 && bundles.length === bundleCount) return;
-    if (tab === 2 && likes.length === favCount) return;
+    if (tab === 0 && tokens.current.length === count) return;
+    if (tab === 1 && bundles.current.length === bundleCount) return;
+    if (tab === 2 && likes.current.length === favCount) return;
 
     if (tab === 0 || tab === 1) {
       fetchNFTs();
@@ -359,15 +379,15 @@ const AccountDetails = () => {
 
   const init = () => {
     if (tab === 0) {
-      setTokens([]);
+      tokens.current = [];
       setCount(0);
       fetchNFTs();
     } else if (tab === 1) {
-      setBundles([]);
+      bundles.current = [];
       setBundleCount(0);
       fetchNFTs();
     } else if (tab === 2) {
-      setLikes([]);
+      likes.current = [];
       setFavCount(0);
       fetchLikes(0);
     } else if (tab === 3) {
@@ -405,9 +425,9 @@ const AccountDetails = () => {
   };
 
   const goToTab = _tab => {
-    setTokens([]);
-    setBundles([]);
-    setLikes([]);
+    tokens.current = [];
+    bundles.current = [];
+    likes.current = [];
 
     setTab(_tab);
   };
@@ -780,10 +800,14 @@ const AccountDetails = () => {
         </div>
         <div ref={ref} className={styles.contentBody} onScroll={handleScroll}>
           {tab === 0 ? (
-            <NFTsGrid items={tokens} numPerRow={numPerRow} loading={fetching} />
+            <NFTsGrid
+              items={tokens.current}
+              numPerRow={numPerRow}
+              loading={fetching}
+            />
           ) : tab === 1 ? (
             <NFTsGrid
-              items={bundles}
+              items={bundles.current}
               numPerRow={numPerRow}
               loading={fetching}
               showCreate={isMe}
@@ -791,11 +815,11 @@ const AccountDetails = () => {
             />
           ) : tab === 2 ? (
             <NFTsGrid
-              items={likes}
+              items={likes.current}
               numPerRow={numPerRow}
               loading={fetching}
               onLike={() => {
-                setLikes([]);
+                likes.current = [];
                 fetchLikes(0);
               }}
             />
@@ -1082,8 +1106,8 @@ const AccountDetails = () => {
         visible={bundleModalVisible}
         onClose={() => setBundleModalVisible(false)}
         onCreateSuccess={() => {
-          setBundles([]);
-          fetchNFTs(0);
+          bundles.current = [];
+          fetchNFTs();
         }}
       />
       <FollowersModal
