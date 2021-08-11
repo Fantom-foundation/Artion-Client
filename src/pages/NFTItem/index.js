@@ -73,7 +73,7 @@ import twitterIcon from 'assets/svgs/twitter.svg';
 import mediumIcon from 'assets/svgs/medium.svg';
 import filterIcon from 'assets/svgs/filter.svg';
 import checkIcon from 'assets/svgs/check.svg';
-import ftmIcon from 'assets/svgs/ftm.svg';
+import ftmIcon from 'assets/imgs/ftm.png';
 import shareIcon from 'assets/svgs/share.svg';
 import iconArtion from 'assets/svgs/logo_small_blue.svg';
 import iconFacebook from 'assets/imgs/facebook.png';
@@ -117,6 +117,7 @@ const NFTItem = () => {
     likeBundle,
     getItemLikeUsers,
     getBundleLikeUsers,
+    getItemsLiked,
   } = useApi();
   const { getERC721Contract, getERC1155Contract } = useNFTContract();
   const {
@@ -242,6 +243,7 @@ const NFTItem = () => {
   const transferHistory = useRef([]);
   const moreItems = useRef([]);
 
+  const [likeCancelSource, setLikeCancelSource] = useState(null);
   const [filter, setFilter] = useState(0);
   const [shareAnchorEl, setShareAnchorEl] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
@@ -1024,6 +1026,58 @@ const NFTItem = () => {
   useEffect(() => {
     getOwnerInfo();
   }, [owner]);
+
+  const updateItems = async () => {
+    try {
+      const missingTokens = moreItems.current
+        .map((tk, index) =>
+          tk.items
+            ? {
+                index,
+                isLiked: tk.isLiked,
+                bundleID: tk._id,
+              }
+            : {
+                index,
+                isLiked: tk.isLiked,
+                contractAddress: tk.contractAddress,
+                tokenID: tk.tokenID,
+              }
+        )
+        .filter(tk => tk.isLiked === undefined);
+
+      if (missingTokens.length === 0) return;
+
+      const cancelTokenSource = axios.CancelToken.source();
+      setLikeCancelSource(cancelTokenSource);
+      const { data, status } = await getItemsLiked(
+        missingTokens,
+        authToken,
+        cancelTokenSource.token
+      );
+      if (status === 'success') {
+        const newTokens = [...moreItems.current];
+        missingTokens.map((tk, idx) => {
+          newTokens[tk.index].isLiked = data[idx].isLiked;
+        });
+        // eslint-disable-next-line require-atomic-updates
+        moreItems.current = newTokens;
+      }
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setLikeCancelSource(null);
+    }
+  };
+
+  useEffect(() => {
+    if (likeCancelSource) {
+      likeCancelSource.cancel();
+    }
+    if (authToken && moreItems.current.length) {
+      updateItems();
+    }
+  }, [moreItems, authToken]);
 
   const getLikeInfo = async () => {
     setLikeFetching(true);
@@ -2671,7 +2725,13 @@ const NFTItem = () => {
                             {loading ? (
                               <Skeleton width={100} height={20} />
                             ) : (
-                              `${formatNumber(bundleListing.current.price)} FTM`
+                              <>
+                                <img
+                                  src={ftmIcon}
+                                  className={styles.tokenIcon}
+                                />
+                                {formatNumber(bundleListing.current.price)}
+                              </>
                             )}
                           </div>
                           <div className={styles.buy}>
@@ -2715,7 +2775,8 @@ const NFTItem = () => {
                             </Link>
                           </div>
                           <div className={styles.price}>
-                            {formatNumber(listing.price)} FTM
+                            <img src={ftmIcon} className={styles.tokenIcon} />
+                            {formatNumber(listing.price)}
                           </div>
                           {tokenInfo?.totalSupply > 1 && (
                             <div className={styles.quantity}>
@@ -2786,8 +2847,8 @@ const NFTItem = () => {
                               </Link>
                             </div>
                             <div className={styles.price}>
+                              <img src={ftmIcon} className={styles.tokenIcon} />
                               {formatNumber(offer.pricePerItem || offer.price)}
-                              &nbsp;FTM
                             </div>
                             {tokenInfo?.totalSupply > 1 && (
                               <div className={styles.quantity}>
@@ -2922,7 +2983,10 @@ const NFTItem = () => {
                   {filter === 0 && (
                     <div className={styles.historyPrice}>
                       {history ? (
-                        `${formatNumber(history.price)} FTM`
+                        <>
+                          <img src={ftmIcon} className={styles.tokenIcon} />
+                          {formatNumber(history.price)}
+                        </>
                       ) : (
                         <Skeleton width={100} height={20} />
                       )}
