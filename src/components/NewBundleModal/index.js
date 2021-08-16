@@ -21,6 +21,7 @@ import useTokens from 'hooks/useTokens';
 import closeIcon from 'assets/svgs/close.svg';
 
 import styles from './styles.module.scss';
+import commonStyles from '../Modal/common.module.scss';
 
 const NFTItem = ({ item, selected, onClick }) => {
   const { storageUrl } = useApi();
@@ -357,38 +358,40 @@ const NewBundleModal = ({ visible, onClose, onCreateSuccess = () => {} }) => {
                 <Select
                   options={options}
                   disabled={creating}
-                  values={selected}
+                  values={paySelected}
                   onChange={tk => {
                     setPaySelected(tk);
                   }}
-                  className={styles.select}
+                  className={commonStyles.select}
                   placeholder=""
                   itemRenderer={({ item, itemIndex, methods }) => (
                     <div
                       key={itemIndex}
-                      className={styles.token}
+                      className={commonStyles.token}
                       onClick={() => {
                         methods.clearAll();
                         methods.addItem(item);
                       }}
                     >
-                      <img src={item.icon} className={styles.tokenIcon} />
-                      <div className={styles.tokenSymbol}>{item.symbol}</div>
+                      <img src={item.icon} className={commonStyles.tokenIcon} />
+                      <div className={commonStyles.tokenSymbol}>
+                        {item.symbol}
+                      </div>
                     </div>
                   )}
                   contentRenderer={({ props: { values } }) =>
                     values.length > 0 ? (
-                      <div className={styles.selectedToken}>
+                      <div className={commonStyles.selectedToken}>
                         <img
                           src={values[0].icon}
-                          className={styles.tokenIcon}
+                          className={commonStyles.tokenIcon}
                         />
-                        <div className={styles.tokenSymbol}>
+                        <div className={commonStyles.tokenSymbol}>
                           {values[0].symbol}
                         </div>
                       </div>
                     ) : (
-                      <div className={styles.selectedToken} />
+                      <div className={commonStyles.selectedToken} />
                     )
                   }
                 />
