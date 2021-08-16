@@ -43,6 +43,12 @@ export const SALES_CONTRACT_ABI = [
       },
       {
         indexed: false,
+        internalType: 'address',
+        name: 'payToken',
+        type: 'address',
+      },
+      {
+        indexed: false,
         internalType: 'uint256',
         name: 'pricePerItem',
         type: 'uint256',
@@ -52,13 +58,6 @@ export const SALES_CONTRACT_ABI = [
         internalType: 'uint256',
         name: 'startingTime',
         type: 'uint256',
-      },
-      { indexed: false, internalType: 'bool', name: 'isPrivate', type: 'bool' },
-      {
-        indexed: false,
-        internalType: 'address',
-        name: 'allowedAddress',
-        type: 'address',
       },
     ],
     name: 'ItemListed',
@@ -94,8 +93,20 @@ export const SALES_CONTRACT_ABI = [
       },
       {
         indexed: false,
+        internalType: 'address',
+        name: 'payToken',
+        type: 'address',
+      },
+      {
+        indexed: false,
         internalType: 'uint256',
-        name: 'price',
+        name: 'unitPrice',
+        type: 'uint256',
+      },
+      {
+        indexed: false,
+        internalType: 'uint256',
+        name: 'pricePerItem',
         type: 'uint256',
       },
     ],
@@ -117,6 +128,12 @@ export const SALES_CONTRACT_ABI = [
         internalType: 'uint256',
         name: 'tokenId',
         type: 'uint256',
+      },
+      {
+        indexed: false,
+        internalType: 'address',
+        name: 'payToken',
+        type: 'address',
       },
       {
         indexed: false,
@@ -166,15 +183,15 @@ export const SALES_CONTRACT_ABI = [
       },
       {
         indexed: false,
-        internalType: 'address',
-        name: 'payToken',
-        type: 'address',
-      },
-      {
-        indexed: false,
         internalType: 'uint256',
         name: 'quantity',
         type: 'uint256',
+      },
+      {
+        indexed: false,
+        internalType: 'address',
+        name: 'payToken',
+        type: 'address',
       },
       {
         indexed: false,
@@ -193,51 +210,6 @@ export const SALES_CONTRACT_ABI = [
     type: 'event',
   },
   {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: 'address',
-        name: 'previousOwner',
-        type: 'address',
-      },
-      {
-        indexed: true,
-        internalType: 'address',
-        name: 'newOwner',
-        type: 'address',
-      },
-    ],
-    name: 'OwnershipTransferred',
-    type: 'event',
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: false,
-        internalType: 'uint256',
-        name: 'platformFee',
-        type: 'uint256',
-      },
-    ],
-    name: 'UpdatePlatformFee',
-    type: 'event',
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: false,
-        internalType: 'address payable',
-        name: 'platformFeeRecipient',
-        type: 'address',
-      },
-    ],
-    name: 'UpdatePlatformFeeRecipient',
-    type: 'event',
-  },
-  {
     inputs: [
       { internalType: 'address', name: '_nftAddress', type: 'address' },
       { internalType: 'uint256', name: '_tokenId', type: 'uint256' },
@@ -249,13 +221,6 @@ export const SALES_CONTRACT_ABI = [
     type: 'function',
   },
   {
-    inputs: [],
-    name: 'artion',
-    outputs: [{ internalType: 'address', name: '', type: 'address' }],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
     inputs: [
       { internalType: 'address', name: '_nftAddress', type: 'address' },
       { internalType: 'uint256', name: '_tokenId', type: 'uint256' },
@@ -264,6 +229,18 @@ export const SALES_CONTRACT_ABI = [
     name: 'buyItem',
     outputs: [],
     stateMutability: 'payable',
+    type: 'function',
+  },
+  {
+    inputs: [
+      { internalType: 'address', name: '_nftAddress', type: 'address' },
+      { internalType: 'uint256', name: '_tokenId', type: 'uint256' },
+      { internalType: 'address', name: '_payToken', type: 'address' },
+      { internalType: 'address', name: '_owner', type: 'address' },
+    ],
+    name: 'buyItem',
+    outputs: [],
+    stateMutability: 'nonpayable',
     type: 'function',
   },
   {
@@ -287,6 +264,17 @@ export const SALES_CONTRACT_ABI = [
     type: 'function',
   },
   {
+    inputs: [{ internalType: 'address', name: '', type: 'address' }],
+    name: 'collectionRoyalties',
+    outputs: [
+      { internalType: 'uint8', name: 'royalty', type: 'uint8' },
+      { internalType: 'address', name: 'creator', type: 'address' },
+      { internalType: 'address', name: 'feeRecipient', type: 'address' },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
     inputs: [
       { internalType: 'address', name: '_nftAddress', type: 'address' },
       { internalType: 'uint256', name: '_tokenId', type: 'uint256' },
@@ -301,20 +289,13 @@ export const SALES_CONTRACT_ABI = [
     type: 'function',
   },
   {
-    inputs: [],
-    name: 'feeReceipient',
-    outputs: [{ internalType: 'address payable', name: '', type: 'address' }],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
     inputs: [
       { internalType: 'address', name: '_nftAddress', type: 'address' },
       { internalType: 'uint256', name: '_tokenId', type: 'uint256' },
       { internalType: 'uint256', name: '_quantity', type: 'uint256' },
+      { internalType: 'address', name: '_payToken', type: 'address' },
       { internalType: 'uint256', name: '_pricePerItem', type: 'uint256' },
       { internalType: 'uint256', name: '_startingTime', type: 'uint256' },
-      { internalType: 'address', name: '_allowedAddress', type: 'address' },
     ],
     name: 'listItem',
     outputs: [],
@@ -330,63 +311,10 @@ export const SALES_CONTRACT_ABI = [
     name: 'listings',
     outputs: [
       { internalType: 'uint256', name: 'quantity', type: 'uint256' },
+      { internalType: 'address', name: 'payToken', type: 'address' },
       { internalType: 'uint256', name: 'pricePerItem', type: 'uint256' },
       { internalType: 'uint256', name: 'startingTime', type: 'uint256' },
-      { internalType: 'address', name: 'allowedAddress', type: 'address' },
     ],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [],
-    name: 'marketplace',
-    outputs: [
-      {
-        internalType: 'contract IFantomBundleMarketplace',
-        name: '',
-        type: 'address',
-      },
-    ],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [
-      { internalType: 'address', name: '', type: 'address' },
-      { internalType: 'uint256', name: '', type: 'uint256' },
-    ],
-    name: 'minters',
-    outputs: [{ internalType: 'address', name: '', type: 'address' }],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [
-      { internalType: 'address', name: '', type: 'address' },
-      { internalType: 'uint256', name: '', type: 'uint256' },
-      { internalType: 'address', name: '', type: 'address' },
-    ],
-    name: 'offers',
-    outputs: [
-      { internalType: 'contract IERC20', name: 'payToken', type: 'address' },
-      { internalType: 'uint256', name: 'quantity', type: 'uint256' },
-      { internalType: 'uint256', name: 'pricePerItem', type: 'uint256' },
-      { internalType: 'uint256', name: 'deadline', type: 'uint256' },
-    ],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [],
-    name: 'owner',
-    outputs: [{ internalType: 'address', name: '', type: 'address' }],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [],
-    name: 'platformFee',
-    outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
     stateMutability: 'view',
     type: 'function',
   },
@@ -410,96 +338,12 @@ export const SALES_CONTRACT_ABI = [
   },
   {
     inputs: [
-      { internalType: 'address', name: '', type: 'address' },
-      { internalType: 'uint256', name: '', type: 'uint256' },
-    ],
-    name: 'royalties',
-    outputs: [{ internalType: 'uint8', name: '', type: 'uint8' }],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [{ internalType: 'address', name: 'newOwner', type: 'address' }],
-    name: 'transferOwnership',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    inputs: [{ internalType: 'address', name: '_artion', type: 'address' }],
-    name: 'updateArtion',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    inputs: [{ internalType: 'address', name: '_auction', type: 'address' }],
-    name: 'updateAuction',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    inputs: [
-      { internalType: 'address', name: '_marketplace', type: 'address' },
-    ],
-    name: 'updateBundleMarketplace',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    inputs: [
       { internalType: 'address', name: '_nftAddress', type: 'address' },
       { internalType: 'uint256', name: '_tokenId', type: 'uint256' },
+      { internalType: 'address', name: '_payToken', type: 'address' },
       { internalType: 'uint256', name: '_newPrice', type: 'uint256' },
     ],
     name: 'updateListing',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    inputs: [
-      { internalType: 'uint256', name: '_platformFee', type: 'uint256' },
-    ],
-    name: 'updatePlatformFee',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
-        internalType: 'address payable',
-        name: '_platformFeeRecipient',
-        type: 'address',
-      },
-    ],
-    name: 'updatePlatformFeeRecipient',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    inputs: [
-      { internalType: 'address', name: '_nftAddress', type: 'address' },
-      { internalType: 'uint256', name: '_tokenId', type: 'uint256' },
-      { internalType: 'address', name: '_owner', type: 'address' },
-    ],
-    name: 'validateCancelListing',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    inputs: [
-      { internalType: 'address', name: '_nftAddress', type: 'address' },
-      { internalType: 'uint256', name: '_tokenId', type: 'uint256' },
-      { internalType: 'address', name: '_seller', type: 'address' },
-      { internalType: 'address', name: '_buyer', type: 'address' },
-    ],
-    name: 'validateItemSold',
     outputs: [],
     stateMutability: 'nonpayable',
     type: 'function',
@@ -1576,6 +1420,42 @@ export const AUCTION_CONTRACT_ABI = [
     name: 'withdrawBid',
     outputs: [],
     stateMutability: 'nonpayable',
+    type: 'function',
+  },
+];
+
+export const ERC20_CONTRACT_ABI = [
+  {
+    constant: false,
+    inputs: [
+      { name: '_spender', type: 'address' },
+      { name: '_value', type: 'uint256' },
+    ],
+    name: 'approve',
+    outputs: [],
+    payable: false,
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    constant: true,
+    inputs: [{ name: 'who', type: 'address' }],
+    name: 'balanceOf',
+    outputs: [{ name: '', type: 'uint256' }],
+    payable: false,
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    constant: true,
+    inputs: [
+      { name: '_owner', type: 'address' },
+      { name: '_spender', type: 'address' },
+    ],
+    name: 'allowance',
+    outputs: [{ name: 'remaining', type: 'uint256' }],
+    payable: false,
+    stateMutability: 'view',
     type: 'function',
   },
 ];

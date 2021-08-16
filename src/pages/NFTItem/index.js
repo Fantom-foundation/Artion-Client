@@ -65,6 +65,8 @@ import Header from 'components/header';
 import SuspenseImg from 'components/SuspenseImg';
 import ModalActions from 'actions/modal.actions';
 import CollectionsActions from 'actions/collections.actions';
+import HeaderActions from 'actions/header.actions';
+import useTokens from 'hooks/useTokens';
 
 import webIcon from 'assets/svgs/web.svg';
 import discordIcon from 'assets/svgs/discord.svg';
@@ -85,6 +87,7 @@ const ONE_MIN = 60;
 const ONE_HOUR = ONE_MIN * 60;
 const ONE_DAY = ONE_HOUR * 24;
 const ONE_MONTH = ONE_DAY * 30;
+const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
 
 const filters = ['Trade History', 'Transfer History'];
 
@@ -119,7 +122,11 @@ const NFTItem = () => {
     getBundleLikeUsers,
     getItemsLiked,
   } = useApi();
-  const { getERC721Contract, getERC1155Contract } = useNFTContract();
+  const {
+    getERC20Contract,
+    getERC721Contract,
+    getERC1155Contract,
+  } = useNFTContract();
   const {
     wftmAddress,
     getWFTMBalance,
@@ -128,7 +135,8 @@ const NFTItem = () => {
   } = useWFTMContract();
   const {
     getSalesContract,
-    buyItem,
+    buyItemETH,
+    buyItemERC20,
     cancelListing,
     listItem,
     updateListing,
@@ -162,6 +170,7 @@ const NFTItem = () => {
   } = useBundleSalesContract();
 
   const { addr: address, id: tokenID, bundleID } = useParams();
+  const { getTokenByAddress } = useTokens();
 
   const { account, chainId } = useWeb3React();
 
@@ -263,6 +272,10 @@ const NFTItem = () => {
     );
   };
 
+  useEffect(() => {
+    dispatch(HeaderActions.toggleSearchbar(false));
+  }, []);
+
   const getBundleInfo = async () => {
     setLoading(true);
     try {
@@ -329,7 +342,10 @@ const NFTItem = () => {
         a.createdAt < b.createdAt ? 1 : -1
       );
       setLiked(likes);
-      listings.current = _listings;
+      listings.current = _listings.map(listing => ({
+        ...listing,
+        token: getTokenByAddress(listing.paymentToken),
+      }));
       offers.current = _offers;
       moreItems.current = nfts;
 
@@ -468,14 +484,19 @@ const NFTItem = () => {
     nft,
     id,
     quantity,
+    paymentToken,
     pricePerItem,
     startingTime
   ) => {
     if (eventMatches(nft, id)) {
+      const token = getTokenByAddress(paymentToken);
       const newListing = {
         owner,
         quantity: parseFloat(quantity.toString()),
-        price: parseFloat(pricePerItem.toString()) / 10 ** 18,
+        token,
+        price: parseFloat(
+          ethers.utils.formatUnits(pricePerItem, token.decimals)
+        ),
         startTime: parseFloat(startingTime.toString()),
       };
       try {
@@ -492,11 +513,15 @@ const NFTItem = () => {
     }
   };
 
-  const itemUpdatedHandler = (owner, nft, id, newPrice) => {
+  const itemUpdatedHandler = (owner, nft, id, paymentToken, newPrice) => {
     if (eventMatches(nft, id)) {
+      const token = getTokenByAddress(paymentToken);
       listings.current.map(listing => {
         if (listing.owner.toLowerCase() === owner.toLowerCase()) {
-          listing.price = parseFloat(newPrice.toString()) / 10 ** 18;
+          listing.token = token;
+          listing.price = parseFloat(
+            ethers.utils.formatUnits(newPrice, token.decimals)
+          );
         }
       });
     }
@@ -510,7 +535,16 @@ const NFTItem = () => {
     }
   };
 
-  const itemSoldHandler = async (seller, buyer, nft, id, _quantity, price) => {
+  const itemSoldHandler = async (
+    seller,
+    buyer,
+    nft,
+    id,
+    _quantity,
+    payToken,
+    unitPrice,
+    price
+  ) => {
     const quantity = parseFloat(_quantity.toString());
     if (eventMatches(nft, id)) {
       listings.current = listings.current.filter(
@@ -1342,14 +1376,14 @@ const NFTItem = () => {
     setTransferring(false);
   };
 
-  const handleListItem = async (_price, quantity) => {
+  const handleListItem = async (token, _price, quantity) => {
     if (listingItem) return;
 
     try {
       setListingItem(true);
 
+      const price = ethers.utils.parseUnits(_price, token.decimals);
       if (bundleID) {
-        const price = ethers.utils.parseEther(_price);
         const addresses = [];
         const tokenIds = [];
         const quantities = [];
@@ -1363,22 +1397,21 @@ const NFTItem = () => {
           addresses,
           tokenIds,
           quantities,
+          token.address,
           price,
-          ethers.BigNumber.from(Math.floor(new Date().getTime() / 1000)),
-          '0x0000000000000000000000000000000000000000'
+          ethers.BigNumber.from(Math.floor(new Date().getTime() / 1000))
         );
         await tx.wait();
 
         showToast('success', 'Bundle listed successfully!');
       } else {
-        const price = ethers.utils.parseEther(_price);
         const tx = await listItem(
           address,
           ethers.BigNumber.from(tokenID),
           ethers.BigNumber.from(quantity),
+          token.address === '' ? ZERO_ADDRESS : token.address,
           price,
-          ethers.BigNumber.from(Math.floor(new Date().getTime() / 1000)),
-          '0x0000000000000000000000000000000000000000'
+          ethers.BigNumber.from(Math.floor(new Date().getTime() / 1000))
         );
         await tx.wait();
 
@@ -1387,7 +1420,8 @@ const NFTItem = () => {
 
       setSellModalVisible(false);
       setListingItem(false);
-    } catch {
+    } catch (err) {
+      console.log(err);
       setListingItem(false);
     }
   };
@@ -1406,13 +1440,13 @@ const NFTItem = () => {
     return approved;
   })();
 
-  const handleUpdatePrice = async (_price, quantity) => {
+  const handleUpdateListing = async (token, _price, quantity) => {
     if (priceUpdating) return;
 
     try {
       setPriceUpdating(true);
 
-      const price = ethers.utils.parseEther(_price);
+      const price = ethers.utils.parseUnits(_price, token.decimals);
       if (bundleID) {
         const tx = await updateBundleListing(bundleID, price);
         await tx.wait();
@@ -1420,6 +1454,7 @@ const NFTItem = () => {
         const tx = await updateListing(
           address,
           tokenID,
+          token.address === '' ? ZERO_ADDRESS : token.address,
           price,
           ethers.BigNumber.from(quantity)
         );
@@ -1464,15 +1499,55 @@ const NFTItem = () => {
     try {
       setBuyingItem(true);
       const _price = listing.price * listing.quantity;
-      const price = ethers.utils.parseEther(_price.toString());
-      const tx = await buyItem(
-        address,
-        ethers.BigNumber.from(tokenID),
-        listing.owner,
-        price,
-        account
-      );
-      await tx.wait();
+      if (listing.token.address === '') {
+        const price = ethers.utils.parseEther(_price.toString());
+        const tx = await buyItemETH(
+          address,
+          ethers.BigNumber.from(tokenID),
+          listing.owner,
+          price,
+          account
+        );
+        await tx.wait();
+      } else {
+        const erc20 = await getERC20Contract(listing.token.address);
+        const balance = await erc20.balanceOf(account);
+        const price = ethers.utils.parseUnits(
+          _price.toString(),
+          listing.token.decimals
+        );
+        if (balance.lt(price)) {
+          const toastId = showToast(
+            'error',
+            `Insufficient ${listing.token.symbol} Balance!`,
+            listing.token.symbol === 'WFTM'
+              ? 'You can wrap FTM in the WFTM station.'
+              : `You can exchange ${listing.token.symbol} on other exchange site.`,
+            () => {
+              toast.dismiss(toastId);
+              setOfferModalVisible(false);
+              if (listing.token.symbol === 'WFTM') {
+                dispatch(ModalActions.showWFTMModal());
+              }
+            }
+          );
+          setBuyingItem(false);
+          return;
+        }
+        const salesContract = await getSalesContract();
+        const allowance = await erc20.allowance(account, salesContract.address);
+        if (allowance.lt(price)) {
+          const tx = await erc20.approve(salesContract.address, price);
+          await tx.wait();
+        }
+        const tx = await buyItemERC20(
+          address,
+          ethers.BigNumber.from(tokenID),
+          listing.token.address,
+          listing.owner
+        );
+        await tx.wait();
+      }
       setBuyingItem(false);
 
       showToast('success', 'You have bought the item!');
@@ -2131,7 +2206,7 @@ const NFTItem = () => {
           <div className={styles.currentPriceLabel}>Current price</div>
           <div className={styles.currentPriceWrapper}>
             <div className={styles.tokenLogo}>
-              <img src={ftmIcon} />
+              <img src={bestListing.token.icon} />
             </div>
             <div className={styles.currentPrice}>{bestListing.price}</div>
             <div className={styles.currentPriceUSD}>
@@ -2775,7 +2850,10 @@ const NFTItem = () => {
                             </Link>
                           </div>
                           <div className={styles.price}>
-                            <img src={ftmIcon} className={styles.tokenIcon} />
+                            <img
+                              src={listing.token.icon}
+                              className={styles.tokenIcon}
+                            />
                             {formatNumber(listing.price)}
                           </div>
                           {tokenInfo?.totalSupply > 1 && (
@@ -3135,7 +3213,7 @@ const NFTItem = () => {
       <SellModal
         visible={sellModalVisible}
         onClose={() => setSellModalVisible(false)}
-        onSell={hasListing ? handleUpdatePrice : handleListItem}
+        onSell={hasListing ? handleUpdateListing : handleListItem}
         startPrice={
           bundleID
             ? bundleListing.current?.price || 0

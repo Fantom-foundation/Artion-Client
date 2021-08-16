@@ -89,7 +89,9 @@ const PaintBoard = () => {
     try {
       const { data } = await fetchMintableCollections(authToken);
       setCollections(data);
-      setSelected([data[0]]);
+      if (data.length) {
+        setSelected([data[0]]);
+      }
     } catch (err) {
       console.log(err);
     }
@@ -412,7 +414,9 @@ const PaintBoard = () => {
             />
           </div>
           <div className={styles.formGroup}>
-            <p className={styles.formLabel}>Link to IP Rights Document</p>
+            <p className={styles.formLabel}>
+              Link to IP Rights Document (Optional)
+            </p>
             <input
               className={styles.formInput}
               placeholder="Enter Link"

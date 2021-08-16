@@ -4,7 +4,7 @@ export * from './abi';
 export * from './auctions';
 export * from './sales';
 export * from './bundleSales';
-export * from './nft';
+export * from './token';
 export * from './wftm';
 export * from './factory';
 
