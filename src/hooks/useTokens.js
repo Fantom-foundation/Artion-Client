@@ -2,7 +2,8 @@ import { useCallback, useMemo } from 'react';
 import { ChainId } from '@sushiswap/sdk';
 import { useWeb3React } from '@web3-react/core';
 
-import iconFTM from 'assets/imgs/ftm.png';
+import iconFTM from 'assets/svgs/ftm.svg';
+import iconWFTM from 'assets/imgs/wftm.png';
 import iconUSDT from 'assets/imgs/usdt.png';
 import iconUSDC from 'assets/imgs/usdc.png';
 import iconDAI from 'assets/imgs/dai.png';
@@ -13,14 +14,15 @@ const Tokens = {
       address: '',
       name: 'Fantom',
       symbol: 'FTM',
+      decimals: 18,
       icon: iconFTM,
     },
     {
       address: '0x21be370d5312f44cb42ce377bc9b8a0cef1a4c83',
       name: 'Wrapped Fantom',
       symbol: 'WFTM',
-      decimal: 18,
-      icon: iconFTM,
+      decimals: 18,
+      icon: iconWFTM,
     },
     {
       address: '0x049d68029688eabf473097a2fc38ef61633a3c7a',
@@ -49,14 +51,15 @@ const Tokens = {
       address: '',
       name: 'Fantom',
       symbol: 'FTM',
+      decimals: 18,
       icon: iconFTM,
     },
     {
       address: '0x077fab8f7f79178f6718bdfdffd5c3b8d787aed5',
       name: 'Wrapped Fantom',
       symbol: 'WFTM',
-      decimal: 18,
-      icon: iconFTM,
+      decimals: 18,
+      icon: iconWFTM,
     },
   ],
 };
@@ -65,7 +68,13 @@ export default function useTokens() {
   const { chainId } = useWeb3React();
 
   const getTokenByAddress = useCallback(
-    addr => (Tokens[chainId] || []).find(tk => tk.address === addr),
+    addr => {
+      const address =
+        addr === '0x0000000000000000000000000000000000000000' ? '' : addr;
+      return (Tokens[chainId] || []).find(
+        tk => tk.address.toLowerCase() === address.toLowerCase()
+      );
+    },
     [chainId]
   );
 

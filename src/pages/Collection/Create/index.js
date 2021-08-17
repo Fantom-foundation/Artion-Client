@@ -29,12 +29,13 @@ import telegramIcon from 'assets/svgs/telegram.svg';
 import twitterIcon from 'assets/svgs/twitter.svg';
 import instagramIcon from 'assets/svgs/instagram.svg';
 import mediumIcon from 'assets/svgs/medium.svg';
-import nftIcon from 'assets/svgs/nft_active.svg';
+import nftIcon from 'assets/svgs/nft_black.svg';
 import uploadIcon from 'assets/imgs/upload.png';
 import plusIcon from 'assets/svgs/plus.svg';
 import closeIcon from 'assets/svgs/close.svg';
 
 import styles from './styles.module.scss';
+import { isAddress } from 'utils';
 
 const CustomRadio = withStyles({
   root: {
@@ -68,6 +69,9 @@ const CollectionCreate = ({ isRegister }) => {
   const [symbolError, setSymbolError] = useState(null);
   const [description, setDescription] = useState('');
   const [descriptionError, setDescriptionError] = useState(null);
+  const [royalty, setRoyalty] = useState(0);
+  const [feeRecipient, setFeeRecipient] = useState('');
+  const [recipientError, setRecipientError] = useState(null);
   const [email, setEmail] = useState('');
   const [emailError, setEmailError] = useState(null);
   const [address, setAddress] = useState('');
@@ -159,6 +163,16 @@ const CollectionCreate = ({ isRegister }) => {
     }
   };
 
+  const validateFeeRecipient = () => {
+    if (feeRecipient.length === 0) {
+      setRecipientError("This field can't be blank");
+    } else if (!isAddress(feeRecipient)) {
+      setRecipientError('Invalid address');
+    } else {
+      setRecipientError(null);
+    }
+  };
+
   const validEmail = email => /(.+)@(.+){2,}\.(.+){2,}/.test(email);
 
   const validateEmail = () => {
@@ -218,6 +232,7 @@ const CollectionCreate = ({ isRegister }) => {
     if (siteUrl.length === 0) return false;
     if (email.length === 0) return false;
     if (!validEmail(email)) return false;
+    if (isRegister && !isAddress(feeRecipient)) return false;
     return true;
   })();
 
@@ -301,6 +316,8 @@ const CollectionCreate = ({ isRegister }) => {
             mediumHandle,
             telegram,
             signature,
+            royalty,
+            feeRecipient,
           };
 
           await axios({
@@ -560,7 +577,15 @@ const CollectionCreate = ({ isRegister }) => {
 
         {!isRegister && (
           <div className={styles.inputGroup}>
-            <div className={styles.inputTitle}>Symbol *</div>
+            <div className={styles.inputTitle}>
+              Symbol *&nbsp;
+              <BootstrapTooltip
+                title="A symbol is used when we deploy your NFT contract. If you are not sure about symbol, be aware that name and symbol share the same value."
+                placement="top"
+              >
+                <HelpOutlineIcon />
+              </BootstrapTooltip>
+            </div>
             <div className={styles.inputWrapper}>
               <input
                 className={cx(styles.input, symbolError && styles.hasError)}
@@ -599,6 +624,43 @@ const CollectionCreate = ({ isRegister }) => {
             )}
           </div>
         </div>
+
+        {isRegister && (
+          <div className={styles.inputGroup}>
+            <div className={styles.inputTitle}>Royalty *</div>
+            <div className={styles.inputWrapper}>
+              <input
+                type="number"
+                min={0}
+                max={100}
+                step={0.01}
+                className={cx(styles.input, symbolError && styles.hasError)}
+                placeholder="Collection Royalty"
+                value={royalty}
+                onChange={e => setRoyalty(e.target.value)}
+              />
+            </div>
+          </div>
+        )}
+
+        {isRegister && (
+          <div className={styles.inputGroup}>
+            <div className={styles.inputTitle}>Fee Recipient *</div>
+            <div className={styles.inputWrapper}>
+              <input
+                className={cx(styles.input, symbolError && styles.hasError)}
+                placeholder="Fee Recipient"
+                value={feeRecipient}
+                onChange={e => setFeeRecipient(e.target.value)}
+                onBlur={validateFeeRecipient}
+              />
+              <div className={styles.lengthIndicator}>{name.length}/20</div>
+              {recipientError && (
+                <div className={styles.error}>{recipientError}</div>
+              )}
+            </div>
+          </div>
+        )}
 
         <div className={styles.inputGroup}>
           <div className={styles.inputTitle}>
@@ -648,7 +710,7 @@ const CollectionCreate = ({ isRegister }) => {
         </div>
 
         <div className={styles.inputGroup}>
-          <div className={styles.inputTitle}>Links</div>
+          <div className={styles.inputTitle}>Links *</div>
           <div className={styles.inputWrapper}>
             <div className={styles.linksWrapper}>
               {isRegister && (

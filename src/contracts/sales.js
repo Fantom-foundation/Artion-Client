@@ -26,16 +26,28 @@ export const useSalesContract = () => {
     return contract;
   }, [chainId]);
 
-  const buyItem = async (nftAddress, tokenId, owner, value, from) => {
+  const buyItemETH = async (nftAddress, tokenId, owner, value, from) => {
     const contract = await getSalesContract();
     const args = [nftAddress, tokenId, owner];
     const options = {
       value,
       from,
     };
-    const gasEstimate = await contract.estimateGas.buyItem(...args, options);
+    const gasEstimate = await contract.estimateGas[
+      'buyItem(address,uint256,address)'
+    ](...args, options);
     options.gasLimit = calculateGasMargin(gasEstimate);
-    return await contract.buyItem(...args, options);
+    return await contract['buyItem(address,uint256,address)'](...args, options);
+  };
+
+  const buyItemERC20 = async (nftAddress, tokenId, payToken, owner) => {
+    const contract = await getSalesContract();
+    return await contract['buyItem(address,uint256,address,address)'](
+      nftAddress,
+      tokenId,
+      payToken,
+      owner
+    );
   };
 
   const cancelListing = async (nftAddress, tokenId) => {
@@ -48,24 +60,36 @@ export const useSalesContract = () => {
     nftAddress,
     tokenId,
     quantity,
+    payToken,
     pricePerItem,
-    startingTime,
-    allowedAddress
+    startingTime
   ) => {
     const contract = await getSalesContract();
     return await contract.listItem(
       nftAddress,
       tokenId,
       quantity,
+      payToken,
       pricePerItem,
-      startingTime,
-      allowedAddress
+      startingTime
     );
   };
 
-  const updateListing = async (nftAddress, tokenId, newPrice) => {
+  const updateListing = async (
+    nftAddress,
+    tokenId,
+    payToken,
+    newPrice
+    // quantity
+  ) => {
     const contract = await getSalesContract();
-    return await contract.updateListing(nftAddress, tokenId, newPrice);
+    return await contract.updateListing(
+      nftAddress,
+      tokenId,
+      payToken,
+      newPrice
+      // quantity
+    );
   };
 
   const createOffer = async (
@@ -104,7 +128,8 @@ export const useSalesContract = () => {
 
   return {
     getSalesContract,
-    buyItem,
+    buyItemETH,
+    buyItemERC20,
     cancelListing,
     listItem,
     updateListing,

@@ -41,16 +41,24 @@ export const useBundleSalesContract = () => {
     return null;
   };
 
-  const buyBundle = async (bundleID, value, from) => {
+  const buyBundleETH = async (bundleID, value, from) => {
     const contract = await getBundleSalesContract();
     const args = [bundleID];
     const options = {
       value,
       from,
     };
-    const gasEstimate = await contract.estimateGas.buyItem(...args, options);
+    const gasEstimate = await contract.estimateGas['buyItem(string)'](
+      ...args,
+      options
+    );
     options.gasLimit = calculateGasMargin(gasEstimate);
-    return await contract.buyItem(...args, options);
+    return await contract['buyItem(string)'](...args, options);
+  };
+
+  const buyBundleERC20 = async (bundleID, payToken) => {
+    const contract = await getBundleSalesContract();
+    return await contract['buyItem(string,address)'](bundleID, payToken);
   };
 
   const cancelBundleListing = async bundleID => {
@@ -64,9 +72,9 @@ export const useBundleSalesContract = () => {
     nftAddresses,
     tokenIds,
     quantities,
+    payToken,
     price,
-    startingTime,
-    allowedAddress
+    startingTime
   ) => {
     const contract = await getBundleSalesContract();
     return await contract.listItem(
@@ -74,9 +82,9 @@ export const useBundleSalesContract = () => {
       nftAddresses,
       tokenIds,
       quantities,
+      payToken,
       price,
-      startingTime,
-      allowedAddress
+      startingTime
     );
   };
 
@@ -103,7 +111,8 @@ export const useBundleSalesContract = () => {
   return {
     getBundleSalesContract,
     getBundleListing,
-    buyBundle,
+    buyBundleETH,
+    buyBundleERC20,
     cancelBundleListing,
     listBundle,
     updateBundleListing,

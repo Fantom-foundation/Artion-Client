@@ -91,12 +91,13 @@ const SellModal = ({
     if (totalSupply > 1) {
       quant = parseInt(quantity);
     }
-    onSell(price, quant);
+    onSell(selected[0], price, quant);
   };
 
   const validateInput = () => {
     if (price.length === 0) return false;
     if (totalSupply > 1 && quantity.length === 0) return false;
+    if (selected.length === 0) return false;
     return true;
   };
 

@@ -506,8 +506,8 @@ export const useApi = () => {
     return res.data;
   };
 
-  const createBundle = async (name, price, items, authToken) => {
-    const data = { name, price, items };
+  const createBundle = async (name, paymentToken, price, items, authToken) => {
+    const data = { name, paymentToken, price, items };
     const res = await axios({
       method: 'post',
       url: `${apiUrl()}/bundle/createBundle`,
