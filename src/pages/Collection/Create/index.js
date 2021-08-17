@@ -577,7 +577,15 @@ const CollectionCreate = ({ isRegister }) => {
 
         {!isRegister && (
           <div className={styles.inputGroup}>
-            <div className={styles.inputTitle}>Symbol *</div>
+            <div className={styles.inputTitle}>
+              Symbol *&nbsp;
+              <BootstrapTooltip
+                title="A symbol is used when we deploy your NFT contract. If you are not sure about symbol, be aware that name and symbol share the same value."
+                placement="top"
+              >
+                <HelpOutlineIcon />
+              </BootstrapTooltip>
+            </div>
             <div className={styles.inputWrapper}>
               <input
                 className={cx(styles.input, symbolError && styles.hasError)}

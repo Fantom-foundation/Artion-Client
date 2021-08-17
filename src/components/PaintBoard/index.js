@@ -415,7 +415,13 @@ const PaintBoard = () => {
           </div>
           <div className={styles.formGroup}>
             <p className={styles.formLabel}>
-              Link to IP Rights Document (Optional)
+              Link to IP Rights Document (Optional)&nbsp;
+              <BootstrapTooltip
+                title="Link to the document which proves your ownership of this image."
+                placement="top"
+              >
+                <HelpOutlineIcon />
+              </BootstrapTooltip>
             </p>
             <input
               className={styles.formInput}

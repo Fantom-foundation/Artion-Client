@@ -6,7 +6,9 @@ import { ClipLoader } from 'react-spinners';
 import Select from 'react-dropdown-select';
 import Skeleton from 'react-loading-skeleton';
 import axios from 'axios';
+import HelpOutlineIcon from '@material-ui/icons/HelpOutline';
 
+import BootstrapTooltip from 'components/BootstrapTooltip';
 import { formatNumber } from 'utils';
 import { FTM_TOTAL_SUPPLY } from 'constants/index';
 import useTokens from 'hooks/useTokens';
@@ -135,7 +137,15 @@ const AuctionModal = ({
       }
     >
       <div className={styles.formGroup}>
-        <div className={styles.formLabel}>Reserve Price</div>
+        <div className={styles.formLabel}>
+          Reserve Price&nbsp;
+          <BootstrapTooltip
+            title="Reserve price is your desired one you want to get from this auction."
+            placement="top"
+          >
+            <HelpOutlineIcon />
+          </BootstrapTooltip>
+        </div>
         <div className={cx(styles.formInputCont, focused && styles.focused)}>
           <Select
             options={options}
