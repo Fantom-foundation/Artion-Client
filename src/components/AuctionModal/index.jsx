@@ -69,9 +69,9 @@ const AuctionModal = ({
 
   useEffect(() => {
     if (visible && tokens?.length) {
-      setSelected([tokens[0]]);
+      setSelected([auction ? auction.token : tokens[0]]);
     }
-  }, [visible]);
+  }, [visible, auction]);
 
   const getTokenPrice = () => {
     if (tokenPriceInterval) clearInterval(tokenPriceInterval);
@@ -131,7 +131,7 @@ const AuctionModal = ({
       onSubmit={() =>
         contractApproved
           ? !confirming && validateInput
-            ? onStartAuction(reservePrice, startTime, endTime)
+            ? onStartAuction(selected[0], reservePrice, startTime, endTime)
             : null
           : approveContract()
       }
@@ -149,7 +149,7 @@ const AuctionModal = ({
         <div className={cx(styles.formInputCont, focused && styles.focused)}>
           <Select
             options={options}
-            disabled={confirming}
+            disabled={auction || confirming}
             values={selected}
             onChange={tk => {
               setSelected(tk);

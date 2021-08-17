@@ -515,16 +515,22 @@
 .result {
   font-size: 20px;
   font-weight: bold;
+  display: flex;
+  align-items: center;
 }
 
 .bidtitle {
   font-size: 18px;
+  display: flex;
+  align-items: center;
 }
 
 .bidAmount {
   font-size: 20px;
   font-weight: bold;
   margin-top: 10px;
+  display: flex;
+  align-items: center;
 }
 
 .placeBid,

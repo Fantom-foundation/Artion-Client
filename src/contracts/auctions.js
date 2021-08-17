@@ -30,12 +30,14 @@ export const useAuctionContract = () => {
     const contract = await getAuctionContract();
     const res = await contract.getAuction(nftAddress, tokenId);
     const owner = res[0];
-    const reservePrice = parseFloat(res[1].toString()) / 10 ** 18;
-    const startTime = parseFloat(res[2].toString());
-    const endTime = parseFloat(res[3].toString());
-    const resulted = res[4];
+    const payToken = res[1];
+    const reservePrice = res[2];
+    const startTime = parseFloat(res[3].toString());
+    const endTime = parseFloat(res[4].toString());
+    const resulted = res[5];
     return {
       owner,
+      payToken,
       reservePrice,
       startTime,
       endTime,
@@ -51,6 +53,7 @@ export const useAuctionContract = () => {
   const createAuction = async (
     nftAddress,
     tokenId,
+    payToken,
     reservePrice,
     startTimestamp,
     endTimestamp
@@ -59,6 +62,7 @@ export const useAuctionContract = () => {
     return await contract.createAuction(
       nftAddress,
       tokenId,
+      payToken,
       reservePrice,
       startTimestamp,
       endTimestamp
@@ -78,16 +82,27 @@ export const useAuctionContract = () => {
     };
   };
 
-  const placeBid = async (nftAddress, tokenId, value, from) => {
+  const placeBid = async (nftAddress, tokenId, payToken, value, from) => {
     const contract = await getAuctionContract();
-    const args = [nftAddress, tokenId];
-    const options = {
-      value,
-      from,
-    };
-    const gasEstimate = await contract.estimateGas.placeBid(...args, options);
-    options.gasLimit = calculateGasMargin(gasEstimate);
-    return await contract.placeBid(...args, options);
+
+    if (payToken === '') {
+      const args = [nftAddress, tokenId];
+      const options = {
+        value,
+        from,
+      };
+      const gasEstimate = await contract.estimateGas[
+        'placeBid(address,uint256)'
+      ](...args, options);
+      options.gasLimit = calculateGasMargin(gasEstimate);
+      return await contract['placeBid(address,uint256)'](...args, options);
+    } else {
+      return await contract['placeBid(address,uint256,uint256)'](
+        nftAddress,
+        tokenId,
+        value
+      );
+    }
   };
 
   const resultAuction = async (nftAddress, tokenId) => {

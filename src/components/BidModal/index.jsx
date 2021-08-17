@@ -2,9 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import cx from 'classnames';
 import { ClipLoader } from 'react-spinners';
+import Select from 'react-dropdown-select';
 
 import { formatNumber } from 'utils';
 import { FTM_TOTAL_SUPPLY } from 'constants/index';
+import useTokens from 'hooks/useTokens';
 
 import Modal from '../Modal';
 import styles from '../Modal/common.module.scss';
@@ -15,15 +17,25 @@ const BidModal = ({
   onPlaceBid,
   minBidAmount,
   confirming,
+  token,
 }) => {
+  const { tokens } = useTokens();
+
   const [price, setPrice] = useState('');
   const [focused, setFocused] = useState(false);
+  const [options, setOptions] = useState([]);
 
   const { price: ftmPrice } = useSelector(state => state.Price);
 
   useEffect(() => {
     setPrice(minBidAmount);
   }, [visible]);
+
+  useEffect(() => {
+    if (tokens?.length) {
+      setOptions(tokens);
+    }
+  }, [tokens]);
 
   const validateInput = () => {
     return price.length > 0;
@@ -41,8 +53,38 @@ const BidModal = ({
       }
     >
       <div className={styles.formGroup}>
-        <div className={styles.formLabel}>Price (FTM)</div>
+        <div className={styles.formLabel}>Price</div>
         <div className={cx(styles.formInputCont, focused && styles.focused)}>
+          <Select
+            options={options}
+            disabled
+            values={token ? [token] : []}
+            className={styles.select}
+            placeholder=""
+            itemRenderer={({ item, itemIndex, methods }) => (
+              <div
+                key={itemIndex}
+                className={styles.token}
+                onClick={() => {
+                  methods.clearAll();
+                  methods.addItem(item);
+                }}
+              >
+                <img src={item.icon} className={styles.tokenIcon} />
+                <div className={styles.tokenSymbol}>{item.symbol}</div>
+              </div>
+            )}
+            contentRenderer={({ props: { values } }) =>
+              values.length > 0 ? (
+                <div className={styles.selectedToken}>
+                  <img src={values[0].icon} className={styles.tokenIcon} />
+                  <div className={styles.tokenSymbol}>{values[0].symbol}</div>
+                </div>
+              ) : (
+                <div className={styles.selectedToken} />
+              )
+            }
+          />
           <input
             className={styles.formInput}
             placeholder="0.00"

@@ -75,7 +75,6 @@ import twitterIcon from 'assets/svgs/twitter.svg';
 import mediumIcon from 'assets/svgs/medium.svg';
 import filterIcon from 'assets/svgs/filter.svg';
 import checkIcon from 'assets/svgs/check.svg';
-import ftmIcon from 'assets/imgs/ftm.png';
 import shareIcon from 'assets/svgs/share.svg';
 import iconArtion from 'assets/svgs/logo_small_blue.svg';
 import iconFacebook from 'assets/imgs/facebook.png';
@@ -239,6 +238,7 @@ const NFTItem = () => {
 
   const [bid, setBid] = useState(null);
   const [winner, setWinner] = useState(null);
+  const [winningToken, setWinningToken] = useState(null);
   const [winningBid, setWinningBid] = useState(null);
   const [views, setViews] = useState();
   const [now, setNow] = useState(new Date());
@@ -313,9 +313,8 @@ const NFTItem = () => {
         })
       );
       setCollections(collections);
-    } catch (err) {
-      console.log('Bundle does not exist', err);
-      // history.replace('/404');
+    } catch {
+      history.replace('/404');
     }
     setLoading(false);
   };
@@ -340,15 +339,21 @@ const NFTItem = () => {
       } = await fetchItemDetails(address, tokenID);
 
       contentType.current = _contentType;
-      tradeHistory.current = history.sort((a, b) =>
-        a.createdAt < b.createdAt ? 1 : -1
-      );
+      tradeHistory.current = history
+        .sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1))
+        .map(history => ({
+          ...history,
+          token: getTokenByAddress(history.paymentToken),
+        }));
       setLiked(likes);
       listings.current = _listings.map(listing => ({
         ...listing,
         token: getTokenByAddress(listing.paymentToken),
       }));
-      offers.current = _offers;
+      offers.current = _offers.map(offer => ({
+        ...offer,
+        token: getTokenByAddress(offer.paymentToken),
+      }));
       moreItems.current = nfts;
 
       try {
@@ -415,7 +420,10 @@ const NFTItem = () => {
   const getBundleOffers = async () => {
     try {
       const { data } = await _getBundleOffers(bundleID);
-      offers.current = data;
+      offers.current = data.map(offer => ({
+        ...offer,
+        token: getTokenByAddress(offer.paymentToken),
+      }));
     } catch (e) {
       console.log(e);
     }
@@ -456,7 +464,11 @@ const NFTItem = () => {
     try {
       const _auction = await getAuction(address, tokenID);
       if (_auction.endTime !== 0) {
-        auction.current = _auction;
+        const token = getTokenByAddress(_auction.payToken);
+        const reservePrice = parseFloat(
+          ethers.utils.formatUnits(_auction.reservePrice, token.decimals)
+        );
+        auction.current = { ..._auction, reservePrice, token };
       }
     } catch (e) {
       console.log(e);
@@ -543,7 +555,7 @@ const NFTItem = () => {
     nft,
     id,
     _quantity,
-    payToken,
+    paymentToken,
     unitPrice,
     price
   ) => {
@@ -584,12 +596,16 @@ const NFTItem = () => {
           holders.current.splice(sellerIndex, 1);
         }
       }
+      const token = getTokenByAddress(paymentToken);
       const newTradeHistory = {
         from: seller,
         to: buyer,
-        price: parseFloat(price.toString()) / 10 ** 18,
+        price: parseFloat(ethers.utils.formatUnits(price, token.decimals)),
         value: quantity,
         createdAt: new Date().toISOString(),
+        paymentToken,
+        token,
+        priceInUSD: parseFloat(ethers.utils.formatUnits(price, token.decimals)),
       };
       try {
         const from = await getUserAccountDetails(seller);
@@ -613,17 +629,20 @@ const NFTItem = () => {
     creator,
     nft,
     id,
-    payToken,
     quantity,
+    payToken,
     pricePerItem,
     deadline
   ) => {
     if (eventMatches(nft, id)) {
+      const token = getTokenByAddress(payToken);
       const newOffer = {
         creator,
         deadline: parseFloat(deadline.toString()) * 1000,
-        payToken,
-        pricePerItem: parseFloat(pricePerItem.toString()) / 10 ** 18,
+        token,
+        pricePerItem: parseFloat(
+          ethers.utils.formatUnits(pricePerItem, token.decimals)
+        ),
         quantity: parseFloat(quantity.toString()),
       };
       try {
@@ -742,12 +761,15 @@ const NFTItem = () => {
     _deadline
   ) => {
     if (bundleID.toLowerCase() === _bundleID.toLowerCase()) {
+      const token = getTokenByAddress(_payToken);
       const newOffer = {
         creator: _creator,
         deadline: parseFloat(_deadline.toString()) * 1000,
-        payToken: _payToken,
-        pricePerItem: parseFloat(_price.toString()) / 10 ** 18,
+        pricePerItem: parseFloat(
+          ethers.utils.formatUnits(_price, token.decimals)
+        ),
         quantity: 1,
+        token,
       };
       try {
         const { data } = await getUserAccountDetails(_creator);
@@ -795,10 +817,13 @@ const NFTItem = () => {
     }
   };
 
-  const auctionReservePriceUpdatedHandler = (nft, id, _price) => {
+  const auctionReservePriceUpdatedHandler = (nft, id, _payToken, _price) => {
     if (eventMatches(nft, id)) {
-      const price = parseFloat(_price.toString()) / 10 ** 18;
       if (auction.current) {
+        const price = ethers.utils.formatUnits(
+          _price,
+          auction.current.token.decimals
+        );
         const newAuction = { ...auction.current, reservePrice: price };
         auction.current = newAuction;
       }
@@ -839,15 +864,24 @@ const NFTItem = () => {
     }
   };
 
-  const auctionResultedHandler = (nft, id, winner, _winningBid) => {
+  function auctionResultedHandler(
+    nft,
+    id,
+    winner,
+    payToken,
+    unitPrice,
+    _winningBid
+  ) {
     if (eventMatches(nft, id)) {
       const newAuction = { ...auction.current, resulted: true };
       auction.current = newAuction;
       setWinner(winner);
+      const token = getTokenByAddress(payToken);
+      setWinningToken(token);
       const winningBid = parseFloat(_winningBid.toString()) / 10 ** 18;
       setWinningBid(winningBid);
     }
-  };
+  }
 
   const addEventListeners = async () => {
     const salesContract = await getSalesContract();
@@ -1702,17 +1736,18 @@ const NFTItem = () => {
     }
   };
 
-  const handleStartAuction = async (_price, _startTime, _endTime) => {
+  const handleStartAuction = async (token, _price, _startTime, _endTime) => {
     try {
       setAuctionStarting(true);
 
-      const price = ethers.utils.parseEther(_price);
+      const price = ethers.utils.parseUnits(_price, token.decimals);
       const startTime = Math.floor(_startTime.getTime() / 1000);
       const endTime = Math.floor(_endTime.getTime() / 1000);
 
       const tx = await createAuction(
         address,
         ethers.BigNumber.from(tokenID),
+        token.address,
         price,
         ethers.BigNumber.from(startTime),
         ethers.BigNumber.from(endTime)
@@ -1728,14 +1763,14 @@ const NFTItem = () => {
     }
   };
 
-  const handleUpdateAuction = async (_price, _startTime, _endTime) => {
+  const handleUpdateAuction = async (token, _price, _startTime, _endTime) => {
     if (!auction.current) return;
 
     try {
       setAuctionUpdating(true);
 
       if (parseFloat(_price) !== auction.current.reservePrice) {
-        const price = ethers.utils.parseEther(_price);
+        const price = ethers.utils.parseUnits(_price, token.decimals);
         await updateAuctionReservePrice(
           address,
           ethers.BigNumber.from(tokenID),
@@ -1810,10 +1845,43 @@ const NFTItem = () => {
     try {
       setBidPlacing(true);
 
-      const price = ethers.utils.parseEther(_price);
+      const { token } = auction.current;
+      const price = ethers.utils.parseUnits(_price, token.decimals);
+      if (token.address !== '') {
+        const erc20 = await getERC20Contract(token.address);
+        const balance = await erc20.balanceOf(account);
+        if (balance.lt(price)) {
+          const toastId = showToast(
+            'error',
+            `Insufficient ${token.symbol} Balance!`,
+            token.symbol === 'WFTM'
+              ? 'You can wrap FTM in the WFTM station.'
+              : `You can exchange ${token.symbol} on other exchange site.`,
+            () => {
+              toast.dismiss(toastId);
+              setOfferModalVisible(false);
+              if (token.symbol === 'WFTM') {
+                dispatch(ModalActions.showWFTMModal());
+              }
+            }
+          );
+          setBuyingItem(false);
+          return;
+        }
+        const auctionContract = await getAuctionContract();
+        const allowance = await erc20.allowance(
+          account,
+          auctionContract.address
+        );
+        if (allowance.lt(price)) {
+          const tx = await erc20.approve(auctionContract.address, price);
+          await tx.wait();
+        }
+      }
       const tx = await placeBid(
         address,
         ethers.BigNumber.from(tokenID),
+        token.address,
         price,
         account
       );
@@ -2639,7 +2707,12 @@ const NFTItem = () => {
                                 ? 'Me'
                                 : shortenAddress(winner)}
                             </Link>
-                            {` (${formatNumber(winningBid)} FTM)`}
+                            &nbsp;(
+                            <img
+                              src={winningToken.icon}
+                              className={styles.tokenIcon}
+                            />
+                            {formatNumber(winningBid)})
                           </>
                         ) : (
                           'Waiting for result'
@@ -2649,7 +2722,11 @@ const NFTItem = () => {
                       <div>
                         <div className={styles.bidtitle}>
                           Reserve Price :&nbsp;
-                          {formatNumber(auction.current.reservePrice)} FTM
+                          <img
+                            src={auction.current.token.icon}
+                            className={styles.tokenIcon}
+                          />
+                          {formatNumber(auction.current.reservePrice)}
                         </div>
                         <div className={styles.bidtitle}>
                           Highest Bid
@@ -2658,13 +2735,21 @@ const NFTItem = () => {
                             : ''}
                         </div>
                         <div className={styles.bidAmount}>
-                          {formatNumber(bid.bid)} FTM
+                          <img
+                            src={auction.current.token.icon}
+                            className={styles.tokenIcon}
+                          />
+                          {formatNumber(bid.bid)}
                         </div>
                       </div>
                     ) : (
                       <div className={styles.bidtitle}>
-                        No bids yet ( Reserve Price :{' '}
-                        {formatNumber(auction.current.reservePrice)} FTM )
+                        No bids yet ( Reserve Price :&nbsp;
+                        <img
+                          src={auction.current.token.icon}
+                          className={styles.tokenIcon}
+                        />
+                        {formatNumber(auction.current.reservePrice)} )
                       </div>
                     )}
                     {!isMine &&
@@ -2927,7 +3012,10 @@ const NFTItem = () => {
                               </Link>
                             </div>
                             <div className={styles.price}>
-                              <img src={ftmIcon} className={styles.tokenIcon} />
+                              <img
+                                src={offer.token.icon}
+                                className={styles.tokenIcon}
+                              />
                               {formatNumber(offer.pricePerItem || offer.price)}
                             </div>
                             {tokenInfo?.totalSupply > 1 && (
@@ -3064,8 +3152,12 @@ const NFTItem = () => {
                     <div className={styles.historyPrice}>
                       {history ? (
                         <>
-                          <img src={ftmIcon} className={styles.tokenIcon} />
+                          <img
+                            src={history.token.icon}
+                            className={styles.tokenIcon}
+                          />
                           {formatNumber(history.price)}
+                          &nbsp;( ${history.priceInUSD} )
                         </>
                       ) : (
                         <Skeleton width={100} height={20} />
@@ -3257,6 +3349,7 @@ const NFTItem = () => {
         onPlaceBid={handlePlaceBid}
         minBidAmount={(bid?.bid || 0) + minBidIncrement}
         confirming={bidPlacing}
+        token={auction.current?.token}
       />
       <OwnersModal
         visible={ownersModalVisible}
