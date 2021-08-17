@@ -159,7 +159,8 @@ const NFTItem = () => {
   const {
     getBundleSalesContract,
     getBundleListing,
-    buyBundle,
+    buyBundleETH,
+    buyBundleERC20,
     cancelBundleListing,
     listBundle,
     updateBundleListing,
@@ -287,7 +288,9 @@ const NFTItem = () => {
         data.bundle.owner,
         bundleID
       );
-      _bundleListing.token = getTokenByAddress(data.bundle.paymentToken);
+      if (_bundleListing) {
+        _bundleListing.token = getTokenByAddress(data.bundle.paymentToken);
+      }
       bundleListing.current = _bundleListing;
       const items = await Promise.all(
         data.items.map(async item => {
@@ -386,7 +389,6 @@ const NFTItem = () => {
         const { data } = await axios.get(tokenURI);
         setInfo(data);
       } catch {
-        console.log('Token URI not available');
         history.replace('/404');
       }
     }
@@ -434,9 +436,12 @@ const NFTItem = () => {
     tradeHistory.current = [];
     try {
       const { data } = await _getBundleTradeHistory(bundleID);
-      tradeHistory.current = data.sort((a, b) =>
-        a.createdAt < b.createdAt ? 1 : -1
-      );
+      tradeHistory.current = data
+        .sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1))
+        .map(history => ({
+          ...history,
+          token: getTokenByAddress(history.paymentToken),
+        }));
     } catch (e) {
       console.log(e);
     }
@@ -665,12 +670,22 @@ const NFTItem = () => {
     }
   };
 
-  const bundleListedHandler = (_owner, _bundleID, _price, _startingTime) => {
+  const bundleListedHandler = (
+    _owner,
+    _bundleID,
+    _payToken,
+    _price,
+    _startingTime
+  ) => {
     if (bundleID.toLowerCase() === _bundleID.toLowerCase()) {
-      const price = parseFloat(_price.toString()) / 10 ** 18;
+      const token = getTokenByAddress(_payToken);
+      const price = parseFloat(
+        ethers.utils.formatUnits(_price, token.decimals)
+      );
       bundleListing.current = {
         price,
         startingTime: parseInt(_startingTime.toString()),
+        token,
       };
     }
   };
@@ -724,16 +739,28 @@ const NFTItem = () => {
     }
   };
 
-  const bundleSoldHandler = async (_seller, _buyer, _bundleID, _price) => {
+  const bundleSoldHandler = async (
+    _seller,
+    _buyer,
+    _bundleID,
+    _payToken,
+    _unitPrice,
+    _price
+  ) => {
     if (bundleID.toLowerCase() === _bundleID.toLowerCase()) {
       setOwner(_buyer);
       bundleListing.current = null;
+      const token = getTokenByAddress(_payToken);
       const newTradeHistory = {
         from: _seller,
         to: _buyer,
-        price: parseFloat(_price.toString()) / 10 ** 18,
+        price: parseFloat(ethers.utils.formatUnits(_price, token.decimals)),
         value: 1,
         createdAt: new Date().toISOString(),
+        token,
+        priceInUSD: parseFloat(
+          ethers.utils.formatUnits(_price, token.decimals)
+        ),
       };
       try {
         const from = await getUserAccountDetails(_seller);
@@ -1433,7 +1460,7 @@ const NFTItem = () => {
           addresses,
           tokenIds,
           quantities,
-          token.address,
+          token.address === '' ? ZERO_ADDRESS : token.address,
           price,
           ethers.BigNumber.from(Math.floor(new Date().getTime() / 1000))
         );
@@ -1601,11 +1628,44 @@ const NFTItem = () => {
 
     try {
       setBuyingItem(true);
-      const price = ethers.utils.parseEther(
-        bundleListing.current.price.toString()
+      const { token } = bundleListing.current;
+      const price = ethers.utils.parseUnits(
+        bundleListing.current.price.toString(),
+        token.decimals
       );
-      const tx = await buyBundle(bundleID, price, account);
-      await tx.wait();
+      if (token.address === '') {
+        const tx = await buyBundleETH(bundleID, price, account);
+        await tx.wait();
+      } else {
+        const erc20 = await getERC20Contract(token.address);
+        const balance = await erc20.balanceOf(account);
+        if (balance.lt(price)) {
+          const toastId = showToast(
+            'error',
+            `Insufficient ${token.symbol} Balance!`,
+            token.symbol === 'WFTM'
+              ? 'You can wrap FTM in the WFTM station.'
+              : `You can exchange ${token.symbol} on other exchange site.`,
+            () => {
+              toast.dismiss(toastId);
+              if (token.symbol === 'WFTM') {
+                dispatch(ModalActions.showWFTMModal());
+              }
+            }
+          );
+          setBuyingItem(false);
+          return;
+        }
+        const salesContract = await getBundleSalesContract();
+        const allowance = await erc20.allowance(account, salesContract.address);
+        if (allowance.lt(price)) {
+          const tx = await erc20.approve(salesContract.address, price);
+          await tx.wait();
+        }
+
+        const tx = await buyBundleERC20(bundleID, token.address);
+        await tx.wait();
+      }
       setBuyingItem(false);
 
       showToast('success', 'You have bought the bundle!');
@@ -1859,13 +1919,13 @@ const NFTItem = () => {
               : `You can exchange ${token.symbol} on other exchange site.`,
             () => {
               toast.dismiss(toastId);
-              setOfferModalVisible(false);
+              setBidModalVisible(false);
               if (token.symbol === 'WFTM') {
                 dispatch(ModalActions.showWFTMModal());
               }
             }
           );
-          setBuyingItem(false);
+          setBidPlacing(false);
           return;
         }
         const auctionContract = await getAuctionContract();
@@ -3157,7 +3217,10 @@ const NFTItem = () => {
                             className={styles.tokenIcon}
                           />
                           {formatNumber(history.price)}
-                          &nbsp;( ${history.priceInUSD} )
+                          &nbsp;( ${formatNumber(
+                            history.priceInUSD.toFixed(3)
+                          )}{' '}
+                          )
                         </>
                       ) : (
                         <Skeleton width={100} height={20} />

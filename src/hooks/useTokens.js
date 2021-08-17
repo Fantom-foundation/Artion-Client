@@ -2,7 +2,7 @@ import { useCallback, useMemo } from 'react';
 import { ChainId } from '@sushiswap/sdk';
 import { useWeb3React } from '@web3-react/core';
 
-import iconFTM from 'assets/imgs/ftm.png';
+import iconFTM from 'assets/svgs/ftm.svg';
 import iconWFTM from 'assets/imgs/wftm.png';
 import iconUSDT from 'assets/imgs/usdt.png';
 import iconUSDC from 'assets/imgs/usdc.png';
