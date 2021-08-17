@@ -283,10 +283,12 @@ const NFTItem = () => {
       setBundleInfo(data.bundle);
       setCreator(data.bundle.creator);
       setOwner(data.bundle.owner);
-      bundleListing.current = await getBundleListing(
+      const _bundleListing = await getBundleListing(
         data.bundle.owner,
         bundleID
       );
+      _bundleListing.token = getTokenByAddress(data.bundle.paymentToken);
+      bundleListing.current = _bundleListing;
       const items = await Promise.all(
         data.items.map(async item => {
           try {
@@ -311,9 +313,9 @@ const NFTItem = () => {
         })
       );
       setCollections(collections);
-    } catch {
-      console.log('Bundle does not exist');
-      history.replace('/404');
+    } catch (err) {
+      console.log('Bundle does not exist', err);
+      // history.replace('/404');
     }
     setLoading(false);
   };
@@ -2802,7 +2804,7 @@ const NFTItem = () => {
                             ) : (
                               <>
                                 <img
-                                  src={ftmIcon}
+                                  src={bundleListing.current.token.icon}
                                   className={styles.tokenIcon}
                                 />
                                 {formatNumber(bundleListing.current.price)}
@@ -3215,9 +3217,7 @@ const NFTItem = () => {
         onClose={() => setSellModalVisible(false)}
         onSell={hasListing ? handleUpdateListing : handleListItem}
         startPrice={
-          bundleID
-            ? bundleListing.current?.price || 0
-            : myListing()?.pricePerItem || 0
+          bundleID ? bundleListing.current?.price || 0 : myListing()?.price || 0
         }
         confirming={listingItem || priceUpdating}
         approveContract={

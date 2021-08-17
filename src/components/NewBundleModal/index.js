@@ -23,6 +23,8 @@ import closeIcon from 'assets/svgs/close.svg';
 import styles from './styles.module.scss';
 import commonStyles from '../Modal/common.module.scss';
 
+const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
+
 const NFTItem = ({ item, selected, onClick }) => {
   const { storageUrl } = useApi();
 
@@ -275,6 +277,7 @@ const NewBundleModal = ({ visible, onClose, onCreateSuccess = () => {} }) => {
 
     let bundleID;
     const selectedItems = [];
+    const token = paySelected[0];
     try {
       setCreating(true);
 
@@ -288,6 +291,7 @@ const NewBundleModal = ({ visible, onClose, onCreateSuccess = () => {} }) => {
       }
       const { data } = await createBundle(
         name,
+        token.address,
         parseFloat(price),
         selectedItems,
         authToken
@@ -298,14 +302,15 @@ const NewBundleModal = ({ visible, onClose, onCreateSuccess = () => {} }) => {
     }
 
     try {
+      const _price = ethers.utils.parseUnits(price, token.decimals);
       const tx = await listBundle(
         bundleID,
         selectedItems.map(item => item.address),
         selectedItems.map(item => item.tokenID),
         selectedItems.map(item => item.supply),
-        ethers.utils.parseEther(price),
-        ethers.BigNumber.from(Math.floor(new Date().getTime() / 1000)),
-        '0x0000000000000000000000000000000000000000'
+        token.address === '' ? ZERO_ADDRESS : token.address,
+        _price,
+        ethers.BigNumber.from(Math.floor(new Date().getTime() / 1000))
       );
       await tx.wait();
 

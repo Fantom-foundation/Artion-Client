@@ -64,9 +64,9 @@ export const useBundleSalesContract = () => {
     nftAddresses,
     tokenIds,
     quantities,
+    payToken,
     price,
-    startingTime,
-    allowedAddress
+    startingTime
   ) => {
     const contract = await getBundleSalesContract();
     return await contract.listItem(
@@ -74,9 +74,9 @@ export const useBundleSalesContract = () => {
       nftAddresses,
       tokenIds,
       quantities,
+      payToken,
       price,
-      startingTime,
-      allowedAddress
+      startingTime
     );
   };
 

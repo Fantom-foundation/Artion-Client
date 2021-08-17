@@ -702,7 +702,7 @@ const CollectionCreate = ({ isRegister }) => {
         </div>
 
         <div className={styles.inputGroup}>
-          <div className={styles.inputTitle}>Links</div>
+          <div className={styles.inputTitle}>Links *</div>
           <div className={styles.inputWrapper}>
             <div className={styles.linksWrapper}>
               {isRegister && (
