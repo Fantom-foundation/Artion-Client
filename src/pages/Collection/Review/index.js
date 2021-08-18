@@ -167,8 +167,29 @@ const CollectionCreate = () => {
             <div className={styles.inputWrapper}>
               <textarea
                 className={cx(styles.input, styles.longInput)}
-                placeholder="Provide your description for your collection"
                 value={collections[index].description}
+                disabled
+              />
+            </div>
+          </div>
+
+          <div className={styles.inputGroup}>
+            <div className={styles.inputTitle1}>Royalty</div>
+            <div className={styles.inputWrapper}>
+              <input
+                className={styles.input}
+                value={collections[index].royalty}
+                disabled
+              />
+            </div>
+          </div>
+
+          <div className={styles.inputGroup}>
+            <div className={styles.inputTitle1}>Fee Recipient</div>
+            <div className={styles.inputWrapper}>
+              <input
+                className={styles.input}
+                value={collections[index].feeRecipient}
                 disabled
               />
             </div>
