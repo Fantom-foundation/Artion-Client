@@ -313,7 +313,11 @@ const BaseCard = ({ item, loading, style, create, onCreate, onLike }) => {
               )}
             </div>
             <div className={styles.alignRight}>
-              {!loading && <div className={styles.label}>Price</div>}
+              {!loading && (
+                <div className={styles.label}>
+                  {auctionActive ? 'Auction' : 'Price'}
+                </div>
+              )}
               {loading || fetching ? (
                 <Skeleton width={80} height={20} />
               ) : (
