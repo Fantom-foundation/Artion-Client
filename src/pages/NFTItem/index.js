@@ -34,6 +34,7 @@ import {
   Toc as TocIcon,
   Label as LabelIcon,
   Ballot as BallotIcon,
+  Loyalty as LoyaltyIcon,
   VerticalSplit as VerticalSplitIcon,
   Subject as SubjectIcon,
   Redeem as RedeemIcon,
@@ -142,6 +143,7 @@ const NFTItem = () => {
     createOffer,
     cancelOffer,
     acceptOffer,
+    getCollectionRoyalty,
   } = useSalesContract();
   const {
     getAuctionContract,
@@ -206,6 +208,7 @@ const NFTItem = () => {
   const [collection, setCollection] = useState();
   const [collectionLoading, setCollectionLoading] = useState(false);
   const [fetchInterval, setFetchInterval] = useState(null);
+  const [collectionRoyalty, setCollectionRoyalty] = useState(null);
 
   const [transferModalVisible, setTransferModalVisible] = useState(false);
   const [sellModalVisible, setSellModalVisible] = useState(false);
@@ -1109,6 +1112,26 @@ const NFTItem = () => {
 
     getLikeInfo();
   }, [chainId, address, tokenID, bundleID]);
+
+  useEffect(() => {
+    if (!chainId || !address) {
+      setCollectionRoyalty(null);
+      return;
+    }
+
+    getCollectionRoyalty(address)
+      .then(res => {
+        if (res.royalty) {
+          setCollectionRoyalty({
+            royalty: res.royalty / 100,
+            feeRecipient: res.feeRecipient,
+          });
+        } else {
+          setCollectionRoyalty(null);
+        }
+      })
+      .catch(console.log);
+  }, [chainId, address]);
 
   useEffect(() => {
     if (address && tokenID && tokenType.current && filter === 1) {
@@ -2549,6 +2572,26 @@ const NFTItem = () => {
     </Panel>
   );
 
+  const renderRoyaltyPanel = () =>
+    collectionRoyalty && (
+      <Panel title="Royalty" icon={LoyaltyIcon}>
+        <div className={styles.panelBody}>
+          <div className={styles.panelLine}>
+            <div className={styles.panelLabel}>Royalty</div>
+            <div className={styles.panelValue}>
+              {collectionRoyalty.royalty}%
+            </div>
+          </div>
+          <div className={styles.panelLine}>
+            <div className={styles.panelLabel}>Fee Recipient</div>
+            <div className={styles.panelValue}>
+              {collectionRoyalty.feeRecipient}
+            </div>
+          </div>
+        </div>
+      </Panel>
+    );
+
   return (
     <div className={styles.container}>
       <Header light />
@@ -2710,6 +2753,7 @@ const NFTItem = () => {
               {bundleID && renderBundleInfoPanel()}
               {!bundleID && renderAboutPanel()}
               {!bundleID && renderCollectionPanel()}
+              {!bundleID && renderRoyaltyPanel()}
             </div>
           </div>
           <div className={styles.itemMain}>
@@ -2736,6 +2780,11 @@ const NFTItem = () => {
             {!bundleID && (
               <div className={cx(styles.panelWrapper, styles.infoPanel)}>
                 {renderCollectionPanel()}
+              </div>
+            )}
+            {!bundleID && (
+              <div className={cx(styles.panelWrapper, styles.infoPanel)}>
+                {renderRoyaltyPanel()}
               </div>
             )}
             {(winner || auction.current?.resulted === false) && (
