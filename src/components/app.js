@@ -15,6 +15,7 @@ import { Client } from '@bandprotocol/bandchain.js';
 import ProtectedRoute from './ProtectedRoute';
 import AccountModal from './AccountModal';
 import WFTMModal from './WFTMModal';
+import Maintenance from './Maintenance';
 import NotFound from './NotFound';
 import PaintBoard from './PaintBoard';
 import LandingPage from '../pages/landingpage';
@@ -98,6 +99,7 @@ const App = () => {
             path="/settings/notification"
             component={NotificationSetting}
           />
+          <Route path="/maintenance" component={Maintenance} />
           <Route path="/404" component={NotFound} />
           <Route path="*">
             <Redirect to="/404" />
