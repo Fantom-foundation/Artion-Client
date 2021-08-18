@@ -274,7 +274,7 @@ const NFTItem = () => {
   };
 
   useEffect(() => {
-    dispatch(HeaderActions.toggleSearchbar(false));
+    dispatch(HeaderActions.toggleSearchbar(true));
   }, []);
 
   const getBundleInfo = async () => {

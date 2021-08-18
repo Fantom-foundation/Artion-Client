@@ -198,7 +198,7 @@ const NotificationSetting = () => {
   };
 
   useEffect(() => {
-    dispatch(HeaderActions.toggleSearchbar(false));
+    dispatch(HeaderActions.toggleSearchbar(true));
   }, []);
 
   useEffect(() => {

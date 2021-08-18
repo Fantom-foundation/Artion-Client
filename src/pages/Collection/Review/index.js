@@ -44,7 +44,7 @@ const CollectionCreate = () => {
   const [reason, setReason] = useState('');
 
   useEffect(() => {
-    dispatch(HeaderActions.toggleSearchbar(false));
+    dispatch(HeaderActions.toggleSearchbar(true));
   }, []);
 
   useEffect(() => {

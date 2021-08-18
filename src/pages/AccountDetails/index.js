@@ -284,7 +284,7 @@ const AccountDetails = () => {
   const isMe = account?.toLowerCase() === uid.toLowerCase();
 
   useEffect(() => {
-    dispatch(HeaderActions.toggleSearchbar(false));
+    dispatch(HeaderActions.toggleSearchbar(true));
     setInterval(() => setNow(new Date()), 1000);
   }, []);
 
