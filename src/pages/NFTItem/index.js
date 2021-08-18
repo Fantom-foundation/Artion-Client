@@ -1807,7 +1807,7 @@ const NFTItem = () => {
       const tx = await createAuction(
         address,
         ethers.BigNumber.from(tokenID),
-        token.address,
+        token.address === '' ? ZERO_ADDRESS : token.address,
         price,
         ethers.BigNumber.from(startTime),
         ethers.BigNumber.from(endTime)
@@ -1941,7 +1941,7 @@ const NFTItem = () => {
       const tx = await placeBid(
         address,
         ethers.BigNumber.from(tokenID),
-        token.address,
+        token.address === '' ? ZERO_ADDRESS : token.address,
         price,
         account
       );
