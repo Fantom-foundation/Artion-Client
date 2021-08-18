@@ -88,7 +88,7 @@ const CollectionCreate = ({ isRegister }) => {
   const isMenuOpen = Boolean(anchorEl);
 
   useEffect(() => {
-    dispatch(HeaderActions.toggleSearchbar(false));
+    dispatch(HeaderActions.toggleSearchbar(true));
   }, []);
 
   useEffect(() => {
