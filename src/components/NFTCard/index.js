@@ -2,6 +2,7 @@ import React, { useState, useEffect, Suspense } from 'react';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import cx from 'classnames';
+import { ethers } from 'ethers';
 import Skeleton from 'react-loading-skeleton';
 import {
   FavoriteBorder as FavoriteBorderIcon,
@@ -17,6 +18,7 @@ import SuspenseImg from 'components/SuspenseImg';
 import { formatNumber } from 'utils';
 import { useApi } from 'api';
 import { useAuctionContract } from 'contracts';
+import useTokens from 'hooks/useTokens';
 
 import iconPlus from 'assets/svgs/plus.svg';
 import ftmIcon from 'assets/svgs/ftm.svg';
@@ -31,6 +33,7 @@ const ONE_MONTH = ONE_DAY * 30;
 const BaseCard = ({ item, loading, style, create, onCreate, onLike }) => {
   const { storageUrl, likeItem, likeBundle } = useApi();
   const { getAuction } = useAuctionContract();
+  const { getTokenByAddress } = useTokens();
 
   const [now, setNow] = useState(new Date());
   const [fetching, setFetching] = useState(false);
@@ -64,6 +67,10 @@ const BaseCard = ({ item, loading, style, create, onCreate, onLike }) => {
     try {
       const _auction = await getAuction(item.contractAddress, item.tokenID);
       if (_auction.endTime !== 0) {
+        const token = getTokenByAddress(_auction.payToken);
+        _auction.reservePrice = parseFloat(
+          ethers.utils.formatUnits(_auction.reservePrice, token.decimals)
+        );
         setAuction(_auction);
       }
     } catch (e) {
@@ -323,7 +330,9 @@ const BaseCard = ({ item, loading, style, create, onCreate, onLike }) => {
               ) : (
                 <div className={cx(styles.label, styles.price)}>
                   <img src={ftmIcon} />
-                  {formatNumber(item?.price || 0)}
+                  {formatNumber(
+                    auctionActive ? auction.reservePrice : item?.price || 0
+                  )}
                 </div>
               )}
             </div>
