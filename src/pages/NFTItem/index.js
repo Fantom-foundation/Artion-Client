@@ -87,7 +87,6 @@ const ONE_MIN = 60;
 const ONE_HOUR = ONE_MIN * 60;
 const ONE_DAY = ONE_HOUR * 24;
 const ONE_MONTH = ONE_DAY * 30;
-const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
 
 const filters = ['Trade History', 'Transfer History'];
 
@@ -172,7 +171,7 @@ const NFTItem = () => {
   } = useBundleSalesContract();
 
   const { addr: address, id: tokenID, bundleID } = useParams();
-  const { getTokenByAddress } = useTokens();
+  const { getTokenByAddress, tokens } = useTokens();
 
   const { account, chainId } = useWeb3React();
 
@@ -255,6 +254,8 @@ const NFTItem = () => {
   const tradeHistory = useRef([]);
   const transferHistory = useRef([]);
   const moreItems = useRef([]);
+  const [prices, setPrices] = useState({});
+  const [priceInterval, setPriceInterval] = useState(null);
 
   const [likeCancelSource, setLikeCancelSource] = useState(null);
   const [filter, setFilter] = useState(0);
@@ -265,7 +266,6 @@ const NFTItem = () => {
   const { isConnected: isWalletConnected, authToken } = useSelector(
     state => state.ConnectWallet
   );
-  const { price: ftmPrice } = useSelector(state => state.Price);
 
   const isLoggedIn = () => {
     return (
@@ -279,6 +279,43 @@ const NFTItem = () => {
   useEffect(() => {
     dispatch(HeaderActions.toggleSearchbar(true));
   }, []);
+
+  const getPrices = async () => {
+    try {
+      const data = await Promise.all(
+        tokens.map(async token => [
+          token.address,
+          await axios.get(
+            `https://oapi.fantom.network/pricefeed/${token.address || 'ftm'}`
+          ),
+        ])
+      );
+      const _prices = {};
+      data.map(([addr, res]) => {
+        _prices[addr] = res.data?.price;
+      });
+      setPrices(_prices);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  useEffect(() => {
+    if (!chainId || !tokens) return;
+
+    if (priceInterval) {
+      clearInterval(priceInterval);
+    }
+
+    getPrices();
+    setPriceInterval(setInterval(getPrices, 1000 * 10));
+
+    return () => {
+      if (priceInterval) {
+        clearInterval(priceInterval);
+      }
+    };
+  }, [chainId, tokens]);
 
   const getBundleInfo = async () => {
     setLoading(true);
@@ -345,7 +382,6 @@ const NFTItem = () => {
       } = await fetchItemDetails(address, tokenID);
 
       contentType.current = _contentType;
-      console.log('====>', history);
       tradeHistory.current = history
         .sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1))
         .map(history => ({
@@ -1484,7 +1520,7 @@ const NFTItem = () => {
           addresses,
           tokenIds,
           quantities,
-          token.address === '' ? ZERO_ADDRESS : token.address,
+          token.address === '' ? ethers.constants.AddressZero : token.address,
           price,
           ethers.BigNumber.from(Math.floor(new Date().getTime() / 1000))
         );
@@ -1496,7 +1532,7 @@ const NFTItem = () => {
           address,
           ethers.BigNumber.from(tokenID),
           ethers.BigNumber.from(quantity),
-          token.address === '' ? ZERO_ADDRESS : token.address,
+          token.address === '' ? ethers.constants.AddressZero : token.address,
           price,
           ethers.BigNumber.from(Math.floor(new Date().getTime() / 1000))
         );
@@ -1541,7 +1577,7 @@ const NFTItem = () => {
         const tx = await updateListing(
           address,
           tokenID,
-          token.address === '' ? ZERO_ADDRESS : token.address,
+          token.address === '' ? ethers.constants.AddressZero : token.address,
           price,
           ethers.BigNumber.from(quantity)
         );
@@ -1831,7 +1867,7 @@ const NFTItem = () => {
       const tx = await createAuction(
         address,
         ethers.BigNumber.from(tokenID),
-        token.address === '' ? ZERO_ADDRESS : token.address,
+        token.address === '' ? ethers.constants.AddressZero : token.address,
         price,
         ethers.BigNumber.from(startTime),
         ethers.BigNumber.from(endTime)
@@ -1965,7 +2001,7 @@ const NFTItem = () => {
       const tx = await placeBid(
         address,
         ethers.BigNumber.from(tokenID),
-        token.address === '' ? ZERO_ADDRESS : token.address,
+        token.address === '' ? ethers.constants.AddressZero : token.address,
         price,
         account
       );
@@ -2364,7 +2400,15 @@ const NFTItem = () => {
             </div>
             <div className={styles.currentPrice}>{bestListing.price}</div>
             <div className={styles.currentPriceUSD}>
-              (${(bestListing.price * ftmPrice).toFixed(2)})
+              (
+              {prices[bestListing.token.address] ? (
+                `$${(
+                  bestListing.price * prices[bestListing.token.address]
+                ).toFixed(2)}`
+              ) : (
+                <Skeleton width={80} height={24} />
+              )}
+              )
             </div>
           </div>
           {!isMine && (
@@ -3051,7 +3095,15 @@ const NFTItem = () => {
                               src={listing.token.icon}
                               className={styles.tokenIcon}
                             />
-                            {formatNumber(listing.price)}
+                            {formatNumber(listing.price)}&nbsp;(
+                            {prices[listing.token.address] !== undefined ? (
+                              `$${(
+                                listing.price * prices[listing.token.address]
+                              ).toFixed(2)}`
+                            ) : (
+                              <Skeleton width={60} height={24} />
+                            )}
+                            )
                           </div>
                           {tokenInfo?.totalSupply > 1 && (
                             <div className={styles.quantity}>
@@ -3127,6 +3179,16 @@ const NFTItem = () => {
                                 className={styles.tokenIcon}
                               />
                               {formatNumber(offer.pricePerItem || offer.price)}
+                              &nbsp;(
+                              {prices[offer.token.address] !== undefined ? (
+                                `$${(
+                                  (offer.pricePerItem || offer.price) *
+                                  prices[offer.token.address]
+                                ).toFixed(2)}`
+                              ) : (
+                                <Skeleton width={60} height={24} />
+                              )}
+                              )
                             </div>
                             {tokenInfo?.totalSupply > 1 && (
                               <div className={styles.quantity}>

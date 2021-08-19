@@ -23,8 +23,6 @@ import closeIcon from 'assets/svgs/close.svg';
 import styles from './styles.module.scss';
 import commonStyles from '../Modal/common.module.scss';
 
-const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
-
 const NFTItem = ({ item, selected, onClick }) => {
   const { storageUrl } = useApi();
 
@@ -308,7 +306,7 @@ const NewBundleModal = ({ visible, onClose, onCreateSuccess = () => {} }) => {
         selectedItems.map(item => item.address),
         selectedItems.map(item => item.tokenID),
         selectedItems.map(item => item.supply),
-        token.address === '' ? ZERO_ADDRESS : token.address,
+        token.address === '' ? ethers.constants.AddressZero : token.address,
         _price,
         ethers.BigNumber.from(Math.floor(new Date().getTime() / 1000))
       );
