@@ -345,6 +345,7 @@ const NFTItem = () => {
       } = await fetchItemDetails(address, tokenID);
 
       contentType.current = _contentType;
+      console.log('====>', history);
       tradeHistory.current = history
         .sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1))
         .map(history => ({

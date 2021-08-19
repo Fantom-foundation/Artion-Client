@@ -82,6 +82,7 @@ const AccountDetails = () => {
   const [fetching, setFetching] = useState(false);
   const [bundleFetching, setBundleFetching] = useState(false);
   const [favFetching, setFavFetching] = useState(false);
+  const [fguresFetching, setFiguresFetching] = useState(false);
   const tokens = useRef([]);
   const bundles = useRef([]);
   const likes = useRef([]);
@@ -132,9 +133,7 @@ const AccountDetails = () => {
   };
 
   const getFigures = async _account => {
-    setFetching(true);
-    setBundleFetching(true);
-    setFavFetching(true);
+    setFiguresFetching(true);
 
     try {
       const {
@@ -149,9 +148,7 @@ const AccountDetails = () => {
       setFavCount(0);
     }
 
-    setFetching(false);
-    setBundleFetching(false);
-    setFavFetching(false);
+    setFiguresFetching(false);
   };
 
   const fetchNFTs = async () => {
@@ -787,9 +784,27 @@ const AccountDetails = () => {
         <div className={styles.contentSidebar}>
           <div className={styles.tabsGroup}>
             <div className={styles.groupTitle}>My Items</div>
-            {renderTab('Single Items', IconList, 0, count, fetching)}
-            {renderTab('Bundles', IconBundle, 1, bundleCount, bundleFetching)}
-            {renderTab('Favorited', IconHeart, 2, favCount, favFetching)}
+            {renderTab(
+              'Single Items',
+              IconList,
+              0,
+              count,
+              fetching || fguresFetching
+            )}
+            {renderTab(
+              'Bundles',
+              IconBundle,
+              1,
+              bundleCount,
+              bundleFetching || fguresFetching
+            )}
+            {renderTab(
+              'Favorited',
+              IconHeart,
+              2,
+              favCount,
+              favFetching || fguresFetching
+            )}
           </div>
           <div className={styles.tabsGroup}>
             <div className={styles.groupTitle}>Account</div>
