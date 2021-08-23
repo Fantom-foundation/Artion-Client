@@ -263,13 +263,11 @@ const NFTItem = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const isMenuOpen = Boolean(anchorEl);
 
-  const { isConnected: isWalletConnected, authToken } = useSelector(
-    state => state.ConnectWallet
-  );
+  const { authToken } = useSelector(state => state.ConnectWallet);
 
   const isLoggedIn = () => {
     return (
-      isWalletConnected &&
+      account &&
       (ENV === 'MAINNET'
         ? chainId === ChainId.FANTOM
         : chainId === ChainId.FANTOM_TESTNET)
@@ -2268,7 +2266,7 @@ const NFTItem = () => {
                 <a
                   target="_blank"
                   rel="noopener noreferrer"
-                  href={`${explorerUrl()}/address/${properties[key]}`}
+                  href={`${explorerUrl}/address/${properties[key]}`}
                 >
                   {shortenAddress(properties[key])}
                 </a>
@@ -2466,7 +2464,7 @@ const NFTItem = () => {
             <SuspenseImg
               src={
                 item.thumbnailPath.length > 10
-                  ? `${storageUrl()}/image/${item.thumbnailPath}`
+                  ? `${storageUrl}/image/${item.thumbnailPath}`
                   : item.metadata.image
               }
             />
@@ -2597,7 +2595,7 @@ const NFTItem = () => {
         <div className={styles.panelLine}>
           <div className={styles.panelLabel}>Collection</div>
           <a
-            href={`${explorerUrl()}/token/${address}`}
+            href={`${explorerUrl}/token/${address}`}
             target="_blank"
             rel="noopener noreferrer"
             className={styles.panelValue}
@@ -2770,9 +2768,7 @@ const NFTItem = () => {
                             <SuspenseImg
                               src={
                                 item.thumbnailPath?.length > 10
-                                  ? `${storageUrl()}/image/${
-                                      item.thumbnailPath
-                                    }`
+                                  ? `${storageUrl}/image/${item.thumbnailPath}`
                                   : item.metadata?.image
                               }
                             />

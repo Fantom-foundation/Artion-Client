@@ -1,36 +1,25 @@
-import { useCallback } from 'react';
 import axios from 'axios';
-import { useWeb3React } from '@web3-react/core';
-import { ChainId } from '@sushiswap/sdk';
+
+// eslint-disable-next-line no-undef
+const isMainnet = process.env.REACT_APP_ENV === 'MAINNET';
 
 export const useApi = () => {
-  const { chainId } = useWeb3React();
+  const explorerUrl = isMainnet
+    ? 'https://ftmscan.com'
+    : 'https://testnet.ftmscan.com';
 
-  const explorerUrl = useCallback(() => {
-    if (chainId === ChainId.FANTOM) {
-      return 'https://ftmscan.com';
-    }
-    return 'https://testnet.ftmscan.com';
-  }, [chainId]);
+  const apiUrl = isMainnet
+    ? 'https://api.artion.io'
+    : 'https://api.testnet.artion.io';
 
-  const apiUrl = useCallback(() => {
-    if (chainId === ChainId.FANTOM) {
-      return 'https://api.artion.io';
-    }
-    return 'https://api.testnet.artion.io';
-  }, [chainId]);
-
-  const storageUrl = useCallback(() => {
-    if (chainId === ChainId.FANTOM) {
-      return 'https://storage.artion.io';
-    }
-    return 'https://storage.testnet.artion.io';
-  }, [chainId]);
+  const storageUrl = isMainnet
+    ? 'https://storage.artion.io'
+    : 'https://storage.testnet.artion.io';
 
   const getNonce = async (address, authToken) => {
     const res = await axios({
       method: 'get',
-      url: `${apiUrl()}/account/nonce/${address}`,
+      url: `${apiUrl}/account/nonce/${address}`,
       headers: {
         Authorization: `Bearer ${authToken}`,
       },
@@ -41,7 +30,7 @@ export const useApi = () => {
   const getAuthToken = async address => {
     let result = await axios({
       method: 'post',
-      url: `${apiUrl()}/auth/getToken`,
+      url: `${apiUrl}/auth/getToken`,
       data: JSON.stringify({ address: address }),
       headers: { 'Content-Type': 'application/json' },
     });
@@ -55,7 +44,7 @@ export const useApi = () => {
   const getIsModerator = async address => {
     const { data } = await axios({
       method: 'get',
-      url: `${apiUrl()}/mod/isModerator/${address}`,
+      url: `${apiUrl}/mod/isModerator/${address}`,
     });
     if (data.status == 'success') {
       return data.data;
@@ -66,7 +55,7 @@ export const useApi = () => {
   const getAccountDetails = async authToken => {
     const res = await axios({
       method: 'get',
-      url: `${apiUrl()}/account/getaccountinfo`,
+      url: `${apiUrl}/account/getaccountinfo`,
       headers: {
         Authorization: `Bearer ${authToken}`,
       },
@@ -79,7 +68,7 @@ export const useApi = () => {
     const data = { address };
     const res = await axios({
       method: 'post',
-      url: `${apiUrl()}/account/getuseraccountinfo`,
+      url: `${apiUrl}/account/getuseraccountinfo`,
       data: JSON.stringify(data),
       headers: {
         'Content-Type': 'application/json',
@@ -92,7 +81,7 @@ export const useApi = () => {
   const getUserFigures = async address => {
     const res = await axios({
       method: 'get',
-      url: `${apiUrl()}/info/getFigures/${address}`,
+      url: `${apiUrl}/info/getFigures/${address}`,
     });
 
     return res.data;
@@ -121,7 +110,7 @@ export const useApi = () => {
 
     const res = await axios({
       method: 'post',
-      url: `${apiUrl()}/account/accountdetails`,
+      url: `${apiUrl}/account/accountdetails`,
       data: formData,
       headers: {
         'Content-Type': 'multipart/form-data',
@@ -136,7 +125,7 @@ export const useApi = () => {
     formData.append('imgData', imageData);
     const res = await axios({
       method: 'post',
-      url: `${apiUrl()}/ipfs/uploadBannerImage2Server`,
+      url: `${apiUrl}/ipfs/uploadBannerImage2Server`,
       data: formData,
       headers: {
         'Content-Type': 'multipart/form-data',
@@ -148,27 +137,27 @@ export const useApi = () => {
 
   const get1155Info = async (contractAddress, tokenID) => {
     const { data } = await axios.get(
-      `${apiUrl()}/info/get1155info/${contractAddress}/${tokenID}`
+      `${apiUrl}/info/get1155info/${contractAddress}/${tokenID}`
     );
     return data;
   };
 
   const getTokenHolders = async (contractAddress, tokenID) => {
     const { data } = await axios.get(
-      `${apiUrl()}/info/getOwnership/${contractAddress}/${tokenID}`
+      `${apiUrl}/info/getOwnership/${contractAddress}/${tokenID}`
     );
     return data;
   };
 
   const fetchCollections = async () => {
-    const res = await axios.get(`${apiUrl()}/info/getcollections`);
+    const res = await axios.get(`${apiUrl}/info/getcollections`);
     return res.data;
   };
 
   const fetchCollection = async contractAddress => {
     const res = await axios({
       method: 'post',
-      url: `${apiUrl()}/collection/getCollectionInfo`,
+      url: `${apiUrl}/collection/getCollectionInfo`,
       data: JSON.stringify({ contractAddress }),
       headers: {
         'Content-Type': 'application/json',
@@ -180,7 +169,7 @@ export const useApi = () => {
   const fetchPendingCollections = async authToken => {
     const res = await axios({
       method: 'post',
-      url: `${apiUrl()}/collection/getReviewApplications`,
+      url: `${apiUrl}/collection/getReviewApplications`,
       headers: {
         Authorization: `Bearer ${authToken}`,
       },
@@ -195,7 +184,7 @@ export const useApi = () => {
     };
     await axios({
       method: 'post',
-      url: `${apiUrl()}/collection/reviewApplication`,
+      url: `${apiUrl}/collection/reviewApplication`,
       data: JSON.stringify(data),
       headers: {
         Authorization: `Bearer ${authToken}`,
@@ -212,7 +201,7 @@ export const useApi = () => {
     };
     await axios({
       method: 'post',
-      url: `${apiUrl()}/collection/reviewApplication`,
+      url: `${apiUrl}/collection/reviewApplication`,
       data: JSON.stringify(data),
       headers: {
         Authorization: `Bearer ${authToken}`,
@@ -224,7 +213,7 @@ export const useApi = () => {
   const fetchMintableCollections = async authToken => {
     const res = await axios({
       method: 'post',
-      url: `${apiUrl()}/collection/getMintableCollections`,
+      url: `${apiUrl}/collection/getMintableCollections`,
       headers: {
         Authorization: `Bearer ${authToken}`,
       },
@@ -260,7 +249,7 @@ export const useApi = () => {
     data.sortby = sortBy;
     const res = await axios({
       method: 'post',
-      url: `${apiUrl()}/nftitems/fetchTokens`,
+      url: `${apiUrl}/nftitems/fetchTokens`,
       data: JSON.stringify(data),
       headers: {
         'Content-Type': 'application/json',
@@ -274,7 +263,7 @@ export const useApi = () => {
     const data = { items: JSON.stringify(items) };
     const res = await axios({
       method: 'post',
-      url: `${apiUrl()}/like/getPageLiked`,
+      url: `${apiUrl}/like/getPageLiked`,
       data: JSON.stringify(data),
       headers: {
         'Content-Type': 'application/json',
@@ -289,7 +278,7 @@ export const useApi = () => {
     const data = { bundleID };
     const res = await axios({
       method: 'post',
-      url: `${apiUrl()}/bundle/getBundleByID`,
+      url: `${apiUrl}/bundle/getBundleByID`,
       data: JSON.stringify(data),
       headers: {
         'Content-Type': 'application/json',
@@ -302,7 +291,7 @@ export const useApi = () => {
     const data = { bundleID };
     const res = await axios({
       method: 'post',
-      url: `${apiUrl()}/bundle/increaseViews`,
+      url: `${apiUrl}/bundle/increaseViews`,
       data: JSON.stringify(data),
       headers: {
         'Content-Type': 'application/json',
@@ -315,7 +304,7 @@ export const useApi = () => {
     const data = { contractAddress, tokenID };
     const res = await axios({
       method: 'post',
-      url: `${apiUrl()}/nftItems/getSingleItemDetails`,
+      url: `${apiUrl}/nftItems/getSingleItemDetails`,
       data: JSON.stringify(data),
       headers: {
         'Content-Type': 'application/json',
@@ -328,7 +317,7 @@ export const useApi = () => {
     const data = { contractAddress, tokenID };
     const res = await axios({
       method: 'post',
-      url: `${apiUrl()}/nftitems/increaseViews`,
+      url: `${apiUrl}/nftitems/increaseViews`,
       data: JSON.stringify(data),
       headers: {
         'Content-Type': 'application/json',
@@ -341,7 +330,7 @@ export const useApi = () => {
     const data = { bundleID };
     const res = await axios({
       method: 'post',
-      url: `${apiUrl()}/offer/getBundleOffer`,
+      url: `${apiUrl}/offer/getBundleOffer`,
       data: JSON.stringify(data),
       headers: {
         'Content-Type': 'application/json',
@@ -354,7 +343,7 @@ export const useApi = () => {
     const data = { bundleID };
     const res = await axios({
       method: 'post',
-      url: `${apiUrl()}/tradehistory/getBundleTradeHistory`,
+      url: `${apiUrl}/tradehistory/getBundleTradeHistory`,
       data: JSON.stringify(data),
       headers: {
         'Content-Type': 'application/json',
@@ -367,7 +356,7 @@ export const useApi = () => {
     const data = { address, tokenID };
     const res = await axios({
       method: 'post',
-      url: `${apiUrl()}/nftitems/transfer${tokenType}History`,
+      url: `${apiUrl}/nftitems/transfer${tokenType}History`,
       data: JSON.stringify(data),
       headers: {
         'Content-Type': 'application/json',
@@ -379,7 +368,7 @@ export const useApi = () => {
   const getAccountActivity = async address => {
     const res = await axios({
       method: 'get',
-      url: `${apiUrl()}/info/getAccountActivity/${address}`,
+      url: `${apiUrl}/info/getAccountActivity/${address}`,
     });
     return res.data;
   };
@@ -387,7 +376,7 @@ export const useApi = () => {
   const getActivityFromOthers = async address => {
     const res = await axios({
       method: 'get',
-      url: `${apiUrl()}/info/getActivityFromOthers/${address}`,
+      url: `${apiUrl}/info/getActivityFromOthers/${address}`,
     });
     return res.data;
   };
@@ -395,7 +384,7 @@ export const useApi = () => {
   const getMyOffers = async address => {
     const res = await axios({
       method: 'get',
-      url: `${apiUrl()}/info/getOffersFromAccount/${address}`,
+      url: `${apiUrl}/info/getOffersFromAccount/${address}`,
     });
     return res.data;
   };
@@ -410,7 +399,7 @@ export const useApi = () => {
     const data = { name, address, signature, signatureAddress };
     const res = await axios({
       method: 'post',
-      url: `${apiUrl()}/mod/add`,
+      url: `${apiUrl}/mod/add`,
       data: JSON.stringify(data),
       headers: {
         'Content-Type': 'application/json',
@@ -424,7 +413,7 @@ export const useApi = () => {
     const data = { address, signature, signatureAddress };
     const res = await axios({
       method: 'post',
-      url: `${apiUrl()}/mod/remove`,
+      url: `${apiUrl}/mod/remove`,
       data: JSON.stringify(data),
       headers: {
         'Content-Type': 'application/json',
@@ -443,7 +432,7 @@ export const useApi = () => {
     const data = { address, signature, signatureAddress };
     const res = await axios({
       method: 'post',
-      url: `${apiUrl()}/ban/banCollection`,
+      url: `${apiUrl}/ban/banCollection`,
       data: JSON.stringify(data),
       headers: {
         'Content-Type': 'application/json',
@@ -462,7 +451,7 @@ export const useApi = () => {
     const data = { address, signature, signatureAddress };
     const res = await axios({
       method: 'post',
-      url: `${apiUrl()}/ban/unbanCollection`,
+      url: `${apiUrl}/ban/unbanCollection`,
       data: JSON.stringify(data),
       headers: {
         'Content-Type': 'application/json',
@@ -482,7 +471,7 @@ export const useApi = () => {
     const data = { address, tokenIDs, signature, signatureAddress };
     const res = await axios({
       method: 'post',
-      url: `${apiUrl()}/ban/banItems`,
+      url: `${apiUrl}/ban/banItems`,
       data: JSON.stringify(data),
       headers: {
         'Content-Type': 'application/json',
@@ -496,7 +485,7 @@ export const useApi = () => {
     const data = { address };
     const res = await axios({
       method: 'post',
-      url: `${apiUrl()}/ban/boostCollection`,
+      url: `${apiUrl}/ban/boostCollection`,
       data: JSON.stringify(data),
       headers: {
         'Content-Type': 'application/json',
@@ -510,7 +499,7 @@ export const useApi = () => {
     const data = { name, paymentToken, price, items };
     const res = await axios({
       method: 'post',
-      url: `${apiUrl()}/bundle/createBundle`,
+      url: `${apiUrl}/bundle/createBundle`,
       data: JSON.stringify(data),
       headers: {
         'Content-Type': 'application/json',
@@ -524,7 +513,7 @@ export const useApi = () => {
     const data = { bundleID };
     const res = await axios({
       method: 'post',
-      url: `${apiUrl()}/bundle/removeBundle`,
+      url: `${apiUrl}/bundle/removeBundle`,
       data: JSON.stringify(data),
       headers: {
         'Content-Type': 'application/json',
@@ -538,7 +527,7 @@ export const useApi = () => {
     const data = { from, to };
     const res = await axios({
       method: 'post',
-      url: `${apiUrl()}/follow/isFollowing`,
+      url: `${apiUrl}/follow/isFollowing`,
       data: JSON.stringify(data),
       headers: {
         'Content-Type': 'application/json',
@@ -551,7 +540,7 @@ export const useApi = () => {
     const data = { follower, status: follow ? 1 : 0 };
     const res = await axios({
       method: 'post',
-      url: `${apiUrl()}/follow/update`,
+      url: `${apiUrl}/follow/update`,
       data: JSON.stringify(data),
       headers: {
         'Content-Type': 'application/json',
@@ -564,7 +553,7 @@ export const useApi = () => {
   const getFollowers = async address => {
     const res = await axios({
       method: 'get',
-      url: `${apiUrl()}/follow/getFollowers/${address}`,
+      url: `${apiUrl}/follow/getFollowers/${address}`,
     });
     return res.data;
   };
@@ -572,7 +561,7 @@ export const useApi = () => {
   const getFollowings = async address => {
     const res = await axios({
       method: 'get',
-      url: `${apiUrl()}/follow/getFollowings/${address}`,
+      url: `${apiUrl}/follow/getFollowings/${address}`,
     });
     return res.data;
   };
@@ -580,7 +569,7 @@ export const useApi = () => {
   const getBundleLikes = async bundleID => {
     const res = await axios({
       method: 'get',
-      url: `${apiUrl()}/bundle/getLikesCount/${bundleID}`,
+      url: `${apiUrl}/bundle/getLikesCount/${bundleID}`,
     });
     return res.data;
   };
@@ -594,7 +583,7 @@ export const useApi = () => {
     };
     const res = await axios({
       method: 'post',
-      url: `${apiUrl()}/like/isLiked`,
+      url: `${apiUrl}/like/isLiked`,
       data: JSON.stringify(data),
       headers: {
         'Content-Type': 'application/json',
@@ -611,7 +600,7 @@ export const useApi = () => {
     };
     const res = await axios({
       method: 'post',
-      url: `${apiUrl()}/like/isLiked`,
+      url: `${apiUrl}/like/isLiked`,
       data: JSON.stringify(data),
       headers: {
         'Content-Type': 'application/json',
@@ -628,7 +617,7 @@ export const useApi = () => {
     };
     const res = await axios({
       method: 'post',
-      url: `${apiUrl()}/like/update`,
+      url: `${apiUrl}/like/update`,
       data: JSON.stringify(data),
       headers: {
         'Content-Type': 'application/json',
@@ -645,7 +634,7 @@ export const useApi = () => {
     };
     const res = await axios({
       method: 'post',
-      url: `${apiUrl()}/like/update`,
+      url: `${apiUrl}/like/update`,
       data: JSON.stringify(data),
       headers: {
         'Content-Type': 'application/json',
@@ -663,7 +652,7 @@ export const useApi = () => {
     };
     const res = await axios({
       method: 'post',
-      url: `${apiUrl()}/like/getLikes`,
+      url: `${apiUrl}/like/getLikes`,
       data: JSON.stringify(data),
       headers: {
         'Content-Type': 'application/json',
@@ -679,7 +668,7 @@ export const useApi = () => {
     };
     const res = await axios({
       method: 'post',
-      url: `${apiUrl()}/like/getLikes`,
+      url: `${apiUrl}/like/getLikes`,
       data: JSON.stringify(data),
       headers: {
         'Content-Type': 'application/json',
@@ -692,7 +681,7 @@ export const useApi = () => {
     const data = { step, address };
     const res = await axios({
       method: 'post',
-      url: `${apiUrl()}/like/getMyLikes`,
+      url: `${apiUrl}/like/getMyLikes`,
       data: JSON.stringify(data),
       headers: {
         'Content-Type': 'application/json',
@@ -704,7 +693,7 @@ export const useApi = () => {
   const getNotificationSettings = async authToken => {
     const res = await axios({
       method: 'get',
-      url: `${apiUrl()}/account/getnotificationsettings`,
+      url: `${apiUrl}/account/getnotificationsettings`,
       headers: {
         Authorization: `Bearer ${authToken}`,
       },
@@ -720,7 +709,7 @@ export const useApi = () => {
   ) => {
     const res = await axios({
       method: 'post',
-      url: `${apiUrl()}/account/notificationsettings`,
+      url: `${apiUrl}/account/notificationsettings`,
       data: JSON.stringify({
         settings: JSON.stringify(settings),
         signature,

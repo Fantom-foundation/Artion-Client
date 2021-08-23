@@ -3,18 +3,15 @@ import { useHistory, withRouter, NavLink, Link } from 'react-router-dom';
 import cx from 'classnames';
 import Skeleton from 'react-loading-skeleton';
 import { Menu } from '@material-ui/core';
-import { UnsupportedChainIdError, useWeb3React } from '@web3-react/core';
-import { NoEthereumProviderError } from '@web3-react/injected-connector';
+import { useWeb3React } from '@web3-react/core';
 import { ExpandMore, Search as SearchIcon } from '@material-ui/icons';
 import { useDispatch, useSelector } from 'react-redux';
 import axios from 'axios';
-import { ChainId } from '@sushiswap/sdk';
 
 import WalletConnectActions from 'actions/walletconnect.actions';
 import AuthActions from 'actions/auth.actions';
 import ModalActions from 'actions/modal.actions';
 import { shortenAddress } from 'utils';
-import { injected } from 'connectors';
 import { useApi } from 'api';
 import { NETWORK_LABEL } from 'constants/networks';
 import { ADMIN_ADDRESS } from 'constants/index';
@@ -23,6 +20,7 @@ import ModModal from 'components/ModModal';
 import BanCollectionModal from 'components/BanCollectionModal';
 import BanItemModal from 'components/BanItemModal';
 import BoostCollectionModal from 'components/BoostCollectionModal';
+import ConnectWalletModal from 'components/ConnectWalletModal';
 import Identicon from 'components/Identicon';
 import toast from 'utils/toast';
 
@@ -38,10 +36,7 @@ import iconSwap from 'assets/svgs/swap.svg';
 
 import styles from './styles.module.scss';
 
-// eslint-disable-next-line no-undef
-const ENV = process.env.REACT_APP_ENV;
-
-const NiftyHeader = ({ light }) => {
+const Header = ({ light }) => {
   const history = useHistory();
   const dispatch = useDispatch();
 
@@ -52,13 +47,11 @@ const NiftyHeader = ({ light }) => {
     getAccountDetails,
     getIsModerator,
   } = useApi();
-  const { account, chainId, activate } = useWeb3React();
+  const { account, chainId, deactivate } = useWeb3React();
 
   const { user } = useSelector(state => state.Auth);
   let isSearchbarShown = useSelector(state => state.HeaderOptions.isShown);
-  const { isConnected: isWalletConnected, isModerator } = useSelector(
-    state => state.ConnectWallet
-  );
+  const { isModerator } = useSelector(state => state.ConnectWallet);
   const { wftmModalVisible } = useSelector(state => state.Modal);
 
   const [anchorEl, setAnchorEl] = useState(null);
@@ -75,6 +68,9 @@ const NiftyHeader = ({ light }) => {
     boostCollectionModalVisible,
     setBoostCollectionModalVisible,
   ] = useState(false);
+  const [connectWalletModalVisible, setConnectWalletModalVisible] = useState(
+    false
+  );
 
   const [keyword, setKeyword] = useState('');
   const [cancelSource, setCancelSource] = useState(null);
@@ -107,54 +103,7 @@ const NiftyHeader = ({ light }) => {
     }
   };
 
-  const changeNetwork = async () => {
-    if (
-      (ENV === 'MAINNET' && chainId === ChainId.FANTOM) ||
-      (ENV !== 'MAINNET' && chainId === ChainId.FANTOM_TESTNET)
-    )
-      return;
-
-    history.push('/');
-
-    const params =
-      ENV === 'MAINNET'
-        ? {
-            chainId: '0xfa',
-            chainName: 'Fantom Opera',
-            nativeCurrency: {
-              name: 'Fantom',
-              symbol: 'FTM',
-              decimals: 18,
-            },
-            rpcUrls: ['https://rpc.ftm.tools'],
-            blockExplorerUrls: ['https://ftmscan.com'],
-          }
-        : {
-            chainId: '0xfa2',
-            chainName: 'Fantom Opera Testnet',
-            nativeCurrency: {
-              name: 'Fantom',
-              symbol: 'FTM',
-              decimals: 18,
-            },
-            rpcUrls: ['https://rpc.ftm.tools'],
-            blockExplorerUrls: ['https://testnet.ftmscan.com'],
-          };
-
-    const provider = await injected.getProvider();
-    try {
-      await provider.request({
-        method: 'wallet_addEthereumChain',
-        params: [params],
-      });
-      setTimeout(handleConnectWallet, 100);
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
   const init = () => {
-    changeNetwork();
     login();
   };
 
@@ -166,32 +115,27 @@ const NiftyHeader = ({ light }) => {
     }
   }, [account, chainId]);
 
-  const handleConnectWallet = (showError = true) => {
-    activate(injected, undefined, true)
-      .then(() => {
-        if (account) login();
-      })
-      .catch(async error => {
-        if (error instanceof UnsupportedChainIdError) {
-          await activate(injected);
-          if (account) login();
-        } else if (error instanceof NoEthereumProviderError) {
-          if (showError) {
-            toast(
-              'error',
-              'No Wallet Found!',
-              'Please install Metamask or Coinbase Wallet on your browser to browse Artion.'
-            );
-          }
-        }
-      });
+  const handleConnectWallet = () => {
+    setConnectWalletModalVisible(true);
+    // activate(injected, undefined, true)
+    //   .then(() => {
+    //     if (account) login();
+    //   })
+    //   .catch(async error => {
+    //     if (error instanceof UnsupportedChainIdError) {
+    //       await activate(injected);
+    //       if (account) login();
+    //     } else if (error instanceof NoEthereumProviderError) {
+    //       if (showError) {
+    //         toast(
+    //           'error',
+    //           'No Wallet Found!',
+    //           'Please install Metamask or Coinbase Wallet on your browser to browse Artion.'
+    //         );
+    //       }
+    //     }
+    //   });
   };
-
-  useEffect(() => {
-    if (!isWalletConnected) {
-      handleConnectWallet(false);
-    }
-  }, []);
 
   const resetResults = () => {
     setAccounts([]);
@@ -227,7 +171,7 @@ const NiftyHeader = ({ light }) => {
         },
       } = await axios({
         method: 'post',
-        url: `${apiUrl()}/info/searchNames`,
+        url: `${apiUrl}/info/searchNames`,
         data: JSON.stringify({ name: word }),
         headers: {
           'Content-Type': 'application/json',
@@ -268,6 +212,7 @@ const NiftyHeader = ({ light }) => {
   };
 
   const handleSignOut = () => {
+    deactivate();
     dispatch(WalletConnectActions.disconnectWallet());
     dispatch(AuthActions.signOut());
     handleMenuClose();
@@ -358,7 +303,7 @@ const NiftyHeader = ({ light }) => {
         list: styles.menuList,
       }}
     >
-      {isWalletConnected && (
+      {account && (
         <div
           className={cx(styles.menuItem, styles.topItem)}
           onClick={goToMyProfile}
@@ -511,7 +456,7 @@ const NiftyHeader = ({ light }) => {
                           tk.thumbnailPath &&
                           (tk.thumbnailPath.length > 10 ? (
                             <img
-                              src={`${storageUrl()}/image/${tk.thumbnailPath}`}
+                              src={`${storageUrl}/image/${tk.thumbnailPath}`}
                             />
                           ) : tk.thumbnailPath === '.' ? (
                             <img src={tk.imageURL} />
@@ -608,16 +553,16 @@ const NiftyHeader = ({ light }) => {
         >
           Create
         </NavLink>
-        {isWalletConnected ? (
+        {account ? (
           <div
             className={cx(styles.account, styles.menuLink)}
             onClick={handleProfileMenuOpen}
           >
             {loading ? (
               <Skeleton className={styles.avatar} />
-            ) : user.imageHash ? (
+            ) : user?.imageHash ? (
               <img
-                src={`https://gateway.pinata.cloud/ipfs/${user.imageHash}`}
+                src={`https://gateway.pinata.cloud/ipfs/${user?.imageHash}`}
                 width="24"
                 height="24"
                 className={styles.avatar}
@@ -634,7 +579,7 @@ const NiftyHeader = ({ light }) => {
                 {loading ? (
                   <Skeleton width={120} />
                 ) : (
-                  user.alias || shortenAddress(account)
+                  user?.alias || shortenAddress(account)
                 )}
               </div>
               <div className={styles.network}>
@@ -678,8 +623,12 @@ const NiftyHeader = ({ light }) => {
         visible={boostCollectionModalVisible}
         onClose={() => setBoostCollectionModalVisible(false)}
       />
+      <ConnectWalletModal
+        visible={connectWalletModalVisible}
+        onClose={() => setConnectWalletModalVisible(false)}
+      />
     </div>
   );
 };
 
-export default withRouter(NiftyHeader);
+export default withRouter(Header);

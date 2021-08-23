@@ -216,7 +216,7 @@ const CollectionCreate = () => {
                     <img src={nftIcon} className={styles.linkIcon} />
                   </div>
                   <div className={styles.inputPrefix}>
-                    {explorerUrl()}/address/{collections[index].erc721Address}
+                    {explorerUrl}/address/{collections[index].erc721Address}
                   </div>
                 </div>
                 <div className={styles.linkItem}>

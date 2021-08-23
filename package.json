@@ -22,6 +22,7 @@
     "@typescript-eslint/parser": "1.13.0",
     "@web3-react/core": "^6.1.9",
     "@web3-react/injected-connector": "^6.0.7",
+    "@web3-react/walletlink-connector": "^6.2.3",
     "axios": "^0.21.1",
     "axios-react": "^2.0.2",
     "babel-jest": "^24.8.0",

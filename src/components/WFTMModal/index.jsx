@@ -91,7 +91,7 @@ const WFTMModal = ({ visible, onClose }) => {
           '',
           () => {
             toast.dismiss(toastId);
-            window.open(`${explorerUrl()}/tx/${tx.hash}`, '_blank');
+            window.open(`${explorerUrl}/tx/${tx.hash}`, '_blank');
           }
         );
       } else {
@@ -103,7 +103,7 @@ const WFTMModal = ({ visible, onClose }) => {
           '',
           () => {
             toast.dismiss(toastId);
-            window.open(`${explorerUrl()}/tx/${tx.hash}`, '_blank');
+            window.open(`${explorerUrl}/tx/${tx.hash}`, '_blank');
           }
         );
       }

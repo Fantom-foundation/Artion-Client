@@ -54,7 +54,7 @@ const NFTItem = ({ item, selected, onClick }) => {
               <SuspenseImg
                 src={
                   item.thumbnailPath?.length > 10
-                    ? `${storageUrl()}/image/${item.thumbnailPath}`
+                    ? `${storageUrl}/image/${item.thumbnailPath}`
                     : item.imageURL
                 }
                 className={styles.media}

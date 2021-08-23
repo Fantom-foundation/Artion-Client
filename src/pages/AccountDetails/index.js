@@ -230,8 +230,6 @@ const AccountDetails = () => {
     if (isNaN(numPerRow) || (prevNumPerRow && prevNumPerRow !== numPerRow))
       return;
 
-    if (!chainId) return;
-
     if (prevUID !== uid) {
       setPrevUID(uid);
       getUserDetails(uid);
@@ -867,9 +865,7 @@ const AccountDetails = () => {
                           <div className={styles.media}>
                             {renderMedia(
                               activity.thumbnailPath.length > 10
-                                ? `${storageUrl()}/image/${
-                                    activity.thumbnailPath
-                                  }`
+                                ? `${storageUrl}/image/${activity.thumbnailPath}`
                                 : activity.imageURL
                             )}
                           </div>
@@ -961,7 +957,7 @@ const AccountDetails = () => {
                         <div className={styles.media}>
                           {renderMedia(
                             offer.thumbnailPath.length > 10
-                              ? `${storageUrl()}/image/${offer.thumbnailPath}`
+                              ? `${storageUrl}/image/${offer.thumbnailPath}`
                               : offer.imageURL
                           )}
                         </div>
@@ -1045,7 +1041,7 @@ const AccountDetails = () => {
                         <div className={styles.media}>
                           {renderMedia(
                             bid.thumbnailPath.length > 10
-                              ? `${storageUrl()}/image/${bid.thumbnailPath}`
+                              ? `${storageUrl}/image/${bid.thumbnailPath}`
                               : bid.imageURL
                           )}
                         </div>

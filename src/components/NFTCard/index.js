@@ -191,7 +191,7 @@ const BaseCard = ({ item, loading, style, create, onCreate, onLike }) => {
               <SuspenseImg
                 src={
                   v.thumbnailPath?.length > 10
-                    ? `${storageUrl()}/image/${v.thumbnailPath}`
+                    ? `${storageUrl}/image/${v.thumbnailPath}`
                     : v.imageURL
                 }
                 className={styles.media}
@@ -291,7 +291,7 @@ const BaseCard = ({ item, loading, style, create, onCreate, onLike }) => {
                       <SuspenseImg
                         src={
                           item.thumbnailPath?.length > 10
-                            ? `${storageUrl()}/image/${item.thumbnailPath}`
+                            ? `${storageUrl}/image/${item.thumbnailPath}`
                             : item?.imageURL || info?.image
                         }
                         className={styles.media}

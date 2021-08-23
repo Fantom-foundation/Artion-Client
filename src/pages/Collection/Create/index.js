@@ -293,7 +293,7 @@ const CollectionCreate = ({ isRegister }) => {
           formData.append('imgData', logodata);
           const result = await axios({
             method: 'post',
-            url: `${apiUrl()}/ipfs/uploadCollectionImage2Server`,
+            url: `${apiUrl}/ipfs/uploadCollectionImage2Server`,
             data: formData,
             headers: {
               'Content-Type': 'multipart/form-data',
@@ -322,7 +322,7 @@ const CollectionCreate = ({ isRegister }) => {
 
           await axios({
             method: 'post',
-            url: `${apiUrl()}/collection/collectiondetails`,
+            url: `${apiUrl}/collection/collectiondetails`,
             data: JSON.stringify(data),
             headers: {
               'Content-Type': 'application/json',
@@ -401,7 +401,7 @@ const CollectionCreate = ({ isRegister }) => {
                 formData.append('imgData', logodata);
                 const result = await axios({
                   method: 'post',
-                  url: `${apiUrl()}/ipfs/uploadCollectionImage2Server`,
+                  url: `${apiUrl}/ipfs/uploadCollectionImage2Server`,
                   data: formData,
                   headers: {
                     'Content-Type': 'multipart/form-data',
@@ -426,7 +426,7 @@ const CollectionCreate = ({ isRegister }) => {
                 };
                 await axios({
                   method: 'post',
-                  url: `${apiUrl()}/collection/collectiondetails`,
+                  url: `${apiUrl}/collection/collectiondetails`,
                   data: JSON.stringify(data),
                   headers: {
                     'Content-Type': 'application/json',
