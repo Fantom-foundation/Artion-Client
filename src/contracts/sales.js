@@ -15,11 +15,12 @@ export const useSalesContract = () => {
     const provider = new ethers.providers.JsonRpcProvider(
       isMainnet ? 'https://rpc.ftm.tools' : 'https://rpc.testnet.fantom.network'
     );
+    const signer = provider.getSigner();
 
     const contract = new ethers.Contract(
       Contracts[isMainnet ? ChainId.FANTOM : ChainId.FANTOM_TESTNET].sales,
       SALES_CONTRACT_ABI,
-      provider
+      signer
     );
 
     return contract;

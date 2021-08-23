@@ -87,6 +87,7 @@
     "react-copy-to-clipboard": "^5.0.3",
     "react-datetime": "^3.0.4",
     "react-dev-utils": "^9.0.2",
+    "react-device-detect": "^1.17.0",
     "react-dom": "^16.9.0",
     "react-dropdown-select": "^4.7.4",
     "react-dropzone": "^11.3.2",

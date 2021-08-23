@@ -299,7 +299,7 @@ const NFTItem = () => {
   };
 
   useEffect(() => {
-    if (!chainId || !tokens) return;
+    if (!tokens) return;
 
     if (priceInterval) {
       clearInterval(priceInterval);
@@ -313,7 +313,7 @@ const NFTItem = () => {
         clearInterval(priceInterval);
       }
     };
-  }, [chainId, tokens]);
+  }, [tokens]);
 
   const getBundleInfo = async () => {
     setLoading(true);
