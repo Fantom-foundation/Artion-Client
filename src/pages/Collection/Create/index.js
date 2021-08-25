@@ -642,7 +642,7 @@ const CollectionCreate = ({ isRegister }) => {
                 min={0}
                 max={100}
                 step={0.01}
-                className={cx(styles.input, symbolError && styles.hasError)}
+                className={styles.input}
                 placeholder="Collection Royalty"
                 value={royalty}
                 onChange={e => setRoyalty(e.target.value)}
@@ -656,7 +656,7 @@ const CollectionCreate = ({ isRegister }) => {
             <div className={styles.inputTitle}>Fee Recipient *</div>
             <div className={styles.inputWrapper}>
               <input
-                className={cx(styles.input, symbolError && styles.hasError)}
+                className={cx(styles.input, recipientError && styles.hasError)}
                 placeholder="Fee Recipient"
                 value={feeRecipient}
                 onChange={e => setFeeRecipient(e.target.value)}
