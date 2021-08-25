@@ -9,7 +9,6 @@ import Loader from 'react-loader-spinner';
 import { ethers } from 'ethers';
 import { useWeb3React } from '@web3-react/core';
 import Select from 'react-dropdown-select';
-import axios from 'axios';
 
 import SuspenseImg from 'components/SuspenseImg';
 import { useApi } from 'api';
@@ -17,6 +16,7 @@ import { useBundleSalesContract, useNFTContract } from 'contracts';
 import { Contracts } from 'constants/networks';
 import toast from 'utils/toast';
 import useTokens from 'hooks/useTokens';
+import { useSalesContract } from 'contracts';
 
 import closeIcon from 'assets/svgs/close.svg';
 
@@ -74,6 +74,7 @@ const NFTItem = ({ item, selected, onClick }) => {
 const NewBundleModal = ({ visible, onClose, onCreateSuccess = () => {} }) => {
   const { tokens: payTokens } = useTokens();
   const { account, chainId } = useWeb3React();
+  const { getSalesContract } = useSalesContract();
 
   const { uid } = useParams();
 
@@ -159,15 +160,11 @@ const NewBundleModal = ({ visible, onClose, onCreateSuccess = () => {} }) => {
   const getTokenPrice = () => {
     if (tokenPriceInterval) clearInterval(tokenPriceInterval);
     const func = async () => {
-      let tk = paySelected[0].symbol.toLowerCase();
-      if (!tk.includes('ftm')) {
-        tk = paySelected[0].address;
-      }
+      const tk = selected[0].address || ethers.constants.AddressZero;
       try {
-        const { data } = await axios.get(
-          `https://oapi.fantom.network/pricefeed/${tk}`
-        );
-        setTokenPrice(data.price);
+        const salesContract = await getSalesContract();
+        const price = await salesContract.getPrice(tk);
+        setTokenPrice(parseFloat(ethers.utils.formatUnits(price, 18)));
       } catch {
         setTokenPrice(null);
       }

@@ -663,15 +663,7 @@ const CollectionCreate = ({ isRegister }) => {
         )}
 
         <div className={styles.inputGroup}>
-          <div className={styles.inputTitle}>
-            Category&nbsp;
-            <BootstrapTooltip
-              title="Adding a category will help make your item discoverable on Fantom."
-              placement="top"
-            >
-              <HelpOutlineIcon />
-            </BootstrapTooltip>
-          </div>
+          <div className={styles.inputTitle}>Category</div>
           <div className={styles.inputSubTitle}>
             Adding a category will help make your item discoverable on Fantom.
           </div>

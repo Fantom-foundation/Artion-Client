@@ -273,17 +273,18 @@ const NFTItem = () => {
 
   const getPrices = async () => {
     try {
+      const salesContract = await getSalesContract();
       const data = await Promise.all(
         tokens.map(async token => [
           token.address,
-          await axios.get(
-            `https://oapi.fantom.network/pricefeed/${token.address || 'ftm'}`
+          await salesContract.getPrice(
+            token.address || ethers.constants.AddressZero
           ),
         ])
       );
       const _prices = {};
-      data.map(([addr, res]) => {
-        _prices[addr] = res.data?.price;
+      data.map(([addr, price]) => {
+        _prices[addr] = parseFloat(ethers.utils.formatUnits(price, 18));
       });
       setPrices(_prices);
     } catch (err) {
@@ -633,15 +634,19 @@ const NFTItem = () => {
         }
       }
       const token = getTokenByAddress(paymentToken);
+      const _price = parseFloat(
+        ethers.utils.formatUnits(price, token.decimals)
+      );
       const newTradeHistory = {
         from: seller,
         to: buyer,
-        price: parseFloat(ethers.utils.formatUnits(price, token.decimals)),
+        price: _price,
         value: quantity,
         createdAt: new Date().toISOString(),
         paymentToken,
         token,
-        priceInUSD: parseFloat(ethers.utils.formatUnits(unitPrice, 18)),
+        priceInUSD:
+          parseFloat(ethers.utils.formatUnits(unitPrice, 18)) * _price,
       };
       try {
         const from = await getUserAccountDetails(seller);
@@ -782,14 +787,18 @@ const NFTItem = () => {
       setOwner(_buyer);
       bundleListing.current = null;
       const token = getTokenByAddress(_payToken);
+      const price = parseFloat(
+        ethers.utils.formatUnits(_price, token.decimals)
+      );
       const newTradeHistory = {
         from: _seller,
         to: _buyer,
-        price: parseFloat(ethers.utils.formatUnits(_price, token.decimals)),
+        price,
         value: 1,
         createdAt: new Date().toISOString(),
         token,
-        priceInUSD: parseFloat(ethers.utils.formatUnits(_unitPrice, 18)),
+        priceInUSD:
+          parseFloat(ethers.utils.formatUnits(_unitPrice, 18)) * price,
       };
       try {
         const from = await getUserAccountDetails(_seller);
@@ -2042,7 +2051,7 @@ const NFTItem = () => {
     return {
       date: `${saleDate.getFullYear()}/${saleDate.getMonth() +
         1}/${saleDate.getDate()}`,
-      price: history.price,
+      price: history.priceInUSD,
       amt: 2100,
     };
   });
@@ -2405,7 +2414,7 @@ const NFTItem = () => {
               {prices[bestListing.token.address] ? (
                 `$${(
                   bestListing.price * prices[bestListing.token.address]
-                ).toFixed(2)}`
+                ).toFixed(3)}`
               ) : (
                 <Skeleton width={80} height={24} />
               )}
@@ -3098,7 +3107,7 @@ const NFTItem = () => {
                             {prices[listing.token.address] !== undefined ? (
                               `$${(
                                 listing.price * prices[listing.token.address]
-                              ).toFixed(2)}`
+                              ).toFixed(3)}`
                             ) : (
                               <Skeleton width={60} height={24} />
                             )}
@@ -3183,7 +3192,7 @@ const NFTItem = () => {
                                 `$${(
                                   (offer.pricePerItem || offer.price) *
                                   prices[offer.token.address]
-                                ).toFixed(2)}`
+                                ).toFixed(3)}`
                               ) : (
                                 <Skeleton width={60} height={24} />
                               )}

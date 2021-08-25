@@ -3,11 +3,12 @@ import cx from 'classnames';
 import { ClipLoader } from 'react-spinners';
 import Select from 'react-dropdown-select';
 import Skeleton from 'react-loading-skeleton';
-import axios from 'axios';
+import { ethers } from 'ethers';
 
 import { formatNumber } from 'utils';
 import { FTM_TOTAL_SUPPLY } from 'constants/index';
 import useTokens from 'hooks/useTokens';
+import { useSalesContract } from 'contracts';
 
 import Modal from '../Modal';
 import styles from '../Modal/common.module.scss';
@@ -24,6 +25,7 @@ const SellModal = ({
   totalSupply,
 }) => {
   const { tokens } = useTokens();
+  const { getSalesContract } = useSalesContract();
 
   const [price, setPrice] = useState('');
   const [quantity, setQuantity] = useState('1');
@@ -50,15 +52,11 @@ const SellModal = ({
   const getTokenPrice = () => {
     if (tokenPriceInterval) clearInterval(tokenPriceInterval);
     const func = async () => {
-      let tk = selected[0].symbol.toLowerCase();
-      if (!tk.includes('ftm')) {
-        tk = selected[0].address;
-      }
+      const tk = selected[0].address || ethers.constants.AddressZero;
       try {
-        const { data } = await axios.get(
-          `https://oapi.fantom.network/pricefeed/${tk}`
-        );
-        setTokenPrice(data.price);
+        const salesContract = await getSalesContract();
+        const price = await salesContract.getPrice(tk);
+        setTokenPrice(parseFloat(ethers.utils.formatUnits(price, 18)));
       } catch {
         setTokenPrice(null);
       }
