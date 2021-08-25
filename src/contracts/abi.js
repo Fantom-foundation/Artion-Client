@@ -99,9 +99,9 @@ export const SALES_CONTRACT_ABI = [
       },
       {
         indexed: false,
-        internalType: 'uint256',
+        internalType: 'int256',
         name: 'unitPrice',
-        type: 'uint256',
+        type: 'int256',
       },
       {
         indexed: false,
@@ -208,6 +208,13 @@ export const SALES_CONTRACT_ABI = [
     ],
     name: 'OfferCreated',
     type: 'event',
+  },
+  {
+    inputs: [{ internalType: 'address', name: '_payToken', type: 'address' }],
+    name: 'getPrice',
+    outputs: [{ internalType: 'int256', name: '', type: 'int256' }],
+    stateMutability: 'view',
+    type: 'function',
   },
   {
     inputs: [
@@ -436,9 +443,9 @@ export const BUNDLE_SALES_CONTRACT_ABI = [
       },
       {
         indexed: false,
-        internalType: 'uint256',
+        internalType: 'int256',
         name: 'unitPrice',
-        type: 'uint256',
+        type: 'int256',
       },
       {
         indexed: false,
@@ -761,9 +768,9 @@ export const AUCTION_CONTRACT_ABI = [
       },
       {
         indexed: false,
-        internalType: 'uint256',
+        internalType: 'int256',
         name: 'unitPrice',
-        type: 'uint256',
+        type: 'int256',
       },
       {
         indexed: false,

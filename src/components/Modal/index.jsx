@@ -13,6 +13,7 @@ const Modal = ({
   submitDisabled,
   submitLabel,
   onSubmit,
+  small,
 }) => {
   const handleClick = e => {
     e.preventDefault();
@@ -21,7 +22,10 @@ const Modal = ({
 
   return (
     <div className={cx(styles.container, visible ? styles.visible : null)}>
-      <div className={styles.modal} onClick={handleClick}>
+      <div
+        className={cx(styles.modal, small && styles.small)}
+        onClick={handleClick}
+      >
         <div className={styles.header}>
           <div className={styles.title}>{title}</div>
           <div className={styles.closeButton} onClick={onClose}>

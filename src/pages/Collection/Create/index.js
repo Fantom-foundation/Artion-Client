@@ -293,7 +293,7 @@ const CollectionCreate = ({ isRegister }) => {
           formData.append('imgData', logodata);
           const result = await axios({
             method: 'post',
-            url: `${apiUrl()}/ipfs/uploadCollectionImage2Server`,
+            url: `${apiUrl}/ipfs/uploadCollectionImage2Server`,
             data: formData,
             headers: {
               'Content-Type': 'multipart/form-data',
@@ -322,7 +322,7 @@ const CollectionCreate = ({ isRegister }) => {
 
           await axios({
             method: 'post',
-            url: `${apiUrl()}/collection/collectiondetails`,
+            url: `${apiUrl}/collection/collectiondetails`,
             data: JSON.stringify(data),
             headers: {
               'Content-Type': 'application/json',
@@ -401,7 +401,7 @@ const CollectionCreate = ({ isRegister }) => {
                 formData.append('imgData', logodata);
                 const result = await axios({
                   method: 'post',
-                  url: `${apiUrl()}/ipfs/uploadCollectionImage2Server`,
+                  url: `${apiUrl}/ipfs/uploadCollectionImage2Server`,
                   data: formData,
                   headers: {
                     'Content-Type': 'multipart/form-data',
@@ -426,7 +426,7 @@ const CollectionCreate = ({ isRegister }) => {
                 };
                 await axios({
                   method: 'post',
-                  url: `${apiUrl()}/collection/collectiondetails`,
+                  url: `${apiUrl}/collection/collectiondetails`,
                   data: JSON.stringify(data),
                   headers: {
                     'Content-Type': 'application/json',
@@ -627,14 +627,22 @@ const CollectionCreate = ({ isRegister }) => {
 
         {isRegister && (
           <div className={styles.inputGroup}>
-            <div className={styles.inputTitle}>Royalty *</div>
+            <div className={styles.inputTitle}>
+              Royalty *&nbsp;
+              <BootstrapTooltip
+                title="Each NFT under this collection exchanged through Artion will have a percentage of sale given to nominated wallet address."
+                placement="top"
+              >
+                <HelpOutlineIcon />
+              </BootstrapTooltip>
+            </div>
             <div className={styles.inputWrapper}>
               <input
                 type="number"
                 min={0}
                 max={100}
                 step={0.01}
-                className={cx(styles.input, symbolError && styles.hasError)}
+                className={styles.input}
                 placeholder="Collection Royalty"
                 value={royalty}
                 onChange={e => setRoyalty(e.target.value)}
@@ -648,13 +656,12 @@ const CollectionCreate = ({ isRegister }) => {
             <div className={styles.inputTitle}>Fee Recipient *</div>
             <div className={styles.inputWrapper}>
               <input
-                className={cx(styles.input, symbolError && styles.hasError)}
+                className={cx(styles.input, recipientError && styles.hasError)}
                 placeholder="Fee Recipient"
                 value={feeRecipient}
                 onChange={e => setFeeRecipient(e.target.value)}
                 onBlur={validateFeeRecipient}
               />
-              <div className={styles.lengthIndicator}>{name.length}/20</div>
               {recipientError && (
                 <div className={styles.error}>{recipientError}</div>
               )}
@@ -663,15 +670,7 @@ const CollectionCreate = ({ isRegister }) => {
         )}
 
         <div className={styles.inputGroup}>
-          <div className={styles.inputTitle}>
-            Category&nbsp;
-            <BootstrapTooltip
-              title="Adding a category will help make your item discoverable on Fantom."
-              placement="top"
-            >
-              <HelpOutlineIcon />
-            </BootstrapTooltip>
-          </div>
+          <div className={styles.inputTitle}>Category</div>
           <div className={styles.inputSubTitle}>
             Adding a category will help make your item discoverable on Fantom.
           </div>

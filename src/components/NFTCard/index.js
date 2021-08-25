@@ -21,7 +21,6 @@ import { useAuctionContract } from 'contracts';
 import useTokens from 'hooks/useTokens';
 
 import iconPlus from 'assets/svgs/plus.svg';
-import ftmIcon from 'assets/svgs/ftm.svg';
 
 import styles from './styles.module.scss';
 
@@ -71,6 +70,7 @@ const BaseCard = ({ item, loading, style, create, onCreate, onLike }) => {
         _auction.reservePrice = parseFloat(
           ethers.utils.formatUnits(_auction.reservePrice, token.decimals)
         );
+        _auction.token = token;
         setAuction(_auction);
       }
     } catch (e) {
@@ -191,7 +191,7 @@ const BaseCard = ({ item, loading, style, create, onCreate, onLike }) => {
               <SuspenseImg
                 src={
                   v.thumbnailPath?.length > 10
-                    ? `${storageUrl()}/image/${v.thumbnailPath}`
+                    ? `${storageUrl}/image/${v.thumbnailPath}`
                     : v.imageURL
                 }
                 className={styles.media}
@@ -291,7 +291,7 @@ const BaseCard = ({ item, loading, style, create, onCreate, onLike }) => {
                       <SuspenseImg
                         src={
                           item.thumbnailPath?.length > 10
-                            ? `${storageUrl()}/image/${item.thumbnailPath}`
+                            ? `${storageUrl}/image/${item.thumbnailPath}`
                             : item?.imageURL || info?.image
                         }
                         className={styles.media}
@@ -329,7 +329,13 @@ const BaseCard = ({ item, loading, style, create, onCreate, onLike }) => {
                 <Skeleton width={80} height={20} />
               ) : (
                 <div className={cx(styles.label, styles.price)}>
-                  <img src={ftmIcon} />
+                  <img
+                    src={
+                      auctionActive
+                        ? auction.token.icon
+                        : getTokenByAddress(item?.paymentToken).icon
+                    }
+                  />
                   {formatNumber(
                     auctionActive ? auction.reservePrice : item?.price || 0
                   )}
@@ -355,7 +361,11 @@ const BaseCard = ({ item, loading, style, create, onCreate, onLike }) => {
                   <Skeleton width={80} height={20} />
                 ) : (
                   <div className={cx(styles.label2, styles.price2)}>
-                    <img src={ftmIcon} />
+                    <img
+                      src={
+                        getTokenByAddress(item?.lastSalePricePaymentToken).icon
+                      }
+                    />
                     {formatNumber(item.lastSalePrice)}
                   </div>
                 )}

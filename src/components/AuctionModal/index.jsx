@@ -5,13 +5,14 @@ import 'react-datetime/css/react-datetime.css';
 import { ClipLoader } from 'react-spinners';
 import Select from 'react-dropdown-select';
 import Skeleton from 'react-loading-skeleton';
-import axios from 'axios';
+import { ethers } from 'ethers';
 import HelpOutlineIcon from '@material-ui/icons/HelpOutline';
 
 import BootstrapTooltip from 'components/BootstrapTooltip';
+import PriceInput from 'components/PriceInput';
 import { formatNumber } from 'utils';
-import { FTM_TOTAL_SUPPLY } from 'constants/index';
 import useTokens from 'hooks/useTokens';
+import { useSalesContract } from 'contracts';
 
 import Modal from '../Modal';
 import styles from '../Modal/common.module.scss';
@@ -28,6 +29,7 @@ const AuctionModal = ({
   contractApproved,
 }) => {
   const { tokens } = useTokens();
+  const { getSalesContract } = useSalesContract();
 
   const [now, setNow] = useState(new Date());
   const [reservePrice, setReservePrice] = useState('');
@@ -76,15 +78,11 @@ const AuctionModal = ({
   const getTokenPrice = () => {
     if (tokenPriceInterval) clearInterval(tokenPriceInterval);
     const func = async () => {
-      let tk = selected[0].symbol.toLowerCase();
-      if (!tk.includes('ftm')) {
-        tk = selected[0].address;
-      }
+      const tk = selected[0].address || ethers.constants.AddressZero;
       try {
-        const { data } = await axios.get(
-          `https://oapi.fantom.network/pricefeed/${tk}`
-        );
-        setTokenPrice(data.price);
+        const salesContract = await getSalesContract();
+        const price = await salesContract.getPrice(tk);
+        setTokenPrice(parseFloat(ethers.utils.formatUnits(price, 18)));
       } catch {
         setTokenPrice(null);
       }
@@ -180,17 +178,10 @@ const AuctionModal = ({
               )
             }
           />
-          <input
+          <PriceInput
             className={styles.formInput}
             placeholder="0.00"
-            value={reservePrice}
-            onChange={e =>
-              setReservePrice(
-                isNaN(e.target.value)
-                  ? reservePrice
-                  : Math.min(e.target.value, FTM_TOTAL_SUPPLY).toString()
-              )
-            }
+            onChange={setReservePrice}
             onFocus={() => setFocused(true)}
             onBlur={() => setFocused(false)}
             disabled={contractApproving || confirming}

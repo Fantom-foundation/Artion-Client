@@ -4,11 +4,12 @@ import 'react-datetime/css/react-datetime.css';
 import { ClipLoader } from 'react-spinners';
 import Select from 'react-dropdown-select';
 import Skeleton from 'react-loading-skeleton';
-import axios from 'axios';
+import { ethers } from 'ethers';
 
 import { formatNumber } from 'utils';
-import { FTM_TOTAL_SUPPLY } from 'constants/index';
 import useTokens from 'hooks/useTokens';
+import { useSalesContract } from 'contracts';
+import PriceInput from 'components/PriceInput';
 
 import Modal from '../Modal';
 import styles from '../Modal/common.module.scss';
@@ -21,6 +22,7 @@ const OfferModal = ({
   totalSupply,
 }) => {
   const { tokens } = useTokens();
+  const { getSalesContract } = useSalesContract();
 
   const [price, setPrice] = useState('');
   const [quantity, setQuantity] = useState('1');
@@ -52,15 +54,11 @@ const OfferModal = ({
   const getTokenPrice = () => {
     if (tokenPriceInterval) clearInterval(tokenPriceInterval);
     const func = async () => {
-      let tk = selected[0].symbol.toLowerCase();
-      if (!tk.includes('ftm')) {
-        tk = selected[0].address;
-      }
+      const tk = selected[0].address || ethers.constants.AddressZero;
       try {
-        const { data } = await axios.get(
-          `https://oapi.fantom.network/pricefeed/${tk}`
-        );
-        setTokenPrice(data.price);
+        const salesContract = await getSalesContract();
+        const price = await salesContract.getPrice(tk);
+        setTokenPrice(parseFloat(ethers.utils.formatUnits(price, 18)));
       } catch {
         setTokenPrice(null);
       }
@@ -93,7 +91,7 @@ const OfferModal = ({
     if (totalSupply > 1) {
       quant = parseInt(quantity);
     }
-    onMakeOffer(price, quant, endTime);
+    onMakeOffer(selected[0], price, quant, endTime);
   };
 
   const validateInput = () => {
@@ -152,17 +150,11 @@ const OfferModal = ({
               )
             }
           />
-          <input
+          <PriceInput
             className={styles.formInput}
             placeholder="0.00"
-            value={price}
-            onChange={e =>
-              setPrice(
-                isNaN(e.target.value)
-                  ? price
-                  : Math.min(e.target.value, FTM_TOTAL_SUPPLY).toString()
-              )
-            }
+            decimals={selected[0]?.decimals || 0}
+            onChange={setPrice}
             disabled={confirming}
           />
           <div className={styles.usdPrice}>

@@ -46,7 +46,6 @@ import Identicon from 'components/Identicon';
 import { useApi } from 'api';
 import {
   useNFTContract,
-  useWFTMContract,
   useSalesContract,
   useAuctionContract,
   useBundleSalesContract,
@@ -87,7 +86,6 @@ const ONE_MIN = 60;
 const ONE_HOUR = ONE_MIN * 60;
 const ONE_DAY = ONE_HOUR * 24;
 const ONE_MONTH = ONE_DAY * 30;
-const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
 
 const filters = ['Trade History', 'Transfer History'];
 
@@ -128,12 +126,6 @@ const NFTItem = () => {
     getERC1155Contract,
   } = useNFTContract();
   const {
-    wftmAddress,
-    getWFTMBalance,
-    getAllowance,
-    approve,
-  } = useWFTMContract();
-  const {
     getSalesContract,
     buyItemETH,
     buyItemERC20,
@@ -172,7 +164,7 @@ const NFTItem = () => {
   } = useBundleSalesContract();
 
   const { addr: address, id: tokenID, bundleID } = useParams();
-  const { getTokenByAddress } = useTokens();
+  const { getTokenByAddress, tokens } = useTokens();
 
   const { account, chainId } = useWeb3React();
 
@@ -255,6 +247,8 @@ const NFTItem = () => {
   const tradeHistory = useRef([]);
   const transferHistory = useRef([]);
   const moreItems = useRef([]);
+  const [prices, setPrices] = useState({});
+  const [priceInterval, setPriceInterval] = useState(null);
 
   const [likeCancelSource, setLikeCancelSource] = useState(null);
   const [filter, setFilter] = useState(0);
@@ -262,14 +256,11 @@ const NFTItem = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const isMenuOpen = Boolean(anchorEl);
 
-  const { isConnected: isWalletConnected, authToken } = useSelector(
-    state => state.ConnectWallet
-  );
-  const { price: ftmPrice } = useSelector(state => state.Price);
+  const { authToken } = useSelector(state => state.ConnectWallet);
 
   const isLoggedIn = () => {
     return (
-      isWalletConnected &&
+      account &&
       (ENV === 'MAINNET'
         ? chainId === ChainId.FANTOM
         : chainId === ChainId.FANTOM_TESTNET)
@@ -279,6 +270,44 @@ const NFTItem = () => {
   useEffect(() => {
     dispatch(HeaderActions.toggleSearchbar(true));
   }, []);
+
+  const getPrices = async () => {
+    try {
+      const salesContract = await getSalesContract();
+      const data = await Promise.all(
+        tokens.map(async token => [
+          token.address,
+          await salesContract.getPrice(
+            token.address || ethers.constants.AddressZero
+          ),
+        ])
+      );
+      const _prices = {};
+      data.map(([addr, price]) => {
+        _prices[addr] = parseFloat(ethers.utils.formatUnits(price, 18));
+      });
+      setPrices(_prices);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  useEffect(() => {
+    if (!tokens) return;
+
+    if (priceInterval) {
+      clearInterval(priceInterval);
+    }
+
+    getPrices();
+    setPriceInterval(setInterval(getPrices, 1000 * 10));
+
+    return () => {
+      if (priceInterval) {
+        clearInterval(priceInterval);
+      }
+    };
+  }, [tokens]);
 
   const getBundleInfo = async () => {
     setLoading(true);
@@ -345,7 +374,6 @@ const NFTItem = () => {
       } = await fetchItemDetails(address, tokenID);
 
       contentType.current = _contentType;
-      console.log('====>', history);
       tradeHistory.current = history
         .sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1))
         .map(history => ({
@@ -606,15 +634,19 @@ const NFTItem = () => {
         }
       }
       const token = getTokenByAddress(paymentToken);
+      const _price = parseFloat(
+        ethers.utils.formatUnits(price, token.decimals)
+      );
       const newTradeHistory = {
         from: seller,
         to: buyer,
-        price: parseFloat(ethers.utils.formatUnits(price, token.decimals)),
+        price: _price,
         value: quantity,
         createdAt: new Date().toISOString(),
         paymentToken,
         token,
-        priceInUSD: parseFloat(ethers.utils.formatUnits(price, token.decimals)),
+        priceInUSD:
+          parseFloat(ethers.utils.formatUnits(unitPrice, 18)) * _price,
       };
       try {
         const from = await getUserAccountDetails(seller);
@@ -755,16 +787,18 @@ const NFTItem = () => {
       setOwner(_buyer);
       bundleListing.current = null;
       const token = getTokenByAddress(_payToken);
+      const price = parseFloat(
+        ethers.utils.formatUnits(_price, token.decimals)
+      );
       const newTradeHistory = {
         from: _seller,
         to: _buyer,
-        price: parseFloat(ethers.utils.formatUnits(_price, token.decimals)),
+        price,
         value: 1,
         createdAt: new Date().toISOString(),
         token,
-        priceInUSD: parseFloat(
-          ethers.utils.formatUnits(_price, token.decimals)
-        ),
+        priceInUSD:
+          parseFloat(ethers.utils.formatUnits(_unitPrice, 18)) * price,
       };
       try {
         const from = await getUserAccountDetails(_seller);
@@ -1484,7 +1518,7 @@ const NFTItem = () => {
           addresses,
           tokenIds,
           quantities,
-          token.address === '' ? ZERO_ADDRESS : token.address,
+          token.address === '' ? ethers.constants.AddressZero : token.address,
           price,
           ethers.BigNumber.from(Math.floor(new Date().getTime() / 1000))
         );
@@ -1496,7 +1530,7 @@ const NFTItem = () => {
           address,
           ethers.BigNumber.from(tokenID),
           ethers.BigNumber.from(quantity),
-          token.address === '' ? ZERO_ADDRESS : token.address,
+          token.address === '' ? ethers.constants.AddressZero : token.address,
           price,
           ethers.BigNumber.from(Math.floor(new Date().getTime() / 1000))
         );
@@ -1541,7 +1575,7 @@ const NFTItem = () => {
         const tx = await updateListing(
           address,
           tokenID,
-          token.address === '' ? ZERO_ADDRESS : token.address,
+          token.address === '' ? ethers.constants.AddressZero : token.address,
           price,
           ethers.BigNumber.from(quantity)
         );
@@ -1612,7 +1646,6 @@ const NFTItem = () => {
               : `You can exchange ${listing.token.symbol} on other exchange site.`,
             () => {
               toast.dismiss(toastId);
-              setOfferModalVisible(false);
               if (listing.token.symbol === 'WFTM') {
                 dispatch(ModalActions.showWFTMModal());
               }
@@ -1701,26 +1734,31 @@ const NFTItem = () => {
     }
   };
 
-  const handleMakeOffer = async (_price, quantity, endTime) => {
+  const handleMakeOffer = async (token, _price, quantity, endTime) => {
     if (offerPlacing) return;
 
     try {
       setOfferPlacing(true);
-      const price = ethers.utils.parseEther(_price.toString());
+      const price = ethers.utils.parseUnits(_price, token.decimals);
       const deadline = Math.floor(endTime.getTime() / 1000);
       const amount = price.mul(quantity);
 
-      const balance = await getWFTMBalance(account);
+      const erc20 = await getERC20Contract(token.address);
+      const balance = await erc20.balanceOf(account);
 
       if (balance.lt(amount)) {
         const toastId = showToast(
           'error',
-          'Insufficient WFTM Balance!',
-          'You can wrap FTM in the WFTM station.',
+          `Insufficient ${token.symbol} Balance!`,
+          token.symbol === 'WFTM'
+            ? 'You can wrap FTM in the WFTM station.'
+            : `You can exchange ${token.symbol} on other exchange site.`,
           () => {
             toast.dismiss(toastId);
             setOfferModalVisible(false);
-            dispatch(ModalActions.showWFTMModal());
+            if (token.symbol === 'WFTM') {
+              dispatch(ModalActions.showWFTMModal());
+            }
           }
         );
         setOfferPlacing(false);
@@ -1728,32 +1766,40 @@ const NFTItem = () => {
       }
 
       if (bundleID) {
-        const allowance = await getAllowance(
+        const allowance = await erc20.allowance(
           account,
           Contracts[chainId].bundleSales
         );
         if (allowance.lt(amount)) {
-          await approve(Contracts[chainId].bundleSales, amount);
+          const tx = await erc20.approve(
+            Contracts[chainId].bundleSales,
+            amount
+          );
+          await tx.wait();
         }
 
         const tx = await createBundleOffer(
           bundleID,
-          wftmAddress(),
+          token.address,
           price,
           ethers.BigNumber.from(deadline)
         );
 
         await tx.wait();
       } else {
-        const allowance = await getAllowance(account, Contracts[chainId].sales);
+        const allowance = await erc20.allowance(
+          account,
+          Contracts[chainId].sales
+        );
         if (allowance.lt(amount)) {
-          await approve(Contracts[chainId].sales, amount);
+          const tx = await erc20.approve(Contracts[chainId].sales, amount);
+          await tx.wait();
         }
 
         const tx = await createOffer(
           address,
           ethers.BigNumber.from(tokenID),
-          wftmAddress(),
+          token.address,
           ethers.BigNumber.from(quantity),
           price,
           ethers.BigNumber.from(deadline)
@@ -1831,7 +1877,7 @@ const NFTItem = () => {
       const tx = await createAuction(
         address,
         ethers.BigNumber.from(tokenID),
-        token.address === '' ? ZERO_ADDRESS : token.address,
+        token.address === '' ? ethers.constants.AddressZero : token.address,
         price,
         ethers.BigNumber.from(startTime),
         ethers.BigNumber.from(endTime)
@@ -1965,7 +2011,7 @@ const NFTItem = () => {
       const tx = await placeBid(
         address,
         ethers.BigNumber.from(tokenID),
-        token.address === '' ? ZERO_ADDRESS : token.address,
+        token.address === '' ? ethers.constants.AddressZero : token.address,
         price,
         account
       );
@@ -1975,7 +2021,8 @@ const NFTItem = () => {
 
       setBidPlacing(false);
       setBidModalVisible(false);
-    } catch {
+    } catch (err) {
+      console.log('===>', err);
       setBidPlacing(false);
     }
   };
@@ -2005,7 +2052,7 @@ const NFTItem = () => {
     return {
       date: `${saleDate.getFullYear()}/${saleDate.getMonth() +
         1}/${saleDate.getDate()}`,
-      price: history.price,
+      price: history.priceInUSD,
       amt: 2100,
     };
   });
@@ -2232,7 +2279,7 @@ const NFTItem = () => {
                 <a
                   target="_blank"
                   rel="noopener noreferrer"
-                  href={`${explorerUrl()}/address/${properties[key]}`}
+                  href={`${explorerUrl}/address/${properties[key]}`}
                 >
                   {shortenAddress(properties[key])}
                 </a>
@@ -2364,7 +2411,15 @@ const NFTItem = () => {
             </div>
             <div className={styles.currentPrice}>{bestListing.price}</div>
             <div className={styles.currentPriceUSD}>
-              (${(bestListing.price * ftmPrice).toFixed(2)})
+              (
+              {prices[bestListing.token.address] ? (
+                `$${(
+                  bestListing.price * prices[bestListing.token.address]
+                ).toFixed(3)}`
+              ) : (
+                <Skeleton width={80} height={24} />
+              )}
+              )
             </div>
           </div>
           {!isMine && (
@@ -2422,7 +2477,7 @@ const NFTItem = () => {
             <SuspenseImg
               src={
                 item.thumbnailPath.length > 10
-                  ? `${storageUrl()}/image/${item.thumbnailPath}`
+                  ? `${storageUrl}/image/${item.thumbnailPath}`
                   : item.metadata.image
               }
             />
@@ -2553,7 +2608,7 @@ const NFTItem = () => {
         <div className={styles.panelLine}>
           <div className={styles.panelLabel}>Collection</div>
           <a
-            href={`${explorerUrl()}/token/${address}`}
+            href={`${explorerUrl}/token/${address}`}
             target="_blank"
             rel="noopener noreferrer"
             className={styles.panelValue}
@@ -2726,9 +2781,7 @@ const NFTItem = () => {
                             <SuspenseImg
                               src={
                                 item.thumbnailPath?.length > 10
-                                  ? `${storageUrl()}/image/${
-                                      item.thumbnailPath
-                                    }`
+                                  ? `${storageUrl}/image/${item.thumbnailPath}`
                                   : item.metadata?.image
                               }
                             />
@@ -3051,7 +3104,15 @@ const NFTItem = () => {
                               src={listing.token.icon}
                               className={styles.tokenIcon}
                             />
-                            {formatNumber(listing.price)}
+                            {formatNumber(listing.price)}&nbsp;(
+                            {prices[listing.token.address] !== undefined ? (
+                              `$${(
+                                listing.price * prices[listing.token.address]
+                              ).toFixed(3)}`
+                            ) : (
+                              <Skeleton width={60} height={24} />
+                            )}
+                            )
                           </div>
                           {tokenInfo?.totalSupply > 1 && (
                             <div className={styles.quantity}>
@@ -3127,6 +3188,16 @@ const NFTItem = () => {
                                 className={styles.tokenIcon}
                               />
                               {formatNumber(offer.pricePerItem || offer.price)}
+                              &nbsp;(
+                              {prices[offer.token.address] !== undefined ? (
+                                `$${(
+                                  (offer.pricePerItem || offer.price) *
+                                  prices[offer.token.address]
+                                ).toFixed(3)}`
+                              ) : (
+                                <Skeleton width={60} height={24} />
+                              )}
+                              )
                             </div>
                             {tokenInfo?.totalSupply > 1 && (
                               <div className={styles.quantity}>

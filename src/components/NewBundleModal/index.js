@@ -9,21 +9,20 @@ import Loader from 'react-loader-spinner';
 import { ethers } from 'ethers';
 import { useWeb3React } from '@web3-react/core';
 import Select from 'react-dropdown-select';
-import axios from 'axios';
 
 import SuspenseImg from 'components/SuspenseImg';
+import PriceInput from 'components/PriceInput';
 import { useApi } from 'api';
 import { useBundleSalesContract, useNFTContract } from 'contracts';
 import { Contracts } from 'constants/networks';
 import toast from 'utils/toast';
 import useTokens from 'hooks/useTokens';
+import { useSalesContract } from 'contracts';
 
 import closeIcon from 'assets/svgs/close.svg';
 
 import styles from './styles.module.scss';
 import commonStyles from '../Modal/common.module.scss';
-
-const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
 
 const NFTItem = ({ item, selected, onClick }) => {
   const { storageUrl } = useApi();
@@ -56,7 +55,7 @@ const NFTItem = ({ item, selected, onClick }) => {
               <SuspenseImg
                 src={
                   item.thumbnailPath?.length > 10
-                    ? `${storageUrl()}/image/${item.thumbnailPath}`
+                    ? `${storageUrl}/image/${item.thumbnailPath}`
                     : item.imageURL
                 }
                 className={styles.media}
@@ -76,6 +75,7 @@ const NFTItem = ({ item, selected, onClick }) => {
 const NewBundleModal = ({ visible, onClose, onCreateSuccess = () => {} }) => {
   const { tokens: payTokens } = useTokens();
   const { account, chainId } = useWeb3React();
+  const { getSalesContract } = useSalesContract();
 
   const { uid } = useParams();
 
@@ -161,15 +161,11 @@ const NewBundleModal = ({ visible, onClose, onCreateSuccess = () => {} }) => {
   const getTokenPrice = () => {
     if (tokenPriceInterval) clearInterval(tokenPriceInterval);
     const func = async () => {
-      let tk = paySelected[0].symbol.toLowerCase();
-      if (!tk.includes('ftm')) {
-        tk = paySelected[0].address;
-      }
+      const tk = selected[0].address || ethers.constants.AddressZero;
       try {
-        const { data } = await axios.get(
-          `https://oapi.fantom.network/pricefeed/${tk}`
-        );
-        setTokenPrice(data.price);
+        const salesContract = await getSalesContract();
+        const price = await salesContract.getPrice(tk);
+        setTokenPrice(parseFloat(ethers.utils.formatUnits(price, 18)));
       } catch {
         setTokenPrice(null);
       }
@@ -308,7 +304,7 @@ const NewBundleModal = ({ visible, onClose, onCreateSuccess = () => {} }) => {
         selectedItems.map(item => item.address),
         selectedItems.map(item => item.tokenID),
         selectedItems.map(item => item.supply),
-        token.address === '' ? ZERO_ADDRESS : token.address,
+        token.address === '' ? ethers.constants.AddressZero : token.address,
         _price,
         ethers.BigNumber.from(Math.floor(new Date().getTime() / 1000))
       );
@@ -400,13 +396,10 @@ const NewBundleModal = ({ visible, onClose, onCreateSuccess = () => {} }) => {
                     )
                   }
                 />
-                <input
+                <PriceInput
                   className={styles.formInput}
                   placeholder="0.00"
-                  value={price}
-                  onChange={e =>
-                    setPrice(isNaN(e.target.value) ? price : e.target.value)
-                  }
+                  onChange={setPrice}
                   disabled={creating}
                 />
                 <div className={styles.usdPrice}>

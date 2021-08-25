@@ -68,9 +68,6 @@ const PaintBoard = () => {
 
   const [lastMintedTnxId, setLastMintedTnxId] = useState('');
 
-  const isWalletConnected = useSelector(
-    state => state.ConnectWallet.isConnected
-  );
   const authToken = useSelector(state => state.ConnectWallet.authToken);
 
   const getFee = async () => {
@@ -162,7 +159,7 @@ const PaintBoard = () => {
   };
 
   const mintNFT = async () => {
-    if (!isWalletConnected) {
+    if (!account) {
       showToast('info', 'Connect your wallet first');
       return;
     }
@@ -202,7 +199,7 @@ const PaintBoard = () => {
     try {
       let result = await axios({
         method: 'post',
-        url: `${apiUrl()}/ipfs/uploadImage2Server`,
+        url: `${apiUrl}/ipfs/uploadImage2Server`,
         data: formData,
         headers: {
           'Content-Type': 'multipart/form-data',
@@ -446,13 +443,10 @@ const PaintBoard = () => {
           <div
             className={cx(
               styles.button,
-              (isMinting || !isWalletConnected || !validateMetadata()) &&
-                styles.disabled
+              (isMinting || !account || !validateMetadata()) && styles.disabled
             )}
             onClick={
-              isMinting || !isWalletConnected || !validateMetadata()
-                ? null
-                : mintNFT
+              isMinting || !account || !validateMetadata() ? null : mintNFT
             }
           >
             {isMinting ? (
@@ -477,7 +471,7 @@ const PaintBoard = () => {
                 className={styles.tnxAnchor}
                 target="_blank"
                 rel="noopener noreferrer"
-                href={`${explorerUrl()}/tx/${lastMintedTnxId}`}
+                href={`${explorerUrl}/tx/${lastMintedTnxId}`}
               >
                 You can track the last transaction here ...
               </a>

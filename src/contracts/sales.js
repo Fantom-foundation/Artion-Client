@@ -15,8 +15,6 @@ export const useSalesContract = () => {
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     const signer = provider.getSigner();
 
-    if (!chainId) return null;
-
     const contract = new ethers.Contract(
       Contracts[chainId].sales,
       SALES_CONTRACT_ABI,
