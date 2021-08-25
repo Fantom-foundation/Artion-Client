@@ -46,7 +46,6 @@ import Identicon from 'components/Identicon';
 import { useApi } from 'api';
 import {
   useNFTContract,
-  useWFTMContract,
   useSalesContract,
   useAuctionContract,
   useBundleSalesContract,
@@ -126,12 +125,6 @@ const NFTItem = () => {
     getERC721Contract,
     getERC1155Contract,
   } = useNFTContract();
-  const {
-    wftmAddress,
-    getWFTMBalance,
-    getAllowance,
-    approve,
-  } = useWFTMContract();
   const {
     getSalesContract,
     buyItemETH,
@@ -648,7 +641,7 @@ const NFTItem = () => {
         createdAt: new Date().toISOString(),
         paymentToken,
         token,
-        priceInUSD: parseFloat(ethers.utils.formatUnits(price, token.decimals)),
+        priceInUSD: parseFloat(ethers.utils.formatUnits(unitPrice, 18)),
       };
       try {
         const from = await getUserAccountDetails(seller);
@@ -796,9 +789,7 @@ const NFTItem = () => {
         value: 1,
         createdAt: new Date().toISOString(),
         token,
-        priceInUSD: parseFloat(
-          ethers.utils.formatUnits(_price, token.decimals)
-        ),
+        priceInUSD: parseFloat(ethers.utils.formatUnits(_unitPrice, 18)),
       };
       try {
         const from = await getUserAccountDetails(_seller);
@@ -1646,7 +1637,6 @@ const NFTItem = () => {
               : `You can exchange ${listing.token.symbol} on other exchange site.`,
             () => {
               toast.dismiss(toastId);
-              setOfferModalVisible(false);
               if (listing.token.symbol === 'WFTM') {
                 dispatch(ModalActions.showWFTMModal());
               }
@@ -1735,26 +1725,31 @@ const NFTItem = () => {
     }
   };
 
-  const handleMakeOffer = async (_price, quantity, endTime) => {
+  const handleMakeOffer = async (token, _price, quantity, endTime) => {
     if (offerPlacing) return;
 
     try {
       setOfferPlacing(true);
-      const price = ethers.utils.parseEther(_price.toString());
+      const price = ethers.utils.parseUnits(_price, token.decimals);
       const deadline = Math.floor(endTime.getTime() / 1000);
       const amount = price.mul(quantity);
 
-      const balance = await getWFTMBalance(account);
+      const erc20 = await getERC20Contract(token.address);
+      const balance = await erc20.balanceOf(account);
 
       if (balance.lt(amount)) {
         const toastId = showToast(
           'error',
-          'Insufficient WFTM Balance!',
-          'You can wrap FTM in the WFTM station.',
+          `Insufficient ${token.symbol} Balance!`,
+          token.symbol === 'WFTM'
+            ? 'You can wrap FTM in the WFTM station.'
+            : `You can exchange ${token.symbol} on other exchange site.`,
           () => {
             toast.dismiss(toastId);
             setOfferModalVisible(false);
-            dispatch(ModalActions.showWFTMModal());
+            if (token.symbol === 'WFTM') {
+              dispatch(ModalActions.showWFTMModal());
+            }
           }
         );
         setOfferPlacing(false);
@@ -1762,32 +1757,40 @@ const NFTItem = () => {
       }
 
       if (bundleID) {
-        const allowance = await getAllowance(
+        const allowance = await erc20.allowance(
           account,
           Contracts[chainId].bundleSales
         );
         if (allowance.lt(amount)) {
-          await approve(Contracts[chainId].bundleSales, amount);
+          const tx = await erc20.approve(
+            Contracts[chainId].bundleSales,
+            amount
+          );
+          await tx.wait();
         }
 
         const tx = await createBundleOffer(
           bundleID,
-          wftmAddress(),
+          token.address,
           price,
           ethers.BigNumber.from(deadline)
         );
 
         await tx.wait();
       } else {
-        const allowance = await getAllowance(account, Contracts[chainId].sales);
+        const allowance = await erc20.allowance(
+          account,
+          Contracts[chainId].sales
+        );
         if (allowance.lt(amount)) {
-          await approve(Contracts[chainId].sales, amount);
+          const tx = await erc20.approve(Contracts[chainId].sales, amount);
+          await tx.wait();
         }
 
         const tx = await createOffer(
           address,
           ethers.BigNumber.from(tokenID),
-          wftmAddress(),
+          token.address,
           ethers.BigNumber.from(quantity),
           price,
           ethers.BigNumber.from(deadline)

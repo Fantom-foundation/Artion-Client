@@ -99,7 +99,7 @@ export const SALES_CONTRACT_ABI = [
       },
       {
         indexed: false,
-        internalType: 'uint256',
+        internalType: 'int256',
         name: 'unitPrice',
         type: 'uint256',
       },
@@ -436,7 +436,7 @@ export const BUNDLE_SALES_CONTRACT_ABI = [
       },
       {
         indexed: false,
-        internalType: 'uint256',
+        internalType: 'int256',
         name: 'unitPrice',
         type: 'uint256',
       },
@@ -761,7 +761,7 @@ export const AUCTION_CONTRACT_ABI = [
       },
       {
         indexed: false,
-        internalType: 'uint256',
+        internalType: 'int256',
         name: 'unitPrice',
         type: 'uint256',
       },

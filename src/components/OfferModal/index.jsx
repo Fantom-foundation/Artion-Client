@@ -93,7 +93,7 @@ const OfferModal = ({
     if (totalSupply > 1) {
       quant = parseInt(quantity);
     }
-    onMakeOffer(price, quant, endTime);
+    onMakeOffer(selected[0], price, quant, endTime);
   };
 
   const validateInput = () => {
