@@ -627,7 +627,15 @@ const CollectionCreate = ({ isRegister }) => {
 
         {isRegister && (
           <div className={styles.inputGroup}>
-            <div className={styles.inputTitle}>Royalty *</div>
+            <div className={styles.inputTitle}>
+              Royalty *&nbsp;
+              <BootstrapTooltip
+                title="Each NFT under this collection exchanged through Artion will have a percentage of sale given to nominated wallet address."
+                placement="top"
+              >
+                <HelpOutlineIcon />
+              </BootstrapTooltip>
+            </div>
             <div className={styles.inputWrapper}>
               <input
                 type="number"
