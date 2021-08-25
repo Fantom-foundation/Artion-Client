@@ -662,7 +662,6 @@ const CollectionCreate = ({ isRegister }) => {
                 onChange={e => setFeeRecipient(e.target.value)}
                 onBlur={validateFeeRecipient}
               />
-              <div className={styles.lengthIndicator}>{name.length}/20</div>
               {recipientError && (
                 <div className={styles.error}>{recipientError}</div>
               )}

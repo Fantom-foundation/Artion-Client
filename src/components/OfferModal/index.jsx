@@ -7,9 +7,9 @@ import Skeleton from 'react-loading-skeleton';
 import { ethers } from 'ethers';
 
 import { formatNumber } from 'utils';
-import { FTM_TOTAL_SUPPLY } from 'constants/index';
 import useTokens from 'hooks/useTokens';
 import { useSalesContract } from 'contracts';
+import PriceInput from 'components/PriceInput';
 
 import Modal from '../Modal';
 import styles from '../Modal/common.module.scss';
@@ -150,17 +150,11 @@ const OfferModal = ({
               )
             }
           />
-          <input
+          <PriceInput
             className={styles.formInput}
             placeholder="0.00"
-            value={price}
-            onChange={e =>
-              setPrice(
-                isNaN(e.target.value)
-                  ? price
-                  : Math.min(e.target.value, FTM_TOTAL_SUPPLY).toString()
-              )
-            }
+            decimals={selected[0]?.decimals || 0}
+            onChange={setPrice}
             disabled={confirming}
           />
           <div className={styles.usdPrice}>

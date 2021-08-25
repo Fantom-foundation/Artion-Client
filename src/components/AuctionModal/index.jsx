@@ -9,8 +9,8 @@ import { ethers } from 'ethers';
 import HelpOutlineIcon from '@material-ui/icons/HelpOutline';
 
 import BootstrapTooltip from 'components/BootstrapTooltip';
+import PriceInput from 'components/PriceInput';
 import { formatNumber } from 'utils';
-import { FTM_TOTAL_SUPPLY } from 'constants/index';
 import useTokens from 'hooks/useTokens';
 import { useSalesContract } from 'contracts';
 
@@ -178,17 +178,10 @@ const AuctionModal = ({
               )
             }
           />
-          <input
+          <PriceInput
             className={styles.formInput}
             placeholder="0.00"
-            value={reservePrice}
-            onChange={e =>
-              setReservePrice(
-                isNaN(e.target.value)
-                  ? reservePrice
-                  : Math.min(e.target.value, FTM_TOTAL_SUPPLY).toString()
-              )
-            }
+            onChange={setReservePrice}
             onFocus={() => setFocused(true)}
             onBlur={() => setFocused(false)}
             disabled={contractApproving || confirming}

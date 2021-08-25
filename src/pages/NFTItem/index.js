@@ -2021,7 +2021,8 @@ const NFTItem = () => {
 
       setBidPlacing(false);
       setBidModalVisible(false);
-    } catch {
+    } catch (err) {
+      console.log('===>', err);
       setBidPlacing(false);
     }
   };

@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
 import cx from 'classnames';
 import { ClipLoader } from 'react-spinners';
 import Select from 'react-dropdown-select';
+import Skeleton from 'react-loading-skeleton';
+import { ethers } from 'ethers';
 
 import { formatNumber } from 'utils';
-import { FTM_TOTAL_SUPPLY } from 'constants/index';
 import useTokens from 'hooks/useTokens';
+import { useSalesContract } from 'contracts';
+import PriceInput from 'components/PriceInput';
 
 import Modal from '../Modal';
 import styles from '../Modal/common.module.scss';
@@ -20,12 +22,13 @@ const BidModal = ({
   token,
 }) => {
   const { tokens } = useTokens();
+  const { getSalesContract } = useSalesContract();
 
   const [price, setPrice] = useState('');
   const [focused, setFocused] = useState(false);
   const [options, setOptions] = useState([]);
-
-  const { price: ftmPrice } = useSelector(state => state.Price);
+  const [tokenPrice, setTokenPrice] = useState();
+  const [tokenPriceInterval, setTokenPriceInterval] = useState();
 
   useEffect(() => {
     setPrice(minBidAmount);
@@ -36,6 +39,28 @@ const BidModal = ({
       setOptions(tokens);
     }
   }, [tokens]);
+
+  const getTokenPrice = () => {
+    if (tokenPriceInterval) clearInterval(tokenPriceInterval);
+    const func = async () => {
+      const tk = token.address || ethers.constants.AddressZero;
+      try {
+        const salesContract = await getSalesContract();
+        const price = await salesContract.getPrice(tk);
+        setTokenPrice(parseFloat(ethers.utils.formatUnits(price, 18)));
+      } catch {
+        setTokenPrice(null);
+      }
+    };
+    func();
+    setTokenPriceInterval(setInterval(func, 60 * 1000));
+  };
+
+  useEffect(() => {
+    if (token) {
+      getTokenPrice();
+    }
+  }, [token]);
 
   const validateInput = () => {
     return price.length > 0;
@@ -85,23 +110,22 @@ const BidModal = ({
               )
             }
           />
-          <input
+          <PriceInput
             className={styles.formInput}
             placeholder="0.00"
-            value={price}
-            onChange={e =>
-              setPrice(
-                isNaN(e.target.value)
-                  ? price
-                  : Math.min(e.target.value, FTM_TOTAL_SUPPLY).toString()
-              )
-            }
+            onChange={setPrice}
             onFocus={() => setFocused(true)}
             onBlur={() => setFocused(false)}
             disabled={confirming}
           />
           <div className={styles.usdPrice}>
-            ${formatNumber(((parseFloat(price) || 0) * ftmPrice).toFixed(2))}
+            {!isNaN(tokenPrice) && tokenPrice !== null ? (
+              `$${formatNumber(
+                ((parseFloat(price) || 0) * tokenPrice).toFixed(2)
+              )}`
+            ) : (
+              <Skeleton width={100} height={24} />
+            )}
           </div>
         </div>
       </div>

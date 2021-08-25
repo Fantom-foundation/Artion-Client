@@ -11,6 +11,7 @@ import { useWeb3React } from '@web3-react/core';
 import Select from 'react-dropdown-select';
 
 import SuspenseImg from 'components/SuspenseImg';
+import PriceInput from 'components/PriceInput';
 import { useApi } from 'api';
 import { useBundleSalesContract, useNFTContract } from 'contracts';
 import { Contracts } from 'constants/networks';
@@ -395,13 +396,10 @@ const NewBundleModal = ({ visible, onClose, onCreateSuccess = () => {} }) => {
                     )
                   }
                 />
-                <input
+                <PriceInput
                   className={styles.formInput}
                   placeholder="0.00"
-                  value={price}
-                  onChange={e =>
-                    setPrice(isNaN(e.target.value) ? price : e.target.value)
-                  }
+                  onChange={setPrice}
                   disabled={creating}
                 />
                 <div className={styles.usdPrice}>
