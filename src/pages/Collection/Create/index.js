@@ -77,7 +77,6 @@ const CollectionCreate = ({ isRegister }) => {
   const [address, setAddress] = useState('');
   const [addressError, setAddressError] = useState('');
   const [siteUrl, setSiteUrl] = useState('');
-  const [siteUrlError, setSiteUrlError] = useState('');
   const [discord, setDiscord] = useState('');
   const [twitterHandle, setTwitterHandle] = useState('');
   const [instagramHandle, setInstagramHandle] = useState('');
@@ -106,7 +105,6 @@ const CollectionCreate = ({ isRegister }) => {
     setAddress('');
     setAddressError(null);
     setSiteUrl('');
-    setSiteUrlError(null);
     setDiscord('');
     setTwitterHandle('');
     setInstagramHandle('');
@@ -193,14 +191,6 @@ const CollectionCreate = ({ isRegister }) => {
     }
   };
 
-  const validateSiteUrl = () => {
-    if (siteUrl.length === 0) {
-      setSiteUrlError("This field can't be blank");
-    } else {
-      setSiteUrlError(null);
-    }
-  };
-
   const handleMenuOpen = e => {
     if (selected.length < 3) {
       setAnchorEl(e.currentTarget);
@@ -229,7 +219,6 @@ const CollectionCreate = ({ isRegister }) => {
     if (addressError) return false;
     if (!isRegister && (symbol.length === 0 || symbol.includes(' ')))
       return false;
-    if (siteUrl.length === 0) return false;
     if (email.length === 0) return false;
     if (!validEmail(email)) return false;
     if (isRegister && !isAddress(feeRecipient)) return false;
@@ -736,9 +725,7 @@ const CollectionCreate = ({ isRegister }) => {
                   )}
                 </>
               )}
-              <div
-                className={cx(styles.linkItem, siteUrlError && styles.hasError)}
-              >
+              <div className={styles.linkItem}>
                 <div className={styles.linkIconWrapper}>
                   <img src={webIcon} className={styles.linkIcon} />
                 </div>
@@ -747,12 +734,8 @@ const CollectionCreate = ({ isRegister }) => {
                   placeholder="Enter your website url"
                   value={siteUrl}
                   onChange={e => setSiteUrl(e.target.value)}
-                  onBlur={validateSiteUrl}
                 />
               </div>
-              {siteUrlError && (
-                <div className={styles.error}>{siteUrlError}</div>
-              )}
               <div className={styles.linkItem}>
                 <div className={styles.linkIconWrapper}>
                   <img src={discordIcon} className={styles.linkIcon} />
