@@ -95,7 +95,7 @@ const OfferModal = ({
   };
 
   const validateInput = () => {
-    if (price.length === 0) return false;
+    if (price.length === 0 || parseFloat(price) == 0) return false;
     if (totalSupply > 1 && quantity.length === 0) return false;
     if (endTime.getTime() < new Date().getTime()) return false;
     return true;
@@ -154,6 +154,7 @@ const OfferModal = ({
             className={styles.formInput}
             placeholder="0.00"
             decimals={selected[0]?.decimals || 0}
+            value={'' + price}
             onChange={setPrice}
             disabled={confirming}
           />

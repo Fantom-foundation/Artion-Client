@@ -212,7 +212,7 @@ const NewBundleModal = ({ visible, onClose, onCreateSuccess = () => {} }) => {
   };
 
   const isValid = () => {
-    return name && price && selected.current.length;
+    return name && price && parseFloat(price) > 0 && selected.current.length;
   };
 
   const closeModal = () => {
@@ -399,6 +399,7 @@ const NewBundleModal = ({ visible, onClose, onCreateSuccess = () => {} }) => {
                 <PriceInput
                   className={styles.formInput}
                   placeholder="0.00"
+                  value={'' + price}
                   onChange={setPrice}
                   disabled={creating}
                 />

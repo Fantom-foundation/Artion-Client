@@ -63,7 +63,7 @@ const BidModal = ({
   }, [token]);
 
   const validateInput = () => {
-    return price.length > 0;
+    return price.length > 0 && parseFloat(price) > 0;
   };
 
   return (
@@ -113,6 +113,8 @@ const BidModal = ({
           <PriceInput
             className={styles.formInput}
             placeholder="0.00"
+            decimals={token?.decimals || 0}
+            value={'' + price}
             onChange={setPrice}
             onFocus={() => setFocused(true)}
             onBlur={() => setFocused(false)}

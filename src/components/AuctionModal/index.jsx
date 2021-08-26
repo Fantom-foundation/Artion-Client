@@ -98,7 +98,8 @@ const AuctionModal = ({
   }, [selected]);
 
   const validateInput = (() => {
-    if (reservePrice.length === 0) return false;
+    if (reservePrice.length === 0 || parseFloat(reservePrice) == 0)
+      return false;
     if (!auctionStarted && startTime.getTime() < now.getTime()) return false;
     return endTime.getTime() > startTime.getTime() + 1000 * 60 * 60;
   })();
@@ -181,6 +182,7 @@ const AuctionModal = ({
           <PriceInput
             className={styles.formInput}
             placeholder="0.00"
+            value={'' + reservePrice}
             onChange={setReservePrice}
             onFocus={() => setFocused(true)}
             onBlur={() => setFocused(false)}
