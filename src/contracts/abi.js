@@ -210,13 +210,6 @@ export const SALES_CONTRACT_ABI = [
     type: 'event',
   },
   {
-    inputs: [{ internalType: 'address', name: '_payToken', type: 'address' }],
-    name: 'getPrice',
-    outputs: [{ internalType: 'int256', name: '', type: 'int256' }],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
     inputs: [
       { internalType: 'address', name: '_nftAddress', type: 'address' },
       { internalType: 'uint256', name: '_tokenId', type: 'uint256' },
@@ -274,7 +267,7 @@ export const SALES_CONTRACT_ABI = [
     inputs: [{ internalType: 'address', name: '', type: 'address' }],
     name: 'collectionRoyalties',
     outputs: [
-      { internalType: 'uint8', name: 'royalty', type: 'uint8' },
+      { internalType: 'uint16', name: 'royalty', type: 'uint16' },
       { internalType: 'address', name: 'creator', type: 'address' },
       { internalType: 'address', name: 'feeRecipient', type: 'address' },
     ],
@@ -293,6 +286,13 @@ export const SALES_CONTRACT_ABI = [
     name: 'createOffer',
     outputs: [],
     stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [{ internalType: 'address', name: '_payToken', type: 'address' }],
+    name: 'getPrice',
+    outputs: [{ internalType: 'int256', name: '', type: 'int256' }],
+    stateMutability: 'view',
     type: 'function',
   },
   {
@@ -329,7 +329,7 @@ export const SALES_CONTRACT_ABI = [
     inputs: [
       { internalType: 'address', name: '_nftAddress', type: 'address' },
       { internalType: 'uint256', name: '_tokenId', type: 'uint256' },
-      { internalType: 'uint8', name: '_royalty', type: 'uint8' },
+      { internalType: 'uint16', name: '_royalty', type: 'uint16' },
     ],
     name: 'registerRoyalty',
     outputs: [],

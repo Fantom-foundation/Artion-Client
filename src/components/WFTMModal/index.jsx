@@ -9,10 +9,10 @@ import SwapVertIcon from '@material-ui/icons/SwapVert';
 import toast from 'react-hot-toast';
 
 import { useWFTMContract } from 'contracts';
+import PriceInput from 'components/PriceInput';
 import showToast from 'utils/toast';
 import { formatNumber } from 'utils';
 import { useApi } from 'api';
-import { FTM_TOTAL_SUPPLY } from 'constants/index';
 
 import Modal from '../Modal';
 import styles from './styles.module.scss';
@@ -162,17 +162,12 @@ const WFTMModal = ({ visible, onClose }) => {
               )}
             </div>
             <div className={styles.rightBox}>
-              <input
+              <PriceInput
                 className={styles.input}
                 placeholder="0.0"
-                value={amount}
-                onChange={e =>
-                  setAmount(
-                    isNaN(e.target.value)
-                      ? amount
-                      : Math.min(e.target.value, FTM_TOTAL_SUPPLY).toString()
-                  )
-                }
+                decimals={18}
+                value={'' + amount}
+                onChange={setAmount}
               />
               <div className={styles.usdVal}>
                 ${formatNumber(((parseFloat(amount) || 0) * price).toFixed(2))}
@@ -200,17 +195,12 @@ const WFTMModal = ({ visible, onClose }) => {
               )}
             </div>
             <div className={styles.rightBox}>
-              <input
+              <PriceInput
                 className={styles.input}
                 placeholder="0.0"
-                value={amount}
-                onChange={e =>
-                  setAmount(
-                    isNaN(e.target.value)
-                      ? amount
-                      : Math.min(e.target.value, FTM_TOTAL_SUPPLY).toString()
-                  )
-                }
+                decimals={18}
+                value={'' + amount}
+                onChange={setAmount}
               />
               <div className={styles.usdVal}>
                 ${formatNumber(((parseFloat(amount) || 0) * price).toFixed(2))}

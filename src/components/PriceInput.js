@@ -1,28 +1,24 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 
-const PriceInput = ({ decimals = 0, onChange, ...rest }) => {
-  const [price, setPrice] = useState('');
-
+const PriceInput = ({ value, decimals = 0, onChange, ...rest }) => {
   useEffect(() => {
-    onChange(price);
-  }, [price]);
-
-  useEffect(() => {
-    setPrice(checkDecimals(price));
+    onChange(checkDecimals(value));
   }, [decimals]);
 
   const handleKeyDown = e => {
     const key = e.keyCode;
     if (key >= '0'.charCodeAt(0) && key <= '9'.charCodeAt(0)) {
-      return;
+      if (value === '0' && key === '0'.charCodeAt(0)) e.preventDefault();
     } else if (key === 190) {
-      if (price.includes('.') || decimals === 0) e.preventDefault();
+      if (value.length === 0 || value.includes('.') || decimals === 0)
+        e.preventDefault();
     } else if (key !== 8) {
       e.preventDefault();
     }
   };
 
   const checkDecimals = val => {
+    if (!val) return '';
     if (val.indexOf('.') > -1 && val.length - val.indexOf('.') - 1 > decimals) {
       const ret = Math.floor(+val * 10 ** decimals) / 10 ** decimals;
       return ret.toString();
@@ -31,12 +27,12 @@ const PriceInput = ({ decimals = 0, onChange, ...rest }) => {
   };
 
   const handleChange = e => {
-    setPrice(checkDecimals(e.target.value));
+    onChange(checkDecimals(e.target.value));
   };
 
   return (
     <input
-      value={price}
+      value={value}
       onKeyDown={handleKeyDown}
       onChange={handleChange}
       {...rest}
