@@ -85,6 +85,10 @@ export const SortByOptions = [
     label: 'Most expensive',
   },
   {
+    id: 'cheapest',
+    label: 'Cheapest',
+  },
+  {
     id: 'lastSalePrice',
     label: 'Highest Last Sale',
   },
