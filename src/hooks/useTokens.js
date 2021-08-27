@@ -70,7 +70,9 @@ export default function useTokens() {
   const getTokenByAddress = useCallback(
     addr => {
       const address =
-        addr === '0x0000000000000000000000000000000000000000' || addr === 'ftm'
+        !addr ||
+        addr === '0x0000000000000000000000000000000000000000' ||
+        addr === 'ftm'
           ? ''
           : addr;
       return (Tokens[chainId] || []).find(
