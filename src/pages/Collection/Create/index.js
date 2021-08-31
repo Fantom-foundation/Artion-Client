@@ -19,6 +19,7 @@ import { Categories } from 'constants/filter.constants';
 import HeaderActions from 'actions/header.actions';
 import Header from 'components/header';
 import BootstrapTooltip from 'components/BootstrapTooltip';
+import PriceInput from 'components/PriceInput';
 import toast from 'utils/toast';
 import { useApi } from 'api';
 import { useFactoryContract, getSigner } from 'contracts';
@@ -52,7 +53,13 @@ const CollectionCreate = ({ isRegister }) => {
 
   const { account } = useWeb3React();
   const { apiUrl, getNonce } = useApi();
-  const { createNFTContract, createPrivateNFTContract } = useFactoryContract();
+  const {
+    getFactoryContract,
+    getPrivateFactoryContract,
+    getArtFactoryContract,
+    getPrivateArtFactoryContract,
+    createNFTContract,
+  } = useFactoryContract();
 
   const inputRef = useRef(null);
 
@@ -69,7 +76,7 @@ const CollectionCreate = ({ isRegister }) => {
   const [symbolError, setSymbolError] = useState(null);
   const [description, setDescription] = useState('');
   const [descriptionError, setDescriptionError] = useState(null);
-  const [royalty, setRoyalty] = useState(0);
+  const [royalty, setRoyalty] = useState('');
   const [feeRecipient, setFeeRecipient] = useState('');
   const [recipientError, setRecipientError] = useState(null);
   const [email, setEmail] = useState('');
@@ -83,6 +90,7 @@ const CollectionCreate = ({ isRegister }) => {
   const [mediumHandle, setMediumHandle] = useState('');
   const [telegram, setTelegram] = useState('');
   const [isPrivate, setIsPrivate] = useState(false);
+  const [isSingle, setIsSingle] = useState(true);
 
   const isMenuOpen = Boolean(anchorEl);
 
@@ -339,9 +347,14 @@ const CollectionCreate = ({ isRegister }) => {
   const handleCreate = async () => {
     setDeploying(true);
     try {
-      const tx = await (isPrivate
-        ? createPrivateNFTContract
-        : createNFTContract)(
+      const tx = await createNFTContract(
+        isSingle
+          ? isPrivate
+            ? await getPrivateFactoryContract()
+            : await getFactoryContract()
+          : isPrivate
+          ? await getPrivateArtFactoryContract()
+          : await getArtFactoryContract(),
         name,
         symbol,
         ethers.utils.parseEther('10'),
@@ -626,15 +639,16 @@ const CollectionCreate = ({ isRegister }) => {
               </BootstrapTooltip>
             </div>
             <div className={styles.inputWrapper}>
-              <input
-                type="number"
-                min={0}
-                max={100}
-                step={0.01}
+              <PriceInput
                 className={styles.input}
                 placeholder="Collection Royalty"
-                value={royalty}
-                onChange={e => setRoyalty(e.target.value)}
+                decimals={2}
+                value={'' + royalty}
+                onChange={val =>
+                  val[val.length - 1] === '.'
+                    ? setRoyalty(val)
+                    : setRoyalty(Math.min(100, +val))
+                }
               />
             </div>
           </div>
@@ -655,6 +669,35 @@ const CollectionCreate = ({ isRegister }) => {
                 <div className={styles.error}>{recipientError}</div>
               )}
             </div>
+          </div>
+        )}
+
+        {!isRegister && (
+          <div className={styles.inputGroup}>
+            <RadioGroup
+              className={styles.inputWrapper}
+              value={JSON.stringify(isSingle)}
+              onChange={e => setIsSingle(e.currentTarget.value === 'true')}
+            >
+              <FormControlLabel
+                classes={{
+                  root: cx(styles.option, isSingle && styles.active),
+                  label: styles.optionLabel,
+                }}
+                value="true"
+                control={<CustomRadio color="primary" />}
+                label="Single Token Standard"
+              />
+              <FormControlLabel
+                classes={{
+                  root: cx(styles.option, !isSingle && styles.active),
+                  label: styles.optionLabel,
+                }}
+                value="false"
+                control={<CustomRadio color="primary" />}
+                label="Multi Token Standard"
+              />
+            </RadioGroup>
           </div>
         )}
 
@@ -839,7 +882,7 @@ const CollectionCreate = ({ isRegister }) => {
               {creating ? (
                 <ClipLoader color="#FFF" size={16} />
               ) : deploying ? (
-                'Deploying Contract'
+                'Deploying'
               ) : (
                 'Create'
               )}

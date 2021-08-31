@@ -723,6 +723,56 @@ export const useApi = () => {
     return res.data;
   };
 
+  const addUnlockableContent = async (
+    contractAddress,
+    tokenID,
+    content,
+    signature,
+    signatureAddress,
+    authToken
+  ) => {
+    const res = await axios({
+      method: 'post',
+      url: `${apiUrl}/unlockable/addUnlockableContent`,
+      data: JSON.stringify({
+        contractAddress,
+        tokenID,
+        content,
+        signature,
+        signatureAddress,
+      }),
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${authToken}`,
+      },
+    });
+    return res.data;
+  };
+
+  const retrieveUnlockableContent = async (
+    contractAddress,
+    tokenID,
+    signature,
+    signatureAddress,
+    authToken
+  ) => {
+    const res = await axios({
+      method: 'post',
+      url: `${apiUrl}/unlockable/retrieveUnlockableContent`,
+      data: JSON.stringify({
+        contractAddress,
+        tokenID,
+        signature,
+        signatureAddress,
+      }),
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${authToken}`,
+      },
+    });
+    return res.data;
+  };
+
   return {
     explorerUrl,
     apiUrl,
@@ -777,5 +827,7 @@ export const useApi = () => {
     getMyLikes,
     getNotificationSettings,
     updateNotificationSettings,
+    addUnlockableContent,
+    retrieveUnlockableContent,
   };
 };

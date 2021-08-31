@@ -12,22 +12,21 @@ import { ChainId } from '@sushiswap/sdk';
 import Select from 'react-dropdown-select';
 
 import CloseIcon from '@material-ui/icons/Close';
-import Stepper from '@material-ui/core/Stepper';
-import Step from '@material-ui/core/Step';
-import StepLabel from '@material-ui/core/StepLabel';
+import { withStyles } from '@material-ui/core/styles';
+import { Stepper, Step, StepLabel, Switch } from '@material-ui/core';
 import InfoIcon from '@material-ui/icons/Info';
 import HelpOutlineIcon from '@material-ui/icons/HelpOutline';
 
 import HeaderActions from 'actions/header.actions';
 import Header from 'components/header';
 import BootstrapTooltip from 'components/BootstrapTooltip';
+import PriceInput from 'components/PriceInput';
 import { calculateGasMargin } from 'utils';
 import showToast from 'utils/toast';
 import WalletUtils from 'utils/wallet';
 import useContract from 'utils/sc.interaction';
 import { useApi } from 'api';
-import { useSalesContract } from 'contracts';
-import { FantomNFTConstants } from 'constants/smartcontracts/fnft.constants';
+import { useSalesContract, getSigner } from 'contracts';
 
 import styles from './styles.module.scss';
 
@@ -39,11 +38,68 @@ const mintSteps = [
   'Confirming the Transaction',
 ];
 
+const FEE_ABI = [
+  {
+    inputs: [],
+    name: 'platformFee',
+    outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+    stateMutability: 'view',
+    type: 'function',
+  },
+];
+
+const SINGLE_NFT_ABI = [
+  {
+    inputs: [
+      { internalType: 'address', name: '_to', type: 'address' },
+      { internalType: 'string', name: '_tokenUri', type: 'string' },
+    ],
+    name: 'mint',
+    outputs: [],
+    stateMutability: 'payable',
+    type: 'function',
+  },
+];
+
+const MULTI_NFT_ABI = [
+  {
+    inputs: [
+      { internalType: 'address', name: '_to', type: 'address' },
+      { internalType: 'uint256', name: '_supply', type: 'uint256' },
+      { internalType: 'string', name: '_uri', type: 'string' },
+    ],
+    name: 'mint',
+    outputs: [],
+    stateMutability: 'payable',
+    type: 'function',
+  },
+];
+
+const PurpleSwitch = withStyles({
+  switchBase: {
+    color: '#1969FF',
+    '&$checked': {
+      color: '#1969FF',
+    },
+    '&$checked + $track': {
+      backgroundColor: '#1969FFAA',
+    },
+  },
+  checked: {},
+  track: {},
+})(Switch);
+
 const PaintBoard = () => {
   const dispatch = useDispatch();
   const history = useHistory();
 
-  const { explorerUrl, apiUrl, fetchMintableCollections } = useApi();
+  const {
+    explorerUrl,
+    apiUrl,
+    fetchMintableCollections,
+    getNonce,
+    addUnlockableContent,
+  } = useApi();
   const { registerRoyalty } = useSalesContract();
   const { loadContract } = useContract();
 
@@ -54,14 +110,18 @@ const PaintBoard = () => {
   const [selected, setSelected] = useState([]);
   const [collections, setCollections] = useState([]);
   const [nft, setNft] = useState();
+  const [type, setType] = useState();
   const [image, setImage] = useState(null);
   const [fee, setFee] = useState(null);
 
   const [name, setName] = useState('');
   const [symbol, setSymbol] = useState('');
   const [description, setDescription] = useState('');
-  const [royalty, setRoyalty] = useState(0);
+  const [royalty, setRoyalty] = useState('');
   const [xtra, setXtra] = useState('');
+  const [supply, setSupply] = useState(0);
+  const [hasUnlockableContent, setHasUnlockableContent] = useState(false);
+  const [unlockableContent, setUnlockableContent] = useState('');
 
   const [currentMintingStep, setCurrentMintingStep] = useState(0);
   const [isMinting, setIsMinting] = useState(false);
@@ -74,7 +134,7 @@ const PaintBoard = () => {
     setFee(null);
 
     try {
-      const contract = await loadContract(nft, FantomNFTConstants.ABI);
+      const contract = await loadContract(nft, FEE_ABI);
       const _fee = await contract.platformFee();
       setFee(parseFloat(_fee.toString()) / 10 ** 18);
     } catch {
@@ -93,12 +153,6 @@ const PaintBoard = () => {
       console.log(err);
     }
   };
-
-  useEffect(() => {
-    if (!chainId) return;
-
-    setNft(FantomNFTConstants.ADDRESS[chainId]);
-  }, [chainId]);
 
   useEffect(() => {
     if (authToken) {
@@ -186,6 +240,26 @@ const PaintBoard = () => {
       return;
     }
 
+    let signature;
+    let addr;
+
+    if (hasUnlockableContent && unlockableContent.length > 0) {
+      const { data: nonce } = await getNonce(account, authToken);
+      try {
+        const signer = await getSigner();
+        const msg = `Approve Signature on Artion.io with nonce ${nonce}`;
+        signature = await signer.signMessage(msg);
+        addr = ethers.utils.verifyMessage(msg, signature);
+      } catch (err) {
+        showToast(
+          'error',
+          'You need to sign the message to be able to update account settings.'
+        );
+        resetMintingStatus();
+        return;
+      }
+    }
+
     let formData = new FormData();
     const base64 = await imageToBase64();
     formData.append('image', base64);
@@ -212,10 +286,14 @@ const PaintBoard = () => {
 
       const jsonHash = result.data.jsonHash;
 
-      const contract = await loadContract(nft, FantomNFTConstants.ABI);
+      const contract = await loadContract(
+        nft,
+        type === 721 ? SINGLE_NFT_ABI : MULTI_NFT_ABI
+      );
 
       try {
-        const args = [account, jsonHash];
+        const args =
+          type === 721 ? [account, jsonHash] : [account, supply, jsonHash];
 
         let tx;
         if (!fee) {
@@ -234,8 +312,15 @@ const PaintBoard = () => {
         setCurrentMintingStep(2);
         const confirmedTnx = await tx.wait();
         setCurrentMintingStep(3);
-        const evtCaught = confirmedTnx.logs[0].topics;
-        const mintedTkId = BigNumber.from(evtCaught[3]);
+        let mintedTkId;
+        if (type === 721) {
+          const evtCaught = confirmedTnx.logs[0].topics;
+          mintedTkId = BigNumber.from(evtCaught[3]);
+        } else {
+          mintedTkId = BigNumber.from(
+            ethers.utils.hexDataSlice(confirmedTnx.logs[1].data, 0, 32)
+          );
+        }
 
         const royaltyTx = await registerRoyalty(
           nft,
@@ -243,6 +328,18 @@ const PaintBoard = () => {
           isNaN(_royalty) ? 0 : _royalty
         );
         await royaltyTx.wait();
+
+        // save unlockable content
+        if (hasUnlockableContent && unlockableContent.length > 0) {
+          await addUnlockableContent(
+            nft,
+            mintedTkId.toNumber(),
+            unlockableContent,
+            signature,
+            addr,
+            authToken
+          );
+        }
 
         showToast('success', 'New NFT item minted!');
         removeImage();
@@ -298,135 +395,174 @@ const PaintBoard = () => {
           </div>
         </div>
         <div className={styles.panel}>
-          <div className={styles.formGroup}>
-            <p className={styles.formLabel}>Collection</p>
-            <Select
-              options={collections}
-              disabled={isMinting}
-              values={selected}
-              onChange={([col]) => {
-                setSelected([col]);
-                setNft(col.erc721Address);
-              }}
-              className={styles.select}
-              placeholder="Choose Collection"
-              itemRenderer={({ item, methods }) => (
-                <div
-                  key={item.erc721Address}
-                  className={styles.collection}
-                  onClick={() => {
-                    methods.clearAll();
-                    methods.addItem(item);
+          <div className={styles.panelInputs}>
+            <div className={styles.panelLeft}>
+              <div className={styles.formGroup}>
+                <p className={styles.formLabel}>Collection</p>
+                <Select
+                  options={collections}
+                  disabled={isMinting}
+                  values={selected}
+                  onChange={([col]) => {
+                    setSelected([col]);
+                    setNft(col.erc721Address);
+                    setType(col.type);
                   }}
-                >
-                  <img
-                    src={`https://gateway.pinata.cloud/ipfs/${item.logoImageHash}`}
-                    className={styles.collectionLogo}
+                  className={styles.select}
+                  placeholder="Choose Collection"
+                  itemRenderer={({ item, methods }) => (
+                    <div
+                      key={item.erc721Address}
+                      className={styles.collection}
+                      onClick={() => {
+                        methods.clearAll();
+                        methods.addItem(item);
+                      }}
+                    >
+                      <img
+                        src={`https://gateway.pinata.cloud/ipfs/${item.logoImageHash}`}
+                        className={styles.collectionLogo}
+                      />
+                      <div className={styles.collectionName}>
+                        {item.collectionName}
+                      </div>
+                    </div>
+                  )}
+                  contentRenderer={({ props: { values } }) =>
+                    values.length > 0 ? (
+                      <div className={styles.collection}>
+                        <img
+                          src={`https://gateway.pinata.cloud/ipfs/${values[0].logoImageHash}`}
+                          className={styles.collectionLogo}
+                        />
+                        <div className={styles.collectionName}>
+                          {values[0].collectionName}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className={styles.collection} />
+                    )
+                  }
+                />
+              </div>
+              <div className={styles.formGroup}>
+                <p className={styles.formLabel}>Name</p>
+                <input
+                  className={styles.formInput}
+                  maxLength={40}
+                  placeholder="Name"
+                  value={name}
+                  onChange={e => setName(e.target.value)}
+                  disabled={isMinting}
+                />
+                <div className={styles.lengthIndicator}>{name.length}/40</div>
+              </div>
+              <div className={styles.formGroup}>
+                <p className={styles.formLabel}>Symbol</p>
+                <input
+                  className={styles.formInput}
+                  maxLength={20}
+                  placeholder="Symbol"
+                  value={symbol}
+                  onChange={e => setSymbol(e.target.value)}
+                  disabled={isMinting}
+                />
+                <div className={styles.lengthIndicator}>{symbol.length}/20</div>
+              </div>
+              <div className={styles.formGroup}>
+                <p className={styles.formLabel}>Description</p>
+                <textarea
+                  className={cx(styles.formInput, styles.longInput)}
+                  maxLength={120}
+                  placeholder="Description"
+                  value={description}
+                  onChange={e => setDescription(e.target.value)}
+                  disabled={isMinting}
+                />
+                <div className={styles.lengthIndicator}>
+                  {description.length}/120
+                </div>
+              </div>
+            </div>
+            <div className={styles.panelRight}>
+              {type === 1155 && (
+                <div className={styles.formGroup}>
+                  <p className={styles.formLabel}>Supply</p>
+                  <PriceInput
+                    className={styles.formInput}
+                    placeholder="Supply"
+                    decimals={0}
+                    value={'' + supply}
+                    onChange={setSupply}
+                    disabled={isMinting}
                   />
-                  <div className={styles.collectionName}>
-                    {item.collectionName}
-                  </div>
                 </div>
               )}
-              contentRenderer={({ props: { values } }) =>
-                values.length > 0 ? (
-                  <div className={styles.collection}>
-                    <img
-                      src={`https://gateway.pinata.cloud/ipfs/${values[0].logoImageHash}`}
-                      className={styles.collectionLogo}
-                    />
-                    <div className={styles.collectionName}>
-                      {values[0].collectionName}
-                    </div>
-                  </div>
-                ) : (
-                  <div className={styles.collection} />
-                )
-              }
-            />
-          </div>
-          <div className={styles.formGroup}>
-            <p className={styles.formLabel}>Name</p>
-            <input
-              className={styles.formInput}
-              maxLength={40}
-              placeholder="Name"
-              value={name}
-              onChange={e => setName(e.target.value)}
-              disabled={isMinting}
-            />
-            <div className={styles.lengthIndicator}>{name.length}/40</div>
-          </div>
-          <div className={styles.formGroup}>
-            <p className={styles.formLabel}>Symbol</p>
-            <input
-              className={styles.formInput}
-              maxLength={20}
-              placeholder="Symbol"
-              value={symbol}
-              onChange={e => setSymbol(e.target.value)}
-              disabled={isMinting}
-            />
-            <div className={styles.lengthIndicator}>{symbol.length}/20</div>
-          </div>
-          <div className={styles.formGroup}>
-            <p className={styles.formLabel}>Description</p>
-            <textarea
-              className={cx(styles.formInput, styles.longInput)}
-              maxLength={120}
-              placeholder="Description"
-              value={description}
-              onChange={e => setDescription(e.target.value)}
-              disabled={isMinting}
-            />
-            <div className={styles.lengthIndicator}>
-              {description.length}/120
+              <div className={styles.formGroup}>
+                <p className={styles.formLabel}>
+                  Royalty (%)&nbsp;
+                  <BootstrapTooltip
+                    title="If you set a royalty here, you will get X percent of sales price each time an NFT is sold on our platform."
+                    placement="top"
+                  >
+                    <HelpOutlineIcon />
+                  </BootstrapTooltip>
+                </p>
+                <PriceInput
+                  className={styles.formInput}
+                  placeholder="Royalty"
+                  decimals={2}
+                  value={'' + royalty}
+                  onChange={val =>
+                    val[val.length - 1] === '.'
+                      ? setRoyalty(val)
+                      : setRoyalty(Math.min(100, +val))
+                  }
+                  disabled={isMinting}
+                />
+              </div>
+              <div className={styles.formGroup}>
+                <p className={styles.formLabel}>
+                  Link to IP Rights Document (Optional)&nbsp;
+                  <BootstrapTooltip
+                    title="Link to the document which proves your ownership of this image."
+                    placement="top"
+                  >
+                    <HelpOutlineIcon />
+                  </BootstrapTooltip>
+                </p>
+                <input
+                  className={styles.formInput}
+                  placeholder="Enter Link"
+                  value={xtra}
+                  onChange={e => setXtra(e.target.value)}
+                  disabled={isMinting}
+                />
+              </div>
+              <div className={styles.formGroup}>
+                <p className={styles.formLabel}>
+                  Unlockable Content&nbsp;
+                  <PurpleSwitch
+                    checked={hasUnlockableContent}
+                    onChange={e => {
+                      setHasUnlockableContent(e.target.checked);
+                      setUnlockableContent('');
+                    }}
+                    name="unlockableContent"
+                  />
+                </p>
+                {hasUnlockableContent && (
+                  <textarea
+                    className={cx(styles.formInput, styles.longInput)}
+                    maxLength={500}
+                    placeholder="Unlockable Content"
+                    value={unlockableContent}
+                    onChange={e => setUnlockableContent(e.target.value)}
+                    disabled={isMinting}
+                  />
+                )}
+              </div>
             </div>
-          </div>
-          <div className={styles.formGroup}>
-            <p className={styles.formLabel}>
-              Royalty (%)&nbsp;
-              <BootstrapTooltip
-                title="If you set a royalty here, you will get X percent of sales price each time an NFT is sold on our platform."
-                placement="top"
-              >
-                <HelpOutlineIcon />
-              </BootstrapTooltip>
-            </p>
-            <input
-              className={styles.formInput}
-              type="number"
-              min={0}
-              max={100}
-              placeholder="Royalty"
-              value={royalty}
-              onChange={e => {
-                const val = e.target.value;
-                if (!isNaN(val)) {
-                  const _royalty = parseInt(val);
-                  setRoyalty(Math.max(Math.min(_royalty, 100), 0));
-                }
-              }}
-              disabled={isMinting}
-            />
-          </div>
-          <div className={styles.formGroup}>
-            <p className={styles.formLabel}>
-              Link to IP Rights Document (Optional)&nbsp;
-              <BootstrapTooltip
-                title="Link to the document which proves your ownership of this image."
-                placement="top"
-              >
-                <HelpOutlineIcon />
-              </BootstrapTooltip>
-            </p>
-            <input
-              className={styles.formInput}
-              placeholder="Enter Link"
-              value={xtra}
-              onChange={e => setXtra(e.target.value)}
-              disabled={isMinting}
-            />
           </div>
 
           {isMinting && (

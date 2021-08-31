@@ -7,6 +7,7 @@ import Skeleton from 'react-loading-skeleton';
 import {
   FavoriteBorder as FavoriteBorderIcon,
   Favorite as FavoriteIcon,
+  CheckCircle as CheckCircleIcon,
 } from '@material-ui/icons';
 import Loader from 'react-loader-spinner';
 import Carousel, { Dots } from '@brainhubeu/react-carousel';
@@ -15,6 +16,7 @@ import axios from 'axios';
 import ReactPlayer from 'react-player';
 
 import SuspenseImg from 'components/SuspenseImg';
+import BootstrapTooltip from 'components/BootstrapTooltip';
 import { formatNumber } from 'utils';
 import { useApi } from 'api';
 import { useAuctionContract } from 'contracts';
@@ -311,6 +313,14 @@ const BaseCard = ({ item, loading, style, create, onCreate, onLike }) => {
               ) : (
                 <div className={styles.label}>
                   {collection?.collectionName || collection?.name}
+                  {collection?.isVerified && (
+                    <BootstrapTooltip
+                      title="Verified Collection"
+                      placement="top"
+                    >
+                      <CheckCircleIcon className={styles.checkIcon} />
+                    </BootstrapTooltip>
+                  )}
                 </div>
               )}
               {loading || fetching ? (

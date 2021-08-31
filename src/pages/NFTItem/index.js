@@ -2282,6 +2282,14 @@ const NFTItem = () => {
                 >
                   {shortenAddress(properties[key])}
                 </a>
+              ) : key === 'IP_Rights' ? (
+                <a
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  href={properties[key]}
+                >
+                  {properties[key]}
+                </a>
               ) : (
                 properties[key]
               )}

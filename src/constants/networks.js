@@ -29,6 +29,8 @@ export const Contracts = {
     bundleSales: '0x0EeB6B95B52dfDFb86CcF960F8408a211555b63b',
     factory: '0x9dA8d9Cc8A7C79e46A3006f55ED98e915b390F5D',
     privateFactory: '0xe8d29976368Fc2d8699797faA7cD3684dFf41810',
+    artFactory: '0xe25575E99AE02D8C798d63Edd6aeB5C520f1c5b8',
+    privateArtFactory: '0x8E504d814C0ba86ECD42Ce92273CaFFB3923253B',
   },
   [ChainId.FANTOM_TESTNET]: {
     auction: '0xa5568193Ba09dbb934A9Af33A9e8639d1eaC6F43',
