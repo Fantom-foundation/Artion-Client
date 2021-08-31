@@ -357,7 +357,7 @@ const CollectionCreate = ({ isRegister }) => {
           : await getArtFactoryContract(),
         name,
         symbol,
-        ethers.utils.parseEther('10'),
+        ethers.utils.parseEther('20'),
         account
       );
       const res = await tx.wait();
