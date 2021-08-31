@@ -42,35 +42,39 @@ export const useFactoryContract = () => {
     return contract;
   }, [chainId]);
 
-  const getPlatformFee = async () => {
-    const contract = await getFactoryContract();
-    const _fee = await contract.platformFee();
-    return parseFloat(_fee.toString()) / 10 ** 18;
-  };
+  const getArtFactoryContract = useCallback(async () => {
+    await window.ethereum.enable();
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const signer = provider.getSigner();
 
-  const getPlatformFeePrivate = async () => {
-    const contract = await getPrivateFactoryContract();
-    const _fee = await contract.platformFee();
-    return parseFloat(_fee.toString()) / 10 ** 18;
-  };
+    if (!chainId) return null;
 
-  const createNFTContract = async (name, symbol, value, from) => {
-    const contract = await getFactoryContract();
-    const args = [name, symbol];
-    const options = {
-      value,
-      from,
-    };
-    const gasEstimate = await contract.estimateGas.createNFTContract(
-      ...args,
-      options
+    const contract = new ethers.Contract(
+      Contracts[chainId].artFactory,
+      FACTORY_ABI,
+      signer
     );
-    options.gasLimit = calculateGasMargin(gasEstimate);
-    return await contract.createNFTContract(...args, options);
-  };
 
-  const createPrivateNFTContract = async (name, symbol, value, from) => {
-    const contract = await getPrivateFactoryContract();
+    return contract;
+  }, [chainId]);
+
+  const getPrivateArtFactoryContract = useCallback(async () => {
+    await window.ethereum.enable();
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const signer = provider.getSigner();
+
+    if (!chainId) return null;
+
+    const contract = new ethers.Contract(
+      Contracts[chainId].privateArtFactory,
+      FACTORY_ABI,
+      signer
+    );
+
+    return contract;
+  }, [chainId]);
+
+  const createNFTContract = async (contract, name, symbol, value, from) => {
     const args = [name, symbol];
     const options = {
       value,
@@ -87,9 +91,8 @@ export const useFactoryContract = () => {
   return {
     getFactoryContract,
     getPrivateFactoryContract,
-    getPlatformFee,
-    getPlatformFeePrivate,
+    getArtFactoryContract,
+    getPrivateArtFactoryContract,
     createNFTContract,
-    createPrivateNFTContract,
   };
 };

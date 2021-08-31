@@ -17,8 +17,8 @@
 }
 
 .board {
-  flex: 1;
-  height: calc(100vh - 170px);
+  width: 400px;
+  height: 400px;
   margin-right: 40px;
 }
 
@@ -26,6 +26,7 @@
   height: 100%;
   border: 2px dashed rgba(0, 0, 0, .6);
   border-radius: 8px;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -74,9 +75,23 @@
 }
 
 .panel {
-  flex: 0 0 400px;
+  flex: 1;
+  max-width: 800px;
   height: 100%;
   position: relative;
+}
+
+.panelInputs {
+  display: flex;
+}
+
+.panelLeft,
+.panelRight {
+  flex: 1;
+}
+
+.panelLeft {
+  margin-right: 30px;
 }
 
 .input {
@@ -125,7 +140,7 @@
   margin-left: auto;
   margin-right: auto;
   margin-bottom: 20px;
-  width: 168px;
+  width: 320px;
   height: 48px;
   border-radius: 8px;
   font-weight: 700;
@@ -251,7 +266,7 @@
   cursor: pointer;
 }
 
-@media only screen and (max-width: 950px) {
+@media only screen and (max-width: 1150px) {
   .body {
     flex-direction: column;
     padding-top: 40px;
@@ -259,19 +274,27 @@
   }
 
   .board {
-    margin-right: 0;
-    flex: 0 0 512px;
-    height: 512px;
-    max-height: calc(100vw - 80px);
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 40px;
   }
 }
 
-@media only screen and (max-width: 600px) {
+@media only screen and (max-width: 768px) {
+  .container {
+    padding-top: 133px;
+  }
+
   .body {
     padding: 40px 20px;
   }
 
-  .board {
-    max-height: calc(100vw - 40px);
+  .panelInputs {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .panelLeft {
+    margin-right: 0;
   }
 }

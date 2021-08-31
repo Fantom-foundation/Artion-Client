@@ -3,36 +3,20 @@ import { useDispatch, useSelector } from 'react-redux';
 import cx from 'classnames';
 import Skeleton from 'react-loading-skeleton';
 import { makeStyles } from '@material-ui/core/styles';
-import { Tooltip, InputBase } from '@material-ui/core';
+import { InputBase } from '@material-ui/core';
 import {
   Search as SearchIcon,
   CheckCircle as CheckCircleIcon,
 } from '@material-ui/icons';
 
 import FilterWrapper from 'components/FilterWrapper';
+import BootstrapTooltip from 'components/BootstrapTooltip';
 import FilterActions from 'actions/filter.actions';
 import nftIcon from 'assets/svgs/nft.svg';
 import nftActiveIcon from 'assets/svgs/nft_active.svg';
 import iconCheck from 'assets/svgs/check_blue.svg';
 
 import './styles.scss';
-
-const useStylesBootstrap = makeStyles(theme => ({
-  arrow: {
-    color: theme.palette.common.black,
-  },
-  tooltip: {
-    backgroundColor: theme.palette.common.black,
-    padding: '8px 16px',
-    fontSize: 14,
-  },
-}));
-
-function BootstrapTooltip(props) {
-  const classes = useStylesBootstrap();
-
-  return <Tooltip arrow classes={classes} {...props} />;
-}
 
 const useStyles = makeStyles(() => ({
   body: {
