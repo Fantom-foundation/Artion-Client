@@ -49,6 +49,7 @@ import {
   useSalesContract,
   useAuctionContract,
   useBundleSalesContract,
+  getSigner,
 } from 'contracts';
 import { shortenAddress, formatNumber } from 'utils';
 import { Contracts } from 'constants/networks';
@@ -119,6 +120,8 @@ const NFTItem = () => {
     getItemLikeUsers,
     getBundleLikeUsers,
     getItemsLiked,
+    getNonce,
+    retrieveUnlockableContent,
   } = useApi();
   const {
     getERC20Contract,
@@ -231,6 +234,9 @@ const NFTItem = () => {
   const [isLiking, setIsLiking] = useState(false);
   const [isLike, setIsLike] = useState(false);
   const [liked, setLiked] = useState();
+  const [hasUnlockable, setHasUnlockable] = useState(false);
+  const [revealing, setRevealing] = useState(false);
+  const [unlockableContent, setUnlockableContent] = useState('');
 
   const [bid, setBid] = useState(null);
   const [winner, setWinner] = useState(null);
@@ -370,6 +376,7 @@ const NFTItem = () => {
           nfts,
           tokenType: type,
           uri,
+          hasUnlockable: _hasUnlockable,
         },
       } = await fetchItemDetails(address, tokenID);
 
@@ -381,6 +388,7 @@ const NFTItem = () => {
           token: getTokenByAddress(history.paymentToken),
         }));
       setLiked(likes);
+      setHasUnlockable(_hasUnlockable);
       listings.current = _listings.map(listing => ({
         ...listing,
         token: getTokenByAddress(listing.paymentToken),
@@ -1561,6 +1569,43 @@ const NFTItem = () => {
     return approved;
   })();
 
+  const handleRevealContent = async () => {
+    if (revealing) return;
+
+    try {
+      setRevealing(true);
+
+      const { data: nonce } = await getNonce(account, authToken);
+      let signature;
+      let addr;
+      try {
+        const signer = await getSigner();
+        const msg = `Approve Signature on Artion.io with nonce ${nonce}`;
+        signature = await signer.signMessage(msg);
+        addr = ethers.utils.verifyMessage(msg, signature);
+      } catch {
+        showToast(
+          'error',
+          'You need to sign the message to be able to update account settings.'
+        );
+        setRevealing(false);
+        return;
+      }
+
+      const { data } = await retrieveUnlockableContent(
+        address,
+        tokenID,
+        signature,
+        addr,
+        authToken
+      );
+      setUnlockableContent(data);
+      setRevealing(false);
+    } catch {
+      setRevealing(false);
+    }
+  };
+
   const handleUpdateListing = async (token, _price, quantity) => {
     if (priceUpdating) return;
 
@@ -2409,6 +2454,35 @@ const NFTItem = () => {
           )}
         </div>
       </div>
+      {hasUnlockable && (
+        <div className={styles.bestBuy}>
+          <div
+            className={styles.unlockableLabel}
+          >{`This item has unlockable content.${
+            !isMine ? ' Only owners can see the content.' : ''
+          }`}</div>
+          {isMine ? (
+            unlockableContent ? (
+              <textarea
+                className={styles.unlockableContent}
+                value={unlockableContent}
+                readOnly
+              />
+            ) : (
+              <div
+                className={cx(styles.revealBtn, revealing && styles.disabled)}
+                onClick={handleRevealContent}
+              >
+                {revealing ? (
+                  <ClipLoader color="#FFF" size={16} />
+                ) : (
+                  `Reveal Content`
+                )}
+              </div>
+            )
+          ) : null}
+        </div>
+      )}
       {bestListing && (
         <div className={styles.bestBuy}>
           <div className={styles.currentPriceLabel}>Current price</div>
