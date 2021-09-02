@@ -1494,6 +1494,7 @@ const NFTItem = () => {
         );
         await tx.wait();
         showToast('success', 'Item transferred successfully!');
+        setOwner(to);
         setTransferModalVisible(false);
         getItemDetails();
       }
@@ -1717,6 +1718,8 @@ const NFTItem = () => {
 
       showToast('success', 'You have bought the item!');
 
+      setOwner(account);
+
       listings.current = listings.current.filter(
         _listing => _listing.owner !== listing.owner
       );
@@ -1771,6 +1774,8 @@ const NFTItem = () => {
       setBuyingItem(false);
 
       showToast('success', 'You have bought the bundle!');
+
+      setOwner(account);
 
       // eslint-disable-next-line require-atomic-updates
       bundleListing.current = null;
@@ -1878,6 +1883,8 @@ const NFTItem = () => {
       setOfferAccepting(false);
 
       showToast('success', 'Offer accepted!');
+
+      setOwner(offer.creator);
 
       offers.current = offers.current.filter(
         _offer => _offer.creator !== offer.creator
@@ -2009,6 +2016,8 @@ const NFTItem = () => {
       setResulting(false);
       setResulted(true);
       showToast('success', 'Auction resulted!');
+
+      setOwner(bid.bidder);
     } catch {
       setResulting(false);
     }
@@ -2250,6 +2259,11 @@ const NFTItem = () => {
   const handleSelectFilter = _filter => {
     setFilter(_filter);
     handleMenuClose();
+  };
+
+  const getSiteUrl = url => {
+    if (url.startsWith('http://' || url.startsWith('https://'))) return url;
+    return 'https://' + url;
   };
 
   const renderMenu = (
@@ -2630,7 +2644,7 @@ const NFTItem = () => {
         <div className={styles.socialLinks}>
           {collection?.siteUrl?.length > 0 && (
             <a
-              href={`https://${collection?.siteUrl}`}
+              href={getSiteUrl(collection?.siteUrl)}
               target="_blank"
               rel="noopener noreferrer"
               className={styles.socialLink}
