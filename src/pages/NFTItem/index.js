@@ -55,6 +55,7 @@ import { shortenAddress, formatNumber } from 'utils';
 import { Contracts } from 'constants/networks';
 import showToast from 'utils/toast';
 import NFTCard from 'components/NFTCard';
+import TxButton from 'components/TxButton';
 import TransferModal from 'components/TransferModal';
 import SellModal from 'components/SellModal';
 import OfferModal from 'components/OfferModal';
@@ -92,6 +93,7 @@ const filters = ['Trade History', 'Transfer History'];
 
 // eslint-disable-next-line no-undef
 const ENV = process.env.REACT_APP_ENV;
+const CHAIN = ENV === 'MAINNET' ? ChainId.FANTOM : ChainId.FANTOM_TESTNET;
 
 const NFTItem = () => {
   const dispatch = useDispatch();
@@ -1084,8 +1086,6 @@ const NFTItem = () => {
   };
 
   useEffect(() => {
-    if (!chainId) return;
-
     if (address && tokenID) {
       addEventListeners();
       getAuctionConfiguration();
@@ -1118,8 +1118,6 @@ const NFTItem = () => {
   }, [chainId]);
 
   useEffect(() => {
-    if (!chainId) return;
-
     setLiked(null);
 
     if (bundleID) {
@@ -1154,7 +1152,7 @@ const NFTItem = () => {
     }
 
     getLikeInfo();
-  }, [chainId, address, tokenID, bundleID]);
+  }, [address, tokenID, bundleID]);
 
   useEffect(() => {
     if (!chainId || !address) {
@@ -1209,19 +1207,26 @@ const NFTItem = () => {
         )
         .filter(tk => tk.isLiked === undefined);
 
-      if (missingTokens.length === 0) return;
-
       const cancelTokenSource = axios.CancelToken.source();
       setLikeCancelSource(cancelTokenSource);
-      const { data, status } = await getItemsLiked(
-        missingTokens,
-        authToken,
-        cancelTokenSource.token
-      );
-      if (status === 'success') {
+      if (authToken) {
+        const { data, status } = await getItemsLiked(
+          missingTokens,
+          authToken,
+          cancelTokenSource.token
+        );
+        if (status === 'success') {
+          const newTokens = [...moreItems.current];
+          missingTokens.map((tk, idx) => {
+            newTokens[tk.index].isLiked = data[idx].isLiked;
+          });
+          // eslint-disable-next-line require-atomic-updates
+          moreItems.current = newTokens;
+        }
+      } else {
         const newTokens = [...moreItems.current];
-        missingTokens.map((tk, idx) => {
-          newTokens[tk.index].isLiked = data[idx].isLiked;
+        missingTokens.map(tk => {
+          newTokens[tk.index].isLiked = false;
         });
         // eslint-disable-next-line require-atomic-updates
         moreItems.current = newTokens;
@@ -1237,7 +1242,7 @@ const NFTItem = () => {
     if (likeCancelSource) {
       likeCancelSource.cancel();
     }
-    if (authToken && moreItems.current.length) {
+    if (moreItems.current.length) {
       updateItems();
     }
   }, [moreItems, authToken]);
@@ -1302,7 +1307,7 @@ const NFTItem = () => {
     try {
       const approved = await contract.isApprovedForAll(
         account,
-        Contracts[chainId].sales
+        Contracts[CHAIN].sales
       );
       setSalesContractApproved(approved);
     } catch (e) {
@@ -2174,7 +2179,7 @@ const NFTItem = () => {
 
   const myListing = () => {
     return listings.current.find(
-      listing => listing.owner.toLowerCase() === account.toLowerCase()
+      listing => listing.owner.toLowerCase() === account?.toLowerCase()
     );
   };
 
@@ -2187,7 +2192,7 @@ const NFTItem = () => {
     let idx = 0;
     while (
       idx < listings.current.length &&
-      listings.current[idx].owner.toLowerCase() === account.toLowerCase()
+      listings.current[idx].owner.toLowerCase() === account?.toLowerCase()
     ) {
       idx++;
     }
@@ -2199,7 +2204,7 @@ const NFTItem = () => {
     let supply = 0;
     holders.current.map(holder => {
       if (
-        holder.address.toLowerCase() !== account.toLowerCase() &&
+        holder.address.toLowerCase() !== account?.toLowerCase() &&
         holder.supply > supply
       ) {
         supply = holder.supply;
@@ -2517,15 +2522,16 @@ const NFTItem = () => {
               )
             </div>
           </div>
-          {!isMine && (
-            <div
+          {bestListing.owner.toLocaleLowerCase() !==
+            account?.toLocaleLowerCase() && (
+            <TxButton
               className={cx(styles.buyNow, buyingItem && styles.disabled)}
               onClick={
                 bundleID ? handleBuyBundle : () => handleBuyItem(bestListing)
               }
             >
               {buyingItem ? <ClipLoader color="#FFF" size={16} /> : 'Buy Now'}
-            </div>
+            </TxButton>
           )}
         </div>
       )}
@@ -2809,7 +2815,7 @@ const NFTItem = () => {
             (tokenType.current === 1155 &&
               myHolding.supply < tokenInfo.totalSupply)) &&
             (!auction.current || auction.current.resulted) && (
-              <div
+              <TxButton
                 className={cx(
                   styles.headerButton,
                   (offerPlacing || offerCanceling) && styles.disabled
@@ -2821,7 +2827,7 @@ const NFTItem = () => {
                 }
               >
                 {hasMyOffer ? 'Withdraw Offer' : 'Make Offer'}
-              </div>
+              </TxButton>
             )}
         </div>
       )}
@@ -3156,7 +3162,7 @@ const NFTItem = () => {
                           </div>
                           <div className={styles.buy}>
                             {!isMine && (
-                              <div
+                              <TxButton
                                 className={cx(
                                   styles.buyButton,
                                   buyingItem && styles.disabled
@@ -3168,7 +3174,7 @@ const NFTItem = () => {
                                 ) : (
                                   'Buy'
                                 )}
-                              </div>
+                              </TxButton>
                             )}
                           </div>
                         </div>
@@ -3216,8 +3222,8 @@ const NFTItem = () => {
                           )}
                           <div className={styles.buy}>
                             {listing.owner.toLowerCase() !==
-                              account.toLowerCase() && (
-                              <div
+                              account?.toLowerCase() && (
+                              <TxButton
                                 className={cx(
                                   styles.buyButton,
                                   buyingItem && styles.disabled
@@ -3229,7 +3235,7 @@ const NFTItem = () => {
                                 ) : (
                                   'Buy'
                                 )}
-                              </div>
+                              </TxButton>
                             )}
                           </div>
                         </div>
@@ -3367,7 +3373,7 @@ const NFTItem = () => {
                         (tokenType.current === 1155 &&
                           myHolding.supply < tokenInfo.totalSupply)) &&
                         (!auction.current || auction.current.resulted) && (
-                          <div
+                          <TxButton
                             className={cx(
                               styles.makeOffer,
                               offerPlacing && styles.disabled
@@ -3375,7 +3381,7 @@ const NFTItem = () => {
                             onClick={() => setOfferModalVisible(true)}
                           >
                             Make Offer
-                          </div>
+                          </TxButton>
                         )}
                     </div>
                   )}

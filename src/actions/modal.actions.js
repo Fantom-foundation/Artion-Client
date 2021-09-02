@@ -5,6 +5,8 @@ const ModalActions = {
   hideAccountModal,
   showWFTMModal,
   hideWFTMModal,
+  showConnectWalletModal,
+  hideConnectWalletModal,
 };
 
 function showAccountModal() {
@@ -52,6 +54,30 @@ function hideWFTMModal() {
 const _hideWFTMModal = () => {
   return {
     type: ModalConstants.HIDE_WFTM_MODAL,
+  };
+};
+
+function showConnectWalletModal() {
+  return dispatch => {
+    dispatch(_showConnectWalletModal());
+  };
+}
+
+const _showConnectWalletModal = () => {
+  return {
+    type: ModalConstants.SHOW_CONNECT_WALLET_MODAL,
+  };
+};
+
+function hideConnectWalletModal() {
+  return dispatch => {
+    dispatch(_hideConnectWalletModal());
+  };
+}
+
+const _hideConnectWalletModal = () => {
+  return {
+    type: ModalConstants.HIDE_CONNECT_WALLET_MODAL,
   };
 };
 

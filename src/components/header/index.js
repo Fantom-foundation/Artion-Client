@@ -52,7 +52,9 @@ const Header = ({ light }) => {
   const { user } = useSelector(state => state.Auth);
   let isSearchbarShown = useSelector(state => state.HeaderOptions.isShown);
   const { isModerator } = useSelector(state => state.ConnectWallet);
-  const { wftmModalVisible } = useSelector(state => state.Modal);
+  const { wftmModalVisible, connectWalletModalVisible } = useSelector(
+    state => state.Modal
+  );
 
   const [anchorEl, setAnchorEl] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -68,9 +70,6 @@ const Header = ({ light }) => {
     boostCollectionModalVisible,
     setBoostCollectionModalVisible,
   ] = useState(false);
-  const [connectWalletModalVisible, setConnectWalletModalVisible] = useState(
-    false
-  );
 
   const [keyword, setKeyword] = useState('');
   const [cancelSource, setCancelSource] = useState(null);
@@ -116,25 +115,7 @@ const Header = ({ light }) => {
   }, [account, chainId]);
 
   const handleConnectWallet = () => {
-    setConnectWalletModalVisible(true);
-    // activate(injected, undefined, true)
-    //   .then(() => {
-    //     if (account) login();
-    //   })
-    //   .catch(async error => {
-    //     if (error instanceof UnsupportedChainIdError) {
-    //       await activate(injected);
-    //       if (account) login();
-    //     } else if (error instanceof NoEthereumProviderError) {
-    //       if (showError) {
-    //         toast(
-    //           'error',
-    //           'No Wallet Found!',
-    //           'Please install Metamask or Coinbase Wallet on your browser to browse Artion.'
-    //         );
-    //       }
-    //     }
-    //   });
+    dispatch(ModalActions.showConnectWalletModal());
   };
 
   const resetResults = () => {
@@ -625,7 +606,7 @@ const Header = ({ light }) => {
       />
       <ConnectWalletModal
         visible={connectWalletModalVisible}
-        onClose={() => setConnectWalletModalVisible(false)}
+        onClose={() => dispatch(ModalActions.hideConnectWalletModal())}
       />
     </div>
   );

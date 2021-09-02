@@ -1,29 +1,24 @@
-import { useCallback } from 'react';
-import { ethers } from 'ethers';
 import { ChainId } from '@sushiswap/sdk';
-import { useWeb3React } from '@web3-react/core';
 
 import { WFTM_ABI } from './abi';
 import { calculateGasMargin } from 'utils';
+import useContract from 'hooks/useContract';
 
 const WFTM_ADDRESS = {
   [ChainId.FANTOM]: '0x21be370d5312f44cb42ce377bc9b8a0cef1a4c83',
   [ChainId.FANTOM_TESTNET]: '0x077fab8f7f79178f6718bdfdffd5c3b8d787aed5',
 };
 
+// eslint-disable-next-line no-undef
+const isMainnet = process.env.REACT_APP_ENV === 'MAINNET';
+const CHAIN = isMainnet ? ChainId.FANTOM : ChainId.FANTOM_TESTNET;
+
 export const useWFTMContract = () => {
-  const { chainId } = useWeb3React();
+  const { getContract } = useContract();
 
-  const wftmAddress = useCallback(() => WFTM_ADDRESS[chainId], [chainId]);
+  const wftmAddress = WFTM_ADDRESS[CHAIN];
 
-  const getWFTMContract = async () => {
-    await window.ethereum.enable();
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    const signer = provider.getSigner();
-    const contract = new ethers.Contract(wftmAddress(), WFTM_ABI, signer);
-
-    return contract;
-  };
+  const getWFTMContract = async () => await getContract(wftmAddress, WFTM_ABI);
 
   const getWFTMBalance = async address => {
     const contract = await getWFTMContract();

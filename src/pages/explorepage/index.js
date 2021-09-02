@@ -58,6 +58,13 @@ const ExploreAllPage = () => {
 
   useEffect(() => {
     dispatch(HeaderActions.toggleSearchbar(true));
+
+    if (fetchInterval) {
+      clearInterval(fetchInterval);
+    }
+
+    updateCollections();
+    setFetchInterval(setInterval(updateCollections, 1000 * 60 * 10));
   }, []);
 
   const updateCollections = async () => {
@@ -168,17 +175,6 @@ const ExploreAllPage = () => {
     }
   };
 
-  useEffect(() => {
-    if (!chainId) return;
-
-    if (fetchInterval) {
-      clearInterval(fetchInterval);
-    }
-
-    updateCollections();
-    setFetchInterval(setInterval(updateCollections, 1000 * 60 * 10));
-  }, [chainId]);
-
   const handleScroll = e => {
     if (upFetching || downFetching) return;
 
@@ -231,15 +227,23 @@ const ExploreAllPage = () => {
 
       const cancelTokenSource = axios.CancelToken.source();
       setLikeCancelSource(cancelTokenSource);
-      const { data, status } = await getItemsLiked(
-        missingTokens,
-        authToken,
-        cancelTokenSource.token
-      );
-      if (status === 'success') {
+      if (authToken) {
+        const { data, status } = await getItemsLiked(
+          missingTokens,
+          authToken,
+          cancelTokenSource.token
+        );
+        if (status === 'success') {
+          const newTokens = [...tokens];
+          missingTokens.map((tk, idx) => {
+            newTokens[tk.index].isLiked = data[idx].isLiked;
+          });
+          dispatch(TokensActions.updateTokens(newTokens));
+        }
+      } else {
         const newTokens = [...tokens];
-        missingTokens.map((tk, idx) => {
-          newTokens[tk.index].isLiked = data[idx].isLiked;
+        missingTokens.map(tk => {
+          newTokens[tk.index].isLiked = false;
         });
         dispatch(TokensActions.updateTokens(newTokens));
       }
@@ -254,7 +258,7 @@ const ExploreAllPage = () => {
     if (likeCancelSource) {
       likeCancelSource.cancel();
     }
-    if (authToken && tokens.length) {
+    if (tokens.length) {
       updateItems();
     }
   }, [tokens, authToken]);
