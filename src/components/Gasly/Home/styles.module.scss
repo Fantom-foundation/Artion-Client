@@ -1,0 +1,109 @@
+.container {
+  min-height: 100vh;
+  background-color: #090C10;
+  color: #EAEAF1;
+}
+
+.main {
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding-top: 120px;
+}
+
+.top {
+  display: flex;
+  position: relative;
+}
+
+.avatarBox {
+  width: 47%;
+  position: relative;
+}
+
+.avatarBg {
+  width: 100%;
+}
+
+.avatar {
+  position: absolute;
+  width: 90%;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.sign {
+  position: absolute;
+  top: 100px;
+  right: 40px;
+  width: 60%;
+}
+
+.logo {
+  position: absolute;
+  bottom: 60px;
+  right: 25%;
+  transform: translateX(50%);
+  width: 30%;
+}
+
+.info {
+  position: relative;
+  width: 100%;
+}
+
+.textBg1 {
+  width: 100%;
+}
+
+.infoContent {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.infoText {
+  font-family: 'Inter' !important;
+  font-size: 36px;
+  font-weight: 600;
+  line-height: 43.57px;
+  letter-spacing: -0.015em;
+  text-align: center;
+  color: #FFF;
+  width: 75%;
+
+  span {
+    font-family: 'Inter' !important;
+    font-weight: 800;
+    color: #3D80FF;
+  }
+}
+
+@media only screen and (max-width: 1000px) {
+
+  .sign {
+    top: 60px;
+  }
+  
+  .logo {
+    bottom: 40px;
+  }
+}
+
+@media only screen and (max-width: 768px) {
+
+  .sign {
+    top: 30px;
+  }
+  
+  .logo {
+    bottom: 20px;
+  }
+}
