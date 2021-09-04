@@ -1,4 +1,11 @@
-import React, { useEffect, useState, useRef, Suspense } from 'react';
+import React, {
+  useEffect,
+  useState,
+  useRef,
+  useCallback,
+  useMemo,
+  Suspense,
+} from 'react';
 import { useParams, Link, useHistory } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import cx from 'classnames';
@@ -199,7 +206,7 @@ const NFTItem = () => {
   const tokenType = useRef();
   const contentType = useRef();
   const [tokenInfo, setTokenInfo] = useState();
-  const holders = useRef([]);
+  const [holders, setHolders] = useState([]);
   const likeUsers = useRef([]);
   const [collections, setCollections] = useState([]);
   const [collection, setCollection] = useState();
@@ -263,6 +270,9 @@ const NFTItem = () => {
   const [shareAnchorEl, setShareAnchorEl] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
   const isMenuOpen = Boolean(anchorEl);
+
+  const prevSalesContract = useRef(null);
+  const prevAuctionContract = useRef(null);
 
   const { authToken } = useSelector(state => state.ConnectWallet);
 
@@ -412,9 +422,9 @@ const NFTItem = () => {
           setTokenInfo(_tokenInfo);
           try {
             const { data: _holders } = await getTokenHolders(address, tokenID);
-            holders.current = _holders;
+            setHolders(_holders);
           } catch {
-            holders.current = [];
+            setHolders([]);
           }
           setOwner(null);
         }
@@ -614,17 +624,18 @@ const NFTItem = () => {
       if (tokenType.current === 721) {
         setOwner(buyer);
       } else {
-        const sellerIndex = holders.current.findIndex(
+        const newHolders = [...holders];
+        const sellerIndex = newHolders.findIndex(
           holder => holder.address.toLowerCase() === seller.toLowerCase()
         );
-        const buyerIndex = holders.current.findIndex(
+        const buyerIndex = newHolders.findIndex(
           holder => holder.address.toLowerCase() === buyer.toLowerCase()
         );
         if (sellerIndex > -1) {
-          holders.current[sellerIndex].supply -= quantity;
+          newHolders[sellerIndex].supply -= quantity;
         }
         if (buyerIndex > -1) {
-          holders.current[buyerIndex].supply += quantity;
+          newHolders[buyerIndex].supply += quantity;
         } else {
           const buyerInfo = {
             address: buyer,
@@ -637,11 +648,12 @@ const NFTItem = () => {
           } catch (e) {
             console.log(e);
           }
-          holders.current.push(buyerInfo);
+          newHolders.push(buyerInfo);
         }
-        if (holders.current[sellerIndex].supply === 0) {
-          holders.current.splice(sellerIndex, 1);
+        if (newHolders[sellerIndex].supply === 0) {
+          newHolders.splice(sellerIndex, 1);
         }
+        setHolders(newHolders);
       }
       const token = getTokenByAddress(paymentToken);
       const _price = parseFloat(
@@ -969,6 +981,9 @@ const NFTItem = () => {
     salesContract.on('OfferCreated', offerCreatedHandler);
     salesContract.on('OfferCanceled', offerCanceledHandler);
 
+    prevSalesContract.current = salesContract;
+    prevAuctionContract.current = auctionContract;
+
     auctionContract.on('AuctionCreated', auctionCreatedHandler);
     auctionContract.on(
       'UpdateAuctionStartTime',
@@ -991,35 +1006,8 @@ const NFTItem = () => {
   };
 
   const removeEventListeners = async () => {
-    const salesContract = await getSalesContract();
-    const auctionContract = await getAuctionContract();
-
-    salesContract.off('ItemListed', itemListedHandler);
-    salesContract.off('ItemUpdated', itemUpdatedHandler);
-    salesContract.off('ItemCanceled', itemCanceledHandler);
-    salesContract.off('ItemSold', itemSoldHandler);
-    salesContract.off('OfferCreated', offerCreatedHandler);
-    salesContract.off('OfferCanceled', offerCanceledHandler);
-
-    auctionContract.off('AuctionCreated', auctionCreatedHandler);
-    auctionContract.off(
-      'UpdateAuctionStartTime',
-      auctionStartTimeUpdatedHandler
-    );
-    auctionContract.off('UpdateAuctionEndTime', auctionEndTimeUpdatedHandler);
-    auctionContract.off(
-      'UpdateAuctionReservePrice',
-      auctionReservePriceUpdatedHandler
-    );
-    auctionContract.off('UpdateMinBidIncrement', minBidIncrementUpdatedHandler);
-    auctionContract.off(
-      'UpdateBidWithdrawalLockTime',
-      bidWithdrawalLockTimeUpdatedHandler
-    );
-    auctionContract.off('BidPlaced', bidPlacedHandler);
-    auctionContract.off('BidWithdrawn', bidWithdrawnHandler);
-    auctionContract.off('AuctionCancelled', auctionCancelledHandler);
-    auctionContract.off('AuctionResulted', auctionResultedHandler);
+    prevSalesContract.current?.removeAllListeners();
+    prevAuctionContract.current?.removeAllListeners();
   };
 
   const addBundleEventListeners = async () => {
@@ -1115,7 +1103,7 @@ const NFTItem = () => {
         removeBundleEventListeners();
       }
     };
-  }, [chainId]);
+  }, [chainId, holders]);
 
   useEffect(() => {
     setLiked(null);
@@ -1459,8 +1447,12 @@ const NFTItem = () => {
     }
   };
 
-  const myHolding = holders.current.find(
-    holder => holder.address.toLowerCase() === account?.toLowerCase()
+  const myHolding = useMemo(
+    () =>
+      holders.find(
+        holder => holder.address.toLowerCase() === account?.toLowerCase()
+      ),
+    [holders, account]
   );
 
   const isMine =
@@ -1486,6 +1478,7 @@ const NFTItem = () => {
         const tx = await contract.safeTransferFrom(account, to, tokenID);
         await tx.wait();
         showToast('success', 'Item transferred successfully!');
+        setOwner(to);
         setTransferModalVisible(false);
         getItemDetails();
       } else {
@@ -1499,9 +1492,46 @@ const NFTItem = () => {
         );
         await tx.wait();
         showToast('success', 'Item transferred successfully!');
-        setOwner(to);
+
+        const newHolders = [...holders];
+        let sender = -1,
+          receiver = -1;
+        for (let i = 0; i < newHolders.length; i++) {
+          if (
+            newHolders[i].address.toLowerCase() === account.toLocaleLowerCase()
+          ) {
+            sender = i;
+            newHolders[i].supply -= quantity;
+          } else if (
+            newHolders[i].address.toLowerCase() === to.toLocaleLowerCase()
+          ) {
+            receiver = i;
+            newHolders[i].supply += quantity;
+          }
+          if (sender > -1 && receiver > -1) {
+            break;
+          }
+        }
+        if (newHolders[sender].supply === 0) {
+          newHolders.splice(sender, 1);
+        }
+        if (receiver === -1) {
+          let newHolder = {
+            address: to,
+            supply: quantity,
+          };
+          try {
+            const res = await getUserAccountDetails(to);
+            newHolder.alias = res?.data.alias;
+            newHolder.imageHash = res?.data.imageHash;
+          } catch (e) {
+            console.log(e);
+          }
+          newHolders.push(newHolder);
+        }
+        setHolders(newHolders);
+
         setTransferModalVisible(false);
-        getItemDetails();
       }
     } catch (err) {
       console.log(err);
@@ -2200,9 +2230,9 @@ const NFTItem = () => {
     return null;
   })();
 
-  const maxSupply = () => {
+  const maxSupply = useCallback(() => {
     let supply = 0;
-    holders.current.map(holder => {
+    holders.map(holder => {
       if (
         holder.address.toLowerCase() !== account?.toLowerCase() &&
         holder.supply > supply
@@ -2211,7 +2241,7 @@ const NFTItem = () => {
       }
     });
     return supply;
-  };
+  }, [holders]);
 
   const onTransferClick = async () => {
     if (auction.current?.resulted === false) {
@@ -2423,8 +2453,8 @@ const NFTItem = () => {
                   onClick={() => setOwnersModalVisible(true)}
                 >
                   <PeopleIcon style={styles.itemIcon} />
-                  &nbsp;{formatNumber(holders.current.length)}
-                  &nbsp;owner{holders.current.length > 1 && 's'}
+                  &nbsp;{formatNumber(holders.length)}
+                  &nbsp;owner{holders.length > 1 && 's'}
                 </div>
                 <div className={styles.itemViews}>
                   <ViewModuleIcon style={styles.itemIcon} />
@@ -3639,7 +3669,7 @@ const NFTItem = () => {
       <OwnersModal
         visible={ownersModalVisible}
         onClose={() => setOwnersModalVisible(false)}
-        holders={holders.current}
+        holders={holders}
       />
       <LikesModal
         visible={likesModalVisible}
