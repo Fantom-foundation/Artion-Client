@@ -22,6 +22,7 @@ import SuspenseImg from 'components/SuspenseImg';
 import { isAddress, shortenAddress, formatFollowers } from 'utils';
 import toast from 'utils/toast';
 import { useApi } from 'api';
+import useTokens from 'hooks/useTokens';
 import HeaderActions from 'actions/header.actions';
 import ModalActions from 'actions/modal.actions';
 import CollectionsActions from 'actions/collections.actions';
@@ -64,6 +65,7 @@ const AccountDetails = () => {
     getMyLikes,
     getItemsLiked,
   } = useApi();
+  const { getTokenByAddress } = useTokens();
   const { account, chainId } = useWeb3React();
   const { width, ref } = useResizeDetector();
 
@@ -309,20 +311,28 @@ const AccountDetails = () => {
 
       const cancelTokenSource = axios.CancelToken.source();
       setLikeCancelSource(cancelTokenSource);
-      getItemsLiked(missingTokens, authToken, cancelTokenSource.token)
-        .then(({ data, status }) => {
-          setLikeCancelSource(null);
-          if (status === 'success') {
-            const newTokens = [...tokens.current];
-            missingTokens.map((tk, idx) => {
-              newTokens[tk.index].isLiked = data[idx].isLiked;
-            });
-            resolve(newTokens);
-          }
-        })
-        .catch(() => {
-          reject();
+      if (authToken) {
+        getItemsLiked(missingTokens, authToken, cancelTokenSource.token)
+          .then(({ data, status }) => {
+            setLikeCancelSource(null);
+            if (status === 'success') {
+              const newTokens = [...tokens.current];
+              missingTokens.map((tk, idx) => {
+                newTokens[tk.index].isLiked = data[idx].isLiked;
+              });
+              resolve(newTokens);
+            }
+          })
+          .catch(() => {
+            reject();
+          });
+      } else {
+        const newTokens = [...tokens.current];
+        missingTokens.map(tk => {
+          newTokens[tk.index].isLiked = false;
         });
+        resolve(newTokens);
+      }
     });
   };
 
@@ -330,7 +340,6 @@ const AccountDetails = () => {
     if (likeCancelSource) {
       likeCancelSource.cancel();
     }
-    if (!authToken) return;
 
     if (tokens.current.length) {
       updateItems(tokens.current)
@@ -454,6 +463,9 @@ const AccountDetails = () => {
         })
       );
       _activities.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
+      _activities.map(item => {
+        item.token = getTokenByAddress(item.paymentToken);
+      });
       setActivities(_activities);
       setActivityLoading(false);
     } catch {
@@ -466,6 +478,9 @@ const AccountDetails = () => {
       setOffersLoading(true);
       const { data } = await getActivityFromOthers(uid);
       data.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
+      data.map(item => {
+        item.token = getTokenByAddress(item.paymentToken);
+      });
       setOffers(data);
       setOffersLoading(false);
     } catch {
@@ -478,6 +493,9 @@ const AccountDetails = () => {
       setBidsLoading(true);
       const { data } = await getMyOffers(uid);
       data.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
+      data.map(item => {
+        item.token = getTokenByAddress(item.paymentToken);
+      });
       setBids(data);
       setBidsLoading(false);
     } catch {
@@ -808,7 +826,7 @@ const AccountDetails = () => {
             <div className={styles.groupTitle}>Account</div>
             {renderTab('Activity', IconClock, 3)}
             {renderTab('Offers', IconList, 4)}
-            {renderTab('Bids', IconList, 5)}
+            {renderTab('My Offers', IconList, 5)}
           </div>
         </div>
         <div ref={ref} className={styles.contentBody} onScroll={handleScroll}>
@@ -878,7 +896,12 @@ const AccountDetails = () => {
                       )}
                       <div className={styles.price}>
                         {activity ? (
-                          `${activity.price} FTM`
+                          <>
+                            <div className={styles.tokenLogo}>
+                              <img src={activity.token.icon} />
+                            </div>
+                            {activity.price}
+                          </>
                         ) : (
                           <Skeleton width={100} height={20} />
                         )}
@@ -996,7 +1019,12 @@ const AccountDetails = () => {
                     )}
                     <div className={styles.price}>
                       {offer ? (
-                        `${offer.pricePerItem} FTM`
+                        <>
+                          <div className={styles.tokenLogo}>
+                            <img src={offer.token.icon} />
+                          </div>
+                          {offer.pricePerItem}
+                        </>
                       ) : (
                         <Skeleton width={100} height={20} />
                       )}
@@ -1054,7 +1082,12 @@ const AccountDetails = () => {
                     )}
                     <div className={styles.price}>
                       {bid ? (
-                        `${bid.pricePerItem} FTM`
+                        <>
+                          <div className={styles.tokenLogo}>
+                            <img src={bid.token.icon} />
+                          </div>
+                          {bid.pricePerItem}
+                        </>
                       ) : (
                         <Skeleton width={100} height={20} />
                       )}

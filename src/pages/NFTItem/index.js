@@ -1225,8 +1225,8 @@ const NFTItem = () => {
         }
       } else {
         const newTokens = [...moreItems.current];
-        missingTokens.map(tk => {
-          newTokens[tk.index].isLiked = false;
+        newTokens.map(tk => {
+          tk.isLiked = false;
         });
         // eslint-disable-next-line require-atomic-updates
         moreItems.current = newTokens;
