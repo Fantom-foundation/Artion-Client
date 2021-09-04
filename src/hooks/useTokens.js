@@ -1,12 +1,13 @@
-import { useCallback, useMemo } from 'react';
 import { ChainId } from '@sushiswap/sdk';
-import { useWeb3React } from '@web3-react/core';
 
 import iconFTM from 'assets/imgs/ftm.png';
 import iconWFTM from 'assets/imgs/wftm.png';
 import iconUSDT from 'assets/imgs/usdt.png';
 import iconUSDC from 'assets/imgs/usdc.png';
 import iconDAI from 'assets/imgs/dai.png';
+
+// eslint-disable-next-line no-undef
+const isMainnet = process.env.REACT_APP_ENV === 'MAINNET';
 
 const Tokens = {
   [ChainId.FANTOM]: [
@@ -65,24 +66,21 @@ const Tokens = {
 };
 
 export default function useTokens() {
-  const { chainId } = useWeb3React();
+  const chain = isMainnet ? ChainId.FANTOM : ChainId.FANTOM_TESTNET;
 
-  const getTokenByAddress = useCallback(
-    addr => {
-      const address =
-        !addr ||
-        addr === '0x0000000000000000000000000000000000000000' ||
-        addr === 'ftm'
-          ? ''
-          : addr;
-      return (Tokens[chainId] || []).find(
-        tk => tk.address.toLowerCase() === address.toLowerCase()
-      );
-    },
-    [chainId]
-  );
+  const tokens = Tokens[chain];
 
-  const tokens = useMemo(() => Tokens[chainId], [chainId]);
+  const getTokenByAddress = addr => {
+    const address =
+      !addr ||
+      addr === '0x0000000000000000000000000000000000000000' ||
+      addr === 'ftm'
+        ? ''
+        : addr;
+    return (tokens || []).find(
+      tk => tk.address.toLowerCase() === address.toLowerCase()
+    );
+  };
 
   return { getTokenByAddress, tokens };
 }

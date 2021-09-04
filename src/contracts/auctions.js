@@ -1,30 +1,20 @@
-import { useCallback } from 'react';
-import { ethers } from 'ethers';
-import { useWeb3React } from '@web3-react/core';
+import { ChainId } from '@sushiswap/sdk';
 
 import { calculateGasMargin } from 'utils';
 import { Contracts } from 'constants/networks';
+import useContract from 'hooks/useContract';
 
 import { AUCTION_CONTRACT_ABI } from './abi';
 
+// eslint-disable-next-line no-undef
+const isMainnet = process.env.REACT_APP_ENV === 'MAINNET';
+const CHAIN = isMainnet ? ChainId.FANTOM : ChainId.FANTOM_TESTNET;
+
 export const useAuctionContract = () => {
-  const { chainId } = useWeb3React();
+  const { getContract } = useContract();
 
-  const getAuctionContract = useCallback(async () => {
-    await window.ethereum.enable();
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    const signer = provider.getSigner();
-
-    if (!chainId) return null;
-
-    const contract = new ethers.Contract(
-      Contracts[chainId].auction,
-      AUCTION_CONTRACT_ABI,
-      signer
-    );
-
-    return contract;
-  }, [chainId]);
+  const getAuctionContract = async () =>
+    await getContract(Contracts[CHAIN].auction, AUCTION_CONTRACT_ABI);
 
   const getAuction = async (nftAddress, tokenId) => {
     const contract = await getAuctionContract();
