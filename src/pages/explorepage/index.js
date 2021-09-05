@@ -40,7 +40,7 @@ const ExploreAllPage = () => {
   const [prevNumPerRow, setPrevNumPerRow] = useState(null);
 
   const { authToken } = useSelector(state => state.ConnectWallet);
-  const { upFetching, downFetching, tokens, from, to } = useSelector(
+  const { upFetching, downFetching, tokens, count, from, to } = useSelector(
     state => state.Tokens
   );
   const {
@@ -94,8 +94,6 @@ const ExploreAllPage = () => {
     }
     if (isNaN(fetchCount)) return;
 
-    dispatch(TokensActions.startFetching(dir));
-
     try {
       const filterBy = [];
       if (statusBuyNow) filterBy.push('buyNow');
@@ -115,6 +113,12 @@ const ExploreAllPage = () => {
         start = from;
         _count = fetchCount * 2;
       }
+      if (start === count) {
+        return;
+      }
+
+      dispatch(TokensActions.startFetching(dir));
+
       const { data } = await fetchTokens(
         start,
         _count,
