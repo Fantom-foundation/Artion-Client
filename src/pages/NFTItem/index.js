@@ -76,6 +76,7 @@ import ModalActions from 'actions/modal.actions';
 import CollectionsActions from 'actions/collections.actions';
 import HeaderActions from 'actions/header.actions';
 import useTokens from 'hooks/useTokens';
+import usePrevious from 'hooks/usePrevious';
 
 import webIcon from 'assets/svgs/web.svg';
 import discordIcon from 'assets/svgs/discord.svg';
@@ -275,6 +276,7 @@ const NFTItem = () => {
   const prevAuctionContract = useRef(null);
 
   const { authToken } = useSelector(state => state.ConnectWallet);
+  const prevAuthToken = usePrevious(authToken);
 
   const isLoggedIn = () => {
     return (
@@ -1178,43 +1180,42 @@ const NFTItem = () => {
 
   const updateItems = async () => {
     try {
-      const missingTokens = moreItems.current
-        .map((tk, index) =>
-          tk.items
-            ? {
-                index,
-                isLiked: tk.isLiked,
-                bundleID: tk._id,
-              }
-            : {
-                index,
-                isLiked: tk.isLiked,
-                contractAddress: tk.contractAddress,
-                tokenID: tk.tokenID,
-              }
-        )
-        .filter(tk => tk.isLiked === undefined);
+      if (!authToken) {
+        moreItems.current = tokens.map(tk => ({
+          ...tk,
+          isLiked: false,
+        }));
+        return;
+      }
+      let missingTokens = moreItems.current.map((tk, index) =>
+        tk.items
+          ? {
+              index,
+              isLiked: tk.isLiked,
+              bundleID: tk._id,
+            }
+          : {
+              index,
+              isLiked: tk.isLiked,
+              contractAddress: tk.contractAddress,
+              tokenID: tk.tokenID,
+            }
+      );
+      if (prevAuthToken) {
+        missingTokens = missingTokens.filter(tk => tk.isLiked === undefined);
+      }
 
       const cancelTokenSource = axios.CancelToken.source();
       setLikeCancelSource(cancelTokenSource);
-      if (authToken) {
-        const { data, status } = await getItemsLiked(
-          missingTokens,
-          authToken,
-          cancelTokenSource.token
-        );
-        if (status === 'success') {
-          const newTokens = [...moreItems.current];
-          missingTokens.map((tk, idx) => {
-            newTokens[tk.index].isLiked = data[idx].isLiked;
-          });
-          // eslint-disable-next-line require-atomic-updates
-          moreItems.current = newTokens;
-        }
-      } else {
+      const { data, status } = await getItemsLiked(
+        missingTokens,
+        authToken,
+        cancelTokenSource.token
+      );
+      if (status === 'success') {
         const newTokens = [...moreItems.current];
-        newTokens.map(tk => {
-          tk.isLiked = false;
+        missingTokens.map((tk, idx) => {
+          newTokens[tk.index].isLiked = data[idx].isLiked;
         });
         // eslint-disable-next-line require-atomic-updates
         moreItems.current = newTokens;
@@ -1533,8 +1534,7 @@ const NFTItem = () => {
 
         setTransferModalVisible(false);
       }
-    } catch (err) {
-      console.log(err);
+    } catch {
       showToast('error', 'Failed to transfer item!');
     }
 

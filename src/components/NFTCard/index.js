@@ -38,7 +38,6 @@ const BaseCard = ({ item, loading, style, create, onCreate, onLike }) => {
 
   const [now, setNow] = useState(new Date());
   const [fetching, setFetching] = useState(false);
-  const [likeFetching, setLikeFetching] = useState(false);
   const [isLiking, setIsLiking] = useState(false);
   const [info, setInfo] = useState(null);
   const [index, setIndex] = useState(0);
@@ -95,10 +94,7 @@ const BaseCard = ({ item, loading, style, create, onCreate, onLike }) => {
   }, [item]);
 
   useEffect(() => {
-    if (item?.isLiked === undefined) {
-      setLikeFetching(true);
-    } else {
-      setLikeFetching(false);
+    if (item?.isLiked !== undefined) {
       setIsLike(item.isLiked);
     }
   }, [item?.isLiked]);
@@ -215,7 +211,7 @@ const BaseCard = ({ item, loading, style, create, onCreate, onLike }) => {
     return (
       <>
         <div className={cx(styles.cardHeader, isLike && styles.liking)}>
-          {!item || likeFetching ? (
+          {!item ? (
             <Skeleton width={80} height={20} />
           ) : (
             <>
