@@ -484,7 +484,7 @@ const CollectionCreate = ({ isRegister }) => {
 
   return (
     <div className={styles.container}>
-      <Header light />
+      <Header border />
       <div className={styles.inner}>
         <div className={styles.title}>
           {isRegister ? 'Register' : 'Create New'} Collection

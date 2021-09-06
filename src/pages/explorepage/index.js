@@ -188,7 +188,7 @@ const ExploreAllPage = () => {
     const obj = e.target;
     if (obj.scrollHeight - obj.clientHeight - obj.scrollTop < 100) {
       fetchNFTs(1);
-    } else if (obj.scrollTop < 100 && from) {
+    } else if (obj.scrollTop < 100 && from > 0) {
       fetchNFTs(-1);
     }
   };
@@ -276,7 +276,7 @@ const ExploreAllPage = () => {
 
   return (
     <>
-      <Header light />
+      <Header border />
       <div
         ref={conRef}
         className={styles.container}

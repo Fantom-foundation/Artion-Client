@@ -9,6 +9,7 @@
   justify-content: space-between;
   z-index: 100;
   box-sizing: border-box;
+  background-color: #FFF;
 }
 
 .left {
@@ -173,13 +174,18 @@
 .menuLink {
   margin-right: 48px;
   text-decoration: none;
-  color: #FFF;
+  color: #3D3D3D;
   font-weight: 700;
   font-size: 18px;
   line-height: 18px;
   user-select: none;
   cursor: pointer;
   position: relative;
+  opacity: 0.6;
+
+  &.active {
+    opacity: 1;
+  }
 
   &:last-child {
     margin-right: 0;
@@ -221,8 +227,9 @@
 .connect {
   box-sizing: border-box;
   padding: 8px 12px 11px 12px;
-  border-radius: 50px;
-  border: 1px solid #D9E1EE;
+  border-radius: 10px;
+  border: 1px solid rgba(0, 0, 0, .2);
+  opacity: 1;
 
   &:hover {
     box-shadow: 0 0 6px rgba(0, 0, 0, 0.3);
@@ -313,23 +320,8 @@
   }
 }
 
-.lightBg {
-  background-color: #FFF;
+.hasBorder {
   border-bottom: 1px solid #D9E1EE;
-  .menuLink {
-    color: #3D3D3D;
-    opacity: 0.6;
-  
-    &.active {
-      opacity: 1;
-    }
-  }
-
-  .connect,
-  .account {
-    opacity: 1;
-    border-color: rgba(0, 0, 0, .2);
-  }
 }
 
 @media only screen and (max-width: 900px) {

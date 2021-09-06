@@ -4,7 +4,7 @@ import FilterConstants from '../constants/filter.constants';
 const initialState = {
   upFetching: false,
   downFetching: false,
-  count: 0,
+  count: null,
   tokens: [],
   from: 0,
   to: 0,

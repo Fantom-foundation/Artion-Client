@@ -361,7 +361,7 @@ const PaintBoard = () => {
 
   return (
     <div className={styles.container}>
-      <Header light />
+      <Header border />
       <div className={styles.body}>
         <div className={styles.board}>
           <div {...getRootProps({ className: styles.uploadCont })}>

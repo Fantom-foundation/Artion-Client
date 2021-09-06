@@ -2781,7 +2781,7 @@ const NFTItem = () => {
 
   return (
     <div className={styles.container}>
-      <Header light />
+      <Header border />
       {isLoggedIn() && (
         <div className={styles.header}>
           {isMine && (
