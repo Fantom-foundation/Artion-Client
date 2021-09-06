@@ -674,7 +674,7 @@ const AccountDetails = () => {
 
   return (
     <div className={styles.container}>
-      <Header light />
+      <Header border />
       <div className={styles.profile}>
         <div className={styles.banner}>
           {loading ? (

@@ -4,21 +4,42 @@ import { Link } from 'react-router-dom';
 
 import HeaderActions from 'actions/header.actions';
 import Header from 'components/header';
-import FakeCard from 'components/FakeCard';
 import toast from 'utils/toast';
 
 import fantomLogo from 'assets/svgs/fantom_logo_white.svg';
-
-import bg1 from 'assets/svgs/bg1.svg';
-import bg2 from 'assets/svgs/bg2.svg';
-
-import card1 from 'assets/imgs/cards/1.gif';
-import card2 from 'assets/imgs/cards/2.png';
-import card3 from 'assets/imgs/cards/3.png';
-import card4 from 'assets/imgs/cards/4.png';
-import card5 from 'assets/imgs/cards/5.jpg';
+import card1 from 'assets/svgs/card1.svg';
+import card2 from 'assets/svgs/card2.svg';
+import card3 from 'assets/svgs/card3.svg';
+import card4 from 'assets/svgs/card4.svg';
 
 import styles from './styles.module.scss';
+
+const cards = [
+  {
+    icon: card1,
+    title: 'Set up your wallet',
+    description:
+      'Once you’ve set up your wallet of choice, connect it to OpenSea by clicking the wallet icon in the top right corner. Learn about the wallets we support.',
+  },
+  {
+    icon: card2,
+    title: 'Create a collection',
+    description:
+      'Once you’ve set up your wallet of choice, connect it to OpenSea by clicking the wallet icon in the top right corner. Learn about the wallets we support.',
+  },
+  {
+    icon: card3,
+    title: 'Add your NFTs',
+    description:
+      'Once you’ve set up your wallet of choice, connect it to OpenSea by clicking the wallet icon in the top right corner. Learn about the wallets we support.',
+  },
+  {
+    icon: card4,
+    title: 'List them for sale',
+    description:
+      'Once you’ve set up your wallet of choice, connect it to OpenSea by clicking the wallet icon in the top right corner. Learn about the wallets we support.',
+  },
+];
 
 const LandingPage = () => {
   const dispatch = useDispatch();
@@ -38,92 +59,56 @@ const LandingPage = () => {
     }
   };
 
+  const renderAboutCard = (key, icon, title, desc) => (
+    <div className={styles.aboutCard} key={key}>
+      <div className={styles.cardIconWrapper}>
+        <img src={icon} />
+      </div>
+      <div className={styles.cardTitle}>{title}</div>
+      <div className={styles.cardDesc}>{desc}</div>
+    </div>
+  );
+
   return (
     <div className={styles.container}>
-      <div className={styles.background}>
-        <img src={bg1} className={styles.bg1} />
-        <img src={bg2} className={styles.bg2} />
-      </div>
       <Header />
       <div className={styles.body}>
-        <div className={styles.title}>The largest NFT marketplace</div>
-        <div className={styles.subtitle}>
-          Create, Buy, Sell and Discover rare digital assets
+        <div className={styles.main}>
+          <div className={styles.mainLeft}>
+            <div className={styles.title}>The largest NFT marketplace</div>
+            <div className={styles.subtitle}>
+              Create, Buy, Sell and Discover rare digital assets
+            </div>
+            <Link
+              to="/exploreall"
+              className={styles.exploreButton}
+              onClick={checkWallet}
+            >
+              Explore
+            </Link>
+          </div>
+          <div className={styles.card}>
+            <div className={styles.cardMedia}>
+              <img src={fantomLogo} />
+            </div>
+            <div className={styles.cardInfo}>
+              <div className={styles.cardCategory}>Ancestral Umans</div>
+              <div className={styles.cardName}>Shamanka - The Healer</div>
+            </div>
+          </div>
         </div>
-        <div className={styles.buttonsContainer}>
-          <Link
-            to="/exploreall"
-            className={styles.exploreButton}
-            onClick={checkWallet}
-          >
-            Explore
-          </Link>
-          <Link
-            to="/create"
-            className={styles.createButton}
-            onClick={checkWallet}
-          >
-            Create
-          </Link>
+        <div className={styles.about}>
+          <div className={styles.aboutInner}>
+            <div className={styles.aboutTitle}>Create and Sell your NFTs</div>
+            <div className={styles.aboutCards}>
+              {cards.map((card, key) =>
+                renderAboutCard(key, card.icon, card.title, card.description)
+              )}
+            </div>
+            <div className={styles.aboutTitle}>Browse by category</div>
+          </div>
         </div>
-        <div className={styles.subtitle2}>Zero % based fees on sales</div>
-        <div className={styles.footer}>
-          Powered by&nbsp;
-          <img src={fantomLogo} className={styles.logo} />
-        </div>
-      </div>
-
-      <div className={styles.cardsGroup}>
-        <div className={styles.card1}>
-          <FakeCard
-            item={{
-              image: card1,
-              category: 'Moose V1',
-              name: 'FTM Moose 1',
-              price: 600,
-            }}
-          />
-        </div>
-        <div className={styles.card2}>
-          <FakeCard
-            item={{
-              image: card2,
-              category: 'Fantums',
-              name: 'LINWOOD LORANCE',
-              price: 150,
-            }}
-          />
-        </div>
-        <div className={styles.card3}>
-          <FakeCard
-            item={{
-              image: card3,
-              category: 'Gantom Stone',
-              name: 'Voodoo Calcite Y9514',
-              price: 300,
-            }}
-          />
-        </div>
-        <div className={styles.card4}>
-          <FakeCard
-            item={{
-              image: card4,
-              category: 'BitUmans',
-              name: 'Bit Uman #305',
-              price: 50,
-            }}
-          />
-        </div>
-        <div className={styles.card5}>
-          <FakeCard
-            item={{
-              image: card5,
-              category: 'ZooCoin Community NFT',
-              name: 'Kaung Kaung',
-              price: 250,
-            }}
-          />
-        </div>
+        <div className={styles.footer}>Footer</div>
       </div>
     </div>
   );

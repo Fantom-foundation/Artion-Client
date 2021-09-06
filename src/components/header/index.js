@@ -24,9 +24,6 @@ import ConnectWalletModal from 'components/ConnectWalletModal';
 import Identicon from 'components/Identicon';
 import toast from 'utils/toast';
 
-import logoWhite from 'assets/svgs/logo_white.svg';
-import logoBlue from 'assets/svgs/logo_blue.svg';
-import logoSmallWhite from 'assets/svgs/logo_small_white.svg';
 import logoSmallBlue from 'assets/svgs/logo_small_blue.svg';
 import iconUser from 'assets/svgs/user.svg';
 import iconNotification from 'assets/svgs/notification.svg';
@@ -36,7 +33,7 @@ import iconSwap from 'assets/svgs/swap.svg';
 
 import styles from './styles.module.scss';
 
-const Header = ({ light }) => {
+const Header = ({ border }) => {
   const history = useHistory();
   const dispatch = useDispatch();
 
@@ -482,19 +479,10 @@ const Header = ({ light }) => {
   );
 
   return (
-    <div className={cx(styles.header, light && styles.lightBg)}>
+    <div className={cx(styles.header, border && styles.hasBorder)}>
       <div className={styles.left}>
         <Link to="/" className={styles.logo}>
-          <img
-            src={light ? logoBlue : logoWhite}
-            alt="logo"
-            className={styles.logoBig}
-          />
-          <img
-            src={light ? logoSmallBlue : logoSmallWhite}
-            alt="logo"
-            className={styles.logoSmall}
-          />
+          <img src={logoSmallBlue} alt="logo" />
         </Link>
         {isSearchbarShown && renderSearchBox()}
         <div className={styles.secondmenu}>

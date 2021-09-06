@@ -113,7 +113,7 @@ const CollectionCreate = () => {
 
   return (
     <div className={styles.container}>
-      <Header light />
+      <Header border />
       {loading ? (
         <div className={styles.loadingPanel}>
           <ClipLoader color="#3D3D3D" size={40} />

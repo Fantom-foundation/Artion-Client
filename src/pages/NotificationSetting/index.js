@@ -253,7 +253,7 @@ const NotificationSetting = () => {
 
   return (
     <div className={styles.container}>
-      <Header light />
+      <Header border />
       <div className={styles.inner}>
         <div className={styles.title}>Notification Settings</div>
 

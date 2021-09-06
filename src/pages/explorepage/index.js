@@ -276,7 +276,7 @@ const ExploreAllPage = () => {
 
   return (
     <>
-      <Header light />
+      <Header border />
       <div
         ref={conRef}
         className={styles.container}
