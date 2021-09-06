@@ -23,6 +23,7 @@ import { isAddress, shortenAddress, formatFollowers } from 'utils';
 import toast from 'utils/toast';
 import { useApi } from 'api';
 import useTokens from 'hooks/useTokens';
+import usePrevious from 'hooks/usePrevious';
 import HeaderActions from 'actions/header.actions';
 import ModalActions from 'actions/modal.actions';
 import CollectionsActions from 'actions/collections.actions';
@@ -113,6 +114,7 @@ const AccountDetails = () => {
   const [fetchInterval, setFetchInterval] = useState(null);
   const [likeCancelSource, setLikeCancelSource] = useState(null);
   const [prevNumPerRow, setPrevNumPerRow] = useState(null);
+  const prevAuthToken = usePrevious(authToken);
 
   const numPerRow = Math.floor(width / 240);
   const fetchCount = numPerRow <= 3 ? 18 : numPerRow === 4 ? 16 : numPerRow * 3;
@@ -287,22 +289,31 @@ const AccountDetails = () => {
 
   const updateItems = async _tokens => {
     return new Promise((resolve, reject) => {
-      const missingTokens = _tokens
-        .map((tk, index) =>
-          tk.items
-            ? {
-                index,
-                isLiked: tk.isLiked,
-                bundleID: tk._id,
-              }
-            : {
-                index,
-                isLiked: tk.isLiked,
-                contractAddress: tk.contractAddress,
-                tokenID: tk.tokenID,
-              }
-        )
-        .filter(tk => tk.isLiked === undefined);
+      if (!authToken) {
+        return resolve(
+          _tokens.map(tk => ({
+            ...tk,
+            isLiked: false,
+          }))
+        );
+      }
+      let missingTokens = _tokens.map((tk, index) =>
+        tk.items
+          ? {
+              index,
+              isLiked: tk.isLiked,
+              bundleID: tk._id,
+            }
+          : {
+              index,
+              isLiked: tk.isLiked,
+              contractAddress: tk.contractAddress,
+              tokenID: tk.tokenID,
+            }
+      );
+      if (prevAuthToken) {
+        missingTokens = missingTokens.filter(tk => tk.isLiked === undefined);
+      }
 
       if (missingTokens.length === 0) {
         reject();
@@ -311,28 +322,20 @@ const AccountDetails = () => {
 
       const cancelTokenSource = axios.CancelToken.source();
       setLikeCancelSource(cancelTokenSource);
-      if (authToken) {
-        getItemsLiked(missingTokens, authToken, cancelTokenSource.token)
-          .then(({ data, status }) => {
-            setLikeCancelSource(null);
-            if (status === 'success') {
-              const newTokens = [...tokens.current];
-              missingTokens.map((tk, idx) => {
-                newTokens[tk.index].isLiked = data[idx].isLiked;
-              });
-              resolve(newTokens);
-            }
-          })
-          .catch(() => {
-            reject();
-          });
-      } else {
-        const newTokens = [...tokens.current];
-        missingTokens.map(tk => {
-          newTokens[tk.index].isLiked = false;
+      getItemsLiked(missingTokens, authToken, cancelTokenSource.token)
+        .then(({ data, status }) => {
+          setLikeCancelSource(null);
+          if (status === 'success') {
+            const newTokens = [...tokens.current];
+            missingTokens.map((tk, idx) => {
+              newTokens[tk.index].isLiked = data[idx].isLiked;
+            });
+            resolve(newTokens);
+          }
+        })
+        .catch(() => {
+          reject();
         });
-        resolve(newTokens);
-      }
     });
   };
 

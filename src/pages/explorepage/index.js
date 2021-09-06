@@ -16,6 +16,7 @@ import CollectionsActions from 'actions/collections.actions';
 import TokensActions from 'actions/tokens.actions';
 import HeaderActions from 'actions/header.actions';
 import useWindowDimensions from 'hooks/useWindowDimensions';
+import usePrevious from 'hooks/usePrevious';
 
 import iconCollapse from 'assets/svgs/collapse.svg';
 
@@ -39,7 +40,7 @@ const ExploreAllPage = () => {
   const [prevNumPerRow, setPrevNumPerRow] = useState(null);
 
   const { authToken } = useSelector(state => state.ConnectWallet);
-  const { upFetching, downFetching, tokens, from, to } = useSelector(
+  const { upFetching, downFetching, tokens, count, from, to } = useSelector(
     state => state.Tokens
   );
   const {
@@ -52,6 +53,8 @@ const ExploreAllPage = () => {
     statusHasOffers,
     statusOnAuction,
   } = useSelector(state => state.Filter);
+
+  const prevAuthToken = usePrevious(authToken);
 
   const numPerRow = Math.floor(gridWidth / 240);
   const fetchCount = numPerRow <= 3 ? 18 : numPerRow === 4 ? 16 : numPerRow * 3;
@@ -91,8 +94,6 @@ const ExploreAllPage = () => {
     }
     if (isNaN(fetchCount)) return;
 
-    dispatch(TokensActions.startFetching(dir));
-
     try {
       const filterBy = [];
       if (statusBuyNow) filterBy.push('buyNow');
@@ -112,6 +113,12 @@ const ExploreAllPage = () => {
         start = from;
         _count = fetchCount * 2;
       }
+      if (start === count) {
+        return;
+      }
+
+      dispatch(TokensActions.startFetching(dir));
+
       const { data } = await fetchTokens(
         start,
         _count,
@@ -206,44 +213,48 @@ const ExploreAllPage = () => {
 
   const updateItems = async () => {
     try {
-      const missingTokens = tokens
-        .map((tk, index) =>
-          tk.items
-            ? {
-                index,
-                isLiked: tk.isLiked,
-                bundleID: tk._id,
-              }
-            : {
-                index,
-                isLiked: tk.isLiked,
-                contractAddress: tk.contractAddress,
-                tokenID: tk.tokenID,
-              }
-        )
-        .filter(tk => tk.isLiked === undefined);
+      if (!authToken) {
+        dispatch(
+          TokensActions.updateTokens(
+            tokens.map(tk => ({
+              ...tk,
+              isLiked: false,
+            }))
+          )
+        );
+        return;
+      }
+      let missingTokens = tokens.map((tk, index) =>
+        tk.items
+          ? {
+              index,
+              isLiked: tk.isLiked,
+              bundleID: tk._id,
+            }
+          : {
+              index,
+              isLiked: tk.isLiked,
+              contractAddress: tk.contractAddress,
+              tokenID: tk.tokenID,
+            }
+      );
+      if (prevAuthToken) {
+        missingTokens = missingTokens.filter(tk => tk.isLiked === undefined);
+      }
 
       if (missingTokens.length === 0) return;
 
       const cancelTokenSource = axios.CancelToken.source();
       setLikeCancelSource(cancelTokenSource);
-      if (authToken) {
-        const { data, status } = await getItemsLiked(
-          missingTokens,
-          authToken,
-          cancelTokenSource.token
-        );
-        if (status === 'success') {
-          const newTokens = [...tokens];
-          missingTokens.map((tk, idx) => {
-            newTokens[tk.index].isLiked = data[idx].isLiked;
-          });
-          dispatch(TokensActions.updateTokens(newTokens));
-        }
-      } else {
+      const { data, status } = await getItemsLiked(
+        missingTokens,
+        authToken,
+        cancelTokenSource.token
+      );
+      if (status === 'success') {
         const newTokens = [...tokens];
-        missingTokens.map(tk => {
-          newTokens[tk.index].isLiked = false;
+        missingTokens.map((tk, idx) => {
+          newTokens[tk.index].isLiked = data[idx].isLiked;
         });
         dispatch(TokensActions.updateTokens(newTokens));
       }
