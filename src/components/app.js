@@ -15,7 +15,6 @@ import { Client } from '@bandprotocol/bandchain.js';
 import ProtectedRoute from './ProtectedRoute';
 import AccountModal from './AccountModal';
 import WFTMModal from './WFTMModal';
-import Maintenance from './Maintenance';
 import GaslyHomePage from './Gasly/Home';
 import NotFound from './NotFound';
 import PaintBoard from './PaintBoard';
@@ -100,7 +99,6 @@ const App = () => {
             path="/settings/notification"
             component={NotificationSetting}
           />
-          <Route path="/maintenance" component={Maintenance} />
           {/* Gasly Pages Start */}
           <Route path="/gasly" component={GaslyHomePage} />
           {/* Gasly Pages End */}
