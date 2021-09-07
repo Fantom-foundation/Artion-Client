@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 import HeaderActions from 'actions/header.actions';
 import Header from 'components/header';
 
-import bg from 'assets/imgs/404.png';
+import man from 'assets/imgs/404_man.png';
 
 import styles from './styles.module.scss';
 
@@ -18,16 +18,18 @@ const NotFound = () => {
 
   return (
     <div className={styles.container}>
-      <div className={styles.background}>
-        <img src={bg} className={styles.bg} />
-      </div>
       <Header />
       <div className={styles.body}>
-        <div className={styles.title}>Error 404</div>
-        <div className={styles.subtitle}>Sorry! We can not find the page!</div>
-        <Link to="/" className={styles.button}>
-          Back To Home
-        </Link>
+        <div className={styles.main}>
+          <div className={styles.title}>404</div>
+          <div className={styles.subtitle}>
+            Oooooops! We couldn’t find the page you’re looking for :(
+          </div>
+          <Link to="/" className={styles.button}>
+            Back To Home
+          </Link>
+        </div>
+        <img src={man} alt="man" className={styles.man} />
       </div>
     </div>
   );
