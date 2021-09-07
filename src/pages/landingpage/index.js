@@ -1,16 +1,23 @@
 import React, { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
+import { useHistory } from 'react-router-dom';
 import { Link } from 'react-router-dom';
+import cx from 'classnames';
+import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 
+import { Categories } from 'constants/filter.constants';
 import HeaderActions from 'actions/header.actions';
+import FilterActions from 'actions/filter.actions';
 import Header from 'components/header';
 import toast from 'utils/toast';
 
 import fantomLogo from 'assets/svgs/fantom_logo_white.svg';
+import logo from 'assets/svgs/logo_white.svg';
 import card1 from 'assets/svgs/card1.svg';
 import card2 from 'assets/svgs/card2.svg';
 import card3 from 'assets/svgs/card3.svg';
 import card4 from 'assets/svgs/card4.svg';
+import search from 'assets/svgs/search.svg';
 
 import styles from './styles.module.scss';
 
@@ -43,6 +50,7 @@ const cards = [
 
 const LandingPage = () => {
   const dispatch = useDispatch();
+  const history = useHistory();
 
   useEffect(() => {
     dispatch(HeaderActions.toggleSearchbar(false));
@@ -59,6 +67,11 @@ const LandingPage = () => {
     }
   };
 
+  const handleViewCategory = id => {
+    dispatch(FilterActions.updateCategoryFilter(id === 'all' ? null : id));
+    history.push('/explore');
+  };
+
   const renderAboutCard = (key, icon, title, desc) => (
     <div className={styles.aboutCard} key={key}>
       <div className={styles.cardIconWrapper}>
@@ -66,6 +79,24 @@ const LandingPage = () => {
       </div>
       <div className={styles.cardTitle}>{title}</div>
       <div className={styles.cardDesc}>{desc}</div>
+    </div>
+  );
+
+  const renderCategoryCard = (key, icon, label, extra = false) => (
+    <div
+      className={styles.categoryCard}
+      key={key}
+      onClick={() => handleViewCategory(key)}
+    >
+      <div className={styles.cardIconWrapper2}>
+        <img src={icon} />
+      </div>
+      <div className={cx(styles.cardLabelWrapper, extra && styles.extraCard)}>
+        <div className={styles.cardLabel}>{label}</div>
+        <div className={styles.browseBtn}>
+          <ChevronRightIcon className={styles.browseBtnIcon} />
+        </div>
+      </div>
     </div>
   );
 
@@ -80,7 +111,7 @@ const LandingPage = () => {
               Create, Buy, Sell and Discover rare digital assets
             </div>
             <Link
-              to="/exploreall"
+              to="/explore"
               className={styles.exploreButton}
               onClick={checkWallet}
             >
@@ -106,9 +137,17 @@ const LandingPage = () => {
               )}
             </div>
             <div className={styles.aboutTitle}>Browse by category</div>
+            <div className={styles.categories}>
+              {Categories.map(cat =>
+                renderCategoryCard(cat.id, cat.icon, cat.label)
+              )}
+              {renderCategoryCard('all', search, 'Explore All NFTs', true)}
+            </div>
           </div>
         </div>
-        <div className={styles.footer}>Footer</div>
+        <div className={styles.footer}>
+          <img src={logo} alt="logo" className={styles.logo} />
+        </div>
       </div>
     </div>
   );
