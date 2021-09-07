@@ -333,7 +333,7 @@ const CollectionCreate = ({ isRegister }) => {
             'Your collection registration application is successfully submitted for review.\nOnce approved, you will get an email notification.'
           );
 
-          history.push('/exploreall');
+          history.push('/explore');
         } catch (e) {
           const { data } = e.response;
           toast('error', data.data);
@@ -440,7 +440,7 @@ const CollectionCreate = ({ isRegister }) => {
 
                 setCreating(false);
 
-                history.push('/exploreall');
+                history.push('/explore');
               } catch (e) {
                 setCreating(false);
               }

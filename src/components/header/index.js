@@ -487,7 +487,7 @@ const Header = ({ border }) => {
         {isSearchbarShown && renderSearchBox()}
         <div className={styles.secondmenu}>
           <NavLink
-            to="/exploreall"
+            to="/explore"
             className={cx(styles.menuLink, styles.link)}
             activeClassName={styles.active}
             onClick={checkWallet}
@@ -507,7 +507,7 @@ const Header = ({ border }) => {
       <div className={styles.menu}>
         {isSearchbarShown && renderSearchBox()}
         <NavLink
-          to="/exploreall"
+          to="/explore"
           className={cx(styles.menuLink, styles.link)}
           activeClassName={styles.active}
           onClick={checkWallet}

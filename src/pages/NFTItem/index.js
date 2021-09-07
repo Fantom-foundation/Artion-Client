@@ -763,7 +763,7 @@ const NFTItem = () => {
     const quantities = _quantities.map(val => parseInt(val.toString()));
     if (bundleID.toLowerCase() === _bundleID.toLowerCase()) {
       if (nfts.length === 0) {
-        history.push('/exploreall');
+        history.push('/explore');
       }
 
       const price = parseFloat(_newPrice.toString()) / 10 ** 18;

@@ -79,7 +79,7 @@ const App = () => {
       <Router>
         <Switch>
           <Route exact path="/" component={LandingPage} />
-          <ProtectedRoute exact path="/exploreall" component={ExplorePage} />
+          <ProtectedRoute exact path="/explore" component={ExplorePage} />
           <ProtectedRoute exact path="/create" component={PaintBoard} />
           <ProtectedRoute path="/explore/:addr/:id" component={NFTItem} />
           <ProtectedRoute path="/bundle/:bundleID" component={NFTItem} />
