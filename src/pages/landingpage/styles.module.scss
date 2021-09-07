@@ -88,9 +88,9 @@
     position: absolute;
     top: 0;
     left: 0;
-    bottom: 0;
-    right: 0;
-    object-fit: contain;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
 }
 
@@ -148,6 +148,7 @@
   flex: 1;
   margin-right: 22px;
   padding: 33px 20px;
+  box-sizing: border-box;
   border-radius: 27px;
   background-color: #FFF;
   box-shadow: 0px 18.6388px 74.5551px #F2F1FA;
@@ -268,7 +269,7 @@
 
 .cardLabel {
   font-weight: 700;
-  font-size: 24px;
+  font-size: 20px;
   letter-spacing: -0.31px;
   color: #121223;
 }
@@ -303,18 +304,91 @@
   height: 35px;
 }
 
-@media only screen and (max-width: 991px) {
+@media only screen and (max-width: 1024px) {
   .body {
     padding-top: 70px;
-  }
-
-  .buttonsContainer {
-    flex-direction: column;
   }
 
   .exploreButton {
     margin-right: 0;
     margin-bottom: 30px;
+  }
+
+  .cardTitle {
+    font-size: 18px;
+  }
+
+  .cardDesc {
+    margin-top: 10px;
+    font-size: 12px;
+  }
+
+  .cardIconWrapper {
+    width: 94px;
+    height: 94px;
+
+    img {
+      width: 70px;
+      height: 70px;
+    }
+  }
+
+  .cardIconWrapper2 {
+    width: 108px;
+    height: 108px;
+
+    img {
+      width: 56px;
+      height: 56px;
+    }
+  }
+
+  .cardLabelWrapper {
+    margin-top: 56px;
+    height: 54px;
+  }
+
+  .cardLabel {
+    font-size: 18px;
+  }
+
+  .browseBtn {
+    width: 40px;
+    height: 40px;
+  }
+
+  .footer {
+    height: 128px;
+    padding: 0 32px;
+  }
+}
+
+@media only screen and (max-width: 900px) {
+  .aboutCards {
+    flex-wrap: wrap;
+    padding-bottom: 58px;
+  }
+
+  .aboutCard {
+    flex: 0 0 calc(50% - 11px);
+    margin-bottom: 22px;
+
+    &:nth-child(2n) {
+      margin-right: 0;
+    }
+  }
+
+  .categoryCard {
+    flex: 0 0 calc(50% - 11px);
+    margin-right: 22px;
+
+    &:nth-child(3n) {
+      margin-right: 22px;
+    }
+
+    &:nth-child(2n) {
+      margin-right: 0;
+    }
   }
 }
 
@@ -322,27 +396,74 @@
   .container {
     padding-top: 155px;
   }
+
+  .main {
+    flex-direction: column-reverse;
+    margin-bottom: 40px;
+  }
+
+  .card {
+    width: 100%;
+    max-width: 400px;
+  }
+
+  .mainLeft {
+    margin-top: 32px;
+    margin-right: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .title {
+    text-align: center;
+  }
 }
 
 @media only screen and (max-width: 600px) {
   .title {
-    font-size: 38px;
-    line-height: 46px;
+    font-size: 48px;
+    line-height: 58px;
   }
 
   .subtitle {
-    font-size: 20px;
-    line-height: 32px;
+    font-size: 14px;
+    line-height: 17px;
+    text-align: center;
   }
 
   .body {
-    width: calc(100% - 80px);
     padding-top: 30px;
   }
 
-  .buttonsContainer,
-  .exploreButton,
-  .createButton {
-    width: 100%;
+  .exploreButton {
+    width: 168px;
+    height: 48px;
+    font-size: 16px;
+  }
+
+  .aboutTitle {
+    margin-top: 72px;
+    font-size: 48px;
+    line-height: 58px;
+  }
+
+  .aboutCards {
+    margin-top: 52px;
+    flex-direction: column;
+  }
+
+  .aboutCard {
+    flex: 0 0 100%;
+    margin-right: 0;
+  }
+
+  .categoryCard {
+    flex-basis: 100%;
+    margin-right: 0 !important;
+  }
+
+  .footer {
+    margin-top: 0;
   }
 }
