@@ -20,80 +20,67 @@ const selfSettings = [
   {
     value: 'sBundleBuy',
     title: 'Bundle Purchased',
-    description:
-      'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.',
+    description: 'You have purchased a bundle.',
   },
   {
     value: 'sBundleSell',
     title: 'Bundle Sold',
-    description:
-      'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.',
+    description: 'Your bundle is sold.',
   },
   {
     value: 'sBundleOffer',
     title: 'Get a new offer for your bundle',
-    description:
-      'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.',
+    description: 'You get an offer for your bundle.',
   },
   {
     value: 'sBundleOfferCancel',
     title: 'An offer to you bundle called off',
-    description:
-      'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.',
+    description: 'An offer to your bundle is canceled.',
   },
   {
     value: 'sNftAuctionPrice',
     title: "Your bid's Auction Price update",
-    description:
-      'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.',
+    description: 'The bid price to your auction is updated.',
   },
   {
     value: 'sNftBidToAuction',
     title: 'A bid to your NFT auction',
-    description:
-      'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.',
+    description: 'You get a bid to your auction.',
   },
   {
     value: 'sNftBidToAuctionCancel',
     title: 'A bid to your NFT called off',
-    description:
-      'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.',
+    description: 'A bid to your auction is canceled.',
   },
   {
     value: 'sAuctionWin',
     title: 'You won the auction',
-    description:
-      'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.',
+    description: 'You purchased an nft in auction.',
   },
   {
     value: 'sAuctionOfBidCancel',
     title: "Your bid's auction called off",
-    description:
-      'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.',
+    description: 'An auction you made a bid is canceled.',
   },
   {
     value: 'sNftSell',
     title: 'NFT Sold',
-    description:
-      'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.',
+    description: 'Your nft item is sold.',
   },
   {
     value: 'sNftBuy',
     title: 'NFT Purchased',
-    description:
-      'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.',
+    description: 'You purchased a new nft item.',
   },
   {
     value: 'sNftOffer',
     title: 'Get a new offer for your NFT',
-    description:
-      'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.',
+    description: 'You get an offer to your nft item.',
   },
   {
     value: 'sNftOfferCancel',
     title: 'An offer to your NFT called off',
-    description:
-      'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.',
+    description: 'An offer to your nft item is canceled.',
   },
 ];
 
@@ -101,44 +88,37 @@ const followerSettings = [
   {
     value: 'fBundleCreation',
     title: 'New bundle creation by follower',
-    description:
-      'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.',
+    description: 'Created a new bundle.',
   },
   {
     value: 'fBundleList',
     title: 'Bundle Listing by follower',
-    description:
-      'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.',
+    description: 'Listed a bundle for sale.',
   },
   {
     value: 'fBundlePrice',
     title: 'Bundle Price Update by follower',
-    description:
-      'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.',
+    description: 'Updated the bundle sale price.',
   },
   {
     value: 'fNftAuctionPrice',
     title: 'NFT Auction Price update by follower',
-    description:
-      'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.',
+    description: 'Updated auction price.',
   },
   {
     value: 'fNftList',
     title: 'NFT Listing by follower',
-    description:
-      'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.',
+    description: 'Listed an nft item for sale.',
   },
   {
     value: 'fNftAuction',
     title: 'New NFT Auction',
-    description:
-      'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.',
+    description: 'Started a new auction.',
   },
   {
     value: 'fNftPrice',
     title: 'NFT Price Update by follower',
-    description:
-      'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.',
+    description: 'Updated nft item price on sale.',
   },
 ];
 

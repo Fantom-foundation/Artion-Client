@@ -357,7 +357,7 @@ const CollectionCreate = ({ isRegister }) => {
           : await getArtFactoryContract(),
         name,
         symbol,
-        ethers.utils.parseEther('20'),
+        ethers.utils.parseEther('100'),
         account
       );
       const res = await tx.wait();
@@ -892,7 +892,7 @@ const CollectionCreate = ({ isRegister }) => {
         {!isRegister && (
           <div className={styles.fee}>
             <InfoIcon />
-            &nbsp;10 FTMs are charged to create a new collection.
+            &nbsp;100 FTMs are charged to create a new collection.
           </div>
         )}
       </div>
