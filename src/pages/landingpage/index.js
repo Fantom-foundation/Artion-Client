@@ -11,7 +11,7 @@ import FilterActions from 'actions/filter.actions';
 import Header from 'components/header';
 import toast from 'utils/toast';
 
-import fantomLogo from 'assets/svgs/fantom_logo_white.svg';
+import example from 'assets/imgs/example.png';
 import logo from 'assets/svgs/logo_white.svg';
 import card1 from 'assets/svgs/card1.svg';
 import card2 from 'assets/svgs/card2.svg';
@@ -120,11 +120,13 @@ const LandingPage = () => {
           </div>
           <div className={styles.card}>
             <div className={styles.cardMedia}>
-              <img src={fantomLogo} />
+              <img src={example} />
             </div>
             <div className={styles.cardInfo}>
-              <div className={styles.cardCategory}>Ancestral Umans</div>
-              <div className={styles.cardName}>Shamanka - The Healer</div>
+              <div className={styles.cardCategory}>ZooCoin Community NFT</div>
+              <div className={styles.cardName}>
+                {'Fountain "Farroupilha" Park'}
+              </div>
             </div>
           </div>
         </div>

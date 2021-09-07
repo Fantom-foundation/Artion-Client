@@ -88,9 +88,9 @@
     position: absolute;
     top: 0;
     left: 0;
-    bottom: 0;
-    right: 0;
-    object-fit: contain;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
 }
 
@@ -396,13 +396,34 @@
   .container {
     padding-top: 155px;
   }
+
+  .main {
+    flex-direction: column-reverse;
+    margin-bottom: 40px;
+  }
+
+  .card {
+    width: 100%;
+    max-width: 400px;
+  }
+
+  .mainLeft {
+    margin-top: 32px;
+    margin-right: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .title {
+    text-align: center;
+  }
 }
 
 @media only screen and (max-width: 600px) {
   .title {
     font-size: 48px;
     line-height: 58px;
-    text-align: center;
   }
 
   .subtitle {
@@ -413,19 +434,6 @@
 
   .body {
     padding-top: 30px;
-  }
-
-  .main {
-    flex-direction: column-reverse;
-    margin-bottom: 40px;
-  }
-
-  .mainLeft {
-    margin-top: 32px;
-    margin-right: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
   }
 
   .exploreButton {
