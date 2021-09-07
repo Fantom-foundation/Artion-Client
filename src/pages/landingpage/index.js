@@ -1,7 +1,10 @@
 import React, { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
+import cx from 'classnames';
+import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 
+import { Categories } from 'constants/filter.constants';
 import HeaderActions from 'actions/header.actions';
 import Header from 'components/header';
 import toast from 'utils/toast';
@@ -69,6 +72,20 @@ const LandingPage = () => {
     </div>
   );
 
+  const renderCategoryCard = (key, icon, label, extra = false) => (
+    <div className={styles.categoryCard} key={key}>
+      <div className={styles.cardIconWrapper2}>
+        <img src={icon} />
+      </div>
+      <div className={cx(styles.cardLabelWrapper, extra && styles.extraCard)}>
+        <div className={styles.cardLabel}>{label}</div>
+        <div className={styles.browseBtn}>
+          <ChevronRightIcon className={styles.browseBtnIcon} />
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <div className={styles.container}>
       <Header />
@@ -106,6 +123,17 @@ const LandingPage = () => {
               )}
             </div>
             <div className={styles.aboutTitle}>Browse by category</div>
+            <div className={styles.categories}>
+              {Categories.map(cat =>
+                renderCategoryCard(cat.id, cat.icon, cat.label)
+              )}
+              {renderCategoryCard(
+                'all',
+                Categories[0].icon,
+                'Explore All NFTs',
+                true
+              )}
+            </div>
           </div>
         </div>
         <div className={styles.footer}>Footer</div>

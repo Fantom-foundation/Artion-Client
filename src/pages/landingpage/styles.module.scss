@@ -195,6 +195,99 @@
   text-align: center;
 }
 
+.categories {
+  margin-top: 65px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.categoryCard {
+  flex: 0 0 calc(33.33% - 26.66px);
+  margin-right: 40px;
+  margin-bottom: 32px;
+  padding: 37px 24px 24px;
+  box-sizing: border-box;
+  border-radius: 15px;
+  background: #FFFFFF;
+  box-shadow: 0px 22.9412px 91.7647px #F2F1FA;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  &:nth-child(3n),
+  &:last-child {
+    margin-right: 0;
+  }
+}
+
+.cardIconWrapper2 {
+  width: 129px;
+  height: 129px;
+  border-radius: 50%;
+  box-shadow: 0px 22.9412px 91.7647px #F2F1FA;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  img {
+    width: 66px;
+    height: 66px;
+  }
+}
+
+.cardLabelWrapper {
+  margin-top: 66px;
+  width: 100%;
+  height: 64px;
+  border-radius: 33px;
+  background: #F6F7F9;
+  padding: 18px 10px 18px 26px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  &.extraCard {
+    background-color: #1969FF;
+
+    .cardLabel {
+      color: #FFF;
+    }
+
+    .browseBtn {
+      background-color: #FFF;
+    }
+
+    .browseBtnIcon {
+      color: #1969FF;
+    }
+  }
+}
+
+.cardLabel {
+  font-weight: 700;
+  font-size: 24px;
+  letter-spacing: -0.31px;
+  color: #121223;
+}
+
+.browseBtn {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background-color: #1969FF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.browseBtnIcon {
+  color: #FFF;
+}
+
 .footer {
 }
 
