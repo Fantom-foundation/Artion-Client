@@ -11,6 +11,7 @@
   justify-content: space-between;
   z-index: 100;
   box-sizing: border-box;
+  background-color: #090C10;
 }
 
 .left {
@@ -93,7 +94,7 @@
 .connect {
   box-sizing: border-box;
   padding: 8px 12px 11px 12px;
-  border-radius: 50px;
+  border-radius: 10px;
   border: 1px solid #D9E1EE;
 
   &:hover {
