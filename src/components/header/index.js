@@ -22,7 +22,6 @@ import BanItemModal from 'components/BanItemModal';
 import BoostCollectionModal from 'components/BoostCollectionModal';
 import ConnectWalletModal from 'components/ConnectWalletModal';
 import Identicon from 'components/Identicon';
-import toast from 'utils/toast';
 
 import logoSmallBlue from 'assets/svgs/logo_small_blue.svg';
 import iconUser from 'assets/svgs/user.svg';
@@ -167,17 +166,6 @@ const Header = ({ border }) => {
       console.log(err);
     } finally {
       setCancelSource(null);
-    }
-  };
-
-  const checkWallet = e => {
-    if (!window.ethereum) {
-      toast(
-        'error',
-        'No Wallet Found!',
-        'Please install Metamask or Coinbase Wallet on your browser to browse Artion.'
-      );
-      e.preventDefault();
     }
   };
 
@@ -490,7 +478,6 @@ const Header = ({ border }) => {
             to="/explore"
             className={cx(styles.menuLink, styles.link)}
             activeClassName={styles.active}
-            onClick={checkWallet}
           >
             Explore
           </NavLink>
@@ -498,7 +485,6 @@ const Header = ({ border }) => {
             to="/create"
             className={cx(styles.menuLink, styles.link)}
             activeClassName={styles.active}
-            onClick={checkWallet}
           >
             Create
           </NavLink>
@@ -510,7 +496,6 @@ const Header = ({ border }) => {
           to="/explore"
           className={cx(styles.menuLink, styles.link)}
           activeClassName={styles.active}
-          onClick={checkWallet}
         >
           Explore
         </NavLink>
@@ -518,7 +503,6 @@ const Header = ({ border }) => {
           to="/create"
           className={cx(styles.menuLink, styles.link)}
           activeClassName={styles.active}
-          onClick={checkWallet}
         >
           Create
         </NavLink>
