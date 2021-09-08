@@ -9,7 +9,6 @@ import { Categories } from 'constants/filter.constants';
 import HeaderActions from 'actions/header.actions';
 import FilterActions from 'actions/filter.actions';
 import Header from 'components/header';
-import toast from 'utils/toast';
 
 import example from 'assets/imgs/example.png';
 import logo from 'assets/svgs/logo_white.svg';
@@ -56,17 +55,6 @@ const LandingPage = () => {
     dispatch(HeaderActions.toggleSearchbar(false));
   }, []);
 
-  const checkWallet = e => {
-    if (!window.ethereum) {
-      toast(
-        'error',
-        'No Wallet Found!',
-        'Please install Metamask or Coinbase Wallet on your browser to browse Artion.'
-      );
-      e.preventDefault();
-    }
-  };
-
   const handleViewCategory = id => {
     dispatch(FilterActions.updateCategoryFilter(id === 'all' ? null : id));
     history.push('/explore');
@@ -110,11 +98,7 @@ const LandingPage = () => {
             <div className={styles.subtitle}>
               Create, Buy, Sell and Discover rare digital assets
             </div>
-            <Link
-              to="/explore"
-              className={styles.exploreButton}
-              onClick={checkWallet}
-            >
+            <Link to="/explore" className={styles.exploreButton}>
               Explore
             </Link>
           </div>
