@@ -214,14 +214,16 @@ const ExploreAllPage = () => {
   const updateItems = async () => {
     try {
       if (!authToken) {
-        dispatch(
-          TokensActions.updateTokens(
-            tokens.map(tk => ({
-              ...tk,
-              isLiked: false,
-            }))
-          )
-        );
+        if (prevAuthToken) {
+          dispatch(
+            TokensActions.updateTokens(
+              tokens.map(tk => ({
+                ...tk,
+                isLiked: false,
+              }))
+            )
+          );
+        }
         return;
       }
       let missingTokens = tokens.map((tk, index) =>
