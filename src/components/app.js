@@ -78,11 +78,11 @@ const App = () => {
       <Router>
         <Switch>
           <Route exact path="/" component={LandingPage} />
-          <ProtectedRoute exact path="/explore" component={ExplorePage} />
+          <Route exact path="/explore" component={ExplorePage} />
+          <Route path="/explore/:addr/:id" component={NFTItem} />
           <ProtectedRoute exact path="/create" component={PaintBoard} />
-          <ProtectedRoute path="/explore/:addr/:id" component={NFTItem} />
-          <ProtectedRoute path="/bundle/:bundleID" component={NFTItem} />
-          <ProtectedRoute path="/account/:uid" component={AccountDetails} />
+          <Route path="/bundle/:bundleID" component={NFTItem} />
+          <Route path="/account/:uid" component={AccountDetails} />
           <ProtectedRoute
             path="/collection/create"
             component={() => <CollectionCreate isRegister={false} />}
