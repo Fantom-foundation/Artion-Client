@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
-import { useHistory } from 'react-router-dom';
+import { NavLink, useHistory } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import cx from 'classnames';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
@@ -25,25 +25,27 @@ const cards = [
     icon: card1,
     title: 'Set up your wallet',
     description:
-      'Once you’ve set up your wallet of choice, connect it to OpenSea by clicking the wallet icon in the top right corner. Learn about the wallets we support.',
+      'Once you’ve set up your wallet of choice, connect it to Artion by clicking the wallet icon in the top right corner. Learn about the wallets we support.',
+    path: '/',
   },
   {
     icon: card2,
     title: 'Create a collection',
     description:
-      'Once you’ve set up your wallet of choice, connect it to OpenSea by clicking the wallet icon in the top right corner. Learn about the wallets we support.',
+      'Once you’ve connected your wallet with Artion you can create a new collection.',
+    path: '/collection/create',
   },
   {
     icon: card3,
     title: 'Add your NFTs',
-    description:
-      'Once you’ve set up your wallet of choice, connect it to OpenSea by clicking the wallet icon in the top right corner. Learn about the wallets we support.',
+    description: 'Or create new NFTs',
+    path: '/create',
   },
   {
     icon: card4,
     title: 'List them for sale',
-    description:
-      'Once you’ve set up your wallet of choice, connect it to OpenSea by clicking the wallet icon in the top right corner. Learn about the wallets we support.',
+    description: 'Or list your NFTs for sale',
+    path: '/explore',
   },
 ];
 
@@ -60,13 +62,15 @@ const LandingPage = () => {
     history.push('/explore');
   };
 
-  const renderAboutCard = (key, icon, title, desc) => (
+  const renderAboutCard = (key, icon, title, desc, path) => (
     <div className={styles.aboutCard} key={key}>
-      <div className={styles.cardIconWrapper}>
-        <img src={icon} />
-      </div>
-      <div className={styles.cardTitle}>{title}</div>
-      <div className={styles.cardDesc}>{desc}</div>
+      <NavLink to={path} className={styles.aboutCardLink}>
+        <div className={styles.cardIconWrapper}>
+          <img src={icon} />
+        </div>
+        <div className={styles.cardTitle}>{title}</div>
+        <div className={styles.cardDesc}>{desc}</div>
+      </NavLink>
     </div>
   );
 
@@ -119,7 +123,13 @@ const LandingPage = () => {
             <div className={styles.aboutTitle}>Create and Sell your NFTs</div>
             <div className={styles.aboutCards}>
               {cards.map((card, key) =>
-                renderAboutCard(key, card.icon, card.title, card.description)
+                renderAboutCard(
+                  key,
+                  card.icon,
+                  card.title,
+                  card.description,
+                  card.path
+                )
               )}
             </div>
             <div className={styles.aboutTitle}>Browse by category</div>

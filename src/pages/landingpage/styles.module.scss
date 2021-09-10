@@ -161,6 +161,13 @@
   }
 }
 
+.aboutCardLink {
+  text-decoration: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 .cardIconWrapper {
   width: 112px;
   height: 112px;
