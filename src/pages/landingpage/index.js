@@ -38,13 +38,15 @@ const cards = [
   {
     icon: card3,
     title: 'Add your NFTs',
-    description: 'Or create new NFTs',
+    description:
+      'Once you’ve connected your wallet with Artion you can create brand new NFTs',
     path: '/create',
   },
   {
     icon: card4,
     title: 'List them for sale',
-    description: 'Or list your NFTs for sale',
+    description:
+      'Once you’ve connected your wallet with Artion you can list NFTs for sale or expand your own collection',
     path: '/explore',
   },
 ];
@@ -137,7 +139,7 @@ const LandingPage = () => {
               {Categories.map(cat =>
                 renderCategoryCard(cat.id, cat.icon, cat.label)
               )}
-              {renderCategoryCard('all', search, 'Explore All NFTs', true)}
+              {renderCategoryCard('all', search, 'Explore All NFTs', false)}
             </div>
           </div>
         </div>
