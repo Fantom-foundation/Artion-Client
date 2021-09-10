@@ -16,7 +16,7 @@ import card1 from 'assets/svgs/card1.svg';
 import card2 from 'assets/svgs/card2.svg';
 import card3 from 'assets/svgs/card3.svg';
 import card4 from 'assets/svgs/card4.svg';
-import search from 'assets/svgs/search.svg';
+import search from 'assets/svgs/magnifier.svg';
 
 import styles from './styles.module.scss';
 
@@ -25,7 +25,7 @@ const cards = [
     icon: card1,
     title: 'Easy Connect',
     description:
-      'Using Metamask or CoinBase Wallet by clicking "Connect Wallet" on the top right.',
+      'Using Metamask or CoinBase Wallet. Just click "Connect Wallet" on the top right to start.',
     path: '/',
   },
   {
@@ -141,7 +141,7 @@ const LandingPage = () => {
               {Categories.map(cat =>
                 renderCategoryCard(cat.id, cat.icon, cat.label)
               )}
-              {renderCategoryCard('all', search, 'Explore All NFTs', false)}
+              {renderCategoryCard('all', search, 'Explore All NFTs', true)}
             </div>
           </div>
         </div>
