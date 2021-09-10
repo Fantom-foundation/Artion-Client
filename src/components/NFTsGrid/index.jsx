@@ -50,7 +50,7 @@ const NFTsGrid = ({
             <Card loading />
           </div>
         ))}
-      {!items.length && category !== null && (
+      {!items.length && category !== null && category !== undefined && (
         <>
           <div style={{ display: 'flex' }}>
             No results found for the {Categories[category].label} category.
