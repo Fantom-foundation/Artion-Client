@@ -23,30 +23,30 @@ import styles from './styles.module.scss';
 const cards = [
   {
     icon: card1,
-    title: 'Set up your wallet',
+    title: 'Easy Connect',
     description:
-      'Once you’ve set up your wallet of choice, connect it to Artion by clicking the wallet icon in the top right corner. Learn about the wallets we support.',
+      'Using Metamask or CoinBase Wallet by clicking "Connect Wallet" on the top right.',
     path: '/',
   },
   {
     icon: card2,
-    title: 'Create a collection',
+    title: 'Super Fast',
     description:
-      'Once you’ve connected your wallet with Artion you can create a new collection.',
-    path: '/collection/create',
+      'Since Artion runs on the Fantom Opera Network, transactions are usually confirmed within 1-2 seconds.',
+    path: '/',
   },
   {
     icon: card3,
-    title: 'Add your NFTs',
+    title: 'Low Transaction Fees',
     description:
-      'Once you’ve connected your wallet with Artion you can create brand new NFTs',
-    path: '/create',
+      'Transactions are usually just a few cents, allowing users to create and trade many NFTs without prohibitively high networkfees.',
+    path: '/',
   },
   {
     icon: card4,
-    title: 'List them for sale',
+    title: 'Zero Fees',
     description:
-      'Once you’ve connected your wallet with Artion you can list NFTs for sale or expand your own collection',
+      'Trade NFTs via auction or direct offer without any fees taken by Artion.',
     path: '/explore',
   },
 ];
@@ -100,9 +100,11 @@ const LandingPage = () => {
       <div className={styles.body}>
         <div className={styles.main}>
           <div className={styles.mainLeft}>
-            <div className={styles.title}>The largest NFT marketplace</div>
+            <div
+              className={styles.title}
+            >{`Fantom's largest NFT Marketplace`}</div>
             <div className={styles.subtitle}>
-              Create, Buy, Sell and Discover rare digital assets
+              Trade without platform fees on Artion
             </div>
             <Link to="/explore" className={styles.exploreButton}>
               Explore
@@ -122,7 +124,7 @@ const LandingPage = () => {
         </div>
         <div className={styles.about}>
           <div className={styles.aboutInner}>
-            <div className={styles.aboutTitle}>Create and Sell your NFTs</div>
+            <div className={styles.aboutTitle}>Why Artion</div>
             <div className={styles.aboutCards}>
               {cards.map((card, key) =>
                 renderAboutCard(
