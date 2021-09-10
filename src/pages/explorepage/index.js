@@ -313,6 +313,7 @@ const ExploreAllPage = () => {
               uploading={upFetching}
               loading={downFetching}
               numPerRow={numPerRow}
+              category={category}
             />
           </div>
         </div>

@@ -4,6 +4,9 @@ import cx from 'classnames';
 import Card from '../NFTCard';
 
 import styles from './styles.module.scss';
+import { Categories } from '../../constants/filter.constants';
+import { useDispatch } from 'react-redux';
+import FilterActions from '../../actions/filter.actions';
 
 const NFTsGrid = ({
   items,
@@ -11,9 +14,11 @@ const NFTsGrid = ({
   uploading,
   loading,
   showCreate,
+  category,
   onCreate = () => {},
   onLike = () => {},
 }) => {
+  const dispatch = useDispatch();
   const n = numPerRow || 6;
   const className = cx(styles.nft, styles[`num${n}`]);
   return (
@@ -45,6 +50,19 @@ const NFTsGrid = ({
             <Card loading />
           </div>
         ))}
+      {!items.length && category !== null && (
+        <>
+          <div style={{ display: 'flex' }}>
+            No results found for the {Categories[category].label} category.
+          </div>
+          <div
+            onClick={() => dispatch(FilterActions.updateCategoryFilter(null))}
+            className={styles.link}
+          >
+            Select all categories
+          </div>
+        </>
+      )}
     </>
   );
 };
