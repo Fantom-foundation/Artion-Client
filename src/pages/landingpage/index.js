@@ -12,6 +12,7 @@ import Header from 'components/header';
 
 import example from 'assets/imgs/example.png';
 import logo from 'assets/svgs/logo_white.svg';
+import fantomLogo from 'assets/svgs/fantom_logo_white.svg';
 import card1 from 'assets/svgs/card1.svg';
 import card2 from 'assets/svgs/card2.svg';
 import card3 from 'assets/svgs/card3.svg';
@@ -147,6 +148,7 @@ const LandingPage = () => {
         </div>
         <div className={styles.footer}>
           <img src={logo} alt="logo" className={styles.logo} />
+          <img src={fantomLogo} alt="fantom-logo" className={styles.logo} />
         </div>
       </div>
     </div>
