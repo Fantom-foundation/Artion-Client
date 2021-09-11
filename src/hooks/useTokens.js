@@ -56,7 +56,7 @@ const Tokens = {
       icon: iconFTM,
     },
     {
-      address: '0x077fab8f7f79178f6718bdfdffd5c3b8d787aed5',
+      address: '0xf1277d1ed8ad466beddf92ef448a132661956621',
       name: 'Wrapped Fantom',
       symbol: 'WFTM',
       decimals: 18,

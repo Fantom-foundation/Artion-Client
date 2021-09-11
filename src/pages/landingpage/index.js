@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
-import { useHistory } from 'react-router-dom';
+import { NavLink, useHistory } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import cx from 'classnames';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
@@ -12,38 +12,43 @@ import Header from 'components/header';
 
 import example from 'assets/imgs/example.png';
 import logo from 'assets/svgs/logo_white.svg';
+import fantomLogo from 'assets/svgs/fantom_logo_white.svg';
 import card1 from 'assets/svgs/card1.svg';
 import card2 from 'assets/svgs/card2.svg';
 import card3 from 'assets/svgs/card3.svg';
 import card4 from 'assets/svgs/card4.svg';
-import search from 'assets/svgs/search.svg';
+import search from 'assets/svgs/magnifier.svg';
 
 import styles from './styles.module.scss';
 
 const cards = [
   {
     icon: card1,
-    title: 'Set up your wallet',
+    title: 'Easy Connect',
     description:
-      'Once you’ve set up your wallet of choice, connect it to OpenSea by clicking the wallet icon in the top right corner. Learn about the wallets we support.',
+      'Using Metamask or CoinBase Wallet. Just click "Connect Wallet" on the top right to start.',
+    path: '/',
   },
   {
     icon: card2,
-    title: 'Create a collection',
+    title: 'Super Fast',
     description:
-      'Once you’ve set up your wallet of choice, connect it to OpenSea by clicking the wallet icon in the top right corner. Learn about the wallets we support.',
+      'Since Artion runs on the Fantom Opera Network, transactions are usually confirmed within 1-2 seconds.',
+    path: '/',
   },
   {
     icon: card3,
-    title: 'Add your NFTs',
+    title: 'Low Transaction Fees',
     description:
-      'Once you’ve set up your wallet of choice, connect it to OpenSea by clicking the wallet icon in the top right corner. Learn about the wallets we support.',
+      'Transactions are usually just a few cents, allowing users to create and trade many NFTs without prohibitively high networkfees.',
+    path: '/',
   },
   {
     icon: card4,
-    title: 'List them for sale',
+    title: 'Zero Fees',
     description:
-      'Once you’ve set up your wallet of choice, connect it to OpenSea by clicking the wallet icon in the top right corner. Learn about the wallets we support.',
+      'Trade NFTs via auction or direct offer without any fees taken by Artion.',
+    path: '/explore',
   },
 ];
 
@@ -60,13 +65,15 @@ const LandingPage = () => {
     history.push('/explore');
   };
 
-  const renderAboutCard = (key, icon, title, desc) => (
+  const renderAboutCard = (key, icon, title, desc, path) => (
     <div className={styles.aboutCard} key={key}>
-      <div className={styles.cardIconWrapper}>
-        <img src={icon} />
-      </div>
-      <div className={styles.cardTitle}>{title}</div>
-      <div className={styles.cardDesc}>{desc}</div>
+      <NavLink to={path} className={styles.aboutCardLink}>
+        <div className={styles.cardIconWrapper}>
+          <img src={icon} />
+        </div>
+        <div className={styles.cardTitle}>{title}</div>
+        <div className={styles.cardDesc}>{desc}</div>
+      </NavLink>
     </div>
   );
 
@@ -94,9 +101,11 @@ const LandingPage = () => {
       <div className={styles.body}>
         <div className={styles.main}>
           <div className={styles.mainLeft}>
-            <div className={styles.title}>The largest NFT marketplace</div>
+            <div
+              className={styles.title}
+            >{`Fantom's largest NFT Marketplace`}</div>
             <div className={styles.subtitle}>
-              Create, Buy, Sell and Discover rare digital assets
+              Trade without platform fees on Artion
             </div>
             <Link to="/explore" className={styles.exploreButton}>
               Explore
@@ -116,10 +125,16 @@ const LandingPage = () => {
         </div>
         <div className={styles.about}>
           <div className={styles.aboutInner}>
-            <div className={styles.aboutTitle}>Create and Sell your NFTs</div>
+            <div className={styles.aboutTitle}>Why Artion</div>
             <div className={styles.aboutCards}>
               {cards.map((card, key) =>
-                renderAboutCard(key, card.icon, card.title, card.description)
+                renderAboutCard(
+                  key,
+                  card.icon,
+                  card.title,
+                  card.description,
+                  card.path
+                )
               )}
             </div>
             <div className={styles.aboutTitle}>Browse by category</div>
@@ -133,6 +148,7 @@ const LandingPage = () => {
         </div>
         <div className={styles.footer}>
           <img src={logo} alt="logo" className={styles.logo} />
+          <img src={fantomLogo} alt="fantom-logo" className={styles.logo} />
         </div>
       </div>
     </div>

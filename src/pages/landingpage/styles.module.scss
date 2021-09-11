@@ -161,6 +161,13 @@
   }
 }
 
+.aboutCardLink {
+  text-decoration: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 .cardIconWrapper {
   width: 112px;
   height: 112px;
@@ -297,6 +304,7 @@
   box-sizing: border-box;
   display: flex;
   align-items: center;
+  justify-content: space-between;
   background-color: #1969FF;
 }
 

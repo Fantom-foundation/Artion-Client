@@ -1,3 +1,27 @@
+.button {
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 20px;
+  width: 320px;
+  height: 48px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 18px;
+  background-color: #1969FF;
+  color: #FFF;
+  box-shadow: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.link {
+  color: #1969FF;
+  cursor: pointer;
+  padding: 0 5px;
+}
+
 .container {
   width: 100%;
   box-sizing: border-box;
