@@ -16,6 +16,7 @@ import { useSalesContract } from 'contracts';
 
 import Modal from '../Modal';
 import styles from '../Modal/common.module.scss';
+import InputError from '../InputError';
 
 const AuctionModal = ({
   visible,
@@ -44,6 +45,7 @@ const AuctionModal = ({
   const [selected, setSelected] = useState([]);
   const [tokenPrice, setTokenPrice] = useState();
   const [tokenPriceInterval, setTokenPriceInterval] = useState();
+  const [inputError, setInputError] = useState(null);
 
   useEffect(() => {
     setInterval(() => setNow(new Date()), 1000);
@@ -110,7 +112,10 @@ const AuctionModal = ({
       title={auction ? 'Update Auction' : 'Start Auction'}
       onClose={onClose}
       submitDisabled={
-        contractApproving || confirming || (contractApproved && !validateInput)
+        contractApproving ||
+        confirming ||
+        (contractApproved && !validateInput) ||
+        inputError
       }
       submitLabel={
         contractApproved ? (
@@ -187,6 +192,7 @@ const AuctionModal = ({
             onFocus={() => setFocused(true)}
             onBlur={() => setFocused(false)}
             disabled={contractApproving || confirming}
+            onInputError={err => setInputError(err)}
           />
           <div className={styles.usdPrice}>
             {!isNaN(tokenPrice) && tokenPrice !== null ? (
@@ -198,6 +204,7 @@ const AuctionModal = ({
             )}
           </div>
         </div>
+        <InputError text={inputError} />
       </div>
       <div className={styles.formGroup}>
         <div className={styles.formLabel}>Start Time</div>

@@ -1,9 +1,29 @@
 import React, { useEffect } from 'react';
+import { PriceConstants } from '../constants/price.constants';
 
-const PriceInput = ({ value, decimals = 0, onChange, ...rest }) => {
+export const PriceInputErrors = {
+  MAX_INPUT_EXCEEDED: 'Max input value exceeded',
+};
+
+const PriceInput = ({
+  value,
+  decimals = 0,
+  onChange,
+  onInputError = err => console.log(err),
+  max = PriceConstants.MAX_PRICE,
+  ...rest
+}) => {
   useEffect(() => {
     onChange(checkDecimals(value));
   }, [decimals]);
+
+  useEffect(() => {
+    if (parseInt(value) > parseInt(max)) {
+      onInputError(PriceInputErrors.MAX_INPUT_EXCEEDED);
+    } else {
+      onInputError(null);
+    }
+  }, [value]);
 
   const handleKeyDown = e => {
     const key = e.keyCode;

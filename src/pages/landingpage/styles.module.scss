@@ -223,6 +223,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  cursor: pointer;
 
   &:nth-child(3n),
   &:last-child {

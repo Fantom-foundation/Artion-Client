@@ -13,6 +13,7 @@ import PriceInput from 'components/PriceInput';
 
 import Modal from '../Modal';
 import styles from '../Modal/common.module.scss';
+import InputError from '../InputError';
 
 const OfferModal = ({
   visible,
@@ -33,6 +34,7 @@ const OfferModal = ({
   const [selected, setSelected] = useState([]);
   const [tokenPrice, setTokenPrice] = useState();
   const [tokenPriceInterval, setTokenPriceInterval] = useState();
+  const [inputError, setInputError] = useState(null);
 
   useEffect(() => {
     if (tokens?.length > 1) {
@@ -106,7 +108,7 @@ const OfferModal = ({
       visible={visible}
       title="Place your offer"
       onClose={onClose}
-      submitDisabled={confirming || !validateInput()}
+      submitDisabled={confirming || !validateInput() || inputError}
       submitLabel={
         confirming ? <ClipLoader color="#FFF" size={16} /> : 'Place Offer'
       }
@@ -157,6 +159,7 @@ const OfferModal = ({
             value={'' + price}
             onChange={setPrice}
             disabled={confirming}
+            onInputError={err => setInputError(err)}
           />
           <div className={styles.usdPrice}>
             {!isNaN(tokenPrice) && tokenPrice !== null ? (
@@ -168,6 +171,7 @@ const OfferModal = ({
             )}
           </div>
         </div>
+        <InputError text={inputError} />
       </div>
       {totalSupply !== null && (
         <div className={styles.formGroup}>

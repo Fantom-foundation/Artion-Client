@@ -12,6 +12,7 @@ import PriceInput from 'components/PriceInput';
 
 import Modal from '../Modal';
 import styles from '../Modal/common.module.scss';
+import InputError from '../InputError';
 
 const BidModal = ({
   visible,
@@ -29,6 +30,7 @@ const BidModal = ({
   const [options, setOptions] = useState([]);
   const [tokenPrice, setTokenPrice] = useState();
   const [tokenPriceInterval, setTokenPriceInterval] = useState();
+  const [inputError, setInputError] = useState(null);
 
   useEffect(() => {
     setPrice(minBidAmount);
@@ -71,7 +73,7 @@ const BidModal = ({
       visible={visible}
       title="Place Bid"
       onClose={onClose}
-      submitDisabled={confirming || !validateInput()}
+      submitDisabled={confirming || !validateInput() || inputError}
       submitLabel={confirming ? <ClipLoader color="#FFF" size={16} /> : 'Place'}
       onSubmit={() =>
         !confirming && validateInput() ? onPlaceBid(price) : null
@@ -119,6 +121,7 @@ const BidModal = ({
             onFocus={() => setFocused(true)}
             onBlur={() => setFocused(false)}
             disabled={confirming}
+            onInputError={err => setInputError(err)}
           />
           <div className={styles.usdPrice}>
             {!isNaN(tokenPrice) && tokenPrice !== null ? (
@@ -130,6 +133,7 @@ const BidModal = ({
             )}
           </div>
         </div>
+        <InputError text={inputError} />
       </div>
     </Modal>
   );
