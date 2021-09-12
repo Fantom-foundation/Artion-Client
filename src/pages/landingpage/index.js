@@ -10,7 +10,7 @@ import HeaderActions from 'actions/header.actions';
 import FilterActions from 'actions/filter.actions';
 import Header from 'components/header';
 
-import example from 'assets/imgs/example.png';
+import umansExample from 'assets/imgs/umans_example.png';
 import logo from 'assets/svgs/logo_white.svg';
 import fantomLogo from 'assets/svgs/fantom_logo_white.svg';
 import card1 from 'assets/svgs/card1.svg';
@@ -101,11 +101,10 @@ const LandingPage = () => {
       <div className={styles.body}>
         <div className={styles.main}>
           <div className={styles.mainLeft}>
-            <div
-              className={styles.title}
-            >{`Fantom's largest NFT Marketplace`}</div>
+            <div className={styles.title}>{`Zero fee NFT Marketplace`}</div>
             <div className={styles.subtitle}>
-              Trade without platform fees on Artion
+              Artion is an NFT marketplace built on Fantom. Create and trade
+              NFTs instantly at low cost.
             </div>
             <Link to="/explore" className={styles.exploreButton}>
               Explore
@@ -113,7 +112,7 @@ const LandingPage = () => {
           </div>
           <div className={styles.card}>
             <div className={styles.cardMedia}>
-              <img src={example} />
+              <img src={umansExample} />
             </div>
             <div className={styles.cardInfo}>
               <div className={styles.cardCategory}>ZooCoin Community NFT</div>

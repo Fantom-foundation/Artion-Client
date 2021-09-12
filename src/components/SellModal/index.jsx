@@ -12,6 +12,7 @@ import PriceInput from 'components/PriceInput';
 
 import Modal from '../Modal';
 import styles from '../Modal/common.module.scss';
+import InputError from '../InputError';
 
 const SellModal = ({
   visible,
@@ -34,6 +35,7 @@ const SellModal = ({
   const [selected, setSelected] = useState([]);
   const [tokenPrice, setTokenPrice] = useState();
   const [tokenPriceInterval, setTokenPriceInterval] = useState();
+  const [inputError, setInputError] = useState(null);
 
   useEffect(() => {
     setPrice(startPrice > 0 ? startPrice.toString() : '');
@@ -107,7 +109,8 @@ const SellModal = ({
       submitDisabled={
         contractApproving ||
         confirming ||
-        (contractApproved && !validateInput())
+        (contractApproved && !validateInput()) ||
+        inputError
       }
       submitLabel={
         contractApproved ? (
@@ -177,6 +180,7 @@ const SellModal = ({
             onFocus={() => setFocused(true)}
             onBlur={() => setFocused(false)}
             disabled={contractApproving || confirming}
+            onInputError={setInputError}
           />
           <div className={styles.usdPrice}>
             {!isNaN(tokenPrice) && tokenPrice !== null ? (
@@ -188,6 +192,7 @@ const SellModal = ({
             )}
           </div>
         </div>
+        <InputError text={inputError} />
       </div>
       {totalSupply !== null && (
         <div className={styles.formGroup}>
