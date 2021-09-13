@@ -2286,7 +2286,7 @@ const NFTItem = () => {
   const handleShareToTwitter = () => {
     handleClose();
     window.open(
-      `https://twitter.com/intent/tweet?text=Check%20out%20this%item%20on%20Artion&url=${window.location.href}`,
+      `https://twitter.com/intent/tweet?text=Check%20out%20this%20item%20on%20Artion&url=${window.location.href}`,
       '_blank'
     );
   };
