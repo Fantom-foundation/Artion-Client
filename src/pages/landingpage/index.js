@@ -58,6 +58,7 @@ const LandingPage = () => {
 
   useEffect(() => {
     dispatch(HeaderActions.toggleSearchbar(false));
+    dispatch(FilterActions.updateCategoryFilter(null));
   }, []);
 
   const handleViewCategory = id => {
