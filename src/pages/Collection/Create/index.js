@@ -717,7 +717,7 @@ const CollectionCreate = ({ isRegister }) => {
           <div className={styles.inputSubTitle}>
             For more information, read{' '}
             <a
-              href="https://docs.fantom.foundation/"
+              href="https://docs.fantom.foundation/tutorials/collection-and-bundle-guide-on-artion"
               target="_blank"
               rel="noopener noreferrer"
             >
