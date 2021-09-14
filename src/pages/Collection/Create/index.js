@@ -656,7 +656,15 @@ const CollectionCreate = ({ isRegister }) => {
 
         {isRegister && (
           <div className={styles.inputGroup}>
-            <div className={styles.inputTitle}>Fee Recipient *</div>
+            <div className={styles.inputTitle}>
+              Fee Recipient *&nbsp;
+              <BootstrapTooltip
+                title="The nominated Fantom Opera Network wallet address to receive royalties from each sale in this collection."
+                placement="top"
+              >
+                <HelpOutlineIcon />
+              </BootstrapTooltip>
+            </div>
             <div className={styles.inputWrapper}>
               <input
                 className={cx(styles.input, recipientError && styles.hasError)}
