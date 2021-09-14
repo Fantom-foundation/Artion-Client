@@ -40,7 +40,7 @@ const cards = [
     icon: card3,
     title: 'Low Transaction Fees',
     description:
-      'Transactions are usually just a few cents, allowing users to create and trade many NFTs without prohibitively high networkfees.',
+      'Transactions are usually just a few cents, allowing users to create and trade many NFTs without prohibitively high network fees.',
     path: '/',
   },
   {
@@ -102,10 +102,12 @@ const LandingPage = () => {
       <div className={styles.body}>
         <div className={styles.main}>
           <div className={styles.mainLeft}>
-            <div className={styles.title}>{`Zero fee NFT Marketplace`}</div>
+            <div
+              className={styles.title}
+            >{`Trade without platform fees on Artion`}</div>
             <div className={styles.subtitle}>
               Artion is an NFT marketplace built on Fantom. Create and trade
-              NFTs instantly at low cost.
+              NFTs instantly with low network costs.
             </div>
             <Link to="/explore" className={styles.exploreButton}>
               Explore
