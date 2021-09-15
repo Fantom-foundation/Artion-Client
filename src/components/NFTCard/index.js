@@ -23,6 +23,7 @@ import { useAuctionContract } from 'contracts';
 import useTokens from 'hooks/useTokens';
 
 import iconPlus from 'assets/svgs/plus.svg';
+import wFTMLogo from 'assets/imgs/wftm.png';
 
 import styles from './styles.module.scss';
 
@@ -335,13 +336,7 @@ const BaseCard = ({ item, loading, style, create, onCreate, onLike }) => {
                 <Skeleton width={80} height={20} />
               ) : (
                 <div className={cx(styles.label, styles.price)}>
-                  <img
-                    src={
-                      auctionActive
-                        ? auction.token.icon
-                        : getTokenByAddress(item?.paymentToken).icon
-                    }
-                  />
+                  <img src={auctionActive ? auction.token.icon : wFTMLogo} />
                   {formatNumber(
                     auctionActive ? auction.reservePrice : item?.price || 0
                   )}

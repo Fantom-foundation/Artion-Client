@@ -3026,18 +3026,17 @@ const NFTItem = () => {
                           />
                           {formatNumber(auction.current.reservePrice)}
                         </div>
+                        <br />
                         <div className={styles.bidtitle}>
-                          Highest Bid
-                          {bid.bid < auction.current.reservePrice
-                            ? ' -- Reserve price not met.'
-                            : ''}
-                        </div>
-                        <div className={styles.bidAmount}>
+                          Highest Bid :&nbsp;
                           <img
                             src={auction.current.token.icon}
                             className={styles.tokenIcon}
                           />
                           {formatNumber(bid.bid)}
+                          {bid.bid < auction.current.reservePrice
+                            ? ' -- Reserve price not met'
+                            : ''}
                         </div>
                       </div>
                     ) : (

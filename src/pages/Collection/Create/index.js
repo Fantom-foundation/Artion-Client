@@ -656,7 +656,15 @@ const CollectionCreate = ({ isRegister }) => {
 
         {isRegister && (
           <div className={styles.inputGroup}>
-            <div className={styles.inputTitle}>Fee Recipient *</div>
+            <div className={styles.inputTitle}>
+              Fee Recipient *&nbsp;
+              <BootstrapTooltip
+                title="The nominated Fantom Opera Network wallet address to receive royalties from each sale in this collection."
+                placement="top"
+              >
+                <HelpOutlineIcon />
+              </BootstrapTooltip>
+            </div>
             <div className={styles.inputWrapper}>
               <input
                 className={cx(styles.input, recipientError && styles.hasError)}
@@ -709,7 +717,7 @@ const CollectionCreate = ({ isRegister }) => {
           <div className={styles.inputSubTitle}>
             For more information, read{' '}
             <a
-              href="https://docs.fantom.foundation/"
+              href="https://docs.fantom.foundation/tutorials/collection-and-bundle-guide-on-artion"
               target="_blank"
               rel="noopener noreferrer"
             >

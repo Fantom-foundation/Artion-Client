@@ -1,6 +1,8 @@
 import { ethers } from 'ethers';
 import { getAddress } from '@ethersproject/address';
 
+import { Categories } from '../constants/filter.constants.js';
+
 export function isAddress(value) {
   try {
     return getAddress(value);
@@ -24,6 +26,10 @@ export const formatNumber = num => {
   let parts = num.toString().split('.');
   parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
   return parts.join('.');
+};
+
+export const formatCategory = category => {
+  return Categories.find(item => item.id === category).label;
 };
 
 const intlFormat = num => {

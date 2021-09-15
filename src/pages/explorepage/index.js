@@ -301,7 +301,10 @@ const ExploreAllPage = () => {
         </div>
         <div className={styles.body}>
           <div className={styles.filterHeader}>
-            <ExploreFilterHeader loading={upFetching || downFetching} />
+            <ExploreFilterHeader
+              loading={upFetching || downFetching}
+              category={category}
+            />
           </div>
           <div
             ref={ref}
