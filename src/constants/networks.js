@@ -27,10 +27,10 @@ export const Contracts = {
     auction: '0xdb404BF33c90b51176cA3db85288296B8594D134',
     sales: '0x19fD7C9B72cd944f987E0aB1FdD33fF8f68Cf87C',
     bundleSales: '0x0EeB6B95B52dfDFb86CcF960F8408a211555b63b',
-    factory: '0x9dA8d9Cc8A7C79e46A3006f55ED98e915b390F5D',
-    privateFactory: '0xe8d29976368Fc2d8699797faA7cD3684dFf41810',
-    artFactory: '0xe25575E99AE02D8C798d63Edd6aeB5C520f1c5b8',
-    privateArtFactory: '0x8E504d814C0ba86ECD42Ce92273CaFFB3923253B',
+    factory: '0x39B7788d6bb04d1860aaA6685F109aFD95D79Db3', //FantomNFTFactory
+    privateFactory: '0x21CC778A6Ab21CBbB0ea62f0bFC7e6163C06dD75', //FantomNFTFactoryPrivate
+    artFactory: '0x865AeDe044a707B9a3e127908Ad1F3f4F1086949',
+    privateArtFactory: '0x1Ec3452a2A96AEd6A4513D6A036d17a6C3449551',
   },
   [ChainId.FANTOM_TESTNET]: {
     auction: '0xa5568193Ba09dbb934A9Af33A9e8639d1eaC6F43',
