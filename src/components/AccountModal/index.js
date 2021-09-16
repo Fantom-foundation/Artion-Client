@@ -4,17 +4,21 @@ import cx from 'classnames';
 import { ClipLoader } from 'react-spinners';
 import Modal from '@material-ui/core/Modal';
 import CreateIcon from '@material-ui/icons/Create';
+import { useWeb3React } from '@web3-react/core';
+import { ethers } from 'ethers';
 
 import ModalActions from 'actions/modal.actions';
 import AuthActions from 'actions/auth.actions';
 import { useApi } from 'api';
 import toast from 'utils/toast';
+import { getSigner } from 'contracts';
 
 import styles from './styles.module.scss';
 
 const AccountModal = () => {
-  const { updateAccountDetails } = useApi();
+  const { getNonce, updateAccountDetails } = useApi();
   const dispatch = useDispatch();
+  const { account } = useWeb3React();
 
   const { fetching, user } = useSelector(state => state.Auth);
 
@@ -45,11 +49,10 @@ const AccountModal = () => {
     }
   }, [accountModalVisible]);
 
-  const validEmail = email =>
-    email.length === 0 || /(.+)@(.+){2,}\.(.+){2,}/.test(email);
+  const validEmail = email => /(.+)@(.+){2,}\.(.+){2,}/.test(email);
 
   const validateEmail = () => {
-    if (email.length > 0 || validEmail(email)) {
+    if (email.length === 0 || validEmail(email)) {
       setEmailError(null);
     } else {
       setEmailError('Invalid email address.');
@@ -102,13 +105,33 @@ const AccountModal = () => {
     try {
       setSaving(true);
 
+      const { data: nonce } = await getNonce(account, authToken);
+
+      let signature;
+      let addr;
+      try {
+        const signer = await getSigner();
+        const msg = `Approve Signature on Artion.io with nonce ${nonce}`;
+        signature = await signer.signMessage(msg);
+        addr = ethers.utils.verifyMessage(msg, signature);
+      } catch (err) {
+        toast(
+          'error',
+          'You need to sign the message to be able to update account settings.'
+        );
+        setSaving(false);
+        return;
+      }
+
       if (!avatar || avatar.startsWith('https')) {
         const res = await updateAccountDetails(
           alias,
           email,
           bio,
           avatar,
-          authToken
+          authToken,
+          signature,
+          addr
         );
         dispatch(AuthActions.fetchSuccess(res.data));
         toast('success', 'Account details saved!');
@@ -129,7 +152,9 @@ const AccountModal = () => {
               email,
               bio,
               data,
-              authToken
+              authToken,
+              signature,
+              addr
             );
             dispatch(AuthActions.fetchSuccess(res.data));
             toast('success', 'Account details saved!');

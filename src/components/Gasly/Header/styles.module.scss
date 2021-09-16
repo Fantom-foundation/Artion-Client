@@ -1,0 +1,150 @@
+.header {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  padding: 32px;
+  width: 100%;
+  max-width: 1504px;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  z-index: 100;
+  box-sizing: border-box;
+}
+
+.left {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  margin-right: 20px;
+}
+
+.logo {
+  height: 24px;
+  cursor: pointer;
+
+  img {
+    height: 100%;
+  }
+}
+
+.logoSmall {
+  display: none;
+}
+
+.menu {
+  display: flex;
+  align-items: center;
+
+  .searchcont {
+    display: none;
+  }
+}
+
+.menuLink {
+  margin-right: 48px;
+  text-decoration: none;
+  color: #FFF;
+  font-weight: 700;
+  font-size: 18px;
+  line-height: 18px;
+  user-select: none;
+  cursor: pointer;
+  position: relative;
+
+  &:last-child {
+    margin-right: 0;
+  }
+}
+
+.account {
+  display: flex;
+  align-items: center;
+}
+
+.avatar {
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 50% !important;
+  margin-right: 12px;
+  overflow: hidden;
+}
+
+.profile {
+  margin-right: 4px;
+}
+
+.address {
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 16px;
+}
+
+.network {
+  margin-top: 4px;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 14px;
+  opacity: 0.6;
+}
+
+.account,
+.connect {
+  box-sizing: border-box;
+  padding: 8px 12px 11px 12px;
+  border-radius: 50px;
+  border: 1px solid #D9E1EE;
+
+  &:hover {
+    box-shadow: 0 0 6px rgba(0, 0, 0, 0.3);
+  }
+}
+
+.connect {
+  height: 55px;
+  display: flex;
+  align-items: center;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+.expand {
+  transition: transform ease 200ms;
+
+  &.expanded {
+    transform: rotate(180deg);
+  }
+}
+
+.profilemenu {
+  width: 250px;
+  transform: translateY(75px) !important;
+  padding: 0;
+  border-radius: 8px !important;
+}
+
+.menuList {
+  padding: 20px 0 !important;
+  width: 100%;
+}
+
+.signOut {
+  width: calc(100% - 40px);
+  height: 48px;
+  border-radius: 10px;
+  margin: 0 auto;
+  background-color: #1969FF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #FFF;
+  cursor: pointer;
+
+  &:hover {
+    box-shadow: 0 0 8px 4px rgba(0, 0, 0, .1);
+  }
+}

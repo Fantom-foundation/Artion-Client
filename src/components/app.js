@@ -12,8 +12,10 @@ import { useWeb3React } from '@web3-react/core';
 import { ChainId } from '@sushiswap/sdk';
 import { Client } from '@bandprotocol/bandchain.js';
 
+import ProtectedRoute from './ProtectedRoute';
 import AccountModal from './AccountModal';
 import WFTMModal from './WFTMModal';
+import GaslyHomePage from './Gasly/Home';
 import NotFound from './NotFound';
 import PaintBoard from './PaintBoard';
 import LandingPage from '../pages/landingpage';
@@ -21,6 +23,8 @@ import ExplorePage from '../pages/explorepage';
 import AccountDetails from '../pages/AccountDetails';
 import NFTItem from '../pages/NFTItem';
 import CollectionCreate from '../pages/Collection/Create';
+import CollectionReview from '../pages/Collection/Review';
+import NotificationSetting from '../pages/NotificationSetting';
 import PriceActions from 'actions/price.actions';
 
 const App = () => {
@@ -74,12 +78,30 @@ const App = () => {
       <Router>
         <Switch>
           <Route exact path="/" component={LandingPage} />
-          <Route exact path="/exploreall" component={ExplorePage} />
-          <Route exact path="/create" component={PaintBoard} />
+          <Route exact path="/explore" component={ExplorePage} />
           <Route path="/explore/:addr/:id" component={NFTItem} />
+          <ProtectedRoute exact path="/create" component={PaintBoard} />
           <Route path="/bundle/:bundleID" component={NFTItem} />
           <Route path="/account/:uid" component={AccountDetails} />
-          <Route path="/collection/add" component={CollectionCreate} />
+          <ProtectedRoute
+            path="/collection/create"
+            component={() => <CollectionCreate isRegister={false} />}
+          />
+          <ProtectedRoute
+            path="/collection/register"
+            component={() => <CollectionCreate isRegister />}
+          />
+          <ProtectedRoute
+            path="/collection/review"
+            component={CollectionReview}
+          />
+          <ProtectedRoute
+            path="/settings/notification"
+            component={NotificationSetting}
+          />
+          {/* Gasly Pages Start */}
+          <Route path="/gasly" component={GaslyHomePage} />
+          {/* Gasly Pages End */}
           <Route path="/404" component={NotFound} />
           <Route path="*">
             <Redirect to="/404" />

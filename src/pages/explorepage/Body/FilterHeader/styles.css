@@ -86,7 +86,7 @@
     border-radius: 6px !important;
     outline: none !important;
     background-color: #FFF !important;
-    border: 1px solid rgba(36, 121, 250, .5);
+    border: 1px solid #EAEAF1;
     color: #3D3D3D !important;
     font-size: 16px !important;
 }
@@ -111,11 +111,11 @@
 
 .menuPropsPaper {
     box-sizing: border-box;
-    top: 200px !important;
     padding: 25px;
     background-color: #FFF;
     border-radius: 8px !important;
     box-shadow: 0 0 8px 2px rgba(0,0, 0, 0.15);
+    transform: translateY(35px) !important;
 }
 
 .menuItemList {
@@ -145,10 +145,24 @@
     .filterHeaderRoot {
         padding-right: 0;
         flex-direction: column-reverse;
-        align-items: flex-start;
+        align-items: center;
     }
 
     .filterHeaderLeft {
         margin-top: 6px;
+    }
+
+    .filterSelectGroup {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .filterHeaderFormControl {
+        margin-right: 0 !important;
+        margin-bottom: 12px !important;
+    }
+
+    .filterHeaderFormControl:last-child {
+        margin-bottom: 0 !important;
     }
 }

@@ -3,11 +3,13 @@
   top: 0;
   left: 0;
   right: 0;
-  padding: 20px;
+  padding: 12px 48px 12px 24px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   z-index: 100;
+  box-sizing: border-box;
+  background-color: #FFF;
 }
 
 .left {
@@ -37,14 +39,15 @@
   height: 50px;
   box-sizing: border-box;
   border-radius: 10px;
-  background-color: rgba(190, 190, 190, .1);
+  border: 1px solid #EAEAF1;
   position: relative;
 
   &.active {
     .searchcontinner {
       border-radius: 10px;
-      background: #F6F7F9;
       box-shadow: 0px 4px 40px rgba(0, 0, 0, 0.15);
+      border: 1px solid #EAEAF1;
+      background-color: #FFF;
     }
 
     .searchicon {
@@ -55,7 +58,7 @@
 
 .searchbar {
   width: 100%;
-  height: 50px;
+  height: 48px;
   display: flex;
   align-items: center;
   padding: 0 14px;
@@ -81,12 +84,15 @@
 }
 
 .resultcont {
-  padding: 6px 14px;
+  padding: 0 14px;
 }
 
 .resultsection {
   margin-bottom: 6px;
 
+  &:first-child {
+    margin-top: 6px;
+  }
   &:last-child {
     margin-bottom: 0;
   }
@@ -168,13 +174,18 @@
 .menuLink {
   margin-right: 48px;
   text-decoration: none;
-  color: #FFF;
+  color: #3D3D3D;
   font-weight: 700;
   font-size: 18px;
   line-height: 18px;
   user-select: none;
   cursor: pointer;
   position: relative;
+  opacity: 0.6;
+
+  &.active {
+    opacity: 1;
+  }
 
   &:last-child {
     margin-right: 0;
@@ -187,10 +198,10 @@
 }
 
 .avatar {
-  width: 36px !important;
-  height: 36px !important;
-  border-radius: 18px !important;
-  margin-right: 8px;
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 50% !important;
+  margin-right: 12px;
   overflow: hidden;
 }
 
@@ -214,13 +225,23 @@
 
 .account,
 .connect {
-  padding: 11px 18px;
+  box-sizing: border-box;
+  padding: 8px 12px 11px 12px;
   border-radius: 10px;
-  border: 1px solid #FFF;
+  border: 1px solid rgba(0, 0, 0, .2);
+  opacity: 1;
 
   &:hover {
     box-shadow: 0 0 6px rgba(0, 0, 0, 0.3);
   }
+}
+
+.connect {
+  height: 55px;
+  display: flex;
+  align-items: center;
+  padding-left: 20px;
+  padding-right: 20px;
 }
 
 .expand {
@@ -234,60 +255,73 @@
 .profilemenu {
   width: 250px;
   transform: translateY(50px) !important;
-  padding: 24px;
+  padding: 0;
   border-radius: 8px !important;
 }
 
 .menuList {
-  padding: 0 !important;
+  padding: 20px 0 !important;
+  width: 100%;
 }
 
 .menuItem {
-  padding: 0 !important;
-  font-weight: 700;
-  font-size: 16px;
+  width: 100%;
+  height: 48px;
+  padding: 0 23px !important;
+  box-sizing: border-box;
+  font-weight: 400;
+  font-size: 14px;
   line-height: 16px;
-  color: #3D3D3D;
-  margin-bottom: 25px !important;
+  color: #121223;
   display: flex;
   align-items: center;
-  background-color: transparent !important;
   cursor: pointer;
 
   &:last-child {
     margin-bottom: 0 !important;
+  }
+
+  &:hover {
+    font-weight: 700;
+    background-color: #EAEAF1;
   }
 }
 
 .menuIcon {
   width: 16px;
   height: auto;
-  margin-right: 8px;
+  margin-right: 14px;
 }
 
 .menuSeparator {
-  width: 100%;
+  width: calc(100% - 32px);
   height: 0.5px;
-  background-color: #8C8C8C;
-  margin: 25px 0;
+  background-color: #EAEAF1;
+  margin: 0 16px;
 }
 
-.lightBg {
-  background-color: #FFF;
-  .menuLink {
-    color: #3D3D3D;
-    opacity: 0.6;
-  
-    &.active {
-      opacity: 1;
-    }
-  }
+.signOut {
+  width: calc(100% - 40px);
+  height: 48px;
+  border-radius: 10px;
+  margin: 20px auto 0;
+  background-color: #1969FF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #FFF;
+  cursor: pointer;
 
-  .connect,
-  .account {
-    opacity: 1;
-    border-color: rgba(0, 0, 0, .2);
+  &:hover {
+    box-shadow: 0 0 8px 4px rgba(0, 0, 0, .1);
   }
+}
+
+.hasBorder {
+  border-bottom: 1px solid #D9E1EE;
 }
 
 @media only screen and (max-width: 900px) {

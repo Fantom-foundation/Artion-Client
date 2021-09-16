@@ -2,6 +2,7 @@ import TokensConstants from '../constants/tokens.constants';
 
 const TokensActions = {
   resetTokens,
+  updateTokens,
   startFetching,
   fetchingSuccess,
   fetchingFailed,
@@ -19,30 +20,50 @@ const _resetTokens = () => {
   };
 };
 
-function startFetching() {
+function updateTokens(tokens) {
   return dispatch => {
-    dispatch(_startFetching());
+    dispatch(_updateTokens(tokens));
   };
 }
 
-const _startFetching = () => {
+const _updateTokens = tokens => {
   return {
-    type: TokensConstants.FETCHING_START,
+    type: TokensConstants.UPDATE_TOKENS,
+    payload: {
+      tokens,
+    },
   };
 };
 
-function fetchingSuccess(count, tokens) {
+function startFetching(direction) {
   return dispatch => {
-    dispatch(_fetchingSuccess(count, tokens));
+    dispatch(_startFetching(direction));
   };
 }
 
-const _fetchingSuccess = (count, tokens) => {
+const _startFetching = direction => {
+  return {
+    type: TokensConstants.FETCHING_START,
+    payload: {
+      direction,
+    },
+  };
+};
+
+function fetchingSuccess(count, tokens, from, to) {
+  return dispatch => {
+    dispatch(_fetchingSuccess(count, tokens, from, to));
+  };
+}
+
+const _fetchingSuccess = (count, tokens, from, to) => {
   return {
     type: TokensConstants.FETCHING_SUCCESS,
     payload: {
       count,
       tokens,
+      from,
+      to,
     },
   };
 };

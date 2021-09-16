@@ -2,8 +2,8 @@ import { ChainId } from '@sushiswap/sdk';
 
 export const FantomNFTConstants = {
   ADDRESS: {
-    [ChainId.FANTOM]: '0xF8fC99a352aE3067DEAc7c3A9bf6aa80CFE1d342',
-    [ChainId.FANTOM_TESTNET]: '0x20F6076861A794152d07F8F0c6D5C99b6aAFC7d2',
+    [ChainId.FANTOM]: '0x4878Be5Aefb2d7Ec4E3f0Cd6aD3EFc79051dC4dD',
+    [ChainId.FANTOM_TESTNET]: '0xe8d29976368Fc2d8699797faA7cD3684dFf41810',
   },
   ABI: [
     {
@@ -139,16 +139,9 @@ export const FantomNFTConstants = {
       type: 'function',
     },
     {
-      inputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
-      name: 'creators',
-      outputs: [{ internalType: 'address', name: '', type: 'address' }],
-      stateMutability: 'view',
-      type: 'function',
-    },
-    {
-      inputs: [{ internalType: 'uint256', name: '_tokenId', type: 'uint256' }],
-      name: 'exists',
-      outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
+      inputs: [],
+      name: 'feeReceipient',
+      outputs: [{ internalType: 'address payable', name: '', type: 'address' }],
       stateMutability: 'view',
       type: 'function',
     },
@@ -181,11 +174,11 @@ export const FantomNFTConstants = {
     },
     {
       inputs: [
-        { internalType: 'address', name: '_beneficiary', type: 'address' },
+        { internalType: 'address', name: '_to', type: 'address' },
         { internalType: 'string', name: '_tokenUri', type: 'string' },
       ],
       name: 'mint',
-      outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+      outputs: [],
       stateMutability: 'payable',
       type: 'function',
     },
@@ -260,13 +253,6 @@ export const FantomNFTConstants = {
     {
       inputs: [{ internalType: 'uint256', name: 'index', type: 'uint256' }],
       name: 'tokenByIndex',
-      outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
-      stateMutability: 'view',
-      type: 'function',
-    },
-    {
-      inputs: [],
-      name: 'tokenIdPointer',
       outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
       stateMutability: 'view',
       type: 'function',

@@ -3,29 +3,8 @@
   width: 100%;
   height: 100vh;
   top: 0;
-  padding-top: 130px;
+  padding-top: 80px;
   box-sizing: border-box;
-}
-
-.background {
-  position: absolute;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  right: 0;
-  overflow: hidden;
-  z-index: -1;
-}
-
-.bg {
-  position: absolute;
-  width: 100%;
-  height: auto;
-  top: 0;
-  left: 0;
-  object-fit: cover;
-  min-height: 830px;
-  max-height: 900px;
 }
 
 .body {
@@ -37,62 +16,68 @@
   margin-left: auto;
   margin-right: auto;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  position: relative;
-  padding-top: 150px;
+  justify-content: space-between;
+  padding-top: 80px;
   z-index: 1;
 }
 
+.main {
+  margin-bottom: 120px;
+}
+
 .title {
-  font-weight: 900;
-  font-size: 160px;
-  line-height: 195px;
-  text-align: center;
-  color: #EFF3FB;
+  font-weight: 700;
+  font-size: 250px;
+  line-height: 304px;
+  letter-spacing: 10px;
+  color: #121223;
 }
 
 .subtitle {
-  margin-top: -3px;
+  margin-top: -25px;
   font-weight: 700;
-  font-size: 24px;
-  line-height: 38px;
-  text-align: center;
-  color: #FFF;
-  opacity: 0.8;
+  font-size: 18px;
+  line-height: 22px;
+  letter-spacing: -0.2px;
+  color: #A2A2AD;
 }
 
 .button {
-  width: 280px;
-  height: 56px;
+  margin-top: 36px;
+  width: 188px;
+  height: 64px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 700;
   font-size: 18px;
-  line-height: 18px;
+  letter-spacing: -0.228571px;
   box-shadow: none;
-  border-radius: 10px;
+  border-radius: 11px;
   box-sizing: border-box;
   cursor: pointer;
   text-decoration: none;
-  background-color: #FFF;
-  color: #007BFF;
-  margin-top: 40px;
+  background-color: #1969FF;
+  color: #FFF;
 
   &:hover {
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
   }
 }
 
-@media only screen and (max-width: 800px) {
-  .container {
-    padding-top: 155px;
+@media only screen and (max-width: 1100px) {
+  .main {
+    margin-right: -80px;
+  }
+
+  .man {
+    margin-right: -30px;
   }
 
   .title {
-    font-size: 100px;
-    line-height: 120px;
+    font-size: 160px;
+    line-height: 170px;
   }
 
   .subtitle {
@@ -102,19 +87,36 @@
   }
 }
 
-@media only screen and (max-width: 600px) {
+@media only screen and (max-width: 810px) {
+  .body {
+    flex-direction: column-reverse;
+  }
+
+  .main {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
   .title {
-    font-size: 65px;
-    line-height: 79px;
+    font-size: 144px;
   }
 
   .subtitle {
-    font-size: 20px;
-    line-height: 32px;
-    margin-top: 8px;
+    font-size: 18px;
+    line-height: 22px;
+    text-align: center;
   }
 
   .button {
-    width: 100%;
+    width: 168px;
+    height: 48px;
+    font-size: 16px;
+  }
+
+  .man {
+    width: 60%;
+    min-width: 300px;
   }
 }

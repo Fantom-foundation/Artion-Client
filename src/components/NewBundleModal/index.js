@@ -8,14 +8,21 @@ import Skeleton from 'react-loading-skeleton';
 import Loader from 'react-loader-spinner';
 import { ethers } from 'ethers';
 import { useWeb3React } from '@web3-react/core';
+import Select from 'react-dropdown-select';
 
 import SuspenseImg from 'components/SuspenseImg';
+import PriceInput from 'components/PriceInput';
 import { useApi } from 'api';
 import { useBundleSalesContract, useNFTContract } from 'contracts';
 import { Contracts } from 'constants/networks';
 import toast from 'utils/toast';
+import useTokens from 'hooks/useTokens';
+import { useSalesContract } from 'contracts';
+
+import closeIcon from 'assets/svgs/close.svg';
 
 import styles from './styles.module.scss';
+import commonStyles from '../Modal/common.module.scss';
 
 const NFTItem = ({ item, selected, onClick }) => {
   const { storageUrl } = useApi();
@@ -48,7 +55,7 @@ const NFTItem = ({ item, selected, onClick }) => {
               <SuspenseImg
                 src={
                   item.thumbnailPath?.length > 10
-                    ? `${storageUrl()}/image/${item.thumbnailPath}`
+                    ? `${storageUrl}/image/${item.thumbnailPath}`
                     : item.imageURL
                 }
                 className={styles.media}
@@ -66,12 +73,14 @@ const NFTItem = ({ item, selected, onClick }) => {
 };
 
 const NewBundleModal = ({ visible, onClose, onCreateSuccess = () => {} }) => {
+  const { tokens: payTokens } = useTokens();
   const { account, chainId } = useWeb3React();
+  const { getSalesContract } = useSalesContract();
 
   const { uid } = useParams();
 
   const { fetchTokens, createBundle, deleteBundle } = useApi();
-  const { getNFTContract } = useNFTContract();
+  const { getERC721Contract } = useNFTContract();
   const { listBundle } = useBundleSalesContract();
 
   const rootRef = useRef(null);
@@ -88,9 +97,12 @@ const NewBundleModal = ({ visible, onClose, onCreateSuccess = () => {} }) => {
   const [page, setPage] = useState(0);
   const tokens = useRef([]);
   const [count, setCount] = useState(0);
+  const [options, setOptions] = useState([]);
+  const [paySelected, setPaySelected] = useState([]);
+  const [tokenPrice, setTokenPrice] = useState();
+  const [tokenPriceInterval, setTokenPriceInterval] = useState();
 
   const { authToken } = useSelector(state => state.ConnectWallet);
-  const { price: ftmPrice } = useSelector(state => state.Price);
 
   const fetchNFTs = async step => {
     if (fetching) return;
@@ -100,7 +112,8 @@ const NewBundleModal = ({ visible, onClose, onCreateSuccess = () => {} }) => {
 
     try {
       const { data } = await fetchTokens(
-        step,
+        step * 18,
+        18,
         'single',
         [],
         null,
@@ -132,8 +145,40 @@ const NewBundleModal = ({ visible, onClose, onCreateSuccess = () => {} }) => {
       tokens.current = [];
       setCount(0);
       fetchNFTs(0);
+
+      if (payTokens?.length) {
+        setPaySelected([payTokens[0]]);
+      }
     }
   }, [visible]);
+
+  useEffect(() => {
+    if (payTokens?.length) {
+      setOptions(payTokens);
+    }
+  }, [payTokens]);
+
+  const getTokenPrice = () => {
+    if (tokenPriceInterval) clearInterval(tokenPriceInterval);
+    const func = async () => {
+      const tk = selected[0].address || ethers.constants.AddressZero;
+      try {
+        const salesContract = await getSalesContract();
+        const price = await salesContract.getPrice(tk);
+        setTokenPrice(parseFloat(ethers.utils.formatUnits(price, 18)));
+      } catch {
+        setTokenPrice(null);
+      }
+    };
+    func();
+    setTokenPriceInterval(setInterval(func, 60 * 1000));
+  };
+
+  useEffect(() => {
+    if (paySelected.length === 0) return;
+
+    getTokenPrice();
+  }, [paySelected]);
 
   const getContractApprovedStatus = async () => {
     setLoadingStatus(true);
@@ -147,7 +192,7 @@ const NewBundleModal = ({ visible, onClose, onCreateSuccess = () => {} }) => {
     try {
       await Promise.all(
         contractAddresses.map(async address => {
-          const contract = await getNFTContract(address);
+          const contract = await getERC721Contract(address);
           try {
             const _approved = await contract.isApprovedForAll(
               account,
@@ -167,7 +212,7 @@ const NewBundleModal = ({ visible, onClose, onCreateSuccess = () => {} }) => {
   };
 
   const isValid = () => {
-    return name && price && selected.current.length;
+    return name && price && parseFloat(price) > 0 && selected.current.length;
   };
 
   const closeModal = () => {
@@ -202,7 +247,7 @@ const NewBundleModal = ({ visible, onClose, onCreateSuccess = () => {} }) => {
     try {
       await Promise.all(
         contractAddresses.map(async address => {
-          const contract = await getNFTContract(address);
+          const contract = await getERC721Contract(address);
           const _approved = await contract.isApprovedForAll(
             account,
             Contracts[chainId].bundleSales
@@ -228,6 +273,7 @@ const NewBundleModal = ({ visible, onClose, onCreateSuccess = () => {} }) => {
 
     let bundleID;
     const selectedItems = [];
+    const token = paySelected[0];
     try {
       setCreating(true);
 
@@ -241,6 +287,7 @@ const NewBundleModal = ({ visible, onClose, onCreateSuccess = () => {} }) => {
       }
       const { data } = await createBundle(
         name,
+        token.address,
         parseFloat(price),
         selectedItems,
         authToken
@@ -251,14 +298,15 @@ const NewBundleModal = ({ visible, onClose, onCreateSuccess = () => {} }) => {
     }
 
     try {
+      const _price = ethers.utils.parseUnits(price, token.decimals);
       const tx = await listBundle(
         bundleID,
         selectedItems.map(item => item.address),
         selectedItems.map(item => item.tokenID),
         selectedItems.map(item => item.supply),
-        ethers.utils.parseEther(price),
-        ethers.BigNumber.from(Math.floor(new Date().getTime() / 1000)),
-        '0x0000000000000000000000000000000000000000'
+        token.address === '' ? ethers.constants.AddressZero : token.address,
+        _price,
+        ethers.BigNumber.from(Math.floor(new Date().getTime() / 1000))
       );
       await tx.wait();
 
@@ -277,64 +325,109 @@ const NewBundleModal = ({ visible, onClose, onCreateSuccess = () => {} }) => {
     }
   };
 
-  const onCancel = () => {
-    closeModal();
-  };
-
   if (!visible) return null;
 
   return (
     <div className={styles.root} ref={rootRef}>
       <Modal open className={styles.modal} container={() => rootRef.current}>
         <div className={styles.paper}>
-          <h2 className={styles.title}>Create Bundle</h2>
-          <div className={styles.formGroup}>
-            <p className={styles.formLabel}>Name</p>
-            <div className={styles.formInputCont}>
-              <input
-                type="text"
-                className={styles.formInput}
-                maxLength={20}
-                placeholder="Bundle Name"
-                value={name}
-                onChange={e => setName(e.target.value)}
-                disabled={creating}
-              />
+          <div className={styles.header}>
+            <div className={styles.title}>Create Bundle</div>
+            <div className={styles.closeButton} onClick={onClose}>
+              <img src={closeIcon} />
             </div>
-            <div className={styles.lengthIndicator}>{name.length}/20</div>
           </div>
-          <div className={styles.formGroup}>
-            <div className={styles.formLabel}>Price</div>
-            <div className={styles.formInputCont}>
-              <input
-                className={styles.formInput}
-                placeholder="0.00"
-                value={price}
-                onChange={e =>
-                  setPrice(isNaN(e.target.value) ? price : e.target.value)
-                }
-                disabled={creating}
-              />
-              <div className={styles.usdPrice}>
-                ${((parseFloat(price) || 0) * ftmPrice).toFixed(2)}
+          <div className={styles.body}>
+            <div className={styles.formGroup}>
+              <p className={styles.formLabel}>Name</p>
+              <div className={styles.formInputCont}>
+                <input
+                  type="text"
+                  className={styles.formInput}
+                  maxLength={20}
+                  placeholder="Bundle Name"
+                  value={name}
+                  onChange={e => setName(e.target.value)}
+                  disabled={creating}
+                />
+              </div>
+              <div className={styles.lengthIndicator}>{name.length}/20</div>
+            </div>
+            <div className={styles.formGroup}>
+              <div className={styles.formLabel}>Price</div>
+              <div className={styles.formInputCont}>
+                <Select
+                  options={options}
+                  disabled={creating}
+                  values={paySelected}
+                  onChange={tk => {
+                    setPaySelected(tk);
+                  }}
+                  className={commonStyles.select}
+                  placeholder=""
+                  itemRenderer={({ item, itemIndex, methods }) => (
+                    <div
+                      key={itemIndex}
+                      className={commonStyles.token}
+                      onClick={() => {
+                        methods.clearAll();
+                        methods.addItem(item);
+                      }}
+                    >
+                      <img src={item.icon} className={commonStyles.tokenIcon} />
+                      <div className={commonStyles.tokenSymbol}>
+                        {item.symbol}
+                      </div>
+                    </div>
+                  )}
+                  contentRenderer={({ props: { values } }) =>
+                    values.length > 0 ? (
+                      <div className={commonStyles.selectedToken}>
+                        <img
+                          src={values[0].icon}
+                          className={commonStyles.tokenIcon}
+                        />
+                        <div className={commonStyles.tokenSymbol}>
+                          {values[0].symbol}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className={commonStyles.selectedToken} />
+                    )
+                  }
+                />
+                <PriceInput
+                  className={styles.formInput}
+                  placeholder="0.00"
+                  value={'' + price}
+                  onChange={setPrice}
+                  disabled={creating}
+                />
+                <div className={styles.usdPrice}>
+                  {!isNaN(tokenPrice) && tokenPrice !== null ? (
+                    `$${((parseFloat(price) || 0) * tokenPrice).toFixed(2)}`
+                  ) : (
+                    <Skeleton width={100} height={24} />
+                  )}
+                </div>
               </div>
             </div>
-          </div>
-          <div className={styles.formGroup}>
-            <p className={styles.formLabel}>Items</p>
-            <div className={styles.itemList} onScroll={handleScroll}>
-              {tokens.current.map((item, idx) => (
-                <NFTItem
-                  key={idx}
-                  item={item}
-                  onClick={() => handleItemClick(idx)}
-                  selected={selected.current.indexOf(idx) > -1}
-                />
-              ))}
-              {fetching &&
-                new Array(5)
-                  .fill(null)
-                  .map((item, idx) => <NFTItem key={idx} item={item} />)}
+            <div className={styles.formGroup}>
+              <p className={styles.formLabel}>Items</p>
+              <div className={styles.itemList} onScroll={handleScroll}>
+                {tokens.current.map((item, idx) => (
+                  <NFTItem
+                    key={idx}
+                    item={item}
+                    onClick={() => handleItemClick(idx)}
+                    selected={selected.current.indexOf(idx) > -1}
+                  />
+                ))}
+                {fetching &&
+                  new Array(5)
+                    .fill(null)
+                    .map((item, idx) => <NFTItem key={idx} item={item} />)}
+              </div>
             </div>
           </div>
 
@@ -361,17 +454,6 @@ const NewBundleModal = ({ visible, onClose, onCreateSuccess = () => {} }) => {
               ) : (
                 'Approve Items'
               )}
-            </div>
-
-            <div
-              className={cx(
-                styles.button,
-                styles.cancel,
-                creating && styles.disabled
-              )}
-              onClick={!creating ? onCancel : null}
-            >
-              Cancel
             </div>
           </div>
         </div>

@@ -1,9 +1,8 @@
 .container {
-  padding-top: 130px;
+  padding-top: 80px;
   height: 100vh;
   box-sizing: border-box;
   display: flex;
-  padding-left: 20px;
   overflow-y: auto;
 }
 
@@ -11,6 +10,49 @@
   flex: 0 0 300px;
   display: flex;
   flex-direction: column;
+  border-right: 1px solid #D9E1EE;
+  box-sizing: border-box;
+  overflow-y: auto;
+  overflow-x: hidden;
+  transition: flex-basis ease 300ms;
+}
+
+.collapsed {
+  flex: 0 0 64px;
+
+  .sidebarHeader {
+    padding: 0;
+    justify-content: center;
+  }
+
+  .iconCollapse {
+    transform: rotateZ(180deg);
+  }
+
+  .filterList {
+    display: none;
+  }
+}
+
+.sidebarHeader {
+  height: 88px;
+  flex: 0 0 88px;
+  display: flex;
+  padding: 0 32px 0 24px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sidebarTitle {
+  font-size: 20px;
+  font-weight: 700;
+  color: #3D3D3D;
+}
+
+.iconCollapse {
+  cursor: pointer;
+  transform: rotateZ(0deg);
+  transition: transform ease 300ms;
 }
 
 .profileWrapper {
@@ -57,26 +99,16 @@
   overflow-y: auto;
 }
 
-.header {
-  height: 64px;
-  display: flex;
-  align-items: center;
-  border-bottom: 1px solid rgba(0, 0, 0, .1);
-  overflow-x: auto;
-}
-
 .exploreAll {
-  height: 92%;
-  overflow-y: auto;
+  height: fit-content;
+  max-height: 92%;
+  overflow-y: scroll;
   margin-left: -40px;
   padding-left: 40px;
   padding-right: 10px;
-}
-
-:global {
-  .MuiCheckbox-colorSecondary.Mui-checked {
-    color: #007bff !important;
-  }
+  padding-bottom: 20px;
+  display: flex;
+  flex-wrap: wrap;
 }
 
 .filterHeader {
@@ -90,10 +122,10 @@
 
 @media only screen and (max-width: 768px) {
   .container {
-    padding-top: 155px;
+    padding-top: 133px;
   }
 
-  .sidebar {
+  .sidebar:not(.collapsed) {
     flex: 0 0 260px;
   }
 }
@@ -101,8 +133,6 @@
 @media only screen and (max-width: 600px) {
   .container {
     flex-direction: column;
-    padding-left: 30px;
-    padding-right: 30px;
 
     /* width */
     &::-webkit-scrollbar {
@@ -111,16 +141,31 @@
   }
 
   .sidebar {
-    flex-basis: 0;
+    flex-basis: unset;
+    flex-grow: 1;
+  }
+
+  .collapsed {
+    flex-basis: unset;
+    flex-grow: 1;
+
+    .filterList {
+      display: block;
+    }
+  }
+
+  .sidebarHeader {
+    display: none;
+  }
+
+  .filterHeader {
+    padding-left: 24px;
+    padding-right: 24px;
   }
 
   .body {
     margin-left: 0;
     overflow-y: visible;
-  }
-
-  .header {
-    flex: 0 0 50px;
   }
 
   .exploreAll {

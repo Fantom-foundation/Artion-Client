@@ -1,28 +1,20 @@
-import { useCallback } from 'react';
-import { ethers } from 'ethers';
-import { useWeb3React } from '@web3-react/core';
+import { ChainId } from '@sushiswap/sdk';
 
 import { calculateGasMargin } from 'utils';
 import { Contracts } from 'constants/networks';
+import useContract from 'hooks/useContract';
 
 import { BUNDLE_SALES_CONTRACT_ABI } from './abi';
 
+// eslint-disable-next-line no-undef
+const isMainnet = process.env.REACT_APP_ENV === 'MAINNET';
+const CHAIN = isMainnet ? ChainId.FANTOM : ChainId.FANTOM_TESTNET;
+
 export const useBundleSalesContract = () => {
-  const { chainId } = useWeb3React();
+  const { getContract } = useContract();
 
-  const getBundleSalesContract = useCallback(async () => {
-    await window.ethereum.enable();
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    const signer = provider.getSigner();
-
-    const contract = new ethers.Contract(
-      Contracts[chainId].bundleSales,
-      BUNDLE_SALES_CONTRACT_ABI,
-      signer
-    );
-
-    return contract;
-  }, [chainId]);
+  const getBundleSalesContract = async () =>
+    await getContract(Contracts[CHAIN].bundleSales, BUNDLE_SALES_CONTRACT_ABI);
 
   const getBundleListing = async (owner, bundleID) => {
     const contract = await getBundleSalesContract();
@@ -41,16 +33,24 @@ export const useBundleSalesContract = () => {
     return null;
   };
 
-  const buyBundle = async (bundleID, value, from) => {
+  const buyBundleETH = async (bundleID, value, from) => {
     const contract = await getBundleSalesContract();
     const args = [bundleID];
     const options = {
       value,
       from,
     };
-    const gasEstimate = await contract.estimateGas.buyItem(...args, options);
+    const gasEstimate = await contract.estimateGas['buyItem(string)'](
+      ...args,
+      options
+    );
     options.gasLimit = calculateGasMargin(gasEstimate);
-    return await contract.buyItem(...args, options);
+    return await contract['buyItem(string)'](...args, options);
+  };
+
+  const buyBundleERC20 = async (bundleID, payToken) => {
+    const contract = await getBundleSalesContract();
+    return await contract['buyItem(string,address)'](bundleID, payToken);
   };
 
   const cancelBundleListing = async bundleID => {
@@ -64,9 +64,9 @@ export const useBundleSalesContract = () => {
     nftAddresses,
     tokenIds,
     quantities,
+    payToken,
     price,
-    startingTime,
-    allowedAddress
+    startingTime
   ) => {
     const contract = await getBundleSalesContract();
     return await contract.listItem(
@@ -74,9 +74,9 @@ export const useBundleSalesContract = () => {
       nftAddresses,
       tokenIds,
       quantities,
+      payToken,
       price,
-      startingTime,
-      allowedAddress
+      startingTime
     );
   };
 
@@ -103,7 +103,8 @@ export const useBundleSalesContract = () => {
   return {
     getBundleSalesContract,
     getBundleListing,
-    buyBundle,
+    buyBundleETH,
+    buyBundleERC20,
     cancelBundleListing,
     listBundle,
     updateBundleListing,

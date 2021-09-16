@@ -1,41 +1,43 @@
-import { useCallback } from 'react';
-import { ethers } from 'ethers';
-import { useWeb3React } from '@web3-react/core';
+import { ChainId } from '@sushiswap/sdk';
 
 import { calculateGasMargin } from 'utils';
 import { Contracts } from 'constants/networks';
+import useContract from 'hooks/useContract';
 
 import { SALES_CONTRACT_ABI } from './abi';
 
+// eslint-disable-next-line no-undef
+const isMainnet = process.env.REACT_APP_ENV === 'MAINNET';
+const CHAIN = isMainnet ? ChainId.FANTOM : ChainId.FANTOM_TESTNET;
+
 export const useSalesContract = () => {
-  const { chainId } = useWeb3React();
+  const { getContract } = useContract();
 
-  const getSalesContract = useCallback(async () => {
-    await window.ethereum.enable();
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    const signer = provider.getSigner();
+  const getSalesContract = async () =>
+    await getContract(Contracts[CHAIN].sales, SALES_CONTRACT_ABI);
 
-    if (!chainId) return null;
-
-    const contract = new ethers.Contract(
-      Contracts[chainId].sales,
-      SALES_CONTRACT_ABI,
-      signer
-    );
-
-    return contract;
-  }, [chainId]);
-
-  const buyItem = async (nftAddress, tokenId, owner, value, from) => {
+  const buyItemETH = async (nftAddress, tokenId, owner, value, from) => {
     const contract = await getSalesContract();
     const args = [nftAddress, tokenId, owner];
     const options = {
       value,
       from,
     };
-    const gasEstimate = await contract.estimateGas.buyItem(...args, options);
+    const gasEstimate = await contract.estimateGas[
+      'buyItem(address,uint256,address)'
+    ](...args, options);
     options.gasLimit = calculateGasMargin(gasEstimate);
-    return await contract.buyItem(...args, options);
+    return await contract['buyItem(address,uint256,address)'](...args, options);
+  };
+
+  const buyItemERC20 = async (nftAddress, tokenId, payToken, owner) => {
+    const contract = await getSalesContract();
+    return await contract['buyItem(address,uint256,address,address)'](
+      nftAddress,
+      tokenId,
+      payToken,
+      owner
+    );
   };
 
   const cancelListing = async (nftAddress, tokenId) => {
@@ -48,24 +50,36 @@ export const useSalesContract = () => {
     nftAddress,
     tokenId,
     quantity,
+    payToken,
     pricePerItem,
-    startingTime,
-    allowedAddress
+    startingTime
   ) => {
     const contract = await getSalesContract();
     return await contract.listItem(
       nftAddress,
       tokenId,
       quantity,
+      payToken,
       pricePerItem,
-      startingTime,
-      allowedAddress
+      startingTime
     );
   };
 
-  const updateListing = async (nftAddress, tokenId, newPrice) => {
+  const updateListing = async (
+    nftAddress,
+    tokenId,
+    payToken,
+    newPrice
+    // quantity
+  ) => {
     const contract = await getSalesContract();
-    return await contract.updateListing(nftAddress, tokenId, newPrice);
+    return await contract.updateListing(
+      nftAddress,
+      tokenId,
+      payToken,
+      newPrice
+      // quantity
+    );
   };
 
   const createOffer = async (
@@ -97,14 +111,20 @@ export const useSalesContract = () => {
     return await contract.acceptOffer(nftAddress, tokenId, creator);
   };
 
-  const registerRoyalty = async (tokenId, royalty) => {
+  const registerRoyalty = async (nftAddress, tokenId, royalty) => {
     const contract = await getSalesContract();
-    return await contract.registerRoyalty(tokenId, royalty);
+    return await contract.registerRoyalty(nftAddress, tokenId, royalty);
+  };
+
+  const getCollectionRoyalty = async nftAddress => {
+    const contract = await getSalesContract();
+    return await contract.collectionRoyalties(nftAddress);
   };
 
   return {
     getSalesContract,
-    buyItem,
+    buyItemETH,
+    buyItemERC20,
     cancelListing,
     listItem,
     updateListing,
@@ -112,5 +132,6 @@ export const useSalesContract = () => {
     cancelOffer,
     acceptOffer,
     registerRoyalty,
+    getCollectionRoyalty,
   };
 };

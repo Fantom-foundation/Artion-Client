@@ -2,59 +2,65 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useHistory, withRouter, NavLink, Link } from 'react-router-dom';
 import cx from 'classnames';
 import Skeleton from 'react-loading-skeleton';
-import Menu from '@material-ui/core/Menu';
-import { UnsupportedChainIdError, useWeb3React } from '@web3-react/core';
+import { Menu } from '@material-ui/core';
+import { useWeb3React } from '@web3-react/core';
 import { ExpandMore, Search as SearchIcon } from '@material-ui/icons';
 import { useDispatch, useSelector } from 'react-redux';
 import axios from 'axios';
-import { ChainId } from '@sushiswap/sdk';
 
 import WalletConnectActions from 'actions/walletconnect.actions';
 import AuthActions from 'actions/auth.actions';
 import ModalActions from 'actions/modal.actions';
-import HeaderActions from 'actions/header.actions';
 import { shortenAddress } from 'utils';
-import { injected } from 'connectors';
 import { useApi } from 'api';
 import { NETWORK_LABEL } from 'constants/networks';
+import { ADMIN_ADDRESS } from 'constants/index';
 import WFTMModal from 'components/WFTMModal';
+import ModModal from 'components/ModModal';
+import BanCollectionModal from 'components/BanCollectionModal';
 import BanItemModal from 'components/BanItemModal';
 import BoostCollectionModal from 'components/BoostCollectionModal';
+import ConnectWalletModal from 'components/ConnectWalletModal';
 import Identicon from 'components/Identicon';
 
-import logoWhite from 'assets/svgs/logo_white.svg';
-import logoBlue from 'assets/svgs/logo_blue.svg';
-import logoSmallWhite from 'assets/svgs/logo_small_white.svg';
 import logoSmallBlue from 'assets/svgs/logo_small_blue.svg';
 import iconUser from 'assets/svgs/user.svg';
+import iconNotification from 'assets/svgs/notification.svg';
 import iconAdd from 'assets/svgs/add.svg';
+import iconEdit from 'assets/svgs/edit.svg';
 import iconSwap from 'assets/svgs/swap.svg';
-import iconExit from 'assets/svgs/exit.svg';
 
 import styles from './styles.module.scss';
 
-const adminAddress = '0xB7bC6D2666e73F8Cd143a929DB5404e2fc03eA89';
-
-// eslint-disable-next-line no-undef
-const ENV = process.env.REACT_APP_ENV;
-
-const NiftyHeader = ({ light }) => {
+const Header = ({ border }) => {
   const history = useHistory();
   const dispatch = useDispatch();
 
-  const { apiUrl, storageUrl, getAuthToken, getAccountDetails } = useApi();
-  const { account, chainId, activate } = useWeb3React();
+  const {
+    apiUrl,
+    storageUrl,
+    getAuthToken,
+    getAccountDetails,
+    getIsModerator,
+  } = useApi();
+  const { account, chainId, deactivate } = useWeb3React();
 
   const { user } = useSelector(state => state.Auth);
   let isSearchbarShown = useSelector(state => state.HeaderOptions.isShown);
-  const { isConnected: isWalletConnected } = useSelector(
-    state => state.ConnectWallet
+  const { isModerator } = useSelector(state => state.ConnectWallet);
+  const { wftmModalVisible, connectWalletModalVisible } = useSelector(
+    state => state.Modal
   );
-  const { wftmModalVisible } = useSelector(state => state.Modal);
 
   const [anchorEl, setAnchorEl] = useState(null);
   const [loading, setLoading] = useState(false);
   const [searchBarActive, setSearchBarActive] = useState(false);
+  const [isAdding, setIsAdding] = useState(false);
+  const [modModalVisible, setModModalVisible] = useState(false);
+  const [isBan, setIsBan] = useState(false);
+  const [banCollectionModalVisible, setBanCollectionModalVisible] = useState(
+    false
+  );
   const [banItemModalVisible, setBanItemModalVisible] = useState(false);
   const [
     boostCollectionModalVisible,
@@ -76,8 +82,9 @@ const NiftyHeader = ({ light }) => {
     try {
       setLoading(true);
       const token = await getAuthToken(account);
+      const isModerator = await getIsModerator(account);
 
-      dispatch(WalletConnectActions.connectWallet(token));
+      dispatch(WalletConnectActions.connectWallet(token, isModerator));
       dispatch(AuthActions.fetchStart());
       try {
         const { data } = await getAccountDetails(token);
@@ -91,54 +98,7 @@ const NiftyHeader = ({ light }) => {
     }
   };
 
-  const changeNetwork = async () => {
-    if (
-      (ENV === 'MAINNET' && chainId === ChainId.FANTOM) ||
-      (ENV !== 'MAINNET' && chainId === ChainId.FANTOM_TESTNET)
-    )
-      return;
-
-    history.push('/');
-
-    const params =
-      ENV === 'MAINNET'
-        ? {
-            chainId: '0xfa',
-            chainName: 'Fantom Opera',
-            nativeCurrency: {
-              name: 'Fantom',
-              symbol: 'FTM',
-              decimals: 18,
-            },
-            rpcUrls: ['https://rpc.ftm.tools'],
-            blockExplorerUrls: ['https://ftmscan.com'],
-          }
-        : {
-            chainId: '0xfa2',
-            chainName: 'Fantom Opera Testnet',
-            nativeCurrency: {
-              name: 'Fantom',
-              symbol: 'FTM',
-              decimals: 18,
-            },
-            rpcUrls: ['https://rpc.ftm.tools'],
-            blockExplorerUrls: ['https://testnet.ftmscan.com'],
-          };
-
-    const provider = await injected.getProvider();
-    try {
-      await provider.request({
-        method: 'wallet_addEthereumChain',
-        params: [params],
-      });
-      setTimeout(handleConnectWallet, 100);
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
   const init = () => {
-    changeNetwork();
     login();
   };
 
@@ -151,25 +111,8 @@ const NiftyHeader = ({ light }) => {
   }, [account, chainId]);
 
   const handleConnectWallet = () => {
-    activate(injected, undefined, true)
-      .then(() => {
-        if (account) login();
-      })
-      .catch(async error => {
-        if (error instanceof UnsupportedChainIdError) {
-          await activate(injected);
-          if (account) login();
-        }
-      });
+    dispatch(ModalActions.showConnectWalletModal());
   };
-
-  useEffect(() => {
-    dispatch(HeaderActions.toggleSearchbar(false));
-
-    if (!isWalletConnected) {
-      handleConnectWallet();
-    }
-  }, []);
 
   const resetResults = () => {
     setAccounts([]);
@@ -205,7 +148,7 @@ const NiftyHeader = ({ light }) => {
         },
       } = await axios({
         method: 'post',
-        url: `${apiUrl()}/info/searchNames`,
+        url: `${apiUrl}/info/searchNames`,
         data: JSON.stringify({ name: word }),
         headers: {
           'Content-Type': 'application/json',
@@ -235,6 +178,7 @@ const NiftyHeader = ({ light }) => {
   };
 
   const handleSignOut = () => {
+    deactivate();
     dispatch(WalletConnectActions.disconnectWallet());
     dispatch(AuthActions.signOut());
     handleMenuClose();
@@ -253,8 +197,18 @@ const NiftyHeader = ({ light }) => {
     handleMenuClose();
   };
 
+  const goToNotificationSettings = () => {
+    history.push(`/settings/notification`);
+    handleMenuClose();
+  };
+
   const handleCreateCollection = () => {
-    history.push('/collection/add');
+    history.push('/collection/create');
+    handleMenuClose();
+  };
+
+  const handleRegisterCollection = () => {
+    history.push('/collection/register');
     handleMenuClose();
   };
 
@@ -263,7 +217,36 @@ const NiftyHeader = ({ light }) => {
     handleMenuClose();
   };
 
-  const banItem = () => {
+  const addMod = () => {
+    setIsAdding(true);
+    setModModalVisible(true);
+    handleMenuClose();
+  };
+
+  const removeMod = () => {
+    setIsAdding(false);
+    setModModalVisible(true);
+    handleMenuClose();
+  };
+
+  const reviewCollections = () => {
+    history.push('/collection/review');
+    handleMenuClose();
+  };
+
+  const banCollection = () => {
+    setIsBan(true);
+    setBanCollectionModalVisible(true);
+    handleMenuClose();
+  };
+
+  const unbanCollection = () => {
+    setIsBan(false);
+    setBanCollectionModalVisible(true);
+    handleMenuClose();
+  };
+
+  const banItems = () => {
     setBanItemModalVisible(true);
     handleMenuClose();
   };
@@ -286,7 +269,7 @@ const NiftyHeader = ({ light }) => {
         list: styles.menuList,
       }}
     >
-      {isWalletConnected && (
+      {account && (
         <div
           className={cx(styles.menuItem, styles.topItem)}
           onClick={goToMyProfile}
@@ -295,28 +278,64 @@ const NiftyHeader = ({ light }) => {
           My Profile
         </div>
       )}
+      <div className={styles.menuItem} onClick={goToNotificationSettings}>
+        <img src={iconNotification} className={styles.menuIcon} />
+        Notification Settings
+      </div>
       <div className={styles.menuItem} onClick={handleCreateCollection}>
         <img src={iconAdd} className={styles.menuIcon} />
-        Register Collection
+        Create New Collection
+      </div>
+      <div className={styles.menuItem} onClick={handleRegisterCollection}>
+        <img src={iconEdit} className={styles.menuIcon} />
+        Register Existing Collection
       </div>
       <div className={styles.menuItem} onClick={openWrapStation}>
         <img src={iconSwap} className={styles.menuIcon} />
         FTM / WFTM Station
       </div>
       <div className={styles.menuSeparator} />
-      {account?.toLowerCase() === adminAddress.toLowerCase() && (
-        <>
-          <div className={styles.menuItem} onClick={banItem}>
-            Ban Item (Admin only)
-          </div>
-          <div className={styles.menuItem} onClick={boostCollection}>
-            Boost Collection (Admin only)
-          </div>
-          <div className={styles.menuSeparator} />
-        </>
-      )}
-      <div className={styles.menuItem} onClick={handleSignOut}>
-        <img src={iconExit} className={styles.menuIcon} />
+      {account?.toLowerCase() === ADMIN_ADDRESS.toLowerCase()
+        ? [
+            <div key={0} className={styles.menuItem} onClick={addMod}>
+              Add Mod
+            </div>,
+            <div key={1} className={styles.menuItem} onClick={removeMod}>
+              Remove Mod
+            </div>,
+            <div
+              key={2}
+              className={styles.menuItem}
+              onClick={reviewCollections}
+            >
+              Review Collections
+            </div>,
+            <div key={3} className={styles.menuItem} onClick={banCollection}>
+              Ban Collection
+            </div>,
+            <div key={4} className={styles.menuItem} onClick={unbanCollection}>
+              Unban Collection
+            </div>,
+            <div key={5} className={styles.menuItem} onClick={banItems}>
+              Ban Items
+            </div>,
+            <div key={6} className={styles.menuItem} onClick={boostCollection}>
+              Boost Collection
+            </div>,
+            <div key={7} className={styles.menuSeparator} />,
+          ]
+        : isModerator
+        ? [
+            <div key={1} className={styles.menuItem} onClick={banCollection}>
+              Ban Collection
+            </div>,
+            <div key={2} className={styles.menuItem} onClick={banItems}>
+              Ban Items
+            </div>,
+            <div key={3} className={styles.menuSeparator} />,
+          ]
+        : null}
+      <div className={styles.signOut} onClick={handleSignOut}>
         Sign Out
       </div>
     </Menu>
@@ -328,7 +347,7 @@ const NiftyHeader = ({ light }) => {
         <div className={styles.searchbar}>
           <SearchIcon className={styles.searchicon} />
           <input
-            placeholder="Search"
+            placeholder="Search items, collections and accounts"
             className={styles.searchinput}
             onChange={e => handleSearch(e.target.value)}
             onFocus={() => setSearchBarActive(true)}
@@ -403,7 +422,7 @@ const NiftyHeader = ({ light }) => {
                           tk.thumbnailPath &&
                           (tk.thumbnailPath.length > 10 ? (
                             <img
-                              src={`${storageUrl()}/image/${tk.thumbnailPath}`}
+                              src={`${storageUrl}/image/${tk.thumbnailPath}`}
                             />
                           ) : tk.thumbnailPath === '.' ? (
                             <img src={tk.imageURL} />
@@ -448,24 +467,15 @@ const NiftyHeader = ({ light }) => {
   );
 
   return (
-    <div className={cx(styles.header, light && styles.lightBg)}>
+    <div className={cx(styles.header, border && styles.hasBorder)}>
       <div className={styles.left}>
         <Link to="/" className={styles.logo}>
-          <img
-            src={light ? logoBlue : logoWhite}
-            alt="logo"
-            className={styles.logoBig}
-          />
-          <img
-            src={light ? logoSmallBlue : logoSmallWhite}
-            alt="logo"
-            className={styles.logoSmall}
-          />
+          <img src={logoSmallBlue} alt="logo" />
         </Link>
         {isSearchbarShown && renderSearchBox()}
         <div className={styles.secondmenu}>
           <NavLink
-            to="/exploreall"
+            to="/explore"
             className={cx(styles.menuLink, styles.link)}
             activeClassName={styles.active}
           >
@@ -483,7 +493,7 @@ const NiftyHeader = ({ light }) => {
       <div className={styles.menu}>
         {isSearchbarShown && renderSearchBox()}
         <NavLink
-          to="/exploreall"
+          to="/explore"
           className={cx(styles.menuLink, styles.link)}
           activeClassName={styles.active}
         >
@@ -496,16 +506,16 @@ const NiftyHeader = ({ light }) => {
         >
           Create
         </NavLink>
-        {isWalletConnected ? (
+        {account ? (
           <div
             className={cx(styles.account, styles.menuLink)}
             onClick={handleProfileMenuOpen}
           >
             {loading ? (
               <Skeleton className={styles.avatar} />
-            ) : user.imageHash ? (
+            ) : user?.imageHash ? (
               <img
-                src={`https://gateway.pinata.cloud/ipfs/${user.imageHash}`}
+                src={`https://gateway.pinata.cloud/ipfs/${user?.imageHash}`}
                 width="24"
                 height="24"
                 className={styles.avatar}
@@ -522,7 +532,7 @@ const NiftyHeader = ({ light }) => {
                 {loading ? (
                   <Skeleton width={120} />
                 ) : (
-                  user.alias || shortenAddress(account)
+                  user?.alias || shortenAddress(account)
                 )}
               </div>
               <div className={styles.network}>
@@ -548,6 +558,16 @@ const NiftyHeader = ({ light }) => {
         visible={wftmModalVisible}
         onClose={() => dispatch(ModalActions.hideWFTMModal())}
       />
+      <ModModal
+        isAdding={isAdding}
+        visible={modModalVisible}
+        onClose={() => setModModalVisible(false)}
+      />
+      <BanCollectionModal
+        visible={banCollectionModalVisible}
+        isBan={isBan}
+        onClose={() => setBanCollectionModalVisible(false)}
+      />
       <BanItemModal
         visible={banItemModalVisible}
         onClose={() => setBanItemModalVisible(false)}
@@ -556,8 +576,12 @@ const NiftyHeader = ({ light }) => {
         visible={boostCollectionModalVisible}
         onClose={() => setBoostCollectionModalVisible(false)}
       />
+      <ConnectWalletModal
+        visible={connectWalletModalVisible}
+        onClose={() => dispatch(ModalActions.hideConnectWalletModal())}
+      />
     </div>
   );
 };
 
-export default withRouter(NiftyHeader);
+export default withRouter(Header);

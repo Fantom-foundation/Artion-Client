@@ -3,22 +3,15 @@
   width: 100%;
   height: 100vh;
   overflow-y: auto;
-  padding-top: 130px;
+  padding-top: 100px;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
   align-items: center;
-
-  &.withHeader {
-    padding-top: 186px;
-  }
 }
 
 .header {
-  position: absolute;
   width: 100%;
-  left: 0;
-  top: 130px;
   box-sizing: border-box;
   padding-right: 40px;
   display: flex;
@@ -27,8 +20,8 @@
 }
 
 .headerButton {
-  min-width: 200px;
-  height: 56px;
+  min-width: 168px;
+  height: 48px;
   padding: 0 15px;
   box-sizing: border-box;
   border-radius: 8px;
@@ -97,13 +90,14 @@
       transform: translate(-50%, -50%);
     }
 
-    img {
+    .content {
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
       object-fit: contain;
+      border: none;
     }
   }
 }
@@ -147,7 +141,7 @@
   display: flex;
   margin-bottom: 10px;
   font-weight: 400;
-  font-size: 18px;
+  font-size: 14px;
 
   &:last-child {
     margin-bottom: 0;
@@ -165,7 +159,7 @@
 }
 
 .collectionDescription {
-  font-size: 18px;
+  font-size: 14px;
 }
 
 .socialLinks {
@@ -203,27 +197,34 @@
 
 .itemInfo {
   display: none;
+  position: relative;
+  overflow: hidden;
 }
 
 .itemInfoCont {
   margin: 40px 0;
   border-radius: 10px;
-  border: 1px solid #2479FA80;
+  border: 1px solid #EAEAF1;
   overflow: hidden;
 }
 
 .itemCategory {
-  font-size: 21px;
-  font-weight: 500;
-  color: #777;
+  font-size: 16px;
+  font-weight: 400;
+  color: #1969FF;
+  margin-right: 110px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .itemName {
   font-weight: 700;
-  font-size: 26px;
-  line-height: 26px;
+  font-size: 32px;
+  line-height: 32px;
   color: #3D3D3D;
   margin-top: 16px;
+  margin-right: 110px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -246,22 +247,22 @@
   margin-top: 34px;
   display: flex;
   align-items: center;
-  font-size: 22px;
-  color: rgba(0, 0, 0, .6);
+  font-size: 14px;
+  color: #A2A2AD;
 }
 
 .itemOwner {
   display: flex;
   align-items: center;
-  font-size: 22px;
-  color: rgba(0, 0, 0, .6);
+  font-size: 14px;
+  color: #A2A2AD;
 }
 
 .ownerAvatar {
-  width: 32px;
-  height: 32px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
-  margin-right: 10px;
+  margin-right: 11px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -304,6 +305,7 @@
 }
 
 .favIcon {
+  width: 16px !important;
   &:hover {
     color: #007BFF;
   }
@@ -320,7 +322,7 @@
   align-items: center;
   justify-content: space-between;
   margin-bottom: 10px;
-  font-size: 16px;
+  font-size: 14px;
 
   &:last-child {
     margin-bottom: 0;
@@ -336,14 +338,15 @@
 .listing,
 .offer,
 .bundleItem {
-  padding-left: 14px;
+  padding-left: 21px;
   height: 50px;
   box-sizing: border-box;
-  border-bottom: 1px solid #BBB;
+  border-bottom: 1px solid #EAEAF1;
   display: flex;
   align-items: center;
-  font-size: 20px;
-  color: #3D3D3D;
+  font-size: 14px;
+  font-weight: 400;
+  color: #121223;
 }
 
 .items {
@@ -395,6 +398,35 @@
   font-size: 18px;
 }
 
+.noOffers {
+  padding-top: 40px;
+  padding-bottom: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.noOffersLabel {
+  font-weight: 400;
+  font-size: 14px;
+  color: #A2A2AD;
+}
+
+.makeOffer {
+  margin-top: 27px;
+  width: 168px;
+  height: 48px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #2479FA;
+  font-size: 16px;
+  font-weight: 700;
+  color: #FFF;
+  cursor: pointer;
+}
+
 .heading {
   background-color: #F6F7F9;
 }
@@ -430,6 +462,8 @@
 
 .price {
   flex: 2;
+  display: flex;
+  align-items: center;
 }
 
 .quantity {
@@ -443,6 +477,13 @@
 .buy {
   flex-basis: 100px;
   padding: 5px 4px;
+}
+
+.tokenIcon {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  margin-right: 6px;
 }
 
 .buyButton {
@@ -474,16 +515,22 @@
 .result {
   font-size: 20px;
   font-weight: bold;
+  display: flex;
+  align-items: center;
 }
 
 .bidtitle {
   font-size: 18px;
+  display: flex;
+  align-items: center;
 }
 
 .bidAmount {
   font-size: 20px;
   font-weight: bold;
   margin-top: 10px;
+  display: flex;
+  align-items: center;
 }
 
 .placeBid,
@@ -532,8 +579,8 @@
 
 .tradeHistoryTitle {
   font-weight: 700;
-  font-size: 22px;
-  color: #3D3D3D;
+  font-size: 16px;
+  color: #121223;
 }
 
 .filter {
@@ -541,8 +588,8 @@
 }
 
 .filterIcon {
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
 }
 
 .histories {
@@ -558,8 +605,9 @@
   display: flex;
   align-items: center;
   padding: 0 14px;
-  font-size: 20px;
-  color: #3D3D3D;
+  font-size: 14px;
+  font-weight: 400;
+  color: #121223;
   border-bottom: 1px solid rgba(0, 0, 0, .1);
 
   &.heading {
@@ -583,6 +631,8 @@
 }
 
 .historyPrice {
+  display: flex;
+  align-items: center;
   flex: 2;
 }
 
@@ -590,8 +640,81 @@
   flex: 2;
 }
 
+.loadingIndicator {
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.itemsList {
+  display: flex;
+  overflow-x: auto;
+  padding-bottom: 20px;
+  margin-bottom: -20px;
+}
+
+.moreItem {
+  width: 240px;
+  flex: 0 0 240px;
+  margin-right: 20px;
+}
+
 .itemInfoWrapper {
   margin: 40px 0;
+  position: relative;
+}
+
+.itemMenu {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: flex;
+  border: 1px solid #EAEAF1;
+  border-radius: 6px;
+}
+
+.itemMenuBtn {
+  width: 48px;
+  height: 48px;
+  border-right: 1px solid #EAEAF1;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+
+  &:last-child {
+    border-right: 0;
+  }
+}
+
+.itemMenuIcon {
+  width: 17px;
+  height: 17px;
+  color: #A2A2AD;
+}
+
+.shareMenu {
+  transform: translateY(55px) !important;
+}
+
+.shareMenuList {
+  padding: 0 !important;
+}
+
+.menuItem {
+  height: 48px;
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  font-weight: 400;
+  color: #121223;
+
+  img {
+    width: 20px;
+    margin-right: 16px;
+  }
 }
 
 .infoPanel {
@@ -600,11 +723,91 @@
 
 .panelWrapper {
   min-width: 550px;
-  margin: 40px 0;
+  margin: 20px 0;
   border-radius: 10px;
-  border: 1px solid #2479FA80;
+  border: 1px solid #EAEAF1;
   box-sizing: border-box;
   overflow: hidden;
+}
+
+.unlockableLabel {
+  font-weight: 500;
+  font-size: 18px;
+  color: #121223;
+}
+
+.unlockableContent {
+  width: 100%;
+  height: 100px;
+  resize: none;
+  margin: 20px 0 0;
+  outline: none;
+  border-radius: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  padding: 8px 16px;
+  box-sizing: border-box;
+  font-size: 16px;
+}
+
+.bestBuy {
+  padding: 14px 20px 20px;
+  margin: 20px 0;
+  border-radius: 10px;
+  border: 1px solid #EAEAF1;
+  box-sizing: border-box;
+}
+
+.currentPriceLabel {
+  font-size: 18px;
+  font-weight: 700;
+  color: #A2A2AD;
+}
+
+.currentPriceWrapper {
+  margin-top: 18px;
+  display: flex;
+  align-items: center;
+}
+
+.tokenLogo {
+  width: 24px;
+  height: 24px;
+  margin-right: 8px;
+
+  img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+  }
+}
+
+.currentPrice {
+  font-weight: 700;
+  font-size: 28px;
+  color: #121223;
+  margin-right: 8px;
+}
+
+.currentPriceUSD {
+  font-weight: 400;
+  font-size: 14px;
+  color: #A2A2AD;
+}
+
+.revealBtn,
+.buyNow {
+  margin-top: 20px;
+  width: 100%;
+  height: 48px;
+  border-radius: 10px;
+  background-color: #2479FA;
+  font-weight: 700;
+  font-size: 16px;
+  color: #FFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
 }
 
 .chartWrapper {
@@ -647,8 +850,8 @@
 
 .menuTitle {
   font-weight: 700;
-  font-size: 18px;
-  line-height: 18px;
+  font-size: 16px;
+  line-height: 16px;
   color: #3D3D3D;
 }
 
@@ -657,12 +860,13 @@
   align-items: center;
   margin-top: 16px;
   font-weight: 500;
-  font-size: 18px;
+  font-size: 14px;
   line-height: 18px;
   color: rgba(0, 0, 0, .4);
   cursor: pointer;
 
   img {
+    width: 16px;
     margin-left: 32px;
     display: none;
   }
@@ -676,7 +880,7 @@
   }
 }
 
-@media only screen and (max-width: 1100px) {
+@media only screen and (max-width: 1180px) {
   .topContainer {
     flex-direction: column;
   }
@@ -684,6 +888,7 @@
   .itemSummary {
     max-width: initial;
     display: flex;
+    align-items: flex-start;
   }
 
   .itemMedia {
@@ -698,6 +903,7 @@
     flex: 1;
     display: block;
     margin: 40px 0 40px 40px;
+    width: 100%;
   }
 
   .itemInfoCont {
@@ -710,6 +916,22 @@
 
   .infoPanel {
     display: block;
+  }
+}
+
+@media only screen and (max-width: 960px) {
+  .itemStats {
+    flex-wrap: wrap;
+  }
+
+  .itemOwner {
+    flex-basis: 100%;
+  }
+
+  .itemViews {
+    margin-left: 0;
+    margin-top: 20px;
+    margin-right: 20px;
   }
 }
 
@@ -734,9 +956,7 @@
   .container {
     padding-top: 155px;
   }
-}
 
-@media only screen and (max-width: 600px) {
   .header {
     position: relative;
     top: inherit;
@@ -747,8 +967,14 @@
   .headerButton {
     margin-right: 0;
     margin-bottom: 16px;
+    height: 48px;
+    font-size: 16px;
+    width: calc(100% - 32px);
+    max-width: 300px;
   }
+}
 
+@media only screen and (max-width: 600px) {
   .topContainer {
     padding: 0 30px;
   }
@@ -788,5 +1014,10 @@
   .listings,
   .offers {
     min-width: 550px;
+  }
+
+  .moreItem {
+    width: calc(100vw - 130px);
+    flex-basis: calc(100vw - 130px);
   }
 }

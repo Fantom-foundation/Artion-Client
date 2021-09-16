@@ -14,9 +14,7 @@
 }
 
 .paper {
-  width: calc(100% - 80px);
-  max-width: 600px;
-  padding: 40px;
+  width: 640px;
   border-radius: 10px;
   box-sizing: border-box;
   background-color: #FFF;
@@ -25,22 +23,48 @@
   color: #3D3D3D;
 }
 
+.header {
+  height: 70px;
+  border-bottom: 1px solid #EAEAF1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+}
+
 .title {
-  font-weight: 900;
-  font-size: 28px;
-  text-align: center;
-  margin: 0 0 40px;
+  font-weight: 700;
+  font-size: 18px;
+  color: #121223;
+}
+
+.closeButton {
+  cursor: pointer;
+
+  img {
+    width: 16px;
+  }
+}
+
+.body {
+  padding: 24px;
 }
 
 .formGroup {
   margin-bottom: 25px;
   position: relative;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
 }
 
 .formLabel {
-  margin: 0 0 8px;
+  margin: 0 0 11px 12px;
+  font-weight: 400;
   font-size: 18px;
-  color: #3D3D3D;
+  line-height: 22px;
+  color: #121223;
 }
 
 .formInputCont {
@@ -49,7 +73,7 @@
   display: flex;
   align-items: center;
   border-radius: 10px;
-  border: 2px solid rgba(0, 0, 0, .1);
+  border: 1px solid #EAEAF1;
 }
 
 .formInput {
@@ -66,7 +90,7 @@
 .usdPrice {
   min-width: 130px;
   height: 50px;
-  border-left: 1.5px solid rgba(0, 0, 0, .1);
+  border-left: 1px solid #EAEAF1;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -91,14 +115,15 @@
 .footer {
   display: flex;
   justify-content: center;
+  margin-bottom: 24px;
 }
 
 .button {
-  width: 200px;
-  height: 56px;
+  width: 169px;
+  height: 48px;
   border-radius: 8px;
   font-weight: 700;
-  font-size: 18px;
+  font-size: 16px;
   background-color: #007bff;
   box-shadow: none;
   display: flex;
@@ -110,14 +135,7 @@
 .save {
   background-color: #1969FF;
   color: #FFF;
-  margin-right: 40px
 };
-
-.cancel {
-  background-color: #FFF;
-  border: 1px solid #1969FF;
-  color: #1969FF;
-}
 
 .avatarBox {
   position: relative;
@@ -143,7 +161,7 @@
 
 .itemList {
   height: 300px;
-  border: 2px solid rgba(0, 0, 0, 0.1);
+  border: 1px solid #EAEAF1;
   border-radius: 12px;
   overflow-y: auto;
   overflow-x: hidden;
@@ -152,7 +170,7 @@
 .item {
   display: flex;
   align-items: center;
-  padding: 4px 8px;
+  padding: 10px 16px;
   user-select: none;
   cursor: pointer;
 
@@ -162,12 +180,16 @@
 
   &.selected {
     background-color: rgba(25, 105, 255, 0.2);
+
+    .itemName {
+      font-weight: 700;
+    }
   }
 }
 
 .imageBox {
-  width: 50px;
-  height: 50px;
+  width: 28px;
+  height: 28px;
   border-radius: 6px;
   overflow: hidden;
   position: relative;
@@ -188,17 +210,13 @@
 }
 
 .itemName {
-  font-weight: 500;
+  font-weight: 400;
   font-size: 16px;
-  color: #3D3D3D;
+  color: #121223;
   margin-left: 12px;
 }
 
 @media only screen and (max-width: 600px) {
-  .paper {
-    padding: 40px 20px;
-  }
-
   .title {
     font-size: 20px;
   }

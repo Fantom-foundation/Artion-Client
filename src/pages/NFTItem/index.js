@@ -1,4 +1,11 @@
-import React, { useEffect, useState, useRef, Suspense } from 'react';
+import React, {
+  useEffect,
+  useState,
+  useRef,
+  useCallback,
+  useMemo,
+  Suspense,
+} from 'react';
 import { useParams, Link, useHistory } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import cx from 'classnames';
@@ -8,6 +15,8 @@ import Loader from 'react-loader-spinner';
 import 'react-loader-spinner/dist/loader/css/react-spinner-loader.css';
 import Skeleton from 'react-loading-skeleton';
 import ReactResizeDetector from 'react-resize-detector';
+import ReactPlayer from 'react-player';
+import { CopyToClipboard } from 'react-copy-to-clipboard';
 import {
   LineChart,
   XAxis,
@@ -21,12 +30,21 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye } from '@fortawesome/free-solid-svg-icons';
 import { useWeb3React } from '@web3-react/core';
 import { ClipLoader } from 'react-spinners';
-import { Tooltip, Menu } from '@material-ui/core';
+import { Tooltip, Menu, MenuItem } from '@material-ui/core';
 import {
   People as PeopleIcon,
   ViewModule as ViewModuleIcon,
   FavoriteBorder as FavoriteBorderIcon,
   Favorite as FavoriteIcon,
+  Timeline as TimelineIcon,
+  LocalOffer as LocalOfferIcon,
+  Toc as TocIcon,
+  Label as LabelIcon,
+  Ballot as BallotIcon,
+  Loyalty as LoyaltyIcon,
+  VerticalSplit as VerticalSplitIcon,
+  Subject as SubjectIcon,
+  Redeem as RedeemIcon,
 } from '@material-ui/icons';
 import toast from 'react-hot-toast';
 
@@ -35,14 +53,17 @@ import Identicon from 'components/Identicon';
 import { useApi } from 'api';
 import {
   useNFTContract,
-  useWFTMContract,
   useSalesContract,
   useAuctionContract,
   useBundleSalesContract,
+  getSigner,
 } from 'contracts';
 import { shortenAddress, formatNumber } from 'utils';
 import { Contracts } from 'constants/networks';
 import showToast from 'utils/toast';
+import NFTCard from 'components/NFTCard';
+import TxButton from 'components/TxButton';
+import TransferModal from 'components/TransferModal';
 import SellModal from 'components/SellModal';
 import OfferModal from 'components/OfferModal';
 import AuctionModal from 'components/AuctionModal';
@@ -52,6 +73,10 @@ import LikesModal from 'components/LikesModal';
 import Header from 'components/header';
 import SuspenseImg from 'components/SuspenseImg';
 import ModalActions from 'actions/modal.actions';
+import CollectionsActions from 'actions/collections.actions';
+import HeaderActions from 'actions/header.actions';
+import useTokens from 'hooks/useTokens';
+import usePrevious from 'hooks/usePrevious';
 
 import webIcon from 'assets/svgs/web.svg';
 import discordIcon from 'assets/svgs/discord.svg';
@@ -60,6 +85,10 @@ import twitterIcon from 'assets/svgs/twitter.svg';
 import mediumIcon from 'assets/svgs/medium.svg';
 import filterIcon from 'assets/svgs/filter.svg';
 import checkIcon from 'assets/svgs/check.svg';
+import shareIcon from 'assets/svgs/share.svg';
+import iconArtion from 'assets/svgs/logo_small_blue.svg';
+import iconFacebook from 'assets/imgs/facebook.png';
+import iconTwitter from 'assets/svgs/twitter_blue.svg';
 
 import styles from './styles.module.scss';
 
@@ -72,29 +101,27 @@ const filters = ['Trade History', 'Transfer History'];
 
 // eslint-disable-next-line no-undef
 const ENV = process.env.REACT_APP_ENV;
+const CHAIN = ENV === 'MAINNET' ? ChainId.FANTOM : ChainId.FANTOM_TESTNET;
 
 const NFTItem = () => {
   const dispatch = useDispatch();
   const history = useHistory();
 
   const {
+    explorerUrl,
     storageUrl,
     getBundleDetails,
-    fetchTokenURI,
+    fetchItemDetails,
     increaseBundleViewCount,
     increaseViewCount,
-    getListings,
-    getOffers,
     getBundleOffers: _getBundleOffers,
-    getTradeHistory,
     getBundleTradeHistory: _getBundleTradeHistory,
     getTransferHistory,
     fetchCollection,
+    fetchCollections,
     getUserAccountDetails,
-    getTokenType,
     get1155Info,
     getTokenHolders,
-    getItemLikes,
     getBundleLikes,
     isLikingItem,
     isLikingBundle,
@@ -102,23 +129,26 @@ const NFTItem = () => {
     likeBundle,
     getItemLikeUsers,
     getBundleLikeUsers,
+    getItemsLiked,
+    getNonce,
+    retrieveUnlockableContent,
   } = useApi();
-  const { getNFTContract } = useNFTContract();
   const {
-    wftmAddress,
-    getWFTMBalance,
-    getAllowance,
-    approve,
-  } = useWFTMContract();
+    getERC20Contract,
+    getERC721Contract,
+    getERC1155Contract,
+  } = useNFTContract();
   const {
     getSalesContract,
-    buyItem,
+    buyItemETH,
+    buyItemERC20,
     cancelListing,
     listItem,
     updateListing,
     createOffer,
     cancelOffer,
     acceptOffer,
+    getCollectionRoyalty,
   } = useSalesContract();
   const {
     getAuctionContract,
@@ -136,7 +166,8 @@ const NFTItem = () => {
   const {
     getBundleSalesContract,
     getBundleListing,
-    buyBundle,
+    buyBundleETH,
+    buyBundleERC20,
     cancelBundleListing,
     listBundle,
     updateBundleListing,
@@ -146,6 +177,7 @@ const NFTItem = () => {
   } = useBundleSalesContract();
 
   const { addr: address, id: tokenID, bundleID } = useParams();
+  const { getTokenByAddress, tokens } = useTokens();
 
   const { account, chainId } = useWeb3React();
 
@@ -173,13 +205,17 @@ const NFTItem = () => {
   const [ownerInfoLoading, setOwnerInfoLoading] = useState(false);
   const [tokenOwnerLoading, setTokenOwnerLoading] = useState(false);
   const tokenType = useRef();
+  const contentType = useRef();
   const [tokenInfo, setTokenInfo] = useState();
-  const holders = useRef([]);
+  const [holders, setHolders] = useState([]);
   const likeUsers = useRef([]);
   const [collections, setCollections] = useState([]);
   const [collection, setCollection] = useState();
   const [collectionLoading, setCollectionLoading] = useState(false);
+  const [fetchInterval, setFetchInterval] = useState(null);
+  const [collectionRoyalty, setCollectionRoyalty] = useState(null);
 
+  const [transferModalVisible, setTransferModalVisible] = useState(false);
   const [sellModalVisible, setSellModalVisible] = useState(false);
   const [offerModalVisible, setOfferModalVisible] = useState(false);
   const [auctionModalVisible, setAuctionModalVisible] = useState(false);
@@ -187,6 +223,7 @@ const NFTItem = () => {
   const [ownersModalVisible, setOwnersModalVisible] = useState(false);
   const [likesModalVisible, setLikesModalVisible] = useState(false);
 
+  const [transferring, setTransferring] = useState(false);
   const [listingItem, setListingItem] = useState(false);
   const [cancelingListing, setCancelingListing] = useState(false);
   const [priceUpdating, setPriceUpdating] = useState(false);
@@ -207,9 +244,13 @@ const NFTItem = () => {
   const [isLiking, setIsLiking] = useState(false);
   const [isLike, setIsLike] = useState(false);
   const [liked, setLiked] = useState();
+  const [hasUnlockable, setHasUnlockable] = useState(false);
+  const [revealing, setRevealing] = useState(false);
+  const [unlockableContent, setUnlockableContent] = useState('');
 
   const [bid, setBid] = useState(null);
   const [winner, setWinner] = useState(null);
+  const [winningToken, setWinningToken] = useState(null);
   const [winningBid, setWinningBid] = useState(null);
   const [views, setViews] = useState();
   const [now, setNow] = useState(new Date());
@@ -221,23 +262,72 @@ const NFTItem = () => {
   const offers = useRef([]);
   const tradeHistory = useRef([]);
   const transferHistory = useRef([]);
+  const moreItems = useRef([]);
+  const [prices, setPrices] = useState({});
+  const [priceInterval, setPriceInterval] = useState(null);
 
+  const [likeCancelSource, setLikeCancelSource] = useState(null);
   const [filter, setFilter] = useState(0);
+  const [shareAnchorEl, setShareAnchorEl] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
   const isMenuOpen = Boolean(anchorEl);
 
-  const { isConnected: isWalletConnected, authToken } = useSelector(
-    state => state.ConnectWallet
-  );
+  const prevSalesContract = useRef(null);
+  const prevAuctionContract = useRef(null);
+
+  const { authToken } = useSelector(state => state.ConnectWallet);
+  const prevAuthToken = usePrevious(authToken);
 
   const isLoggedIn = () => {
     return (
-      isWalletConnected &&
+      account &&
       (ENV === 'MAINNET'
         ? chainId === ChainId.FANTOM
         : chainId === ChainId.FANTOM_TESTNET)
     );
   };
+
+  useEffect(() => {
+    dispatch(HeaderActions.toggleSearchbar(true));
+  }, []);
+
+  const getPrices = async () => {
+    try {
+      const salesContract = await getSalesContract();
+      const data = await Promise.all(
+        tokens.map(async token => [
+          token.address,
+          await salesContract.getPrice(
+            token.address || ethers.constants.AddressZero
+          ),
+        ])
+      );
+      const _prices = {};
+      data.map(([addr, price]) => {
+        _prices[addr] = parseFloat(ethers.utils.formatUnits(price, 18));
+      });
+      setPrices(_prices);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  useEffect(() => {
+    if (!tokens) return;
+
+    if (priceInterval) {
+      clearInterval(priceInterval);
+    }
+
+    getPrices();
+    setPriceInterval(setInterval(getPrices, 1000 * 10));
+
+    return () => {
+      if (priceInterval) {
+        clearInterval(priceInterval);
+      }
+    };
+  }, [tokens]);
 
   const getBundleInfo = async () => {
     setLoading(true);
@@ -246,10 +336,14 @@ const NFTItem = () => {
       setBundleInfo(data.bundle);
       setCreator(data.bundle.creator);
       setOwner(data.bundle.owner);
-      bundleListing.current = await getBundleListing(
+      const _bundleListing = await getBundleListing(
         data.bundle.owner,
         bundleID
       );
+      if (_bundleListing) {
+        _bundleListing.token = getTokenByAddress(data.bundle.paymentToken);
+      }
+      bundleListing.current = _bundleListing;
       const items = await Promise.all(
         data.items.map(async item => {
           try {
@@ -275,50 +369,86 @@ const NFTItem = () => {
       );
       setCollections(collections);
     } catch {
-      console.log('Bundle does not exist');
       history.replace('/404');
     }
     setLoading(false);
   };
 
-  const getTokenURI = async () => {
+  const getItemDetails = async () => {
     setLoading(true);
+    setTokenOwnerLoading(true);
+    setHistoryLoading(true);
+    tradeHistory.current = [];
     try {
-      const { data: tokenURI } = await fetchTokenURI(address, tokenID);
-      const { data } = await axios.get(tokenURI);
-      setInfo(data);
-    } catch {
-      console.log('Token URI not available');
-      history.replace('/404');
-    }
-    setLoading(false);
-  };
+      const {
+        data: {
+          contentType: _contentType,
+          history,
+          likes,
+          listings: _listings,
+          offers: _offers,
+          nfts,
+          tokenType: type,
+          uri,
+          hasUnlockable: _hasUnlockable,
+        },
+      } = await fetchItemDetails(address, tokenID);
 
-  const getTokenOwner = async () => {
-    try {
-      setTokenOwnerLoading(true);
-      const type = await getTokenType(address);
-      tokenType.current = type;
-      if (type === 721) {
-        const contract = await getNFTContract(address);
-        const res = await contract.ownerOf(tokenID);
-        setOwner(res);
-      } else if (type === 1155) {
-        const { data: _tokenInfo } = await get1155Info(address, tokenID);
-        setTokenInfo(_tokenInfo);
-        try {
-          const { data: _holders } = await getTokenHolders(address, tokenID);
-          holders.current = _holders;
-        } catch {
-          holders.current = [];
+      contentType.current = _contentType;
+      tradeHistory.current = history
+        .sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1))
+        .map(history => ({
+          ...history,
+          token: getTokenByAddress(history.paymentToken),
+        }));
+      setLiked(likes);
+      setHasUnlockable(_hasUnlockable);
+      listings.current = _listings.map(listing => ({
+        ...listing,
+        token: getTokenByAddress(listing.paymentToken),
+      }));
+      offers.current = _offers.map(offer => ({
+        ...offer,
+        token: getTokenByAddress(offer.paymentToken),
+      }));
+      moreItems.current = nfts;
+
+      try {
+        tokenType.current = type;
+        if (type === 721) {
+          const contract = await getERC721Contract(address);
+          const res = await contract.ownerOf(tokenID);
+          setOwner(res);
+        } else if (type === 1155) {
+          const { data: _tokenInfo } = await get1155Info(address, tokenID);
+          setTokenInfo(_tokenInfo);
+          try {
+            const { data: _holders } = await getTokenHolders(address, tokenID);
+            setHolders(_holders);
+          } catch {
+            setHolders([]);
+          }
+          setOwner(null);
         }
+      } catch {
         setOwner(null);
       }
+
+      const { data } = await axios.get(uri);
+      setInfo(data);
     } catch {
-      setOwner(null);
-    } finally {
-      setTokenOwnerLoading(false);
+      try {
+        const contract = await getERC721Contract(address);
+        const tokenURI = await contract.tokenURI(tokenID);
+        const { data } = await axios.get(tokenURI);
+        setInfo(data);
+      } catch {
+        history.replace('/404');
+      }
     }
+    setLoading(false);
+    setTokenOwnerLoading(false);
+    setHistoryLoading(false);
   };
 
   const getCreatorInfo = async () => {
@@ -343,45 +473,16 @@ const NFTItem = () => {
     setOwnerInfoLoading(false);
   };
 
-  const getItemListings = async () => {
-    try {
-      const { data } = await getListings(address, tokenID);
-      listings.current = data;
-    } catch (e) {
-      console.log(e);
-    }
-  };
-
-  const getCurrentOffers = async () => {
-    try {
-      const { data } = await getOffers(address, tokenID);
-      offers.current = data;
-    } catch (e) {
-      console.log(e);
-    }
-  };
-
   const getBundleOffers = async () => {
     try {
       const { data } = await _getBundleOffers(bundleID);
-      offers.current = data;
+      offers.current = data.map(offer => ({
+        ...offer,
+        token: getTokenByAddress(offer.paymentToken),
+      }));
     } catch (e) {
       console.log(e);
     }
-  };
-
-  const getItemTradeHistory = async () => {
-    setHistoryLoading(true);
-    tradeHistory.current = [];
-    try {
-      const { data } = await getTradeHistory(address, tokenID);
-      tradeHistory.current = data.sort((a, b) =>
-        a.createdAt < b.createdAt ? 1 : -1
-      );
-    } catch (e) {
-      console.log(e);
-    }
-    setHistoryLoading(false);
   };
 
   const getBundleTradeHistory = async () => {
@@ -389,9 +490,12 @@ const NFTItem = () => {
     tradeHistory.current = [];
     try {
       const { data } = await _getBundleTradeHistory(bundleID);
-      tradeHistory.current = data.sort((a, b) =>
-        a.createdAt < b.createdAt ? 1 : -1
-      );
+      tradeHistory.current = data
+        .sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1))
+        .map(history => ({
+          ...history,
+          token: getTokenByAddress(history.paymentToken),
+        }));
     } catch (e) {
       console.log(e);
     }
@@ -419,7 +523,11 @@ const NFTItem = () => {
     try {
       const _auction = await getAuction(address, tokenID);
       if (_auction.endTime !== 0) {
-        auction.current = _auction;
+        const token = getTokenByAddress(_auction.payToken);
+        const reservePrice = parseFloat(
+          ethers.utils.formatUnits(_auction.reservePrice, token.decimals)
+        );
+        auction.current = { ..._auction, reservePrice, token };
       }
     } catch (e) {
       console.log(e);
@@ -449,14 +557,19 @@ const NFTItem = () => {
     nft,
     id,
     quantity,
+    paymentToken,
     pricePerItem,
     startingTime
   ) => {
     if (eventMatches(nft, id)) {
+      const token = getTokenByAddress(paymentToken);
       const newListing = {
         owner,
         quantity: parseFloat(quantity.toString()),
-        price: parseFloat(pricePerItem.toString()) / 10 ** 18,
+        token,
+        price: parseFloat(
+          ethers.utils.formatUnits(pricePerItem, token.decimals)
+        ),
         startTime: parseFloat(startingTime.toString()),
       };
       try {
@@ -467,14 +580,21 @@ const NFTItem = () => {
       } catch {
         listings.current.push(newListing);
       }
+      listings.current = listings.current.sort((a, b) =>
+        a.price > b.price ? 1 : -1
+      );
     }
   };
 
-  const itemUpdatedHandler = (owner, nft, id, newPrice) => {
+  const itemUpdatedHandler = (owner, nft, id, paymentToken, newPrice) => {
     if (eventMatches(nft, id)) {
+      const token = getTokenByAddress(paymentToken);
       listings.current.map(listing => {
         if (listing.owner.toLowerCase() === owner.toLowerCase()) {
-          listing.price = parseFloat(newPrice.toString()) / 10 ** 18;
+          listing.token = token;
+          listing.price = parseFloat(
+            ethers.utils.formatUnits(newPrice, token.decimals)
+          );
         }
       });
     }
@@ -488,7 +608,16 @@ const NFTItem = () => {
     }
   };
 
-  const itemSoldHandler = async (seller, buyer, nft, id, _quantity, price) => {
+  const itemSoldHandler = async (
+    seller,
+    buyer,
+    nft,
+    id,
+    _quantity,
+    paymentToken,
+    unitPrice,
+    price
+  ) => {
     const quantity = parseFloat(_quantity.toString());
     if (eventMatches(nft, id)) {
       listings.current = listings.current.filter(
@@ -497,17 +626,18 @@ const NFTItem = () => {
       if (tokenType.current === 721) {
         setOwner(buyer);
       } else {
-        const sellerIndex = holders.current.findIndex(
+        const newHolders = [...holders];
+        const sellerIndex = newHolders.findIndex(
           holder => holder.address.toLowerCase() === seller.toLowerCase()
         );
-        const buyerIndex = holders.current.findIndex(
+        const buyerIndex = newHolders.findIndex(
           holder => holder.address.toLowerCase() === buyer.toLowerCase()
         );
         if (sellerIndex > -1) {
-          holders.current[sellerIndex].supply -= quantity;
+          newHolders[sellerIndex].supply -= quantity;
         }
         if (buyerIndex > -1) {
-          holders.current[buyerIndex].supply += quantity;
+          newHolders[buyerIndex].supply += quantity;
         } else {
           const buyerInfo = {
             address: buyer,
@@ -520,18 +650,27 @@ const NFTItem = () => {
           } catch (e) {
             console.log(e);
           }
-          holders.current.push(buyerInfo);
+          newHolders.push(buyerInfo);
         }
-        if (holders.current[sellerIndex].supply === 0) {
-          holders.current.splice(sellerIndex, 1);
+        if (newHolders[sellerIndex].supply === 0) {
+          newHolders.splice(sellerIndex, 1);
         }
+        setHolders(newHolders);
       }
+      const token = getTokenByAddress(paymentToken);
+      const _price = parseFloat(
+        ethers.utils.formatUnits(price, token.decimals)
+      );
       const newTradeHistory = {
         from: seller,
         to: buyer,
-        price: parseFloat(price.toString()) / 10 ** 18,
+        price: _price,
         value: quantity,
         createdAt: new Date().toISOString(),
+        paymentToken,
+        token,
+        priceInUSD:
+          parseFloat(ethers.utils.formatUnits(unitPrice, 18)) * _price,
       };
       try {
         const from = await getUserAccountDetails(seller);
@@ -555,17 +694,20 @@ const NFTItem = () => {
     creator,
     nft,
     id,
-    payToken,
     quantity,
+    payToken,
     pricePerItem,
     deadline
   ) => {
     if (eventMatches(nft, id)) {
+      const token = getTokenByAddress(payToken);
       const newOffer = {
         creator,
         deadline: parseFloat(deadline.toString()) * 1000,
-        payToken,
-        pricePerItem: parseFloat(pricePerItem.toString()) / 10 ** 18,
+        token,
+        pricePerItem: parseFloat(
+          ethers.utils.formatUnits(pricePerItem, token.decimals)
+        ),
         quantity: parseFloat(quantity.toString()),
       };
       try {
@@ -588,12 +730,22 @@ const NFTItem = () => {
     }
   };
 
-  const bundleListedHandler = (_owner, _bundleID, _price, _startingTime) => {
+  const bundleListedHandler = (
+    _owner,
+    _bundleID,
+    _payToken,
+    _price,
+    _startingTime
+  ) => {
     if (bundleID.toLowerCase() === _bundleID.toLowerCase()) {
-      const price = parseFloat(_price.toString()) / 10 ** 18;
+      const token = getTokenByAddress(_payToken);
+      const price = parseFloat(
+        ethers.utils.formatUnits(_price, token.decimals)
+      );
       bundleListing.current = {
         price,
         startingTime: parseInt(_startingTime.toString()),
+        token,
       };
     }
   };
@@ -611,7 +763,7 @@ const NFTItem = () => {
     const quantities = _quantities.map(val => parseInt(val.toString()));
     if (bundleID.toLowerCase() === _bundleID.toLowerCase()) {
       if (nfts.length === 0) {
-        history.push('/exploreall');
+        history.push('/explore');
       }
 
       const price = parseFloat(_newPrice.toString()) / 10 ** 18;
@@ -647,16 +799,30 @@ const NFTItem = () => {
     }
   };
 
-  const bundleSoldHandler = async (_seller, _buyer, _bundleID, _price) => {
+  const bundleSoldHandler = async (
+    _seller,
+    _buyer,
+    _bundleID,
+    _payToken,
+    _unitPrice,
+    _price
+  ) => {
     if (bundleID.toLowerCase() === _bundleID.toLowerCase()) {
       setOwner(_buyer);
       bundleListing.current = null;
+      const token = getTokenByAddress(_payToken);
+      const price = parseFloat(
+        ethers.utils.formatUnits(_price, token.decimals)
+      );
       const newTradeHistory = {
         from: _seller,
         to: _buyer,
-        price: parseFloat(_price.toString()) / 10 ** 18,
+        price,
         value: 1,
         createdAt: new Date().toISOString(),
+        token,
+        priceInUSD:
+          parseFloat(ethers.utils.formatUnits(_unitPrice, 18)) * price,
       };
       try {
         const from = await getUserAccountDetails(_seller);
@@ -684,12 +850,15 @@ const NFTItem = () => {
     _deadline
   ) => {
     if (bundleID.toLowerCase() === _bundleID.toLowerCase()) {
+      const token = getTokenByAddress(_payToken);
       const newOffer = {
         creator: _creator,
         deadline: parseFloat(_deadline.toString()) * 1000,
-        payToken: _payToken,
-        pricePerItem: parseFloat(_price.toString()) / 10 ** 18,
+        pricePerItem: parseFloat(
+          ethers.utils.formatUnits(_price, token.decimals)
+        ),
         quantity: 1,
+        token,
       };
       try {
         const { data } = await getUserAccountDetails(_creator);
@@ -737,10 +906,13 @@ const NFTItem = () => {
     }
   };
 
-  const auctionReservePriceUpdatedHandler = (nft, id, _price) => {
+  const auctionReservePriceUpdatedHandler = (nft, id, _payToken, _price) => {
     if (eventMatches(nft, id)) {
-      const price = parseFloat(_price.toString()) / 10 ** 18;
       if (auction.current) {
+        const price = ethers.utils.formatUnits(
+          _price,
+          auction.current.token.decimals
+        );
         const newAuction = { ...auction.current, reservePrice: price };
         auction.current = newAuction;
       }
@@ -781,15 +953,24 @@ const NFTItem = () => {
     }
   };
 
-  const auctionResultedHandler = (nft, id, winner, _winningBid) => {
+  function auctionResultedHandler(
+    nft,
+    id,
+    winner,
+    payToken,
+    unitPrice,
+    _winningBid
+  ) {
     if (eventMatches(nft, id)) {
       const newAuction = { ...auction.current, resulted: true };
       auction.current = newAuction;
       setWinner(winner);
+      const token = getTokenByAddress(payToken);
+      setWinningToken(token);
       const winningBid = parseFloat(_winningBid.toString()) / 10 ** 18;
       setWinningBid(winningBid);
     }
-  };
+  }
 
   const addEventListeners = async () => {
     const salesContract = await getSalesContract();
@@ -801,6 +982,9 @@ const NFTItem = () => {
     salesContract.on('ItemSold', itemSoldHandler);
     salesContract.on('OfferCreated', offerCreatedHandler);
     salesContract.on('OfferCanceled', offerCanceledHandler);
+
+    prevSalesContract.current = salesContract;
+    prevAuctionContract.current = auctionContract;
 
     auctionContract.on('AuctionCreated', auctionCreatedHandler);
     auctionContract.on(
@@ -824,35 +1008,8 @@ const NFTItem = () => {
   };
 
   const removeEventListeners = async () => {
-    const salesContract = await getSalesContract();
-    const auctionContract = await getAuctionContract();
-
-    salesContract.off('ItemListed', itemListedHandler);
-    salesContract.off('ItemUpdated', itemUpdatedHandler);
-    salesContract.off('ItemCanceled', itemCanceledHandler);
-    salesContract.off('ItemSold', itemSoldHandler);
-    salesContract.off('OfferCreated', offerCreatedHandler);
-    salesContract.off('OfferCanceled', offerCanceledHandler);
-
-    auctionContract.off('AuctionCreated', auctionCreatedHandler);
-    auctionContract.off(
-      'UpdateAuctionStartTime',
-      auctionStartTimeUpdatedHandler
-    );
-    auctionContract.off('UpdateAuctionEndTime', auctionEndTimeUpdatedHandler);
-    auctionContract.off(
-      'UpdateAuctionReservePrice',
-      auctionReservePriceUpdatedHandler
-    );
-    auctionContract.off('UpdateMinBidIncrement', minBidIncrementUpdatedHandler);
-    auctionContract.off(
-      'UpdateBidWithdrawalLockTime',
-      bidWithdrawalLockTimeUpdatedHandler
-    );
-    auctionContract.off('BidPlaced', bidPlacedHandler);
-    auctionContract.off('BidWithdrawn', bidWithdrawnHandler);
-    auctionContract.off('AuctionCancelled', auctionCancelledHandler);
-    auctionContract.off('AuctionResulted', auctionResultedHandler);
+    prevSalesContract.current?.removeAllListeners();
+    prevAuctionContract.current?.removeAllListeners();
   };
 
   const addBundleEventListeners = async () => {
@@ -900,12 +1057,35 @@ const NFTItem = () => {
     setCollectionLoading(false);
   };
 
-  useEffect(() => {
-    if (!chainId) return;
+  const updateCollections = async () => {
+    try {
+      dispatch(CollectionsActions.fetchStart());
+      const res = await fetchCollections();
+      if (res.status === 'success') {
+        const verified = [];
+        const unverified = [];
+        res.data.map(item => {
+          if (item.isVerified) verified.push(item);
+          else unverified.push(item);
+        });
+        dispatch(CollectionsActions.fetchSuccess([...verified, ...unverified]));
+      }
+    } catch {
+      dispatch(CollectionsActions.fetchFailed());
+    }
+  };
 
+  useEffect(() => {
     if (address && tokenID) {
       addEventListeners();
       getAuctionConfiguration();
+
+      if (fetchInterval) {
+        clearInterval(fetchInterval);
+      }
+
+      updateCollections();
+      setFetchInterval(setInterval(updateCollections, 1000 * 60 * 10));
     }
 
     if (bundleID) {
@@ -925,11 +1105,9 @@ const NFTItem = () => {
         removeBundleEventListeners();
       }
     };
-  }, [chainId]);
+  }, [chainId, holders]);
 
   useEffect(() => {
-    if (!chainId) return;
-
     setLiked(null);
 
     if (bundleID) {
@@ -951,19 +1129,12 @@ const NFTItem = () => {
     } else {
       bundleListing.current = null;
 
-      getTokenURI();
-      getTokenOwner();
-      getItemListings();
-      getCurrentOffers();
-      getItemTradeHistory();
+      getItemDetails();
       getAuctions();
       getBid();
 
       increaseViewCount(address, tokenID).then(({ data }) => {
         setViews(data);
-      });
-      getItemLikes(address, tokenID).then(({ data }) => {
-        setLiked(data);
       });
       isLikingItem(address, tokenID, account).then(({ data }) => {
         setIsLike(data);
@@ -971,7 +1142,27 @@ const NFTItem = () => {
     }
 
     getLikeInfo();
-  }, [chainId, address, tokenID, bundleID]);
+  }, [address, tokenID, bundleID]);
+
+  useEffect(() => {
+    if (!chainId || !address) {
+      setCollectionRoyalty(null);
+      return;
+    }
+
+    getCollectionRoyalty(address)
+      .then(res => {
+        if (res.royalty) {
+          setCollectionRoyalty({
+            royalty: res.royalty / 100,
+            feeRecipient: res.feeRecipient,
+          });
+        } else {
+          setCollectionRoyalty(null);
+        }
+      })
+      .catch(console.log);
+  }, [chainId, address]);
 
   useEffect(() => {
     if (address && tokenID && tokenType.current && filter === 1) {
@@ -986,6 +1177,64 @@ const NFTItem = () => {
   useEffect(() => {
     getOwnerInfo();
   }, [owner]);
+
+  const updateItems = async () => {
+    try {
+      if (!authToken) {
+        moreItems.current = tokens.map(tk => ({
+          ...tk,
+          isLiked: false,
+        }));
+        return;
+      }
+      let missingTokens = moreItems.current.map((tk, index) =>
+        tk.items
+          ? {
+              index,
+              isLiked: tk.isLiked,
+              bundleID: tk._id,
+            }
+          : {
+              index,
+              isLiked: tk.isLiked,
+              contractAddress: tk.contractAddress,
+              tokenID: tk.tokenID,
+            }
+      );
+      if (prevAuthToken) {
+        missingTokens = missingTokens.filter(tk => tk.isLiked === undefined);
+      }
+
+      const cancelTokenSource = axios.CancelToken.source();
+      setLikeCancelSource(cancelTokenSource);
+      const { data, status } = await getItemsLiked(
+        missingTokens,
+        authToken,
+        cancelTokenSource.token
+      );
+      if (status === 'success') {
+        const newTokens = [...moreItems.current];
+        missingTokens.map((tk, idx) => {
+          newTokens[tk.index].isLiked = data[idx].isLiked;
+        });
+        // eslint-disable-next-line require-atomic-updates
+        moreItems.current = newTokens;
+      }
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setLikeCancelSource(null);
+    }
+  };
+
+  useEffect(() => {
+    if (likeCancelSource) {
+      likeCancelSource.cancel();
+    }
+    if (moreItems.current.length) {
+      updateItems();
+    }
+  }, [moreItems, authToken]);
 
   const getLikeInfo = async () => {
     setLikeFetching(true);
@@ -1043,11 +1292,11 @@ const NFTItem = () => {
   };
 
   const getSalesContractStatus = async () => {
-    const contract = await getNFTContract(address);
+    const contract = await getERC721Contract(address);
     try {
       const approved = await contract.isApprovedForAll(
         account,
-        Contracts[chainId].sales
+        Contracts[CHAIN].sales
       );
       setSalesContractApproved(approved);
     } catch (e) {
@@ -1065,7 +1314,7 @@ const NFTItem = () => {
     const approved = {};
     await Promise.all(
       contractAddresses.map(async address => {
-        const contract = await getNFTContract(address);
+        const contract = await getERC721Contract(address);
         try {
           const _approved = await contract.isApprovedForAll(
             account,
@@ -1081,7 +1330,7 @@ const NFTItem = () => {
   };
 
   const getAuctionContractStatus = async () => {
-    const contract = await getNFTContract(address);
+    const contract = await getERC721Contract(address);
     try {
       const approved = await contract.isApprovedForAll(
         account,
@@ -1094,7 +1343,7 @@ const NFTItem = () => {
   };
 
   const addNFTContractEventListeners = async () => {
-    const contract = await getNFTContract(address);
+    const contract = await getERC721Contract(address);
 
     contract.on('ApprovalForAll', (owner, operator, approved) => {
       if (account?.toLowerCase() === owner?.toLowerCase()) {
@@ -1130,7 +1379,7 @@ const NFTItem = () => {
   const handleApproveSalesContract = async () => {
     setSalesContractApproving(true);
     try {
-      const contract = await getNFTContract(address);
+      const contract = await getERC721Contract(address);
       const tx = await contract.setApprovalForAll(
         Contracts[chainId].sales,
         true
@@ -1159,7 +1408,7 @@ const NFTItem = () => {
       const approved = {};
       await Promise.all(
         contractAddresses.map(async address => {
-          const contract = await getNFTContract(address);
+          const contract = await getERC721Contract(address);
           const _approved = await contract.isApprovedForAll(
             account,
             Contracts[chainId].bundleSales
@@ -1185,7 +1434,7 @@ const NFTItem = () => {
   const handleApproveAuctionContract = async () => {
     setAuctionContractApproving(true);
     try {
-      const contract = await getNFTContract(address);
+      const contract = await getERC721Contract(address);
       const tx = await contract.setApprovalForAll(
         Contracts[chainId].auction,
         true
@@ -1199,8 +1448,12 @@ const NFTItem = () => {
     }
   };
 
-  const myHolding = holders.current.find(
-    holder => holder.address.toLowerCase() === account?.toLowerCase()
+  const myHolding = useMemo(
+    () =>
+      holders.find(
+        holder => holder.address.toLowerCase() === account?.toLowerCase()
+      ),
+    [holders, account]
   );
 
   const isMine =
@@ -1208,14 +1461,94 @@ const NFTItem = () => {
       ? owner?.toLowerCase() === account?.toLowerCase()
       : !!myHolding;
 
-  const handleListItem = async (_price, quantity) => {
+  const handleTransfer = async (to, quantity) => {
+    if (bundleID) return;
+
+    if (!ethers.utils.isAddress(to)) {
+      showToast('error', 'Invalid Aaddress!');
+      return;
+    }
+
+    if (transferring) return;
+
+    setTransferring(true);
+
+    try {
+      if (tokenType.current === 721) {
+        const contract = await getERC721Contract(address);
+        const tx = await contract.safeTransferFrom(account, to, tokenID);
+        await tx.wait();
+        showToast('success', 'Item transferred successfully!');
+        setOwner(to);
+        setTransferModalVisible(false);
+        getItemDetails();
+      } else {
+        const contract = await getERC1155Contract(address);
+        const tx = await contract.safeTransferFrom(
+          account,
+          to,
+          tokenID,
+          quantity,
+          '0x'
+        );
+        await tx.wait();
+        showToast('success', 'Item transferred successfully!');
+
+        const newHolders = [...holders];
+        let sender = -1,
+          receiver = -1;
+        for (let i = 0; i < newHolders.length; i++) {
+          if (
+            newHolders[i].address.toLowerCase() === account.toLocaleLowerCase()
+          ) {
+            sender = i;
+            newHolders[i].supply -= quantity;
+          } else if (
+            newHolders[i].address.toLowerCase() === to.toLocaleLowerCase()
+          ) {
+            receiver = i;
+            newHolders[i].supply += quantity;
+          }
+          if (sender > -1 && receiver > -1) {
+            break;
+          }
+        }
+        if (newHolders[sender].supply === 0) {
+          newHolders.splice(sender, 1);
+        }
+        if (receiver === -1) {
+          let newHolder = {
+            address: to,
+            supply: quantity,
+          };
+          try {
+            const res = await getUserAccountDetails(to);
+            newHolder.alias = res?.data.alias;
+            newHolder.imageHash = res?.data.imageHash;
+          } catch (e) {
+            console.log(e);
+          }
+          newHolders.push(newHolder);
+        }
+        setHolders(newHolders);
+
+        setTransferModalVisible(false);
+      }
+    } catch {
+      showToast('error', 'Failed to transfer item!');
+    }
+
+    setTransferring(false);
+  };
+
+  const handleListItem = async (token, _price, quantity) => {
     if (listingItem) return;
 
     try {
       setListingItem(true);
 
+      const price = ethers.utils.parseUnits(_price, token.decimals);
       if (bundleID) {
-        const price = ethers.utils.parseEther(_price);
         const addresses = [];
         const tokenIds = [];
         const quantities = [];
@@ -1229,22 +1562,21 @@ const NFTItem = () => {
           addresses,
           tokenIds,
           quantities,
+          token.address === '' ? ethers.constants.AddressZero : token.address,
           price,
-          ethers.BigNumber.from(Math.floor(new Date().getTime() / 1000)),
-          '0x0000000000000000000000000000000000000000'
+          ethers.BigNumber.from(Math.floor(new Date().getTime() / 1000))
         );
         await tx.wait();
 
         showToast('success', 'Bundle listed successfully!');
       } else {
-        const price = ethers.utils.parseEther(_price);
         const tx = await listItem(
           address,
           ethers.BigNumber.from(tokenID),
           ethers.BigNumber.from(quantity),
+          token.address === '' ? ethers.constants.AddressZero : token.address,
           price,
-          ethers.BigNumber.from(Math.floor(new Date().getTime() / 1000)),
-          '0x0000000000000000000000000000000000000000'
+          ethers.BigNumber.from(Math.floor(new Date().getTime() / 1000))
         );
         await tx.wait();
 
@@ -1253,7 +1585,8 @@ const NFTItem = () => {
 
       setSellModalVisible(false);
       setListingItem(false);
-    } catch {
+    } catch (err) {
+      console.log(err);
       setListingItem(false);
     }
   };
@@ -1272,13 +1605,50 @@ const NFTItem = () => {
     return approved;
   })();
 
-  const handleUpdatePrice = async (_price, quantity) => {
+  const handleRevealContent = async () => {
+    if (revealing) return;
+
+    try {
+      setRevealing(true);
+
+      const { data: nonce } = await getNonce(account, authToken);
+      let signature;
+      let addr;
+      try {
+        const signer = await getSigner();
+        const msg = `Approve Signature on Artion.io with nonce ${nonce}`;
+        signature = await signer.signMessage(msg);
+        addr = ethers.utils.verifyMessage(msg, signature);
+      } catch {
+        showToast(
+          'error',
+          'You need to sign the message to be able to update account settings.'
+        );
+        setRevealing(false);
+        return;
+      }
+
+      const { data } = await retrieveUnlockableContent(
+        address,
+        tokenID,
+        signature,
+        addr,
+        authToken
+      );
+      setUnlockableContent(data);
+      setRevealing(false);
+    } catch {
+      setRevealing(false);
+    }
+  };
+
+  const handleUpdateListing = async (token, _price, quantity) => {
     if (priceUpdating) return;
 
     try {
       setPriceUpdating(true);
 
-      const price = ethers.utils.parseEther(_price);
+      const price = ethers.utils.parseUnits(_price, token.decimals);
       if (bundleID) {
         const tx = await updateBundleListing(bundleID, price);
         await tx.wait();
@@ -1286,6 +1656,7 @@ const NFTItem = () => {
         const tx = await updateListing(
           address,
           tokenID,
+          token.address === '' ? ethers.constants.AddressZero : token.address,
           price,
           ethers.BigNumber.from(quantity)
         );
@@ -1330,18 +1701,59 @@ const NFTItem = () => {
     try {
       setBuyingItem(true);
       const _price = listing.price * listing.quantity;
-      const price = ethers.utils.parseEther(_price.toString());
-      const tx = await buyItem(
-        address,
-        ethers.BigNumber.from(tokenID),
-        listing.owner,
-        price,
-        account
-      );
-      await tx.wait();
+      if (listing.token.address === '') {
+        const price = ethers.utils.parseEther(_price.toString());
+        const tx = await buyItemETH(
+          address,
+          ethers.BigNumber.from(tokenID),
+          listing.owner,
+          price,
+          account
+        );
+        await tx.wait();
+      } else {
+        const erc20 = await getERC20Contract(listing.token.address);
+        const balance = await erc20.balanceOf(account);
+        const price = ethers.utils.parseUnits(
+          _price.toString(),
+          listing.token.decimals
+        );
+        if (balance.lt(price)) {
+          const toastId = showToast(
+            'error',
+            `Insufficient ${listing.token.symbol} Balance!`,
+            listing.token.symbol === 'WFTM'
+              ? 'You can wrap FTM in the WFTM station.'
+              : `You can exchange ${listing.token.symbol} on other exchange site.`,
+            () => {
+              toast.dismiss(toastId);
+              if (listing.token.symbol === 'WFTM') {
+                dispatch(ModalActions.showWFTMModal());
+              }
+            }
+          );
+          setBuyingItem(false);
+          return;
+        }
+        const salesContract = await getSalesContract();
+        const allowance = await erc20.allowance(account, salesContract.address);
+        if (allowance.lt(price)) {
+          const tx = await erc20.approve(salesContract.address, price);
+          await tx.wait();
+        }
+        const tx = await buyItemERC20(
+          address,
+          ethers.BigNumber.from(tokenID),
+          listing.token.address,
+          listing.owner
+        );
+        await tx.wait();
+      }
       setBuyingItem(false);
 
       showToast('success', 'You have bought the item!');
+
+      setOwner(account);
 
       listings.current = listings.current.filter(
         _listing => _listing.owner !== listing.owner
@@ -1356,14 +1768,49 @@ const NFTItem = () => {
 
     try {
       setBuyingItem(true);
-      const price = ethers.utils.parseEther(
-        bundleListing.current.price.toString()
+      const { token } = bundleListing.current;
+      const price = ethers.utils.parseUnits(
+        bundleListing.current.price.toString(),
+        token.decimals
       );
-      const tx = await buyBundle(bundleID, price, account);
-      await tx.wait();
+      if (token.address === '') {
+        const tx = await buyBundleETH(bundleID, price, account);
+        await tx.wait();
+      } else {
+        const erc20 = await getERC20Contract(token.address);
+        const balance = await erc20.balanceOf(account);
+        if (balance.lt(price)) {
+          const toastId = showToast(
+            'error',
+            `Insufficient ${token.symbol} Balance!`,
+            token.symbol === 'WFTM'
+              ? 'You can wrap FTM in the WFTM station.'
+              : `You can exchange ${token.symbol} on other exchange site.`,
+            () => {
+              toast.dismiss(toastId);
+              if (token.symbol === 'WFTM') {
+                dispatch(ModalActions.showWFTMModal());
+              }
+            }
+          );
+          setBuyingItem(false);
+          return;
+        }
+        const salesContract = await getBundleSalesContract();
+        const allowance = await erc20.allowance(account, salesContract.address);
+        if (allowance.lt(price)) {
+          const tx = await erc20.approve(salesContract.address, price);
+          await tx.wait();
+        }
+
+        const tx = await buyBundleERC20(bundleID, token.address);
+        await tx.wait();
+      }
       setBuyingItem(false);
 
       showToast('success', 'You have bought the bundle!');
+
+      setOwner(account);
 
       // eslint-disable-next-line require-atomic-updates
       bundleListing.current = null;
@@ -1372,26 +1819,31 @@ const NFTItem = () => {
     }
   };
 
-  const handleMakeOffer = async (_price, quantity, endTime) => {
+  const handleMakeOffer = async (token, _price, quantity, endTime) => {
     if (offerPlacing) return;
 
     try {
       setOfferPlacing(true);
-      const price = ethers.utils.parseEther(_price.toString());
+      const price = ethers.utils.parseUnits(_price, token.decimals);
       const deadline = Math.floor(endTime.getTime() / 1000);
       const amount = price.mul(quantity);
 
-      const balance = await getWFTMBalance(account);
+      const erc20 = await getERC20Contract(token.address);
+      const balance = await erc20.balanceOf(account);
 
       if (balance.lt(amount)) {
         const toastId = showToast(
           'error',
-          'Insufficient WFTM Balance!',
-          'You can wrap FTM in the WFTM station.',
+          `Insufficient ${token.symbol} Balance!`,
+          token.symbol === 'WFTM'
+            ? 'You can wrap FTM in the WFTM station.'
+            : `You can exchange ${token.symbol} on other exchange site.`,
           () => {
             toast.dismiss(toastId);
             setOfferModalVisible(false);
-            dispatch(ModalActions.showWFTMModal());
+            if (token.symbol === 'WFTM') {
+              dispatch(ModalActions.showWFTMModal());
+            }
           }
         );
         setOfferPlacing(false);
@@ -1399,32 +1851,40 @@ const NFTItem = () => {
       }
 
       if (bundleID) {
-        const allowance = await getAllowance(
+        const allowance = await erc20.allowance(
           account,
           Contracts[chainId].bundleSales
         );
         if (allowance.lt(amount)) {
-          await approve(Contracts[chainId].bundleSales, amount);
+          const tx = await erc20.approve(
+            Contracts[chainId].bundleSales,
+            amount
+          );
+          await tx.wait();
         }
 
         const tx = await createBundleOffer(
           bundleID,
-          wftmAddress(),
+          token.address,
           price,
           ethers.BigNumber.from(deadline)
         );
 
         await tx.wait();
       } else {
-        const allowance = await getAllowance(account, Contracts[chainId].sales);
+        const allowance = await erc20.allowance(
+          account,
+          Contracts[chainId].sales
+        );
         if (allowance.lt(amount)) {
-          await approve(Contracts[chainId].sales, amount);
+          const tx = await erc20.approve(Contracts[chainId].sales, amount);
+          await tx.wait();
         }
 
         const tx = await createOffer(
           address,
           ethers.BigNumber.from(tokenID),
-          wftmAddress(),
+          token.address,
           ethers.BigNumber.from(quantity),
           price,
           ethers.BigNumber.from(deadline)
@@ -1459,6 +1919,8 @@ const NFTItem = () => {
 
       showToast('success', 'Offer accepted!');
 
+      setOwner(offer.creator);
+
       offers.current = offers.current.filter(
         _offer => _offer.creator !== offer.creator
       );
@@ -1491,17 +1953,18 @@ const NFTItem = () => {
     }
   };
 
-  const handleStartAuction = async (_price, _startTime, _endTime) => {
+  const handleStartAuction = async (token, _price, _startTime, _endTime) => {
     try {
       setAuctionStarting(true);
 
-      const price = ethers.utils.parseEther(_price);
+      const price = ethers.utils.parseUnits(_price, token.decimals);
       const startTime = Math.floor(_startTime.getTime() / 1000);
       const endTime = Math.floor(_endTime.getTime() / 1000);
 
       const tx = await createAuction(
         address,
         ethers.BigNumber.from(tokenID),
+        token.address === '' ? ethers.constants.AddressZero : token.address,
         price,
         ethers.BigNumber.from(startTime),
         ethers.BigNumber.from(endTime)
@@ -1517,14 +1980,14 @@ const NFTItem = () => {
     }
   };
 
-  const handleUpdateAuction = async (_price, _startTime, _endTime) => {
+  const handleUpdateAuction = async (token, _price, _startTime, _endTime) => {
     if (!auction.current) return;
 
     try {
       setAuctionUpdating(true);
 
       if (parseFloat(_price) !== auction.current.reservePrice) {
-        const price = ethers.utils.parseEther(_price);
+        const price = ethers.utils.parseUnits(_price, token.decimals);
         await updateAuctionReservePrice(
           address,
           ethers.BigNumber.from(tokenID),
@@ -1588,6 +2051,8 @@ const NFTItem = () => {
       setResulting(false);
       setResulted(true);
       showToast('success', 'Auction resulted!');
+
+      setOwner(bid.bidder);
     } catch {
       setResulting(false);
     }
@@ -1599,10 +2064,43 @@ const NFTItem = () => {
     try {
       setBidPlacing(true);
 
-      const price = ethers.utils.parseEther(_price);
+      const { token } = auction.current;
+      const price = ethers.utils.parseUnits(_price, token.decimals);
+      if (token.address !== '') {
+        const erc20 = await getERC20Contract(token.address);
+        const balance = await erc20.balanceOf(account);
+        if (balance.lt(price)) {
+          const toastId = showToast(
+            'error',
+            `Insufficient ${token.symbol} Balance!`,
+            token.symbol === 'WFTM'
+              ? 'You can wrap FTM in the WFTM station.'
+              : `You can exchange ${token.symbol} on other exchange site.`,
+            () => {
+              toast.dismiss(toastId);
+              setBidModalVisible(false);
+              if (token.symbol === 'WFTM') {
+                dispatch(ModalActions.showWFTMModal());
+              }
+            }
+          );
+          setBidPlacing(false);
+          return;
+        }
+        const auctionContract = await getAuctionContract();
+        const allowance = await erc20.allowance(
+          account,
+          auctionContract.address
+        );
+        if (allowance.lt(price)) {
+          const tx = await erc20.approve(auctionContract.address, price);
+          await tx.wait();
+        }
+      }
       const tx = await placeBid(
         address,
         ethers.BigNumber.from(tokenID),
+        token.address === '' ? ethers.constants.AddressZero : token.address,
         price,
         account
       );
@@ -1642,7 +2140,7 @@ const NFTItem = () => {
     return {
       date: `${saleDate.getFullYear()}/${saleDate.getMonth() +
         1}/${saleDate.getDate()}`,
-      price: history.price,
+      price: history.priceInUSD,
       amt: 2100,
     };
   });
@@ -1711,7 +2209,7 @@ const NFTItem = () => {
 
   const myListing = () => {
     return listings.current.find(
-      listing => listing.owner.toLowerCase() === account.toLowerCase()
+      listing => listing.owner.toLowerCase() === account?.toLowerCase()
     );
   };
 
@@ -1719,17 +2217,45 @@ const NFTItem = () => {
     return bundleListing.current || myListing() !== undefined;
   })();
 
-  const maxSupply = () => {
+  const bestListing = (() => {
+    if (bundleID) return bundleListing.current;
+    let idx = 0;
+    while (
+      idx < listings.current.length &&
+      listings.current[idx].owner.toLowerCase() === account?.toLowerCase()
+    ) {
+      idx++;
+    }
+    if (idx < listings.current.length) return listings.current[idx];
+    return null;
+  })();
+
+  const maxSupply = useCallback(() => {
     let supply = 0;
-    holders.current.map(holder => {
+    holders.map(holder => {
       if (
-        holder.address.toLowerCase() !== account.toLowerCase() &&
+        holder.address.toLowerCase() !== account?.toLowerCase() &&
         holder.supply > supply
       ) {
         supply = holder.supply;
       }
     });
     return supply;
+  }, [holders]);
+
+  const onTransferClick = async () => {
+    if (auction.current?.resulted === false) {
+      showToast('warning', 'Please cancel current auction before transfer.');
+      return;
+    }
+    if (hasListing) {
+      showToast(
+        'warning',
+        'You have listed your item. Please cancel listing before transfer.'
+      );
+      return;
+    }
+    setTransferModalVisible(true);
   };
 
   const handleMenuOpen = e => {
@@ -1740,9 +2266,39 @@ const NFTItem = () => {
     setAnchorEl(null);
   };
 
+  const handleClose = () => {
+    setShareAnchorEl(null);
+  };
+
+  const handleCopyLink = () => {
+    handleClose();
+    showToast('success', 'Link copied to clipboard!');
+  };
+
+  const handleShareOnFacebook = () => {
+    handleClose();
+    window.open(
+      `https://www.facebook.com/sharer/sharer.php?u=${window.location.href}`,
+      '_blank'
+    );
+  };
+
+  const handleShareToTwitter = () => {
+    handleClose();
+    window.open(
+      `https://twitter.com/intent/tweet?text=Check%20out%20this%20item%20on%20Artion&url=${window.location.href}`,
+      '_blank'
+    );
+  };
+
   const handleSelectFilter = _filter => {
     setFilter(_filter);
     handleMenuClose();
+  };
+
+  const getSiteUrl = url => {
+    if (url.startsWith('http://' || url.startsWith('https://'))) return url;
+    return 'https://' + url;
   };
 
   const renderMenu = (
@@ -1772,6 +2328,38 @@ const NFTItem = () => {
     </Menu>
   );
 
+  const renderMedia = (image, contentType) => {
+    if (contentType === 'video' || image?.includes('youtube')) {
+      return (
+        <ReactPlayer
+          className={styles.content}
+          url={image}
+          controls={true}
+          width="100%"
+          height="100%"
+        />
+      );
+    } else if (contentType === 'embed') {
+      return <iframe className={styles.content} src={image} />;
+    } else if (contentType === 'image' || contentType === 'gif') {
+      return (
+        <Suspense
+          fallback={
+            <Loader
+              type="Oval"
+              color="#007BFF"
+              height={32}
+              width={32}
+              className={styles.loader}
+            />
+          }
+        >
+          <SuspenseImg className={styles.content} src={image} />
+        </Suspense>
+      );
+    }
+  };
+
   const renderProperties = properties => {
     const res = [];
     Object.keys(properties).map((key, idx) => {
@@ -1784,10 +2372,22 @@ const NFTItem = () => {
                 <a
                   target="_blank"
                   rel="noopener noreferrer"
-                  href={`https://ftmscan.com/address/${properties[key]}`}
+                  href={`${explorerUrl}/address/${properties[key]}`}
                 >
                   {shortenAddress(properties[key])}
                 </a>
+              ) : key === 'IP_Rights' ? (
+                properties[key] ? (
+                  <a
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    href={properties[key]}
+                  >
+                    {properties[key]}
+                  </a>
+                ) : (
+                  'Not available'
+                )
               ) : (
                 properties[key]
               )}
@@ -1802,6 +2402,19 @@ const NFTItem = () => {
 
   const renderItemInfo = () => (
     <>
+      <div className={styles.itemMenu}>
+        {isMine && !bundleID && (
+          <div className={styles.itemMenuBtn} onClick={onTransferClick}>
+            <RedeemIcon src={shareIcon} className={styles.itemMenuIcon} />
+          </div>
+        )}
+        <div
+          className={styles.itemMenuBtn}
+          onClick={e => setShareAnchorEl(e.currentTarget)}
+        >
+          <img src={shareIcon} className={styles.itemMenuIcon} />
+        </div>
+      </div>
       <div className={styles.itemCategory}>
         {collection?.collectionName || collection?.name || ''}
       </div>
@@ -1815,7 +2428,7 @@ const NFTItem = () => {
         {(ownerInfoLoading || tokenOwnerLoading || owner || tokenInfo) && (
           <div className={styles.itemOwner}>
             {ownerInfoLoading || tokenOwnerLoading ? (
-              <Skeleton width={180} height={25} />
+              <Skeleton width={150} height={20} />
             ) : tokenType.current === 721 || bundleID ? (
               <>
                 <div className={styles.ownerAvatar}>
@@ -1844,8 +2457,8 @@ const NFTItem = () => {
                   onClick={() => setOwnersModalVisible(true)}
                 >
                   <PeopleIcon style={styles.itemIcon} />
-                  &nbsp;{formatNumber(holders.current.length)}
-                  &nbsp;owner{holders.current.length > 1 && 's'}
+                  &nbsp;{formatNumber(holders.length)}
+                  &nbsp;owner{holders.length > 1 && 's'}
                 </div>
                 <div className={styles.itemViews}>
                   <ViewModuleIcon style={styles.itemIcon} />
@@ -1856,12 +2469,12 @@ const NFTItem = () => {
           </div>
         )}
         <div className={styles.itemViews}>
-          <FontAwesomeIcon icon={faEye} color="#00000099" />
+          <FontAwesomeIcon icon={faEye} color="#A2A2AD" />
           &nbsp;
           {isNaN(views) ? (
-            <Skeleton width={80} height={24} />
+            <Skeleton width={80} height={20} />
           ) : (
-            `${formatNumber(views)} View${views > 1 ? 's' : ''}`
+            `${formatNumber(views)} view${views !== 1 ? 's' : ''}`
           )}
         </div>
         <div
@@ -1872,7 +2485,7 @@ const NFTItem = () => {
           )}
         >
           {isNaN(liked) || likeFetching ? (
-            <Skeleton width={80} height={24} />
+            <Skeleton width={80} height={20} />
           ) : (
             <>
               {isLike ? (
@@ -1888,12 +2501,74 @@ const NFTItem = () => {
               )}
               &nbsp;
               <span onClick={liked ? showLikeUsers : null}>
-                {formatNumber(liked || 0)} Like{liked > 1 ? 's' : ''}
+                {formatNumber(liked || 0)} favorite{liked !== 1 ? 's' : ''}
               </span>
             </>
           )}
         </div>
       </div>
+      {hasUnlockable && (
+        <div className={styles.bestBuy}>
+          <div
+            className={styles.unlockableLabel}
+          >{`This item has unlockable content.${
+            !isMine ? ' Only owners can see the content.' : ''
+          }`}</div>
+          {isMine ? (
+            unlockableContent ? (
+              <textarea
+                className={styles.unlockableContent}
+                value={unlockableContent}
+                readOnly
+              />
+            ) : (
+              <div
+                className={cx(styles.revealBtn, revealing && styles.disabled)}
+                onClick={handleRevealContent}
+              >
+                {revealing ? (
+                  <ClipLoader color="#FFF" size={16} />
+                ) : (
+                  `Reveal Content`
+                )}
+              </div>
+            )
+          ) : null}
+        </div>
+      )}
+      {bestListing && (
+        <div className={styles.bestBuy}>
+          <div className={styles.currentPriceLabel}>Current price</div>
+          <div className={styles.currentPriceWrapper}>
+            <div className={styles.tokenLogo}>
+              <img src={bestListing.token.icon} />
+            </div>
+            <div className={styles.currentPrice}>{bestListing.price}</div>
+            <div className={styles.currentPriceUSD}>
+              (
+              {prices[bestListing.token.address] ? (
+                `$${(
+                  bestListing.price * prices[bestListing.token.address]
+                ).toFixed(3)}`
+              ) : (
+                <Skeleton width={80} height={24} />
+              )}
+              )
+            </div>
+          </div>
+          {bestListing.owner.toLocaleLowerCase() !==
+            account?.toLocaleLowerCase() && (
+            <TxButton
+              className={cx(styles.buyNow, buyingItem && styles.disabled)}
+              onClick={
+                bundleID ? handleBuyBundle : () => handleBuyItem(bestListing)
+              }
+            >
+              {buyingItem ? <ClipLoader color="#FFF" size={16} /> : 'Buy Now'}
+            </TxButton>
+          )}
+        </div>
+      )}
     </>
   );
 
@@ -1937,7 +2612,7 @@ const NFTItem = () => {
             <SuspenseImg
               src={
                 item.thumbnailPath.length > 10
-                  ? `${storageUrl()}/image/${item.thumbnailPath}`
+                  ? `${storageUrl}/image/${item.thumbnailPath}`
                   : item.metadata.image
               }
             />
@@ -1955,13 +2630,10 @@ const NFTItem = () => {
   };
 
   const renderBundleInfoPanel = () => (
-    <Panel
-      title={<div className={styles.panelTitle}>Bundle Description</div>}
-      expanded
-    >
+    <Panel title="Bundle Description" icon={SubjectIcon} expanded>
       <div className={styles.panelBody}>
         {creatorInfoLoading ? (
-          <Skeleton width={180} height={25} />
+          <Skeleton width={150} height={20} />
         ) : (
           <div className={styles.itemOwner}>
             <div className={styles.ownerAvatar}>
@@ -1973,7 +2645,7 @@ const NFTItem = () => {
               ) : (
                 <Identicon
                   account={creator}
-                  size={32}
+                  size={24}
                   className={styles.avatar}
                 />
               )}
@@ -1992,6 +2664,7 @@ const NFTItem = () => {
 
   const renderAboutPanel = () => (
     <Panel
+      icon={VerticalSplitIcon}
       title={
         <div className={styles.panelTitle}>
           About&nbsp;
@@ -2011,7 +2684,7 @@ const NFTItem = () => {
         <div className={styles.socialLinks}>
           {collection?.siteUrl?.length > 0 && (
             <a
-              href={collection?.siteUrl}
+              href={getSiteUrl(collection?.siteUrl)}
               target="_blank"
               rel="noopener noreferrer"
               className={styles.socialLink}
@@ -2065,12 +2738,12 @@ const NFTItem = () => {
   );
 
   const renderCollectionPanel = () => (
-    <Panel title="Chain Info">
+    <Panel title="Chain Info" icon={BallotIcon}>
       <div className={styles.panelBody}>
         <div className={styles.panelLine}>
           <div className={styles.panelLabel}>Collection</div>
           <a
-            href={`https://ftmscan.com/token/${address}`}
+            href={`${explorerUrl}/token/${address}`}
             target="_blank"
             rel="noopener noreferrer"
             className={styles.panelValue}
@@ -2090,11 +2763,29 @@ const NFTItem = () => {
     </Panel>
   );
 
+  const renderRoyaltyPanel = () =>
+    collectionRoyalty && (
+      <Panel title="Royalty" icon={LoyaltyIcon}>
+        <div className={styles.panelBody}>
+          <div className={styles.panelLine}>
+            <div className={styles.panelLabel}>Royalty</div>
+            <div className={styles.panelValue}>
+              {collectionRoyalty.royalty}%
+            </div>
+          </div>
+          <div className={styles.panelLine}>
+            <div className={styles.panelLabel}>Fee Recipient</div>
+            <div className={styles.panelValue}>
+              {collectionRoyalty.feeRecipient}
+            </div>
+          </div>
+        </div>
+      </Panel>
+    );
+
   return (
-    <div
-      className={cx(styles.container, isLoggedIn() ? styles.withHeader : '')}
-    >
-      <Header light />
+    <div className={styles.container}>
+      <Header border />
       {isLoggedIn() && (
         <div className={styles.header}>
           {isMine && (
@@ -2158,7 +2849,7 @@ const NFTItem = () => {
             (tokenType.current === 1155 &&
               myHolding.supply < tokenInfo.totalSupply)) &&
             (!auction.current || auction.current.resulted) && (
-              <div
+              <TxButton
                 className={cx(
                   styles.headerButton,
                   (offerPlacing || offerCanceling) && styles.disabled
@@ -2170,7 +2861,7 @@ const NFTItem = () => {
                 }
               >
                 {hasMyOffer ? 'Withdraw Offer' : 'Make Offer'}
-              </div>
+              </TxButton>
             )}
         </div>
       )}
@@ -2188,25 +2879,14 @@ const NFTItem = () => {
                     className={styles.loader}
                   />
                 ) : !bundleID || bundleItems.current.length ? (
-                  <Suspense
-                    fallback={
-                      <Loader
-                        type="Oval"
-                        color="#007BFF"
-                        height={32}
-                        width={32}
-                        className={styles.loader}
-                      />
-                    }
-                  >
-                    <SuspenseImg
-                      src={
-                        bundleID
-                          ? bundleItems.current[previewIndex].metadata?.image
-                          : info?.image
-                      }
-                    />
-                  </Suspense>
+                  bundleID ? (
+                    renderMedia(
+                      bundleItems.current[previewIndex].metadata?.image,
+                      bundleItems.current[previewIndex].contentType
+                    )
+                  ) : (
+                    renderMedia(info?.image, contentType.current)
+                  )
                 ) : null}
               </div>
               {bundleID && (
@@ -2236,9 +2916,7 @@ const NFTItem = () => {
                             <SuspenseImg
                               src={
                                 item.thumbnailPath?.length > 10
-                                  ? `${storageUrl()}/image/${
-                                      item.thumbnailPath
-                                    }`
+                                  ? `${storageUrl}/image/${item.thumbnailPath}`
                                   : item.metadata?.image
                               }
                             />
@@ -2255,7 +2933,7 @@ const NFTItem = () => {
             <div className={styles.itemInfo}>{renderItemInfo()}</div>
             <div className={styles.itemInfoCont}>
               {info?.properties && (
-                <Panel title="Properties">
+                <Panel title="Properties" icon={LabelIcon}>
                   <div className={styles.panelBody}>
                     {renderProperties(info.properties)}
                   </div>
@@ -2264,6 +2942,7 @@ const NFTItem = () => {
               {bundleID && renderBundleInfoPanel()}
               {!bundleID && renderAboutPanel()}
               {!bundleID && renderCollectionPanel()}
+              {!bundleID && renderRoyaltyPanel()}
             </div>
           </div>
           <div className={styles.itemMain}>
@@ -2290,6 +2969,11 @@ const NFTItem = () => {
             {!bundleID && (
               <div className={cx(styles.panelWrapper, styles.infoPanel)}>
                 {renderCollectionPanel()}
+              </div>
+            )}
+            {!bundleID && (
+              <div className={cx(styles.panelWrapper, styles.infoPanel)}>
+                {renderRoyaltyPanel()}
               </div>
             )}
             {(winner || auction.current?.resulted === false) && (
@@ -2321,7 +3005,12 @@ const NFTItem = () => {
                                 ? 'Me'
                                 : shortenAddress(winner)}
                             </Link>
-                            {` (${formatNumber(winningBid)} FTM)`}
+                            &nbsp;(
+                            <img
+                              src={winningToken.icon}
+                              className={styles.tokenIcon}
+                            />
+                            {formatNumber(winningBid)})
                           </>
                         ) : (
                           'Waiting for result'
@@ -2331,22 +3020,33 @@ const NFTItem = () => {
                       <div>
                         <div className={styles.bidtitle}>
                           Reserve Price :&nbsp;
-                          {formatNumber(auction.current.reservePrice)} FTM
+                          <img
+                            src={auction.current.token.icon}
+                            className={styles.tokenIcon}
+                          />
+                          {formatNumber(auction.current.reservePrice)}
                         </div>
+                        <br />
                         <div className={styles.bidtitle}>
-                          Highest Bid
+                          Highest Bid :&nbsp;
+                          <img
+                            src={auction.current.token.icon}
+                            className={styles.tokenIcon}
+                          />
+                          {formatNumber(bid.bid)}
                           {bid.bid < auction.current.reservePrice
-                            ? ' -- Reserve price not met.'
+                            ? ' -- Reserve price not met'
                             : ''}
-                        </div>
-                        <div className={styles.bidAmount}>
-                          {formatNumber(bid.bid)} FTM
                         </div>
                       </div>
                     ) : (
                       <div className={styles.bidtitle}>
-                        No bids yet ( Reserve Price :{' '}
-                        {formatNumber(auction.current.reservePrice)} FTM )
+                        No bids yet ( Reserve Price :&nbsp;
+                        <img
+                          src={auction.current.token.icon}
+                          className={styles.tokenIcon}
+                        />
+                        {formatNumber(auction.current.reservePrice)} )
                       </div>
                     )}
                     {!isMine &&
@@ -2404,7 +3104,7 @@ const NFTItem = () => {
             )}
             {!bundleID && (
               <div className={styles.panelWrapper}>
-                <Panel title="Price History">
+                <Panel title="Price History" icon={TimelineIcon}>
                   <ReactResizeDetector>
                     {({ width }) =>
                       width > 0 ? (
@@ -2442,7 +3142,7 @@ const NFTItem = () => {
               </div>
             )}
             <div className={styles.panelWrapper}>
-              <Panel title="Listings" expanded>
+              <Panel title="Listings" icon={LocalOfferIcon} expanded>
                 <div className={styles.listings}>
                   <div className={cx(styles.listing, styles.heading)}>
                     <div className={styles.owner}>From</div>
@@ -2457,7 +3157,7 @@ const NFTItem = () => {
                         <div className={styles.listing}>
                           <div className={styles.owner}>
                             {loading ? (
-                              <Skeleton width={120} height={24} />
+                              <Skeleton width={100} height={20} />
                             ) : (
                               <Link to={`/account/${owner}`}>
                                 <div className={styles.userAvatarWrapper}>
@@ -2482,18 +3182,23 @@ const NFTItem = () => {
                           </div>
                           <div className={styles.price}>
                             {loading ? (
-                              <Skeleton width={100} height={24} />
+                              <Skeleton width={100} height={20} />
                             ) : (
-                              `${formatNumber(bundleListing.current.price)} FTM`
+                              <>
+                                <img
+                                  src={bundleListing.current.token.icon}
+                                  className={styles.tokenIcon}
+                                />
+                                {formatNumber(bundleListing.current.price)}
+                              </>
                             )}
                           </div>
                           <div className={styles.buy}>
                             {!isMine && (
-                              <div
+                              <TxButton
                                 className={cx(
                                   styles.buyButton,
-                                  (salesContractApproving || buyingItem) &&
-                                    styles.disabled
+                                  buyingItem && styles.disabled
                                 )}
                                 onClick={handleBuyBundle}
                               >
@@ -2502,7 +3207,7 @@ const NFTItem = () => {
                                 ) : (
                                   'Buy'
                                 )}
-                              </div>
+                              </TxButton>
                             )}
                           </div>
                         </div>
@@ -2525,11 +3230,23 @@ const NFTItem = () => {
                                   />
                                 )}
                               </div>
-                              {listing.alias || listing.owner.substr(0, 6)}
+                              {listing.alias || listing.owner?.substr(0, 6)}
                             </Link>
                           </div>
                           <div className={styles.price}>
-                            {formatNumber(listing.price)} FTM
+                            <img
+                              src={listing.token.icon}
+                              className={styles.tokenIcon}
+                            />
+                            {formatNumber(listing.price)}&nbsp;(
+                            {prices[listing.token.address] !== undefined ? (
+                              `$${(
+                                listing.price * prices[listing.token.address]
+                              ).toFixed(3)}`
+                            ) : (
+                              <Skeleton width={60} height={24} />
+                            )}
+                            )
                           </div>
                           {tokenInfo?.totalSupply > 1 && (
                             <div className={styles.quantity}>
@@ -2538,12 +3255,11 @@ const NFTItem = () => {
                           )}
                           <div className={styles.buy}>
                             {listing.owner.toLowerCase() !==
-                              account.toLowerCase() && (
-                              <div
+                              account?.toLowerCase() && (
+                              <TxButton
                                 className={cx(
                                   styles.buyButton,
-                                  (salesContractApproving || buyingItem) &&
-                                    styles.disabled
+                                  buyingItem && styles.disabled
                                 )}
                                 onClick={() => handleBuyItem(listing)}
                               >
@@ -2552,7 +3268,7 @@ const NFTItem = () => {
                                 ) : (
                                   'Buy'
                                 )}
-                              </div>
+                              </TxButton>
                             )}
                           </div>
                         </div>
@@ -2561,114 +3277,153 @@ const NFTItem = () => {
               </Panel>
             </div>
             <div className={styles.panelWrapper}>
-              <Panel title="Offers" expanded>
+              <Panel title="Offers" icon={TocIcon} expanded>
                 <div className={styles.offers}>
-                  <div className={cx(styles.offer, styles.heading)}>
-                    <div className={styles.owner}>From</div>
-                    <div className={styles.price}>Price</div>
-                    {tokenInfo?.totalSupply > 1 && (
-                      <div className={styles.quantity}>Quantity</div>
-                    )}
-                    <div className={styles.deadline}>Expires In</div>
-                    <div className={styles.buy} />
-                  </div>
-                  {offers.current
-                    .filter(offer => offer.deadline > now.getTime())
-                    .sort((a, b) => (a.pricePerItem < b.pricePerItem ? 1 : -1))
-                    .map((offer, idx) => (
-                      <div className={styles.offer} key={idx}>
-                        <div className={styles.owner}>
-                          <Link to={`/account/${offer.creator}`}>
-                            <div className={styles.userAvatarWrapper}>
-                              {offer.image ? (
-                                <img
-                                  src={`https://gateway.pinata.cloud/ipfs/${offer.image}`}
-                                  className={styles.userAvatar}
-                                />
-                              ) : (
-                                <Identicon
-                                  account={offer.creator}
-                                  size={24}
-                                  className={styles.userAvatar}
-                                />
-                              )}
-                            </div>
-                            {offer.alias || offer.creator.substr(0, 6)}
-                          </Link>
-                        </div>
-                        <div className={styles.price}>
-                          {formatNumber(offer.pricePerItem || offer.price)} FTM
-                        </div>
+                  {offers.current.length ? (
+                    <>
+                      <div className={cx(styles.offer, styles.heading)}>
+                        <div className={styles.owner}>From</div>
+                        <div className={styles.price}>Price</div>
                         {tokenInfo?.totalSupply > 1 && (
-                          <div className={styles.quantity}>
-                            {formatNumber(offer.quantity)}
-                          </div>
+                          <div className={styles.quantity}>Quantity</div>
                         )}
-                        <div className={styles.deadline}>
-                          {formatExpiration(offer.deadline)}
-                        </div>
-                        <div className={styles.buy}>
-                          {(isMine ||
-                            (myHolding &&
-                              myHolding.supply >= offer.quantity)) &&
-                            offer.creator?.toLowerCase() !==
-                              account?.toLowerCase() && (
-                              <div
-                                className={cx(
-                                  styles.buyButton,
-                                  (salesContractApproving || offerAccepting) &&
-                                    styles.disabled
-                                )}
-                                onClick={
-                                  bundleID
-                                    ? isBundleContractApproved
-                                      ? () => handleAcceptOffer(offer)
-                                      : handleApproveBundleSalesContract
-                                    : salesContractApproved
-                                    ? () => handleAcceptOffer(offer)
-                                    : handleApproveSalesContract
-                                }
-                              >
-                                {!(bundleID
-                                  ? isBundleContractApproved
-                                  : salesContractApproved) ? (
-                                  salesContractApproving ? (
-                                    <ClipLoader color="#FFF" size={16} />
+                        <div className={styles.deadline}>Expires In</div>
+                        <div className={styles.buy} />
+                      </div>
+                      {offers.current
+                        .filter(offer => offer.deadline > now.getTime())
+                        .sort((a, b) =>
+                          a.pricePerItem < b.pricePerItem ? 1 : -1
+                        )
+                        .map((offer, idx) => (
+                          <div className={styles.offer} key={idx}>
+                            <div className={styles.owner}>
+                              <Link to={`/account/${offer.creator}`}>
+                                <div className={styles.userAvatarWrapper}>
+                                  {offer.image ? (
+                                    <img
+                                      src={`https://gateway.pinata.cloud/ipfs/${offer.image}`}
+                                      className={styles.userAvatar}
+                                    />
                                   ) : (
-                                    'Approve'
-                                  )
-                                ) : offerAccepting ? (
-                                  <ClipLoader color="#FFF" size={16} />
-                                ) : (
-                                  'Accept'
-                                )}
+                                    <Identicon
+                                      account={offer.creator}
+                                      size={24}
+                                      className={styles.userAvatar}
+                                    />
+                                  )}
+                                </div>
+                                {offer.alias || offer.creator?.substr(0, 6)}
+                              </Link>
+                            </div>
+                            <div className={styles.price}>
+                              <img
+                                src={offer.token.icon}
+                                className={styles.tokenIcon}
+                              />
+                              {formatNumber(offer.pricePerItem || offer.price)}
+                              &nbsp;(
+                              {prices[offer.token.address] !== undefined ? (
+                                `$${(
+                                  (offer.pricePerItem || offer.price) *
+                                  prices[offer.token.address]
+                                ).toFixed(3)}`
+                              ) : (
+                                <Skeleton width={60} height={24} />
+                              )}
+                              )
+                            </div>
+                            {tokenInfo?.totalSupply > 1 && (
+                              <div className={styles.quantity}>
+                                {formatNumber(offer.quantity)}
                               </div>
                             )}
-                          {offer.creator?.toLowerCase() ===
-                            account?.toLowerCase() && (
-                            <div
-                              className={cx(
-                                styles.buyButton,
-                                offerCanceling && styles.disabled
-                              )}
-                              onClick={() => handleCancelOffer()}
-                            >
-                              {offerCanceling ? (
-                                <ClipLoader color="#FFF" size={16} />
-                              ) : (
-                                'Withdraw'
+                            <div className={styles.deadline}>
+                              {formatExpiration(offer.deadline)}
+                            </div>
+                            <div className={styles.buy}>
+                              {(isMine ||
+                                (myHolding &&
+                                  myHolding.supply >= offer.quantity)) &&
+                                offer.creator?.toLowerCase() !==
+                                  account?.toLowerCase() && (
+                                  <div
+                                    className={cx(
+                                      styles.buyButton,
+                                      (salesContractApproving ||
+                                        offerAccepting) &&
+                                        styles.disabled
+                                    )}
+                                    onClick={
+                                      bundleID
+                                        ? isBundleContractApproved
+                                          ? () => handleAcceptOffer(offer)
+                                          : handleApproveBundleSalesContract
+                                        : salesContractApproved
+                                        ? () => handleAcceptOffer(offer)
+                                        : handleApproveSalesContract
+                                    }
+                                  >
+                                    {!(bundleID
+                                      ? isBundleContractApproved
+                                      : salesContractApproved) ? (
+                                      salesContractApproving ? (
+                                        <ClipLoader color="#FFF" size={16} />
+                                      ) : (
+                                        'Approve'
+                                      )
+                                    ) : offerAccepting ? (
+                                      <ClipLoader color="#FFF" size={16} />
+                                    ) : (
+                                      'Accept'
+                                    )}
+                                  </div>
+                                )}
+                              {offer.creator?.toLowerCase() ===
+                                account?.toLowerCase() && (
+                                <div
+                                  className={cx(
+                                    styles.buyButton,
+                                    offerCanceling && styles.disabled
+                                  )}
+                                  onClick={() => handleCancelOffer()}
+                                >
+                                  {offerCanceling ? (
+                                    <ClipLoader color="#FFF" size={16} />
+                                  ) : (
+                                    'Withdraw'
+                                  )}
+                                </div>
                               )}
                             </div>
-                          )}
-                        </div>
-                      </div>
-                    ))}
+                          </div>
+                        ))}
+                    </>
+                  ) : (
+                    <div className={styles.noOffers}>
+                      <div className={styles.noOffersLabel}>No Offers Yet</div>
+                      {(!isMine ||
+                        (tokenType.current === 1155 &&
+                          myHolding.supply < tokenInfo.totalSupply)) &&
+                        (!auction.current || auction.current.resulted) && (
+                          <TxButton
+                            className={cx(
+                              styles.makeOffer,
+                              offerPlacing && styles.disabled
+                            )}
+                            onClick={() => setOfferModalVisible(true)}
+                          >
+                            Make Offer
+                          </TxButton>
+                        )}
+                    </div>
+                  )}
                 </div>
               </Panel>
             </div>
             {bundleID && (
               <div className={styles.panelWrapper}>
-                <Panel title="Items" expanded>
+                <Panel title="Items" icon={ViewModuleIcon} expanded>
                   <div className={styles.items}>
                     {(loading
                       ? [null, null, null]
@@ -2711,9 +3466,19 @@ const NFTItem = () => {
                   {filter === 0 && (
                     <div className={styles.historyPrice}>
                       {history ? (
-                        `${formatNumber(history.price)} FTM`
+                        <>
+                          <img
+                            src={history.token.icon}
+                            className={styles.tokenIcon}
+                          />
+                          {formatNumber(history.price)}
+                          &nbsp;( ${formatNumber(
+                            history.priceInUSD.toFixed(3)
+                          )}{' '}
+                          )
+                        </>
                       ) : (
-                        <Skeleton width={120} height={25} />
+                        <Skeleton width={100} height={20} />
                       )}
                     </div>
                   )}
@@ -2722,7 +3487,7 @@ const NFTItem = () => {
                       {history ? (
                         formatNumber(history.value)
                       ) : (
-                        <Skeleton width={120} height={25} />
+                        <Skeleton width={100} height={20} />
                       )}
                     </div>
                   )}
@@ -2743,10 +3508,10 @@ const NFTItem = () => {
                             />
                           )}
                         </div>
-                        {history.fromAlias || history.from.substr(0, 6)}
+                        {history.fromAlias || history.from?.substr(0, 6)}
                       </Link>
                     ) : (
-                      <Skeleton width={200} height={25} />
+                      <Skeleton width={180} height={20} />
                     )}
                   </div>
                   <div className={styles.to}>
@@ -2766,36 +3531,103 @@ const NFTItem = () => {
                             />
                           )}
                         </div>
-                        {history.toAlias || history.to.substr(0, 6)}
+                        {history.toAlias || history.to?.substr(0, 6)}
                       </Link>
                     ) : (
-                      <Skeleton width={200} height={25} />
+                      <Skeleton width={180} height={20} />
                     )}
                   </div>
                   <div className={styles.saleDate}>
                     {saleDate ? (
                       formatDate(saleDate)
                     ) : (
-                      <Skeleton width={180} height={25} />
+                      <Skeleton width={150} height={20} />
                     )}
                   </div>
                 </div>
               );
             })}
           </div>
+          {!bundleID && (
+            <div className={styles.panelWrapper}>
+              <Panel
+                title="More from this collection"
+                icon={ViewModuleIcon}
+                responsive
+              >
+                <div className={styles.panelBody}>
+                  {loading ? (
+                    <div className={styles.loadingIndicator}>
+                      <ClipLoader color="#007BFF" size={16} />
+                    </div>
+                  ) : (
+                    <div className={styles.itemsList}>
+                      {moreItems.current.map((item, idx) => (
+                        <div key={idx} className={styles.moreItem}>
+                          <NFTCard item={item} />
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </Panel>
+            </div>
+          )}
         </div>
       </div>
 
       {renderMenu}
 
+      <Menu
+        id="simple-menu"
+        anchorEl={shareAnchorEl}
+        keepMounted
+        open={Boolean(shareAnchorEl)}
+        onClose={handleClose}
+        classes={{ paper: styles.shareMenu, list: styles.shareMenuList }}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'right',
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'right',
+        }}
+      >
+        <CopyToClipboard text={window.location.href} onCopy={handleCopyLink}>
+          <MenuItem classes={{ root: styles.menuItem }}>
+            <img src={iconArtion} />
+            Copy Link
+          </MenuItem>
+        </CopyToClipboard>
+        <MenuItem
+          classes={{ root: styles.menuItem }}
+          onClick={handleShareOnFacebook}
+        >
+          <img src={iconFacebook} />
+          Share on Facebook
+        </MenuItem>
+        <MenuItem
+          classes={{ root: styles.menuItem }}
+          onClick={handleShareToTwitter}
+        >
+          <img src={iconTwitter} />
+          Share to Twitter
+        </MenuItem>
+      </Menu>
+      <TransferModal
+        visible={transferModalVisible}
+        totalSupply={tokenType.current === 1155 ? myHolding?.supply : null}
+        transferring={transferring}
+        onTransfer={handleTransfer}
+        onClose={() => setTransferModalVisible(false)}
+      />
       <SellModal
         visible={sellModalVisible}
         onClose={() => setSellModalVisible(false)}
-        onSell={hasListing ? handleUpdatePrice : handleListItem}
+        onSell={hasListing ? handleUpdateListing : handleListItem}
         startPrice={
-          bundleID
-            ? bundleListing.current?.price || 0
-            : myListing()?.pricePerItem || 0
+          bundleID ? bundleListing.current?.price || 0 : myListing()?.price || 0
         }
         confirming={listingItem || priceUpdating}
         approveContract={
@@ -2835,11 +3667,12 @@ const NFTItem = () => {
         onPlaceBid={handlePlaceBid}
         minBidAmount={(bid?.bid || 0) + minBidIncrement}
         confirming={bidPlacing}
+        token={auction.current?.token}
       />
       <OwnersModal
         visible={ownersModalVisible}
         onClose={() => setOwnersModalVisible(false)}
-        holders={holders.current}
+        holders={holders}
       />
       <LikesModal
         visible={likesModalVisible}

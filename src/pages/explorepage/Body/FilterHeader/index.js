@@ -11,12 +11,12 @@ import {
 
 import { GroupFilters, SortByOptions } from 'constants/filter.constants';
 import FilterActions from 'actions/filter.actions';
-import { formatNumber } from 'utils';
+import { formatNumber, formatCategory } from 'utils';
 import nftActiveIcon from 'assets/svgs/nft_active.svg';
 
 import './styles.css';
 
-const ExploreFilterHeader = ({ loading }) => {
+const ExploreFilterHeader = ({ loading, category }) => {
   const dispatch = useDispatch();
 
   const { collections: collectionItems } = useSelector(
@@ -59,7 +59,10 @@ const ExploreFilterHeader = ({ loading }) => {
           {loading ? (
             <Skeleton width={100} height={24} />
           ) : (
-            `${formatNumber(count)} result${count > 1 ? 's' : ''}`
+            `${formatNumber(count)} Result${count !== 1 ? 's' : ''}
+            ${
+              category === null ? '' : `- Category: ${formatCategory(category)}`
+            }`
           )}
         </label>
         {selectedCollections().map((item, idx) => (

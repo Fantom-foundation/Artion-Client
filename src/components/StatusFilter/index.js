@@ -1,76 +1,44 @@
-import React, { useState } from 'react';
+import React from 'react';
 import cx from 'classnames';
 import { useDispatch, useSelector } from 'react-redux';
 import { makeStyles } from '@material-ui/core/styles';
-import Accordion from '@material-ui/core/Accordion';
-import AccordionDetails from '@material-ui/core/AccordionDetails';
-import AccordionSummary from '@material-ui/core/AccordionSummary';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import FormGroup from '@material-ui/core/FormGroup';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Checkbox from '@material-ui/core/Checkbox';
 
 import FilterActions from 'actions/filter.actions';
-
-import iconStar from 'assets/svgs/star.svg';
+import FilterWrapper from 'components/FilterWrapper';
 
 const useStyles = makeStyles(() => ({
-  root: {
-    width: '100%',
-    paddingBottom: 20,
-  },
-  wrapper: {
-    boxShadow: 'none',
-    borderRadius: '10px !important',
-    border: '1px solid #2479FA77',
-    overflow: 'hidden',
-  },
-  header: {
-    height: 50,
-    minHeight: '50px !important',
-    backgroundColor: '#fff',
-    boxShadow: 'none',
-  },
-  heading: {
-    fontWeight: 500,
-    fontSize: 18,
-    paddingLeft: 20,
-    flexShrink: 0,
-    color: '#3D3D3D',
-  },
-  icon: {
-    width: 24,
-    height: 24,
-  },
-  arrowIcon: {
-    color: '#3D3D3D',
-    opacity: '0.6',
-  },
   body: {
-    padding: '6px 16px 20px',
-  },
-  statusFormGroup: {
-    display: 'flex',
-    flexDirection: 'column',
-    width: '100%',
+    display: 'grid',
+    gridTemplateColumns: '1fr 1fr',
+    gridGap: '8px',
   },
   formControl: {
     width: '100%',
-    marginRight: 0,
-  },
-  selected: {
-    color: '#007BFF',
-  },
-  statusSvgDiv: {
+    height: 40,
+    boxSizing: 'border-box',
+    borderRadius: 10,
+    border: '1px solid #A2A2AD',
+    cursor: 'pointer',
+    margin: '0 !important',
     display: 'flex',
     alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: 14,
+    fontWeight: '400',
+    color: '#121223',
+    backgroundColor: '#FFF',
+  },
+  selected: {
+    backgroundColor: '#1969FF',
+    color: '#FFF',
+    fontWeight: 700,
+    border: 0,
   },
 }));
 
 const ExploreStatus = () => {
   const dispatch = useDispatch();
   const classes = useStyles();
-  const [expanded, setExpanded] = useState(false);
 
   const {
     statusBuyNow,
@@ -83,109 +51,45 @@ const ExploreStatus = () => {
     dispatch(FilterActions.updateStatusFilter(field, selected));
   };
 
-  const handleAccordionColElapse = panel => (event, isExpanded) => {
-    setExpanded(isExpanded ? panel : false);
-  };
-
-  const handleCheckgroupChanges = event => {
-    let name = event.target.name;
-    switch (name) {
-      case 'buyNow':
-        handleStatusChange('statusBuyNow', !statusBuyNow);
-        break;
-      case 'hasBids':
-        handleStatusChange('statusHasBids', !statusHasBids);
-        break;
-      case 'hasOffers':
-        handleStatusChange('statusHasOffers', !statusHasOffers);
-        break;
-      case 'onAuction':
-        handleStatusChange('statusOnAuction', !statusOnAuction);
-        break;
-      default: {
-        console.log('nothing to change');
-      }
-    }
-  };
-
   return (
-    <div className={classes.root}>
-      <Accordion
-        className={classes.wrapper}
-        expanded={expanded === 'panel1'}
-        onChange={handleAccordionColElapse('panel1')}
+    <FilterWrapper title="Status" classes={{ body: classes.body }}>
+      <div
+        className={cx(
+          classes.formControl,
+          statusBuyNow ? classes.selected : null
+        )}
+        onClick={() => handleStatusChange('statusBuyNow', !statusBuyNow)}
       >
-        <AccordionSummary
-          expandIcon={<ExpandMoreIcon className={classes.arrowIcon} />}
-          className={classes.header}
-        >
-          <div className={classes.statusSvgDiv}>
-            <img src={iconStar} className={classes.icon} />
-            <span className={classes.heading}>Status</span>
-          </div>
-        </AccordionSummary>
-        <AccordionDetails className={classes.body}>
-          <FormGroup className={classes.statusFormGroup}>
-            <FormControlLabel
-              className={cx(
-                classes.formControl,
-                statusBuyNow ? classes.selected : null
-              )}
-              control={
-                <Checkbox
-                  checked={statusBuyNow}
-                  onChange={handleCheckgroupChanges}
-                  name="buyNow"
-                />
-              }
-              label="Buy Now"
-            />
-            <FormControlLabel
-              className={cx(
-                classes.formControl,
-                statusHasBids ? classes.selected : null
-              )}
-              control={
-                <Checkbox
-                  checked={statusHasBids}
-                  onChange={handleCheckgroupChanges}
-                  name="hasBids"
-                />
-              }
-              label="Has Bids"
-            />
-            <FormControlLabel
-              className={cx(
-                classes.formControl,
-                statusHasOffers ? classes.selected : null
-              )}
-              control={
-                <Checkbox
-                  checked={statusHasOffers}
-                  onChange={handleCheckgroupChanges}
-                  name="hasOffers"
-                />
-              }
-              label="Has Offers"
-            />
-            <FormControlLabel
-              className={cx(
-                classes.formControl,
-                statusOnAuction ? classes.selected : null
-              )}
-              control={
-                <Checkbox
-                  checked={statusOnAuction}
-                  onChange={handleCheckgroupChanges}
-                  name="onAuction"
-                />
-              }
-              label="On Auction"
-            />
-          </FormGroup>
-        </AccordionDetails>
-      </Accordion>
-    </div>
+        Buy Now
+      </div>
+      <div
+        className={cx(
+          classes.formControl,
+          statusHasBids ? classes.selected : null
+        )}
+        onClick={() => handleStatusChange('statusHasBids', !statusHasBids)}
+      >
+        Has Bids
+      </div>
+      <div
+        className={cx(
+          classes.formControl,
+          statusHasOffers ? classes.selected : null
+        )}
+        onClick={() => handleStatusChange('statusHasOffers', !statusHasOffers)}
+      >
+        Has Offers
+      </div>
+      <div
+        className={cx(
+          classes.formControl,
+          statusOnAuction ? classes.selected : null
+        )}
+        onClick={() => handleStatusChange('statusOnAuction', !statusOnAuction)}
+      >
+        On Auction
+      </div>
+    </FilterWrapper>
   );
 };
 
