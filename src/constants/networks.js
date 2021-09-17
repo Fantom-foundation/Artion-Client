@@ -26,7 +26,7 @@ export const Contracts = {
   [ChainId.FANTOM]: {
     auction: '0x951Cc69504d39b3eDb155CA99f555E47E044c2F1',
     sales: '0xa06aecbb8CD9328667f8E05f288e5b3ac1CFf852',
-    bundleSales: '0xcA7B26B232b15d59cb7c87a005B881724bD3f2B5',
+    bundleSales: '0x56aD389A02Ea9d63f13106cB0c161342f537a92e',
     factory: '0xCC7A2eC7A8A0564518fD3D2ca0Df8B2137626144', //FantomNFTFactory
     privateFactory: '0xe5841838Dd7e522f217DfFBCEaef82F04EC649Cd', //FantomNFTFactoryPrivate
     artFactory: '0x520DaB621f93F59d3557174280AB1B6d4FB8c956', //FantomArtFactory
