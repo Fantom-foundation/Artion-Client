@@ -35,7 +35,7 @@ import iconArtion from 'assets/svgs/logo_small_blue.svg';
 import iconFacebook from 'assets/imgs/facebook.png';
 import iconTwitter from 'assets/svgs/twitter_blue.svg';
 import IconList from 'assets/icons/iconList';
-import IconBundle from 'assets/icons/iconBundle';
+// import IconBundle from 'assets/icons/iconBundle';
 import IconHeart from 'assets/icons/iconHeart';
 import IconClock from 'assets/icons/iconClock';
 
@@ -546,9 +546,9 @@ const AccountDetails = () => {
     dispatch(ModalActions.showAccountModal());
   };
 
-  const handleCreateBundle = () => {
-    setBundleModalVisible(true);
-  };
+  // const handleCreateBundle = () => {
+  //   setBundleModalVisible(true);
+  // };
 
   const fetchFollowers = async () => {
     setFollowersLoading(true);
@@ -810,13 +810,13 @@ const AccountDetails = () => {
               count,
               fetching || fguresFetching
             )}
-            {renderTab(
+            {/* {renderTab(
               'Bundles',
               IconBundle,
               1,
               bundleCount,
               bundleFetching || fguresFetching
-            )}
+            )} */}
             {renderTab(
               'Favorited',
               IconHeart,
@@ -839,15 +839,16 @@ const AccountDetails = () => {
               numPerRow={numPerRow}
               loading={fetching}
             />
-          ) : tab === 1 ? (
-            <NFTsGrid
-              items={bundles.current}
-              numPerRow={numPerRow}
-              loading={fetching}
-              showCreate={isMe}
-              onCreate={handleCreateBundle}
-            />
-          ) : tab === 2 ? (
+          ) : // tab === 1 ? (
+          //   <NFTsGrid
+          //     items={bundles.current}
+          //     numPerRow={numPerRow}
+          //     loading={fetching}
+          //     showCreate={isMe}
+          //     onCreate={handleCreateBundle}
+          //   />
+          // ) :
+          tab === 2 ? (
             <NFTsGrid
               items={likes.current}
               numPerRow={numPerRow}
