@@ -15,10 +15,10 @@ export const GroupFilters = [
     value: 'single',
     label: 'Single Items',
   },
-  {
-    value: 'bundle',
-    label: 'Bundles',
-  },
+  // {
+  //   value: 'bundle',
+  //   label: 'Bundles',
+  // },
 ];
 
 export const Categories = [
