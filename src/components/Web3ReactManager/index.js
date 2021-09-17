@@ -1,4 +1,6 @@
+// eslint-disable-next-line no-unused-vars
 import React, { useEffect, useState } from 'react';
+// eslint-disable-next-line no-unused-vars
 import Loader from '../Loader';
 import { NetworkContextName } from '../../constants';
 import { network } from '../../connectors';
@@ -38,6 +40,7 @@ export default function Web3ReactManager({ children }) {
       clearTimeout(timeout);
     };
   }, []);
+  console.log(showLoader);
 
   // on page load, do nothing until we've tried to connect to the injected connector
   if (!triedEager) {
@@ -45,24 +48,24 @@ export default function Web3ReactManager({ children }) {
   }
 
   // if the account context isn't active, and there's an error on the network context, it's an irrecoverable error
-  if (!active && networkError) {
-    return (
-      <div className="flex items-center justify-center h-80">
-        <div className="text-secondary">
-          {`Oops! An unknown error occurred. Please refresh the page, or visit from another browser or device`}
-        </div>
-      </div>
-    );
-  }
+  // if (!active && networkError) {
+  //   return (
+  //     <div className="flex items-center justify-center h-80">
+  //       <div className="text-secondary">
+  //         {`Oops! An unknown error occurred. Please refresh the page, or visit from another browser or device`}
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
   // if neither context is active, spin
-  if (!active && !networkActive) {
-    return showLoader ? (
-      <div className="flex items-center justify-center h-80">
-        <Loader />
-      </div>
-    ) : null;
-  }
+  // if (!active && !networkActive) {
+  //   return showLoader ? (
+  //     <div className="flex items-center justify-center h-80">
+  //       <Loader />
+  //     </div>
+  //   ) : null;
+  // }
 
   return children;
 }
