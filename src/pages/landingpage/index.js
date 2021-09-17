@@ -118,10 +118,8 @@ const LandingPage = () => {
               <img src={umansExample} />
             </div>
             <div className={styles.cardInfo}>
-              <div className={styles.cardCategory}>ZooCoin Community NFT</div>
-              <div className={styles.cardName}>
-                {'Fountain "Farroupilha" Park'}
-              </div>
+              <div className={styles.cardCategory}>Ancestral Uman</div>
+              <div className={styles.cardName}>{'World of Umans'}</div>
             </div>
           </div>
         </div>
