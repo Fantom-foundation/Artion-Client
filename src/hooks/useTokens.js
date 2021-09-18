@@ -1,6 +1,6 @@
 import { ChainId } from '@sushiswap/sdk';
 
-import iconFTM from 'assets/imgs/ftm.png';
+// import iconFTM from 'assets/imgs/ftm.png';
 import iconWFTM from 'assets/imgs/wftm.png';
 import iconUSDT from 'assets/imgs/usdt.png';
 import iconUSDC from 'assets/imgs/usdc.png';
@@ -11,13 +11,13 @@ const isMainnet = process.env.REACT_APP_ENV === 'MAINNET';
 
 const Tokens = {
   [ChainId.FANTOM]: [
-    {
-      address: '',
-      name: 'Fantom',
-      symbol: 'FTM',
-      decimals: 18,
-      icon: iconFTM,
-    },
+    // {
+    //   address: '',
+    //   name: 'Fantom',
+    //   symbol: 'FTM',
+    //   decimals: 18,
+    //   icon: iconFTM,
+    // },
     {
       address: '0x21be370d5312f44cb42ce377bc9b8a0cef1a4c83',
       name: 'Wrapped Fantom',
@@ -48,13 +48,13 @@ const Tokens = {
     },
   ],
   [ChainId.FANTOM_TESTNET]: [
-    {
-      address: '',
-      name: 'Fantom',
-      symbol: 'FTM',
-      decimals: 18,
-      icon: iconFTM,
-    },
+    // {
+    //   address: '',
+    //   name: 'Fantom',
+    //   symbol: 'FTM',
+    //   decimals: 18,
+    //   icon: iconFTM,
+    // },
     {
       address: '0xf1277d1ed8ad466beddf92ef448a132661956621',
       name: 'Wrapped Fantom',
