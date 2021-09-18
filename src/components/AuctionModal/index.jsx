@@ -188,6 +188,7 @@ const AuctionModal = ({
             className={styles.formInput}
             placeholder="0.00"
             value={'' + reservePrice}
+            decimals={selected[0]?.decimals || 0}
             onChange={setReservePrice}
             onFocus={() => setFocused(true)}
             onBlur={() => setFocused(false)}
