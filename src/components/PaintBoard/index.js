@@ -281,9 +281,10 @@ const PaintBoard = () => {
         },
       });
 
-      console.log('upload image result is ');
-
       const jsonHash = result.data.jsonHash;
+      if (result && result.data) {
+        console.log('Uploaded JSON is ', result.data.jsonHash);
+      }
 
       const contract = await loadContract(
         nft,
@@ -293,8 +294,9 @@ const PaintBoard = () => {
         const args =
           type === 721 ? [account, jsonHash] : [account, supply, jsonHash];
 
-        let tx;
 
+        let tx;
+        console.log("Minting ERC-", type, " on ", nft);
         if (!fee) {
           tx = await contract.mint(...args);
         } else {
@@ -307,9 +309,11 @@ const PaintBoard = () => {
         }
         setCurrentMintingStep(1);
         setLastMintedTnxId(tx.hash);
+        console.log("Mint trx submitted as ", tx.hash);
 
         setCurrentMintingStep(2);
         const confirmedTnx = await tx.wait();
+
         setCurrentMintingStep(3);
         let mintedTkId;
         if (type === 721) {
@@ -320,6 +324,7 @@ const PaintBoard = () => {
             ethers.utils.hexDataSlice(confirmedTnx.logs[1].data, 0, 32)
           );
         }
+        console.log("Minted tokenID #", mintedTkId, " on ", nft);
 
         const royaltyTx = await registerRoyalty(
           nft,
@@ -328,8 +333,9 @@ const PaintBoard = () => {
         );
         await royaltyTx.wait();
 
-        // save unlockable content
+        // save unlock-able content
         if (hasUnlockableContent && unlockableContent.length > 0) {
+          console.log("Adding unlock-able content for tokenID #", mintedTkId, " on ", nft);
           await addUnlockableContent(
             nft,
             mintedTkId.toNumber(),
@@ -340,7 +346,9 @@ const PaintBoard = () => {
           );
         }
 
+        console.log("Mint finished for TokenID #", mintedTkId, " on ", nft);
         showToast('success', 'New NFT item minted!');
+
         removeImage();
         setName('');
         setSymbol('');
