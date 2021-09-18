@@ -902,7 +902,7 @@ const AccountDetails = () => {
                         {activity ? (
                           <>
                             <div className={styles.tokenLogo}>
-                              <img src={activity.token.icon} />
+                              <img src={activity.token?.icon} />
                             </div>
                             {activity.price}
                           </>
@@ -1025,7 +1025,7 @@ const AccountDetails = () => {
                       {offer ? (
                         <>
                           <div className={styles.tokenLogo}>
-                            <img src={offer.token.icon} />
+                            <img src={offer.token?.icon} />
                           </div>
                           {offer.pricePerItem}
                         </>
@@ -1088,7 +1088,7 @@ const AccountDetails = () => {
                       {bid ? (
                         <>
                           <div className={styles.tokenLogo}>
-                            <img src={bid.token.icon} />
+                            <img src={bid.token?.icon} />
                           </div>
                           {bid.pricePerItem}
                         </>
