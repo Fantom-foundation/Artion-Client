@@ -2541,7 +2541,7 @@ const NFTItem = () => {
           <div className={styles.currentPriceLabel}>Current price</div>
           <div className={styles.currentPriceWrapper}>
             <div className={styles.tokenLogo}>
-              <img src={bestListing.token.icon} />
+              <img src={bestListing.token?.icon} />
             </div>
             <div className={styles.currentPrice}>{bestListing.price}</div>
             <div className={styles.currentPriceUSD}>
@@ -3007,7 +3007,7 @@ const NFTItem = () => {
                             </Link>
                             &nbsp;(
                             <img
-                              src={winningToken.icon}
+                              src={winningToken?.icon}
                               className={styles.tokenIcon}
                             />
                             {formatNumber(winningBid)})
@@ -3021,7 +3021,7 @@ const NFTItem = () => {
                         <div className={styles.bidtitle}>
                           Reserve Price :&nbsp;
                           <img
-                            src={auction.current.token.icon}
+                            src={auction.current.token?.icon}
                             className={styles.tokenIcon}
                           />
                           {formatNumber(auction.current.reservePrice)}
@@ -3030,7 +3030,7 @@ const NFTItem = () => {
                         <div className={styles.bidtitle}>
                           Highest Bid :&nbsp;
                           <img
-                            src={auction.current.token.icon}
+                            src={auction.current.token?.icon}
                             className={styles.tokenIcon}
                           />
                           {formatNumber(bid.bid)}
@@ -3043,7 +3043,7 @@ const NFTItem = () => {
                       <div className={styles.bidtitle}>
                         No bids yet ( Reserve Price :&nbsp;
                         <img
-                          src={auction.current.token.icon}
+                          src={auction.current.token?.icon}
                           className={styles.tokenIcon}
                         />
                         {formatNumber(auction.current.reservePrice)} )
@@ -3186,7 +3186,7 @@ const NFTItem = () => {
                             ) : (
                               <>
                                 <img
-                                  src={bundleListing.current.token.icon}
+                                  src={bundleListing.current.token?.icon}
                                   className={styles.tokenIcon}
                                 />
                                 {formatNumber(bundleListing.current.price)}
@@ -3235,7 +3235,7 @@ const NFTItem = () => {
                           </div>
                           <div className={styles.price}>
                             <img
-                              src={listing.token.icon}
+                              src={listing.token?.icon}
                               className={styles.tokenIcon}
                             />
                             {formatNumber(listing.price)}&nbsp;(
@@ -3318,7 +3318,7 @@ const NFTItem = () => {
                             </div>
                             <div className={styles.price}>
                               <img
-                                src={offer.token.icon}
+                                src={offer.token?.icon}
                                 className={styles.tokenIcon}
                               />
                               {formatNumber(offer.pricePerItem || offer.price)}
@@ -3468,7 +3468,7 @@ const NFTItem = () => {
                       {history ? (
                         <>
                           <img
-                            src={history.token.icon}
+                            src={history.token?.icon}
                             className={styles.tokenIcon}
                           />
                           {formatNumber(history.price)}
