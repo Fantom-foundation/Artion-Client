@@ -156,14 +156,14 @@ const SellModal = ({
                   methods.addItem(item);
                 }}
               >
-                <img src={item.icon} className={styles.tokenIcon} />
+                <img src={item?.icon} className={styles.tokenIcon} />
                 <div className={styles.tokenSymbol}>{item.symbol}</div>
               </div>
             )}
             contentRenderer={({ props: { values } }) =>
               values.length > 0 ? (
                 <div className={styles.selectedToken}>
-                  <img src={values[0].icon} className={styles.tokenIcon} />
+                  <img src={values[0]?.icon} className={styles.tokenIcon} />
                   <div className={styles.tokenSymbol}>{values[0].symbol}</div>
                 </div>
               ) : (

@@ -326,23 +326,34 @@ const BaseCard = ({ item, loading, style, create, onCreate, onLike }) => {
                 <div className={styles.name}>{item?.name || info?.name}</div>
               )}
             </div>
-            <div className={styles.alignRight}>
-              {!loading && (
-                <div className={styles.label}>
-                  {auctionActive ? 'Auction' : 'Price'}
-                </div>
-              )}
-              {loading || fetching ? (
-                <Skeleton width={80} height={20} />
-              ) : (
-                <div className={cx(styles.label, styles.price)}>
-                  <img src={auctionActive ? auction.token.icon : wFTMLogo} />
-                  {formatNumber(
-                    auctionActive ? auction.reservePrice : item?.price || 0
-                  )}
-                </div>
-              )}
-            </div>
+            {auction?.reservePrice || item?.price ? (
+              <div className={styles.alignRight}>
+                {!loading && (
+                  <div className={styles.label}>
+                    {auctionActive ? 'Auction' : 'Price'}
+                  </div>
+                )}
+                {loading || fetching ? (
+                  <Skeleton width={80} height={20} />
+                ) : (
+                  <div className={cx(styles.label, styles.price)}>
+                    <img
+                      src={
+                        auctionActive
+                          ? auction?.token?.icon
+                          : getTokenByAddress(item?.paymentToken)?.icon ||
+                            wFTMLogo
+                      }
+                    />
+                    {formatNumber(
+                      auctionActive ? auction.reservePrice : item?.price || 0
+                    )}
+                  </div>
+                )}
+              </div>
+            ) : (
+              ''
+            )}
           </div>
           <div className={styles.alignBottom}>
             <div>
@@ -364,7 +375,7 @@ const BaseCard = ({ item, loading, style, create, onCreate, onLike }) => {
                   <div className={cx(styles.label2, styles.price2)}>
                     <img
                       src={
-                        getTokenByAddress(item?.lastSalePricePaymentToken).icon
+                        getTokenByAddress(item?.lastSalePricePaymentToken)?.icon
                       }
                     />
                     {formatNumber(item.lastSalePrice)}
