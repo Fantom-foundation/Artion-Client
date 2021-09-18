@@ -3277,7 +3277,7 @@ const NFTItem = () => {
               </Panel>
             </div>
             <div className={styles.panelWrapper}>
-              <Panel title="Offers" icon={TocIcon} expanded>
+              <Panel title="Direct Offers" icon={TocIcon} expanded>
                 <div className={styles.offers}>
                   {offers.current.length ? (
                     <>

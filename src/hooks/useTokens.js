@@ -28,7 +28,7 @@ const Tokens = {
     {
       address: '0x049d68029688eabf473097a2fc38ef61633a3c7a',
       name: 'Tether USD',
-      symbol: 'USDT',
+      symbol: 'fUSDT',
       decimals: 6,
       icon: iconUSDT,
     },
