@@ -45,7 +45,7 @@ const cards = [
   },
   {
     icon: card4,
-    title: 'Zero Fees',
+    title: 'Zero Platform Fees',
     description:
       'Trade NFTs via auction or direct offer without any fees taken by Artion.',
     path: '/explore',
