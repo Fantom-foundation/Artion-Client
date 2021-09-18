@@ -38,7 +38,7 @@ const OfferModal = ({
 
   useEffect(() => {
     if (tokens?.length > 1) {
-      setOptions(tokens.slice(1));
+      setOptions(tokens);
     }
   }, [tokens]);
 
@@ -48,7 +48,7 @@ const OfferModal = ({
       setQuantity('1');
       setEndTime(new Date(new Date().getTime() + 24 * 60 * 60 * 1000));
       if (tokens?.length > 1) {
-        setSelected([tokens[1]]);
+        setSelected([tokens[0]]);
       }
     }
   }, [visible]);
