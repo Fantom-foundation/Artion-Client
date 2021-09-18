@@ -336,7 +336,14 @@ const BaseCard = ({ item, loading, style, create, onCreate, onLike }) => {
                 <Skeleton width={80} height={20} />
               ) : (
                 <div className={cx(styles.label, styles.price)}>
-                  <img src={auctionActive ? auction.token.icon : wFTMLogo} />
+                  <img
+                    src={
+                      auctionActive
+                        ? auction?.token?.icon
+                        : getTokenByAddress(item?.paymentToken)?.icon ||
+                          wFTMLogo
+                    }
+                  />
                   {formatNumber(
                     auctionActive ? auction.reservePrice : item?.price || 0
                   )}
@@ -364,7 +371,7 @@ const BaseCard = ({ item, loading, style, create, onCreate, onLike }) => {
                   <div className={cx(styles.label2, styles.price2)}>
                     <img
                       src={
-                        getTokenByAddress(item?.lastSalePricePaymentToken).icon
+                        getTokenByAddress(item?.lastSalePricePaymentToken)?.icon
                       }
                     />
                     {formatNumber(item.lastSalePrice)}

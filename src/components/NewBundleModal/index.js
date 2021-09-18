@@ -374,7 +374,10 @@ const NewBundleModal = ({ visible, onClose, onCreateSuccess = () => {} }) => {
                         methods.addItem(item);
                       }}
                     >
-                      <img src={item.icon} className={commonStyles.tokenIcon} />
+                      <img
+                        src={item?.icon}
+                        className={commonStyles.tokenIcon}
+                      />
                       <div className={commonStyles.tokenSymbol}>
                         {item.symbol}
                       </div>
@@ -384,7 +387,7 @@ const NewBundleModal = ({ visible, onClose, onCreateSuccess = () => {} }) => {
                     values.length > 0 ? (
                       <div className={commonStyles.selectedToken}>
                         <img
-                          src={values[0].icon}
+                          src={values[0]?.icon}
                           className={commonStyles.tokenIcon}
                         />
                         <div className={commonStyles.tokenSymbol}>

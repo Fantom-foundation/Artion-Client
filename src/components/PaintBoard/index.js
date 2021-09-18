@@ -282,7 +282,6 @@ const PaintBoard = () => {
       });
 
       console.log('upload image result is ');
-      console.log(result);
 
       const jsonHash = result.data.jsonHash;
 
@@ -290,12 +289,12 @@ const PaintBoard = () => {
         nft,
         type === 721 ? SINGLE_NFT_ABI : MULTI_NFT_ABI
       );
-
       try {
         const args =
           type === 721 ? [account, jsonHash] : [account, supply, jsonHash];
 
         let tx;
+
         if (!fee) {
           tx = await contract.mint(...args);
         } else {
