@@ -207,40 +207,42 @@ const AuctionModal = ({
         </div>
         <InputError text={inputError} />
       </div>
-      <div className={styles.formGroup}>
-        <div className={styles.formLabel}>Start Time</div>
-        <div className={styles.formInputCont}>
-          <Datetime
-            value={startTime}
-            onChange={val => setStartTime(val.toDate())}
-            inputProps={{
-              className: styles.formInput,
-              onKeyDown: e => e.preventDefault(),
-              disabled: auctionStarted || contractApproving || confirming,
-            }}
-            closeOnSelect
-            isValidDate={cur =>
-              cur.valueOf() > now.getTime() - 1000 * 60 * 60 * 24
-            }
-          />
+      <div className={styles.formGroupDates}>
+        <div className={styles.formGroup}>
+          <div className={styles.formLabel}>Start Time</div>
+          <div className={styles.formInputCont}>
+            <Datetime
+              value={startTime}
+              onChange={val => setStartTime(val.toDate())}
+              inputProps={{
+                className: styles.formInput,
+                onKeyDown: e => e.preventDefault(),
+                disabled: auctionStarted || contractApproving || confirming,
+              }}
+              closeOnSelect
+              isValidDate={cur =>
+                cur.valueOf() > now.getTime() - 1000 * 60 * 60 * 24
+              }
+            />
+          </div>
         </div>
-      </div>
-      <div className={styles.formGroup}>
-        <div className={styles.formLabel}>Auction Expiration</div>
-        <div className={styles.formInputCont}>
-          <Datetime
-            value={endTime}
-            onChange={val => setEndTime(val.toDate())}
-            inputProps={{
-              className: styles.formInput,
-              onKeyDown: e => e.preventDefault(),
-              disabled: contractApproving || confirming,
-            }}
-            closeOnSelect
-            isValidDate={cur =>
-              cur.valueOf() > startTime.getTime() - 1000 * 60 * 60 * 23
-            }
-          />
+        <div className={styles.formGroup}>
+          <div className={styles.formLabel}>Auction Expiration</div>
+          <div className={styles.formInputCont}>
+            <Datetime
+              value={endTime}
+              onChange={val => setEndTime(val.toDate())}
+              inputProps={{
+                className: styles.formInput,
+                onKeyDown: e => e.preventDefault(),
+                disabled: contractApproving || confirming,
+              }}
+              closeOnSelect
+              isValidDate={cur =>
+                cur.valueOf() > startTime.getTime() - 1000 * 60 * 60 * 23
+              }
+            />
+          </div>
         </div>
       </div>
     </Modal>
