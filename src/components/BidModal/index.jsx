@@ -24,7 +24,7 @@ const BidModal = ({
 }) => {
   const { tokens } = useTokens();
   const { getSalesContract } = useSalesContract();
-
+  const [currentBid, setCurrentBid] = useState(0);
   const [price, setPrice] = useState('');
   const [focused, setFocused] = useState(false);
   const [options, setOptions] = useState([]);
@@ -34,6 +34,7 @@ const BidModal = ({
 
   useEffect(() => {
     setPrice(minBidAmount);
+    setCurrentBid(parseFloat(minBidAmount));
   }, [visible]);
 
   useEffect(() => {
@@ -65,7 +66,11 @@ const BidModal = ({
   }, [token]);
 
   const validateInput = () => {
-    return price.length > 0 && parseFloat(price) > 0;
+    return (
+      price.length > 0 &&
+      parseFloat(price) > 0 &&
+      parseFloat(price) > currentBid
+    );
   };
 
   return (
