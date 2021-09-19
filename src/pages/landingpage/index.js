@@ -148,6 +148,30 @@ const LandingPage = () => {
         </div>
         <div className={styles.footer}>
           <img src={logo} alt="logo" className={styles.logo} />
+          <a
+            style={{ textDecoration: 'none', color: '#FFFFFF' }}
+            target="_blank"
+            rel="noopener noreferrer"
+            href="https://app.termly.io/document/privacy-policy/7db4b9fc-aa5d-4f80-bfa1-27120ff982ba"
+          >
+            Privacy Policy
+          </a>
+          <a
+            style={{ textDecoration: 'none', color: '#FFFFFF' }}
+            target="_blank"
+            rel="noopener noreferrer"
+            href="https://app.termly.io/document/cookie-policy/c79f1a78-08a2-4da2-85f0-846a461cde81"
+          >
+            Cookie Policy
+          </a>
+          <a
+            style={{ textDecoration: 'none', color: '#FFFFFF' }}
+            target="_blank"
+            rel="noopener noreferrer"
+            href="https://app.termly.io/document/terms-of-use-for-online-marketplace/1f69b33f-65ba-40d9-bf63-b28e357f7c34"
+          >
+            Terms of Service
+          </a>
           <img src={fantomLogo} alt="fantom-logo" className={styles.logo} />
         </div>
       </div>
