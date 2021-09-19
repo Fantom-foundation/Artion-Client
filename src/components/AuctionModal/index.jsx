@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import cx from 'classnames';
 import Datetime from 'react-datetime';
 import 'react-datetime/css/react-datetime.css';
+import './styles.css';
 import { ClipLoader } from 'react-spinners';
 import Select from 'react-dropdown-select';
 import Skeleton from 'react-loading-skeleton';
@@ -213,6 +214,7 @@ const AuctionModal = ({
           <div className={styles.formInputCont}>
             <Datetime
               value={startTime}
+              className={'calendarAboveInput'}
               onChange={val => setStartTime(val.toDate())}
               inputProps={{
                 className: styles.formInput,
@@ -231,6 +233,7 @@ const AuctionModal = ({
           <div className={styles.formInputCont}>
             <Datetime
               value={endTime}
+              className={'calendarAboveInput'}
               onChange={val => setEndTime(val.toDate())}
               inputProps={{
                 className: styles.formInput,
