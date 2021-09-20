@@ -434,6 +434,8 @@ const NFTItem = () => {
         setOwner(null);
       }
       console.log('AXIOS FETCH URI: ', uri);
+      new URL(uri);
+      console.log('URI is valid!');
       const { data } = await axios.get(uri);
       console.log('AXIOS FETCHED DATA: ', data);
       setInfo(data);
