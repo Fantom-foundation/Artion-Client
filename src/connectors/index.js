@@ -11,7 +11,7 @@ const isMainnet = process.env.REACT_APP_ENV === 'MAINNET';
 
 const RPC = isMainnet
   ? {
-      [ChainId.FANTOM]: 'https://rpcapi.fantom.network',
+      [ChainId.FANTOM]: 'https://rpc.ftm.tools',
     }
   : {
       [ChainId.FANTOM_TESTNET]: 'https://rpc.testnet.fantom.network',
