@@ -58,7 +58,7 @@ import {
   useBundleSalesContract,
   getSigner,
 } from 'contracts';
-import { shortenAddress, formatNumber } from 'utils';
+import { shortenAddress, formatNumber, formatError } from 'utils';
 import { Contracts } from 'constants/networks';
 import showToast from 'utils/toast';
 import NFTCard from 'components/NFTCard';
@@ -1759,7 +1759,8 @@ const NFTItem = () => {
       listings.current = listings.current.filter(
         _listing => _listing.owner !== listing.owner
       );
-    } catch {
+    } catch (error) {
+      showToast('error', formatError(error.message));
       setBuyingItem(false);
     }
   };
@@ -1815,7 +1816,8 @@ const NFTItem = () => {
 
       // eslint-disable-next-line require-atomic-updates
       bundleListing.current = null;
-    } catch {
+    } catch (error) {
+      showToast('error', formatError(error.message));
       setBuyingItem(false);
     }
   };
@@ -2111,7 +2113,8 @@ const NFTItem = () => {
 
       setBidPlacing(false);
       setBidModalVisible(false);
-    } catch {
+    } catch (error) {
+      showToast('error', formatError(error.message));
       setBidPlacing(false);
     }
   };

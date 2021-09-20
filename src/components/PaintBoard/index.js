@@ -21,7 +21,7 @@ import HeaderActions from 'actions/header.actions';
 import Header from 'components/header';
 import BootstrapTooltip from 'components/BootstrapTooltip';
 import PriceInput from 'components/PriceInput';
-import { calculateGasMargin } from 'utils';
+import { calculateGasMargin, formatError } from 'utils';
 import showToast from 'utils/toast';
 import WalletUtils from 'utils/wallet';
 import useContract from 'utils/sc.interaction';
@@ -298,8 +298,12 @@ const PaintBoard = () => {
         if (!fee) {
           tx = await contract.mint(...args);
         } else {
+          const provider = new ethers.providers.Web3Provider(window.ethereum);
+          const price = (await provider.getGasPrice()) * 2;
+
           const options = {
             value: ethers.utils.parseEther(fee.toString()),
+            gasPrice: price,
           };
           const gasEstimate = await contract.estimateGas.mint(...args, options);
           options.gasLimit = calculateGasMargin(gasEstimate);
@@ -350,7 +354,7 @@ const PaintBoard = () => {
           history.push(`/explore/${nft}/${mintedTkId.toNumber()}`);
         }, 1000 + Math.random() * 2000);
       } catch (error) {
-        showToast('error', error.message);
+        showToast('error', formatError(error.message));
       }
     } catch (error) {
       showToast('error', error.message);

@@ -14,6 +14,7 @@ import InfoIcon from '@material-ui/icons/Info';
 import { ClipLoader } from 'react-spinners';
 import { useWeb3React } from '@web3-react/core';
 import { ethers } from 'ethers';
+import showToast from 'utils/toast';
 
 import { Categories } from 'constants/filter.constants';
 import HeaderActions from 'actions/header.actions';
@@ -36,7 +37,7 @@ import plusIcon from 'assets/svgs/plus.svg';
 import closeIcon from 'assets/svgs/close.svg';
 
 import styles from './styles.module.scss';
-import { isAddress } from 'utils';
+import { formatError, isAddress } from 'utils';
 
 const CustomRadio = withStyles({
   root: {
@@ -450,6 +451,7 @@ const CollectionCreate = ({ isRegister }) => {
         }
       });
     } catch (err) {
+      showToast('error', formatError(err.message));
       console.log(err);
       setDeploying(false);
     }

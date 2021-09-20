@@ -1,4 +1,5 @@
 import { ChainId } from '@sushiswap/sdk';
+import { ethers } from 'ethers';
 
 import { calculateGasMargin } from 'utils';
 import { Contracts } from 'constants/networks';
@@ -36,10 +37,16 @@ export const useBundleSalesContract = () => {
   const buyBundleETH = async (bundleID, value, from) => {
     const contract = await getBundleSalesContract();
     const args = [bundleID];
+
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const price = (await provider.getGasPrice()) * 2;
+
     const options = {
       value,
       from,
+      gasPrice: price,
     };
+
     const gasEstimate = await contract.estimateGas['buyItem(string)'](
       ...args,
       options

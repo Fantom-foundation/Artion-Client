@@ -1,4 +1,5 @@
 import { ChainId } from '@sushiswap/sdk';
+import { ethers } from 'ethers';
 
 import { WFTM_ABI } from './abi';
 import { calculateGasMargin } from 'utils';
@@ -27,10 +28,16 @@ export const useWFTMContract = () => {
 
   const wrapFTM = async (value, from) => {
     const contract = await getWFTMContract();
+
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const price = (await provider.getGasPrice()) * 2;
+
     const options = {
       value,
       from,
+      gasPrice: price,
     };
+
     const gasEstimate = await contract.estimateGas.deposit(options);
     options.gasLimit = calculateGasMargin(gasEstimate);
 
