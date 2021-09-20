@@ -298,8 +298,12 @@ const PaintBoard = () => {
         if (!fee) {
           tx = await contract.mint(...args);
         } else {
+          const provider = new ethers.providers.Web3Provider(window.ethereum);
+          const price = (await provider.getGasPrice()) * 2;
+
           const options = {
             value: ethers.utils.parseEther(fee.toString()),
+            gasPrice: price,
           };
           const gasEstimate = await contract.estimateGas.mint(...args, options);
           options.gasLimit = calculateGasMargin(gasEstimate);

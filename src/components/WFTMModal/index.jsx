@@ -109,6 +109,7 @@ const WFTMModal = ({ visible, onClose }) => {
       }
       setAmount('');
     } catch (err) {
+      showToast('error', err.code);
       console.log(err);
     } finally {
       setConfirming(false);
