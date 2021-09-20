@@ -32,6 +32,13 @@ export const formatCategory = category => {
   return Categories.find(item => item.id === category).label;
 };
 
+export const formatError = error => {
+  let startIndex = error.indexOf('message');
+  let finalString = String(error.substr(startIndex + 10).replace(`"}}}'`, ''));
+
+  return finalString;
+};
+
 const intlFormat = num => {
   return new Intl.NumberFormat().format(Math.round(num * 10) / 10);
 };
