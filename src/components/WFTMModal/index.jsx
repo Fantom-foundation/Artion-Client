@@ -11,7 +11,7 @@ import toast from 'react-hot-toast';
 import { useWFTMContract } from 'contracts';
 import PriceInput from 'components/PriceInput';
 import showToast from 'utils/toast';
-import { formatNumber } from 'utils';
+import { formatNumber, formatError } from 'utils';
 import { useApi } from 'api';
 
 import Modal from '../Modal';
@@ -109,6 +109,7 @@ const WFTMModal = ({ visible, onClose }) => {
       }
       setAmount('');
     } catch (err) {
+      showToast('error', formatError(err.message));
       console.log(err);
     } finally {
       setConfirming(false);
