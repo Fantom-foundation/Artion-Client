@@ -433,14 +433,19 @@ const NFTItem = () => {
       } catch {
         setOwner(null);
       }
-
+      console.log('AXIOS FETCH URI: ', uri);
       const { data } = await axios.get(uri);
+      console.log('AXIOS FETCHED DATA: ', data);
       setInfo(data);
-    } catch {
+    } catch (err) {
+      console.error('AXIOS FAILED FETCH:', { err });
       try {
         const contract = await getERC721Contract(address);
+        console.log('FETCH ERC721 CONTRACT: ', contract);
         const tokenURI = await contract.tokenURI(tokenID);
+        console.log('TOKENURI: ', { tokenURI });
         const { data } = await axios.get(tokenURI);
+        console.log('AXIOS TOKENURI DATA', { data });
         setInfo(data);
       } catch {
         history.replace('/404');
@@ -450,7 +455,7 @@ const NFTItem = () => {
     setTokenOwnerLoading(false);
     setHistoryLoading(false);
   };
-
+  console.log({ info });
   const getCreatorInfo = async () => {
     setCreatorInfoLoading(true);
     try {
