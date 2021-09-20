@@ -433,7 +433,8 @@ const NFTItem = () => {
       } catch {
         setOwner(null);
       }
-
+      //TODO remove URL check when DB problem for NFT-ITEM url is fixed
+      new URL(uri);
       const { data } = await axios.get(uri);
       setInfo(data);
     } catch {
