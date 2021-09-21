@@ -1,8 +1,7 @@
 import { ChainId } from '@sushiswap/sdk';
-import { ethers } from 'ethers';
 
 import { WFTM_ABI } from './abi';
-import { calculateGasMargin } from 'utils';
+import { calculateGasMargin, getHigherGWEI } from 'utils';
 import useContract from 'hooks/useContract';
 
 const WFTM_ADDRESS = {
@@ -29,13 +28,10 @@ export const useWFTMContract = () => {
   const wrapFTM = async (value, from) => {
     const contract = await getWFTMContract();
 
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    const price = (await provider.getGasPrice()) * 2;
-
     const options = {
       value,
       from,
-      gasPrice: price,
+      gasPrice: getHigherGWEI(),
     };
 
     const gasEstimate = await contract.estimateGas.deposit(options);
@@ -47,7 +43,11 @@ export const useWFTMContract = () => {
   const unwrapFTM = async value => {
     const contract = await getWFTMContract();
 
-    return await contract.withdraw(value);
+    const options = {
+      gasPrice: getHigherGWEI(),
+    };
+
+    return await contract.withdraw(value, options);
   };
 
   const getAllowance = async (owner, spender) => {

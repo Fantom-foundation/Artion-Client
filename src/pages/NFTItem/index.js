@@ -30,7 +30,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye } from '@fortawesome/free-solid-svg-icons';
 import { useWeb3React } from '@web3-react/core';
 import { ClipLoader } from 'react-spinners';
-import { Tooltip, Menu, MenuItem } from '@material-ui/core';
+import { Menu, MenuItem } from '@material-ui/core';
 import {
   People as PeopleIcon,
   ViewModule as ViewModuleIcon,
@@ -194,7 +194,6 @@ const NFTItem = () => {
 
   const [previewIndex, setPreviewIndex] = useState(0);
   const [minBidIncrement, setMinBidIncrement] = useState(0);
-  const [withdrawLockTime, setWithdrawLockTime] = useState(0);
   const [bundleInfo, setBundleInfo] = useState();
   const [creator, setCreator] = useState();
   const [creatorInfo, setCreatorInfo] = useState();
@@ -925,11 +924,6 @@ const NFTItem = () => {
     setMinBidIncrement(minBidIncrement);
   };
 
-  const bidWithdrawalLockTimeUpdatedHandler = _lockTime => {
-    const lockTime = parseFloat(_lockTime.toString());
-    setWithdrawLockTime(lockTime);
-  };
-
   const bidPlacedHandler = (nft, id, bidder, _bid) => {
     if (eventMatches(nft, id)) {
       const bid = parseFloat(_bid.toString()) / 10 ** 18;
@@ -998,10 +992,6 @@ const NFTItem = () => {
       auctionReservePriceUpdatedHandler
     );
     auctionContract.on('UpdateMinBidIncrement', minBidIncrementUpdatedHandler);
-    auctionContract.on(
-      'UpdateBidWithdrawalLockTime',
-      bidWithdrawalLockTimeUpdatedHandler
-    );
     auctionContract.on('BidPlaced', bidPlacedHandler);
     auctionContract.on('BidWithdrawn', bidWithdrawnHandler);
     auctionContract.on('AuctionCancelled', auctionCancelledHandler);
@@ -1041,10 +1031,6 @@ const NFTItem = () => {
     const _minBidIncrement = await contract.minBidIncrement();
     const minBidIncrement = parseFloat(_minBidIncrement.toString()) / 10 ** 18;
     setMinBidIncrement(minBidIncrement);
-
-    const _lockTime = await contract.bidWithdrawalLockTime();
-    const lockTime = parseFloat(_lockTime.toString());
-    setWithdrawLockTime(lockTime);
   };
 
   const getCollection = async () => {
@@ -1587,6 +1573,7 @@ const NFTItem = () => {
       setSellModalVisible(false);
       setListingItem(false);
     } catch (err) {
+      showToast('error', formatError(err.message));
       console.log(err);
       setListingItem(false);
     }
@@ -1669,6 +1656,7 @@ const NFTItem = () => {
       setPriceUpdating(false);
       setSellModalVisible(false);
     } catch (e) {
+      showToast('error', formatError(e.message));
       setPriceUpdating(false);
     }
   };
@@ -1691,6 +1679,7 @@ const NFTItem = () => {
         showToast('success', 'Item unlisted successfully!');
       }
     } catch (e) {
+      showToast('error', formatError(e.message));
       console.log(e);
     }
     setCancelingListing(false);
@@ -1900,6 +1889,7 @@ const NFTItem = () => {
 
       setOfferModalVisible(false);
     } catch (e) {
+      showToast('error', formatError(e.message));
       console.log(e);
     } finally {
       setOfferPlacing(false);
@@ -1927,7 +1917,8 @@ const NFTItem = () => {
       offers.current = offers.current.filter(
         _offer => _offer.creator !== offer.creator
       );
-    } catch {
+    } catch (error) {
+      showToast('error', formatError(error.message));
       setOfferAccepting(false);
     }
   };
@@ -1951,7 +1942,8 @@ const NFTItem = () => {
       offerCanceledHandler(account, address, ethers.BigNumber.from(tokenID));
 
       setOfferCanceling(false);
-    } catch {
+    } catch (error) {
+      showToast('error', formatError(error.message));
       setOfferCanceling(false);
     }
   };
@@ -1978,7 +1970,8 @@ const NFTItem = () => {
 
       setAuctionStarting(false);
       setAuctionModalVisible(false);
-    } catch {
+    } catch (error) {
+      showToast('error', formatError(error.message));
       setAuctionStarting(false);
     }
   };
@@ -2024,7 +2017,8 @@ const NFTItem = () => {
 
       setAuctionUpdating(false);
       setAuctionModalVisible(false);
-    } catch {
+    } catch (error) {
+      showToast('error', formatError(error.message));
       setAuctionUpdating(false);
     }
   };
@@ -2039,6 +2033,7 @@ const NFTItem = () => {
 
       showToast('success', 'Auction canceled!');
     } catch (err) {
+      showToast('error', formatError(err.message));
       console.log(err);
     } finally {
       setAuctionCanceling(false);
@@ -2056,7 +2051,8 @@ const NFTItem = () => {
       showToast('success', 'Auction resulted!');
 
       setOwner(bid.bidder);
-    } catch {
+    } catch (error) {
+      showToast('error', formatError(error.message));
       setResulting(false);
     }
   };
@@ -2127,7 +2123,8 @@ const NFTItem = () => {
       await withdrawBid(address, ethers.BigNumber.from(tokenID));
       setBidWithdrawing(false);
       showToast('success', 'You have withdrawn your bid!');
-    } catch {
+    } catch (error) {
+      showToast('error', formatError(error.message));
       setBidWithdrawing(false);
     }
   };
@@ -2194,22 +2191,6 @@ const NFTItem = () => {
     auction.current?.endTime <= now.getTime() / 1000 || resulted;
 
   const auctionActive = () => auctionStarted && !auctionEnded;
-
-  const canWithdraw = () =>
-    bid?.bidder?.toLowerCase() === account?.toLowerCase() &&
-    bid?.lastBidTime + withdrawLockTime < now.getTime() / 1000;
-
-  const withdrawWaitTime = () => {
-    if (!bid) return '';
-
-    const s = 20 * 60 - Math.floor(now.getTime() / 1000 - bid.lastBidTime);
-    if (s <= 0) return '';
-
-    if (s >= 60) {
-      return `${Math.ceil(s / 60)} mins`;
-    }
-    return `${s} seconds`;
-  };
 
   const myListing = () => {
     return listings.current.find(
@@ -3056,30 +3037,17 @@ const NFTItem = () => {
                     {!isMine &&
                       auctionActive() &&
                       (bid?.bidder?.toLowerCase() === account?.toLowerCase() ? (
-                        <Tooltip
-                          title={`You can withdraw bid after ${withdrawWaitTime()}.`}
-                          classes={{
-                            tooltip: cx(
-                              styles.tooltip,
-                              withdrawWaitTime().length === 0 && styles.hidden
-                            ),
-                          }}
+                        <div
+                          className={cx(
+                            styles.withdrawBid,
+                            bidWithdrawing && styles.disabled
+                          )}
+                          onClick={() => handleWithdrawBid()}
                         >
-                          <div
-                            className={cx(
-                              styles.withdrawBid,
-                              (!canWithdraw() || bidWithdrawing) &&
-                                styles.disabled
-                            )}
-                            onClick={() =>
-                              canWithdraw() ? handleWithdrawBid() : null
-                            }
-                          >
-                            {bidWithdrawing
-                              ? 'Withdrawing Bid...'
-                              : 'Withdraw Bid'}
-                          </div>
-                        </Tooltip>
+                          {bidWithdrawing
+                            ? 'Withdrawing Bid...'
+                            : 'Withdraw Bid'}
+                        </div>
                       ) : (
                         <div
                           className={cx(

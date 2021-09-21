@@ -1,7 +1,6 @@
 import { ChainId } from '@sushiswap/sdk';
-import { ethers } from 'ethers';
 
-import { calculateGasMargin } from 'utils';
+import { calculateGasMargin, getHigherGWEI } from 'utils';
 import { Contracts } from 'constants/networks';
 import useContract from 'hooks/useContract';
 
@@ -28,13 +27,11 @@ export const useFactoryContract = () => {
 
   const createNFTContract = async (contract, name, symbol, value, from) => {
     const args = [name, symbol];
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    const price = (await provider.getGasPrice()) * 2;
 
     const options = {
       value,
       from,
-      gasPrice: price,
+      gasPrice: getHigherGWEI(),
     };
 
     const gasEstimate = await contract.estimateGas.createNFTContract(

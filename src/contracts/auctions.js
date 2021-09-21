@@ -1,7 +1,6 @@
 import { ChainId } from '@sushiswap/sdk';
-import { ethers } from 'ethers';
 
-import { calculateGasMargin } from 'utils';
+import { calculateGasMargin, getHigherGWEI } from 'utils';
 import { Contracts } from 'constants/networks';
 import useContract from 'hooks/useContract';
 
@@ -38,7 +37,11 @@ export const useAuctionContract = () => {
 
   const cancelAuction = async (nftAddress, tokenId) => {
     const contract = await getAuctionContract();
-    return await contract.cancelAuction(nftAddress, tokenId);
+    const options = {
+      gasPrice: getHigherGWEI(),
+    };
+
+    return await contract.cancelAuction(nftAddress, tokenId, options);
   };
 
   const createAuction = async (
@@ -50,13 +53,18 @@ export const useAuctionContract = () => {
     endTimestamp
   ) => {
     const contract = await getAuctionContract();
+    const options = {
+      gasPrice: getHigherGWEI(),
+    };
+
     return await contract.createAuction(
       nftAddress,
       tokenId,
       payToken,
       reservePrice,
       startTimestamp,
-      endTimestamp
+      endTimestamp,
+      options
     );
   };
 
@@ -78,13 +86,11 @@ export const useAuctionContract = () => {
 
     if (payToken === '') {
       const args = [nftAddress, tokenId];
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      const price = (await provider.getGasPrice()) * 2;
 
       const options = {
         value,
         from,
-        gasPrice: price,
+        gasPrice: getHigherGWEI(),
       };
       const gasEstimate = await contract.estimateGas[
         'placeBid(address,uint256)'
@@ -92,36 +98,55 @@ export const useAuctionContract = () => {
       options.gasLimit = calculateGasMargin(gasEstimate);
       return await contract['placeBid(address,uint256)'](...args, options);
     } else {
+      const options = {
+        gasPrice: getHigherGWEI(),
+      };
+
       return await contract['placeBid(address,uint256,uint256)'](
         nftAddress,
         tokenId,
-        value
+        value,
+        options
       );
     }
   };
 
   const resultAuction = async (nftAddress, tokenId) => {
     const contract = await getAuctionContract();
-    const tx = await contract.resultAuction(nftAddress, tokenId);
+    const options = {
+      gasPrice: getHigherGWEI(),
+    };
+
+    const tx = await contract.resultAuction(nftAddress, tokenId, options);
     await tx.wait();
   };
 
   const updateAuctionStartTime = async (nftAddress, tokenId, startTime) => {
     const contract = await getAuctionContract();
+    const options = {
+      gasPrice: getHigherGWEI(),
+    };
+
     const tx = await contract.updateAuctionStartTime(
       nftAddress,
       tokenId,
-      startTime
+      startTime,
+      options
     );
     await tx.wait();
   };
 
   const updateAuctionEndTime = async (nftAddress, tokenId, endTimestamp) => {
     const contract = await getAuctionContract();
+    const options = {
+      gasPrice: getHigherGWEI(),
+    };
+
     const tx = await contract.updateAuctionEndTime(
       nftAddress,
       tokenId,
-      endTimestamp
+      endTimestamp,
+      options
     );
     await tx.wait();
   };
@@ -132,17 +157,26 @@ export const useAuctionContract = () => {
     reservePrice
   ) => {
     const contract = await getAuctionContract();
+    const options = {
+      gasPrice: getHigherGWEI(),
+    };
+
     const tx = await contract.updateAuctionReservePrice(
       nftAddress,
       tokenId,
-      reservePrice
+      reservePrice,
+      options
     );
     await tx.wait();
   };
 
   const withdrawBid = async (nftAddress, tokenId) => {
     const contract = await getAuctionContract();
-    const tx = await contract.withdrawBid(nftAddress, tokenId);
+    const options = {
+      gasPrice: getHigherGWEI(),
+    };
+
+    const tx = await contract.withdrawBid(nftAddress, tokenId, options);
     await tx.wait();
   };
 

@@ -1,7 +1,6 @@
 import { ChainId } from '@sushiswap/sdk';
-import { ethers } from 'ethers';
 
-import { calculateGasMargin } from 'utils';
+import { calculateGasMargin, getHigherGWEI } from 'utils';
 import { Contracts } from 'constants/networks';
 import useContract from 'hooks/useContract';
 
@@ -21,13 +20,10 @@ export const useSalesContract = () => {
     const contract = await getSalesContract();
     const args = [nftAddress, tokenId, owner];
 
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    const price = (await provider.getGasPrice()) * 2;
-
     const options = {
       value,
       from,
-      gasPrice: price,
+      gasPrice: getHigherGWEI(),
     };
 
     const gasEstimate = await contract.estimateGas[
@@ -39,17 +35,26 @@ export const useSalesContract = () => {
 
   const buyItemERC20 = async (nftAddress, tokenId, payToken, owner) => {
     const contract = await getSalesContract();
+    const options = {
+      gasPrice: getHigherGWEI(),
+    };
+
     return await contract['buyItem(address,uint256,address,address)'](
       nftAddress,
       tokenId,
       payToken,
-      owner
+      owner,
+      options
     );
   };
 
   const cancelListing = async (nftAddress, tokenId) => {
     const contract = await getSalesContract();
-    const tx = await contract.cancelListing(nftAddress, tokenId);
+    const options = {
+      gasPrice: getHigherGWEI(),
+    };
+
+    const tx = await contract.cancelListing(nftAddress, tokenId, options);
     await tx.wait();
   };
 
@@ -62,13 +67,19 @@ export const useSalesContract = () => {
     startingTime
   ) => {
     const contract = await getSalesContract();
+
+    const options = {
+      gasPrice: getHigherGWEI(),
+    };
+
     return await contract.listItem(
       nftAddress,
       tokenId,
       quantity,
       payToken,
       pricePerItem,
-      startingTime
+      startingTime,
+      options
     );
   };
 
@@ -80,12 +91,17 @@ export const useSalesContract = () => {
     // quantity
   ) => {
     const contract = await getSalesContract();
+
+    const options = {
+      gasPrice: getHigherGWEI(),
+    };
+
     return await contract.updateListing(
       nftAddress,
       tokenId,
       payToken,
-      newPrice
-      // quantity
+      newPrice,
+      options
     );
   };
 
@@ -98,29 +114,52 @@ export const useSalesContract = () => {
     deadline
   ) => {
     const contract = await getSalesContract();
+
+    const options = {
+      gasPrice: getHigherGWEI(),
+    };
+
     return await contract.createOffer(
       nftAddress,
       tokenId,
       payToken,
       quantity,
       pricePerItem,
-      deadline
+      deadline,
+      options
     );
   };
 
   const cancelOffer = async (nftAddress, tokenId) => {
     const contract = await getSalesContract();
-    return await contract.cancelOffer(nftAddress, tokenId);
+    const options = {
+      gasPrice: getHigherGWEI(),
+    };
+
+    return await contract.cancelOffer(nftAddress, tokenId, options);
   };
 
   const acceptOffer = async (nftAddress, tokenId, creator) => {
     const contract = await getSalesContract();
-    return await contract.acceptOffer(nftAddress, tokenId, creator);
+    const options = {
+      gasPrice: getHigherGWEI(),
+    };
+
+    return await contract.acceptOffer(nftAddress, tokenId, creator, options);
   };
 
   const registerRoyalty = async (nftAddress, tokenId, royalty) => {
     const contract = await getSalesContract();
-    return await contract.registerRoyalty(nftAddress, tokenId, royalty);
+    const options = {
+      gasPrice: getHigherGWEI(),
+    };
+
+    return await contract.registerRoyalty(
+      nftAddress,
+      tokenId,
+      royalty,
+      options
+    );
   };
 
   const getCollectionRoyalty = async nftAddress => {
