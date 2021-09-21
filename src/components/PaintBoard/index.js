@@ -21,7 +21,7 @@ import HeaderActions from 'actions/header.actions';
 import Header from 'components/header';
 import BootstrapTooltip from 'components/BootstrapTooltip';
 import PriceInput from 'components/PriceInput';
-import { calculateGasMargin, formatError } from 'utils';
+import { calculateGasMargin, formatError, getHigherGWEI } from 'utils';
 import showToast from 'utils/toast';
 import WalletUtils from 'utils/wallet';
 import useContract from 'utils/sc.interaction';
@@ -298,12 +298,9 @@ const PaintBoard = () => {
         if (!fee) {
           tx = await contract.mint(...args);
         } else {
-          const provider = new ethers.providers.Web3Provider(window.ethereum);
-          const price = (await provider.getGasPrice()) * 2;
-
           const options = {
             value: ethers.utils.parseEther(fee.toString()),
-            gasPrice: price,
+            gasPrice: getHigherGWEI(),
           };
           const gasEstimate = await contract.estimateGas.mint(...args, options);
           options.gasLimit = calculateGasMargin(gasEstimate);
