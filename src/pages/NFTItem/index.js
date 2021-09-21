@@ -1587,6 +1587,7 @@ const NFTItem = () => {
       setSellModalVisible(false);
       setListingItem(false);
     } catch (err) {
+      showToast('error', formatError(err.message));
       console.log(err);
       setListingItem(false);
     }
@@ -1669,6 +1670,7 @@ const NFTItem = () => {
       setPriceUpdating(false);
       setSellModalVisible(false);
     } catch (e) {
+      showToast('error', formatError(e.message));
       setPriceUpdating(false);
     }
   };
@@ -1691,6 +1693,7 @@ const NFTItem = () => {
         showToast('success', 'Item unlisted successfully!');
       }
     } catch (e) {
+      showToast('error', formatError(e.message));
       console.log(e);
     }
     setCancelingListing(false);
@@ -1900,6 +1903,7 @@ const NFTItem = () => {
 
       setOfferModalVisible(false);
     } catch (e) {
+      showToast('error', formatError(e.message));
       console.log(e);
     } finally {
       setOfferPlacing(false);
@@ -1927,7 +1931,8 @@ const NFTItem = () => {
       offers.current = offers.current.filter(
         _offer => _offer.creator !== offer.creator
       );
-    } catch {
+    } catch (error) {
+      showToast('error', formatError(error.message));
       setOfferAccepting(false);
     }
   };
@@ -1951,7 +1956,8 @@ const NFTItem = () => {
       offerCanceledHandler(account, address, ethers.BigNumber.from(tokenID));
 
       setOfferCanceling(false);
-    } catch {
+    } catch (error) {
+      showToast('error', formatError(error.message));
       setOfferCanceling(false);
     }
   };
@@ -1978,7 +1984,8 @@ const NFTItem = () => {
 
       setAuctionStarting(false);
       setAuctionModalVisible(false);
-    } catch {
+    } catch (error) {
+      showToast('error', formatError(error.message));
       setAuctionStarting(false);
     }
   };
@@ -2024,7 +2031,8 @@ const NFTItem = () => {
 
       setAuctionUpdating(false);
       setAuctionModalVisible(false);
-    } catch {
+    } catch (error) {
+      showToast('error', formatError(error.message));
       setAuctionUpdating(false);
     }
   };
@@ -2039,6 +2047,7 @@ const NFTItem = () => {
 
       showToast('success', 'Auction canceled!');
     } catch (err) {
+      showToast('error', formatError(err.message));
       console.log(err);
     } finally {
       setAuctionCanceling(false);
@@ -2056,7 +2065,8 @@ const NFTItem = () => {
       showToast('success', 'Auction resulted!');
 
       setOwner(bid.bidder);
-    } catch {
+    } catch (error) {
+      showToast('error', formatError(error.message));
       setResulting(false);
     }
   };
@@ -2127,7 +2137,8 @@ const NFTItem = () => {
       await withdrawBid(address, ethers.BigNumber.from(tokenID));
       setBidWithdrawing(false);
       showToast('success', 'You have withdrawn your bid!');
-    } catch {
+    } catch (error) {
+      showToast('error', formatError(error.message));
       setBidWithdrawing(false);
     }
   };

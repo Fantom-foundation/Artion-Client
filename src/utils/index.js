@@ -21,6 +21,13 @@ export function shortenAddress(address, chars = 4) {
   return `${parsed.substring(0, chars + 2)}...${parsed.substring(42 - chars)}`;
 }
 
+export const getHigherGWEI = async () => {
+  const provider = new ethers.providers.Web3Provider(window.ethereum);
+  const price = (await provider.getGasPrice()) * 2;
+
+  return price;
+};
+
 export const formatNumber = num => {
   if (isNaN(num) || num === null) return '';
   let parts = num.toString().split('.');
