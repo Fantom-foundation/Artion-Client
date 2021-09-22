@@ -528,7 +528,6 @@ const NFTItem = () => {
           ethers.utils.formatUnits(_auction.reservePrice, token.decimals)
         );
         auction.current = { ..._auction, reservePrice, token };
-        // console.log('AuctionCurrent: ', auction.current);
       }
     } catch (e) {
       console.log(e);
@@ -1694,7 +1693,6 @@ const NFTItem = () => {
       const _price = listing.price * listing.quantity;
       if (listing.token.address === '') {
         const price = ethers.utils.parseEther(_price.toString());
-
         const tx = await buyItemETH(
           address,
           ethers.BigNumber.from(tokenID),
@@ -2043,11 +2041,6 @@ const NFTItem = () => {
   };
 
   const handleResultAuction = async () => {
-    if (bid === null) {
-      showToast('info', 'No bids were placed!');
-      return;
-    }
-
     if (resulting) return;
 
     try {
@@ -2528,7 +2521,6 @@ const NFTItem = () => {
           ) : null}
         </div>
       )}
-
       {bestListing && (
         <div className={styles.bestBuy}>
           <div className={styles.currentPriceLabel}>Current price</div>
@@ -2539,9 +2531,9 @@ const NFTItem = () => {
             <div className={styles.currentPrice}>{bestListing.price}</div>
             <div className={styles.currentPriceUSD}>
               (
-              {prices[bestListing.token?.address] ? (
+              {prices[bestListing.token.address] ? (
                 `$${(
-                  bestListing.price * prices[bestListing.token?.address]
+                  bestListing.price * prices[bestListing.token.address]
                 ).toFixed(3)}`
               ) : (
                 <Skeleton width={80} height={24} />
@@ -3075,7 +3067,7 @@ const NFTItem = () => {
                         )}
                         onClick={handleResultAuction}
                       >
-                        Result
+                        {resulting ? 'Resulting...' : 'Result'}
                       </div>
                     )}
                   </div>
@@ -3219,9 +3211,9 @@ const NFTItem = () => {
                               className={styles.tokenIcon}
                             />
                             {formatNumber(listing.price)}&nbsp;(
-                            {prices[listing.token?.address] !== undefined ? (
+                            {prices[listing.token.address] !== undefined ? (
                               `$${(
-                                listing.price * prices[listing.token?.address]
+                                listing.price * prices[listing.token.address]
                               ).toFixed(3)}`
                             ) : (
                               <Skeleton width={60} height={24} />
