@@ -104,7 +104,7 @@ const AuctionModal = ({
     if (reservePrice.length === 0 || parseFloat(reservePrice) == 0)
       return false;
     if (!auctionStarted && startTime.getTime() < now.getTime()) return false;
-    return endTime.getTime() > startTime.getTime() + 1000 * 60 * 60;
+    return endTime.getTime() >= startTime.getTime() + 1000 * 60 * 5;
   })();
 
   return (
