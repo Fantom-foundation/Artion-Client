@@ -161,7 +161,6 @@ const NFTItem = () => {
     updateAuctionStartTime,
     updateAuctionEndTime,
     updateAuctionReservePrice,
-    withdrawBid,
   } = useAuctionContract();
   const {
     getBundleSalesContract,
@@ -234,7 +233,6 @@ const NFTItem = () => {
   const [auctionUpdating, setAuctionUpdating] = useState(false);
   const [auctionCanceling, setAuctionCanceling] = useState(false);
   const [bidPlacing, setBidPlacing] = useState(false);
-  const [bidWithdrawing, setBidWithdrawing] = useState(false);
   const [resulting, setResulting] = useState(false);
   const [resulted, setResulted] = useState(false);
   const [historyLoading, setHistoryLoading] = useState(false);
@@ -2122,20 +2120,6 @@ const NFTItem = () => {
     }
   };
 
-  const handleWithdrawBid = async () => {
-    if (bidWithdrawing) return;
-
-    try {
-      setBidWithdrawing(true);
-      await withdrawBid(address, ethers.BigNumber.from(tokenID));
-      setBidWithdrawing(false);
-      showToast('success', 'You have withdrawn your bid!');
-    } catch (error) {
-      showToast('error', formatError(error.message));
-      setBidWithdrawing(false);
-    }
-  };
-
   const hasMyOffer = (() =>
     offers.current.findIndex(
       offer =>
@@ -3045,17 +3029,7 @@ const NFTItem = () => {
                     {!isMine &&
                       auctionActive() &&
                       (bid?.bidder?.toLowerCase() === account?.toLowerCase() ? (
-                        <div
-                          className={cx(
-                            styles.withdrawBid,
-                            bidWithdrawing && styles.disabled
-                          )}
-                          onClick={() => handleWithdrawBid()}
-                        >
-                          {bidWithdrawing
-                            ? 'Withdrawing Bid...'
-                            : 'Withdraw Bid'}
-                        </div>
+                        <div>(Your bid)</div>
                       ) : (
                         <div
                           className={cx(
