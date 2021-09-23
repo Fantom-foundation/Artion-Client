@@ -347,7 +347,9 @@ const BaseCard = ({ item, loading, style, create, onCreate, onLike }) => {
                             wFTMLogo
                       }
                     />
-                    {formatNumber(auctionActive ? auction.reservePrice : price)}
+                    {formatNumber(
+                      auctionActive ? auction.reservePrice : price.toFixed(3)
+                    )}
                   </div>
                 )}
               </div>

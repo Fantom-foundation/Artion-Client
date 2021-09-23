@@ -12,12 +12,8 @@ export function isAddress(value) {
 }
 
 export const formatPrice = (price = 0, payToken) => {
-  if (price == 0) {
-    return 0;
-  }
-
   if (
-    payToken === process.env.REACT_APP_USDT ||
+    payToken === process.env.REACT_APP_USDC ||
     payToken === process.env.REACT_APP_FUSDT
   ) {
     return price / 1e12;
