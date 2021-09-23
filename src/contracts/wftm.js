@@ -3,6 +3,7 @@ import { ChainId } from '@sushiswap/sdk';
 import { WFTM_ABI } from './abi';
 import { calculateGasMargin, getHigherGWEI } from 'utils';
 import useContract from 'hooks/useContract';
+import { ethers } from 'ethers';
 
 const WFTM_ADDRESS = {
   [ChainId.FANTOM]: '0x21be370d5312f44cb42ce377bc9b8a0cef1a4c83',
@@ -12,7 +13,6 @@ const WFTM_ADDRESS = {
 // eslint-disable-next-line no-undef
 const isMainnet = process.env.REACT_APP_ENV === 'MAINNET';
 const CHAIN = isMainnet ? ChainId.FANTOM : ChainId.FANTOM_TESTNET;
-
 export const useWFTMContract = () => {
   const { getContract } = useContract();
 
@@ -57,7 +57,10 @@ export const useWFTMContract = () => {
 
   const approve = async (address, value) => {
     const contract = await getWFTMContract();
-    const tx = await contract.approve(address, value);
+    const tx = await contract.approve(
+      address,
+      ethers.constants.MaxUint256 || value
+    );
     await tx.wait();
   };
 

@@ -408,6 +408,7 @@ const NFTItem = () => {
         ...offer,
         token: getTokenByAddress(offer.paymentToken),
       }));
+
       moreItems.current = nfts;
 
       try {
@@ -430,15 +431,28 @@ const NFTItem = () => {
       } catch {
         setOwner(null);
       }
-      //TODO remove URL check when DB problem for NFT-ITEM url is fixed
-      new URL(uri);
-      const { data } = await axios.get(uri);
+
+      let data;
+      const base64regex = /^([0-9a-zA-Z+/]{4})*(([0-9a-zA-Z+/]{2}==)|([0-9a-zA-Z+/]{3}=))?$/;
+      if (base64regex.test(uri)) {
+        const string = atob(uri);
+        data = JSON.parse(string);
+      } else {
+        new URL(uri);
+        const response = await axios.get(uri);
+        data = response.data;
+      }
+
       setInfo(data);
     } catch {
       try {
+        console.warn(
+          'Failed to retrieve Item data, fallback to fetching from contract'
+        );
         const contract = await getERC721Contract(address);
         const tokenURI = await contract.tokenURI(tokenID);
         const { data } = await axios.get(tokenURI);
+
         setInfo(data);
       } catch {
         history.replace('/404');
@@ -1869,7 +1883,10 @@ const NFTItem = () => {
           Contracts[chainId].sales
         );
         if (allowance.lt(amount)) {
-          const tx = await erc20.approve(Contracts[chainId].sales, amount);
+          const tx = await erc20.approve(
+            Contracts[chainId].sales,
+            ethers.constants.MaxUint256
+          );
           await tx.wait();
         }
 
