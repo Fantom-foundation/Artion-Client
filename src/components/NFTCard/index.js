@@ -17,7 +17,7 @@ import ReactPlayer from 'react-player';
 
 import SuspenseImg from 'components/SuspenseImg';
 import BootstrapTooltip from 'components/BootstrapTooltip';
-import { formatNumber } from 'utils';
+import { formatNumber, formatPrice } from 'utils';
 import { useApi } from 'api';
 import { useAuctionContract } from 'contracts';
 import useTokens from 'hooks/useTokens';
@@ -52,6 +52,8 @@ const BaseCard = ({ item, loading, style, create, onCreate, onLike }) => {
   const collection = collections.find(
     col => col.address === item?.contractAddress
   );
+
+  let price = formatPrice(item?.price, item?.paymentToken);
 
   const getTokenURI = async tokenURI => {
     setFetching(true);
@@ -345,9 +347,7 @@ const BaseCard = ({ item, loading, style, create, onCreate, onLike }) => {
                             wFTMLogo
                       }
                     />
-                    {formatNumber(
-                      auctionActive ? auction.reservePrice : item?.price || 0
-                    )}
+                    {formatNumber(auctionActive ? auction.reservePrice : price)}
                   </div>
                 )}
               </div>
