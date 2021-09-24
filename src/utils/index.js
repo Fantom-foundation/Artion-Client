@@ -11,17 +11,6 @@ export function isAddress(value) {
   }
 }
 
-export const formatPrice = (price = 0, payToken) => {
-  if (
-    payToken === process.env.REACT_APP_USDC ||
-    payToken === process.env.REACT_APP_FUSDT
-  ) {
-    return price / 1e12;
-  }
-
-  return price;
-};
-
 export function shortenAddress(address, chars = 4) {
   if (!address) return '';
 
