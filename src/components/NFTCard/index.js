@@ -346,9 +346,7 @@ const BaseCard = ({ item, loading, style, create, onCreate, onLike }) => {
                       }
                     />
                     {formatNumber(
-                      auctionActive
-                        ? auction.reservePrice
-                        : item.price.toFixed(3)
+                      auctionActive ? auction.reservePrice : price.toFixed(2)
                     )}
                   </div>
                 )}
