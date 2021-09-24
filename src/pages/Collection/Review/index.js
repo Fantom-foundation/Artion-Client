@@ -127,7 +127,7 @@ const CollectionCreate = () => {
               onClick={() => setIndex(idx)}
             >
               <img
-                src={`https://gateway.pinata.cloud/ipfs/${collection.logoImageHash}`}
+                src={`https://cloudflare-ipfs.com/ipfs/${collection.logoImageHash}`}
                 className={styles.collectionLogo}
               />
               <div className={styles.collectionName}>
@@ -145,7 +145,7 @@ const CollectionCreate = () => {
             <div className={styles.inputWrapper}>
               <div className={styles.logoUploadBox}>
                 <img
-                  src={`https://gateway.pinata.cloud/ipfs/${collections[index].logoImageHash}`}
+                  src={`https://cloudflare-ipfs.com/ipfs/${collections[index].logoImageHash}`}
                 />
               </div>
             </div>

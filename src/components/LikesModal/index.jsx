@@ -33,7 +33,7 @@ const LikesModal = ({ visible, onClose, users }) => {
                 <Skeleton width={40} height={40} />
               ) : user.imageHash ? (
                 <img
-                  src={`https://gateway.pinata.cloud/ipfs/${user.imageHash}`}
+                  src={`https://cloudflare-ipfs.com/ipfs/${user.imageHash}`}
                   width={40}
                   height={40}
                 />

@@ -174,7 +174,7 @@ const ExploreCollections = () => {
                   className={classes.logo}
                   src={
                     item.isVerified
-                      ? `https://gateway.pinata.cloud/ipfs/${item.logoImageHash}`
+                      ? `https://cloudflare-ipfs.com/ipfs/${item.logoImageHash}`
                       : collections.includes(item.address)
                       ? nftActiveIcon
                       : nftIcon

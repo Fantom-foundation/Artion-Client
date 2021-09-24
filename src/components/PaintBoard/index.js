@@ -420,7 +420,7 @@ const PaintBoard = () => {
                       }}
                     >
                       <img
-                        src={`https://gateway.pinata.cloud/ipfs/${item.logoImageHash}`}
+                        src={`https://cloudflare-ipfs.com/ipfs/${item.logoImageHash}`}
                         className={styles.collectionLogo}
                       />
                       <div className={styles.collectionName}>
@@ -432,7 +432,7 @@ const PaintBoard = () => {
                     values.length > 0 ? (
                       <div className={styles.collection}>
                         <img
-                          src={`https://gateway.pinata.cloud/ipfs/${values[0].logoImageHash}`}
+                          src={`https://cloudflare-ipfs.com/ipfs/${values[0].logoImageHash}`}
                           className={styles.collectionLogo}
                         />
                         <div className={styles.collectionName}>
