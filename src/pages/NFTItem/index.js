@@ -540,7 +540,6 @@ const NFTItem = () => {
           ethers.utils.formatUnits(_auction.reservePrice, token.decimals)
         );
         auction.current = { ..._auction, reservePrice, token };
-        // console.log('AuctionCurrent: ', auction.current);
       }
     } catch (e) {
       console.log(e);
@@ -549,7 +548,12 @@ const NFTItem = () => {
 
   const getBid = async () => {
     try {
-      const bid = await getHighestBidder(address, tokenID);
+      const bid = await getHighestBidder(
+        address,
+        tokenID,
+        auction.current.token.address
+      );
+
       if (bid.bid !== 0) {
         setBid(bid);
       }
@@ -1130,8 +1134,9 @@ const NFTItem = () => {
       bundleListing.current = null;
 
       getItemDetails();
-      getAuctions();
-      getBid();
+      getAuctions().then(() => {
+        getBid();
+      });
 
       increaseViewCount(address, tokenID).then(({ data }) => {
         setViews(data);
