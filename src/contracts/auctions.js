@@ -68,12 +68,24 @@ export const useAuctionContract = () => {
     );
   };
 
-  const getHighestBidder = async (nftAddress, tokenId) => {
+  const getHighestBidder = async (nftAddress, tokenId, tokenAddress) => {
     const contract = await getAuctionContract();
     const res = await contract.getHighestBidder(nftAddress, tokenId);
     const bidder = res[0];
-    const bid = parseFloat(res[1].toString()) / 10 ** 18;
+
+    let bid;
+
+    if (
+      tokenAddress.toLowerCase() === process.env.REACT_APP_USDC ||
+      tokenAddress.toLowerCase() === process.env.REACT_APP_FUSDT
+    ) {
+      bid = parseFloat(res[1].toString()) / 1e6;
+    } else {
+      bid = parseFloat(res[1].toString()) / 1e18;
+    }
+
     const lastBidTime = parseFloat(res[2].toString());
+
     return {
       bidder,
       bid,
