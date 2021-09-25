@@ -77,7 +77,7 @@ export const useAuctionContract = () => {
 
     if (
       tokenAddress.toLowerCase() === process.env.REACT_APP_USDC ||
-      tokenAddress.toLowerCase() === process.env.REACT_APP_FUSDT
+      tokenAddress === process.env.REACT_APP_FUSDT
     ) {
       bid = parseFloat(res[1].toString()) / 1e6;
     } else {
