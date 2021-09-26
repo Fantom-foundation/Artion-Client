@@ -2809,7 +2809,8 @@ const NFTItem = () => {
                   <div
                     className={cx(
                       styles.headerButton,
-                      (auctionStarting || auctionUpdating) && styles.disabled
+                      (auctionStarting || auctionUpdating || auctionEnded) &&
+                        styles.disabled
                     )}
                     onClick={() => setAuctionModalVisible(true)}
                   >
