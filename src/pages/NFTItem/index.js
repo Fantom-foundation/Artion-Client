@@ -443,6 +443,8 @@ const NFTItem = () => {
         data = response.data;
       }
 
+      data.properties.royalty = parseInt(data.properties.royalty) / 100;
+
       setInfo(data);
     } catch {
       try {

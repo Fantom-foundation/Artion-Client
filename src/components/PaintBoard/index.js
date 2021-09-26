@@ -268,7 +268,7 @@ const PaintBoard = () => {
     formData.append('description', description);
     formData.append('symbol', symbol);
     formData.append('xtra', xtra);
-    const _royalty = parseInt(royalty);
+    const _royalty = parseInt(royalty) * 100;
     formData.append('royalty', isNaN(_royalty) ? 0 : _royalty);
     try {
       let result = await axios({
