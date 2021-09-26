@@ -82,11 +82,11 @@ export const SortByOptions = [
   // },
   {
     id: 'price',
-    label: 'Most expensive',
+    label: 'Highest Price',
   },
   {
     id: 'cheapest',
-    label: 'Cheapest',
+    label: 'Lowest Price',
   },
   {
     id: 'lastSalePrice',
