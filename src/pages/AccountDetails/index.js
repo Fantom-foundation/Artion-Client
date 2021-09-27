@@ -129,7 +129,12 @@ const AccountDetails = () => {
     }
     try {
       const { data: isFollowing } = await getFollowing(account, _account);
-      setFollowing(isFollowing);
+
+      if (account === undefined) {
+        setFollowing(false);
+      } else {
+        setFollowing(isFollowing);
+      }
     } catch {
       setFollowing(false);
     }
@@ -251,7 +256,11 @@ const AccountDetails = () => {
     if (me && user && me.address?.toLowerCase() === uid.toLowerCase()) {
       setUser({ ...user, ...me });
     }
-  }, [me, uid]);
+
+    if (account === undefined) {
+      setFollowing(false);
+    }
+  }, [me, uid, account]);
 
   const updateCollections = async () => {
     try {
@@ -588,6 +597,11 @@ const AccountDetails = () => {
 
   const followUser = async () => {
     if (followingInProgress) return;
+
+    if (account === undefined) {
+      toast('error', 'Please connect your wallet!');
+      return;
+    }
 
     setFollowingInProgress(true);
     try {
