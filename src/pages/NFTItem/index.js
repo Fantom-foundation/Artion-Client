@@ -443,6 +443,8 @@ const NFTItem = () => {
         data = response.data;
       }
 
+      data.properties.royalty = parseInt(data.properties.royalty) / 100;
+
       setInfo(data);
     } catch {
       try {
@@ -2807,7 +2809,8 @@ const NFTItem = () => {
                   <div
                     className={cx(
                       styles.headerButton,
-                      (auctionStarting || auctionUpdating) && styles.disabled
+                      (auctionStarting || auctionUpdating || auctionEnded) &&
+                        styles.disabled
                     )}
                     onClick={() => setAuctionModalVisible(true)}
                   >
