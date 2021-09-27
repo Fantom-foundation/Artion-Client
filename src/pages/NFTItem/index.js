@@ -3015,10 +3015,13 @@ const NFTItem = () => {
                             {formatNumber(winningBid)})
                           </>
                         ) : (
-                          'Waiting for result'
+                          'Auction has concluded'
                         )}
                       </div>
-                    ) : bid ? (
+                    ) : (
+                      ''
+                    )}
+                    {bid ? (
                       <div>
                         <div className={styles.bidtitle}>
                           Reserve Price :&nbsp;
