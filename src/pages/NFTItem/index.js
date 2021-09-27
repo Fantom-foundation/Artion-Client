@@ -3074,7 +3074,7 @@ const NFTItem = () => {
                         )}
                         onClick={handleResultAuction}
                       >
-                        Result
+                        Accept highest bid
                       </div>
                     )}
                   </div>
