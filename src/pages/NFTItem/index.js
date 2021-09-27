@@ -2812,7 +2812,9 @@ const NFTItem = () => {
                       (auctionStarting || auctionUpdating || auctionEnded) &&
                         styles.disabled
                     )}
-                    onClick={() => setAuctionModalVisible(true)}
+                    onClick={() => {
+                      !auctionEnded && setAuctionModalVisible(true);
+                    }}
                   >
                     {auction.current ? 'Update Auction' : 'Start Auction'}
                   </div>
