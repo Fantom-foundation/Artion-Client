@@ -1,5 +1,5 @@
 const IPFSConstants = {
-  HashURI: 'https://gateway.pinata.cloud/ipfs/',
+  HashURI: 'https://cloudflare-ipfs.com/ipfs/',
 };
 
 export default IPFSConstants;

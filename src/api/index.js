@@ -249,7 +249,7 @@ export const useApi = () => {
     data.sortby = sortBy;
     const res = await axios({
       method: 'post',
-      url: `${apiUrl}/nftitems/fetchTokens`,
+      url: `https://fetch-tokens.vercel.app/api`,
       data: JSON.stringify(data),
       headers: {
         'Content-Type': 'application/json',

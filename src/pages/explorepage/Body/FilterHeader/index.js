@@ -71,7 +71,7 @@ const ExploreFilterHeader = ({ loading, category }) => {
               className="filterCollectionItemLogo"
               src={
                 item.isVerified
-                  ? `https://gateway.pinata.cloud/ipfs/${item.logoImageHash}`
+                  ? `https://cloudflare-ipfs.com/ipfs/${item.logoImageHash}`
                   : nftActiveIcon
               }
             />

@@ -681,7 +681,7 @@ const AccountDetails = () => {
             <Skeleton width="100%" height={200} />
           ) : bannerHash || user.bannerHash ? (
             <img
-              src={`https://gateway.pinata.cloud/ipfs/${bannerHash ||
+              src={`https://cloudflare-ipfs.com/ipfs/${bannerHash ||
                 user.bannerHash}`}
               className={styles.bannerImg}
             />
@@ -720,7 +720,7 @@ const AccountDetails = () => {
               <Skeleton width={160} height={160} className={styles.avatar} />
             ) : user.imageHash ? (
               <img
-                src={`https://gateway.pinata.cloud/ipfs/${user.imageHash}`}
+                src={`https://cloudflare-ipfs.com/ipfs/${user.imageHash}`}
                 className={styles.avatar}
               />
             ) : (
@@ -926,7 +926,7 @@ const AccountDetails = () => {
                             <div className={styles.ownerAvatarWrapper}>
                               {activity.image ? (
                                 <img
-                                  src={`https://gateway.pinata.cloud/ipfs/${activity.image}`}
+                                  src={`https://cloudflare-ipfs.com/ipfs/${activity.image}`}
                                   className={styles.ownerAvatar}
                                 />
                               ) : (
@@ -1003,7 +1003,7 @@ const AccountDetails = () => {
                         <div className={styles.ownerAvatarWrapper}>
                           {offer.image ? (
                             <img
-                              src={`https://gateway.pinata.cloud/ipfs/${offer.image}`}
+                              src={`https://cloudflare-ipfs.com/ipfs/${offer.image}`}
                               className={styles.ownerAvatar}
                             />
                           ) : (

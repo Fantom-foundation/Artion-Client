@@ -26,7 +26,7 @@ const OwnersModal = ({ visible, onClose, holders }) => {
             <div className={styles.avatarWrapper}>
               {holder.imageHash ? (
                 <img
-                  src={`https://gateway.pinata.cloud/ipfs/${holder.imageHash}`}
+                  src={`https://cloudflare-ipfs.com/ipfs/${holder.imageHash}`}
                   width={40}
                   height={40}
                 />

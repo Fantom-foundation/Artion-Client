@@ -365,7 +365,7 @@ const Header = ({ border }) => {
                     <div key={idx} className={styles.result}>
                       <img
                         className={styles.resultimg}
-                        src={`https://gateway.pinata.cloud/ipfs/${collection.logoImageHash}`}
+                        src={`https://cloudflare-ipfs.com/ipfs/${collection.logoImageHash}`}
                       />
                       <div className={styles.resulttitle}>
                         {collection.collectionName}
@@ -389,7 +389,7 @@ const Header = ({ border }) => {
                       {account.imageHash ? (
                         <img
                           className={styles.resultimg}
-                          src={`https://gateway.pinata.cloud/ipfs/${account.imageHash}`}
+                          src={`https://cloudflare-ipfs.com/ipfs/${account.imageHash}`}
                         />
                       ) : (
                         <Identicon
@@ -515,7 +515,7 @@ const Header = ({ border }) => {
               <Skeleton className={styles.avatar} />
             ) : user?.imageHash ? (
               <img
-                src={`https://gateway.pinata.cloud/ipfs/${user?.imageHash}`}
+                src={`https://cloudflare-ipfs.com/ipfs/${user?.imageHash}`}
                 width="24"
                 height="24"
                 className={styles.avatar}
