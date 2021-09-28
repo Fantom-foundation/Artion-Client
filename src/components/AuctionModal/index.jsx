@@ -101,11 +101,7 @@ const AuctionModal = ({
   }, [selected]);
 
   const validateInput = (() => {
-    if (
-      reservePrice.length === 0 ||
-      parseFloat(reservePrice) == 0 ||
-      auction.resulted
-    )
+    if (reservePrice.length === 0 || parseFloat(reservePrice) == 0)
       return false;
     if (!auctionStarted && startTime.getTime() < now.getTime()) return false;
     return (
