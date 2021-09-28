@@ -2313,11 +2313,6 @@ const NFTItem = () => {
     handleMenuClose();
   };
 
-  const getSiteUrl = url => {
-    if (url.startsWith('http://' || url.startsWith('https://'))) return url;
-    return 'https://' + url;
-  };
-
   const renderMenu = (
     <Menu
       anchorEl={anchorEl}
@@ -2712,7 +2707,7 @@ const NFTItem = () => {
           )}
           {collection?.twitterHandle?.length > 0 && (
             <a
-              href={`${collection?.twitterHandle}`}
+              href={collection?.twitterHandle}
               target="_blank"
               rel="noopener noreferrer"
               className={styles.socialLink}
@@ -2722,7 +2717,7 @@ const NFTItem = () => {
           )}
           {collection?.mediumHandle?.length > 0 && (
             <a
-              href={`${collection?.mediumHandle}`}
+              href={collection?.mediumHandle}
               target="_blank"
               rel="noopener noreferrer"
               className={styles.socialLink}
@@ -2732,7 +2727,7 @@ const NFTItem = () => {
           )}
           {collection?.telegram?.length > 0 && (
             <a
-              href={`${collection?.telegram}`}
+              href={collection?.telegram}
               target="_blank"
               rel="noopener noreferrer"
               className={styles.socialLink}
@@ -2742,7 +2737,7 @@ const NFTItem = () => {
           )}
           {collection?.discord?.length > 0 && (
             <a
-              href={`${collection?.discord}`}
+              href={collection?.discord}
               target="_blank"
               rel="noopener noreferrer"
               className={styles.socialLink}
