@@ -101,10 +101,17 @@ const AuctionModal = ({
   }, [selected]);
 
   const validateInput = (() => {
-    if (reservePrice.length === 0 || parseFloat(reservePrice) == 0)
+    if (
+      reservePrice.length === 0 ||
+      parseFloat(reservePrice) == 0 ||
+      auction.resulted
+    )
       return false;
     if (!auctionStarted && startTime.getTime() < now.getTime()) return false;
-    return endTime.getTime() >= startTime.getTime() + 1000 * 60 * 5;
+    return (
+      endTime.getTime() >= now.getTime() + 1000 * 60 * 5 &&
+      endTime.getTime() >= startTime.getTime() + 1000 * 60 * 5
+    );
   })();
 
   return (
