@@ -2701,7 +2701,7 @@ const NFTItem = () => {
         <div className={styles.socialLinks}>
           {collection?.siteUrl?.length > 0 && (
             <a
-              href={getSiteUrl(collection?.siteUrl)}
+              href={collection?.siteUrl}
               target="_blank"
               rel="noopener noreferrer"
               className={styles.socialLink}
@@ -2711,7 +2711,7 @@ const NFTItem = () => {
           )}
           {collection?.twitterHandle?.length > 0 && (
             <a
-              href={`https://twitter.com/${collection?.twitterHandle}`}
+              href={`${collection?.twitterHandle}`}
               target="_blank"
               rel="noopener noreferrer"
               className={styles.socialLink}
@@ -2721,7 +2721,7 @@ const NFTItem = () => {
           )}
           {collection?.mediumHandle?.length > 0 && (
             <a
-              href={`https://medium.com/${collection?.mediumHandle}`}
+              href={`${collection?.mediumHandle}`}
               target="_blank"
               rel="noopener noreferrer"
               className={styles.socialLink}
@@ -2731,7 +2731,7 @@ const NFTItem = () => {
           )}
           {collection?.telegram?.length > 0 && (
             <a
-              href={`https://t.me/${collection?.telegram}`}
+              href={`${collection?.telegram}`}
               target="_blank"
               rel="noopener noreferrer"
               className={styles.socialLink}
@@ -2741,7 +2741,7 @@ const NFTItem = () => {
           )}
           {collection?.discord?.length > 0 && (
             <a
-              href={`https://discord.gg/${collection?.discord}`}
+              href={`${collection?.discord}`}
               target="_blank"
               rel="noopener noreferrer"
               className={styles.socialLink}
