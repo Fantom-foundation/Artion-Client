@@ -2079,6 +2079,7 @@ const NFTItem = () => {
       await resultAuction(address, tokenID);
       setResulting(false);
       setResulted(true);
+      auction.current = null;
       showToast('success', 'Auction resulted!');
 
       setOwner(bid.bidder);
@@ -3090,6 +3091,9 @@ const NFTItem = () => {
                             </div>
                           )
                         : // )
+                          !isMine &&
+                          bid?.bidder?.toLowerCase() !==
+                            account?.toLowerCase() &&
                           auctionActive() && (
                             <div
                               className={cx(
