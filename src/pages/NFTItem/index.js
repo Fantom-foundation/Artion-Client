@@ -553,14 +553,16 @@ const NFTItem = () => {
 
   const getBid = async () => {
     try {
-      const bid = await getHighestBidder(
-        address,
-        tokenID,
-        auction.current.token.address
-      );
+      if (auction.current) {
+        const bid = await getHighestBidder(
+          address,
+          tokenID,
+          auction.current.token.address
+        );
 
-      if (bid.bid !== 0) {
-        setBid(bid);
+        if (bid.bid !== 0) {
+          setBid(bid);
+        }
       }
     } catch (e) {
       console.log(e);
