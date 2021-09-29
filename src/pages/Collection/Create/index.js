@@ -331,6 +331,7 @@ const CollectionCreate = ({ isRegister }) => {
             signature,
             royalty,
             feeRecipient,
+            txid: transactionID,
           };
 
           await axios({
