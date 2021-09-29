@@ -9,12 +9,14 @@ export const useApi = () => {
     : 'https://testnet.ftmscan.com';
 
   const apiUrl = isMainnet
-    ? 'https://api.artion.io'
+    ? 'http://api.artion.io'
     : 'https://api.testnet.artion.io';
 
   const storageUrl = isMainnet
     ? 'https://storage.artion.io'
     : 'https://storage.testnet.artion.io';
+
+  const tokenURL = 'https://fetch-tokens.vercel.app/api';
 
   const getNonce = async (address, authToken) => {
     const res = await axios({
@@ -249,7 +251,7 @@ export const useApi = () => {
     data.sortby = sortBy;
     const res = await axios({
       method: 'post',
-      url: `https://fetch-tokens.vercel.app/api`,
+      url: `${tokenURL}`,
       data: JSON.stringify(data),
       headers: {
         'Content-Type': 'application/json',

@@ -229,6 +229,7 @@ const NFTItem = () => {
   const [cancelListingConfirming, setCancelListingConfirming] = useState(false);
   const [priceUpdating, setPriceUpdating] = useState(false);
   const [offerPlacing, setOfferPlacing] = useState(false);
+  const [offerConfirming, setOfferConfirming] = useState(false);
   const [offerCanceling, setOfferCanceling] = useState(false);
   const [offerAccepting, setOfferAccepting] = useState(false);
   const [buyingItem, setBuyingItem] = useState(false);
@@ -752,6 +753,8 @@ const NFTItem = () => {
         console.log(e);
       }
       offers.current.push(newOffer);
+      setOfferConfirming(false);
+      showToast('success', 'Offer placed successfully!');
     }
   };
 
@@ -761,6 +764,9 @@ const NFTItem = () => {
         offer => offer.creator?.toLowerCase() !== creator?.toLowerCase()
       );
       offers.current = newOffers;
+      setOfferCanceling(false);
+      setOfferConfirming(false);
+      showToast('success', 'You have withdrawn your offer!');
     }
   };
 
@@ -1719,9 +1725,6 @@ const NFTItem = () => {
         showToast('success', 'Bundle unlisted successfully!');
       } else {
         await cancelListing(address, tokenID);
-        listings.current = listings.current.filter(
-          listing => listing.owner.toLowerCase() !== account.toLowerCase()
-        );
       }
     } catch (e) {
       setCancelListingConfirming(false);
@@ -1863,6 +1866,7 @@ const NFTItem = () => {
 
     try {
       setOfferPlacing(true);
+      setOfferConfirming(true);
       const price = ethers.utils.parseUnits(_price, token.decimals);
       const deadline = Math.floor(endTime.getTime() / 1000);
       const amount = price.mul(quantity);
@@ -1886,6 +1890,7 @@ const NFTItem = () => {
           }
         );
         setOfferPlacing(false);
+        setOfferConfirming(false);
         return;
       }
 
@@ -1935,10 +1940,9 @@ const NFTItem = () => {
         await tx.wait();
       }
 
-      showToast('success', 'Offer placed successfully!');
-
       setOfferModalVisible(false);
     } catch (e) {
+      setOfferConfirming(false);
       showToast('error', formatError(e.message));
       console.log(e);
     } finally {
@@ -1978,6 +1982,7 @@ const NFTItem = () => {
 
     try {
       setOfferCanceling(true);
+      setOfferConfirming(true);
 
       if (bundleID) {
         const tx = await cancelBundleOffer(bundleID);
@@ -1987,12 +1992,9 @@ const NFTItem = () => {
         await tx.wait();
       }
 
-      showToast('success', 'You have withdrawn your offer!');
-
       offerCanceledHandler(account, address, ethers.BigNumber.from(tokenID));
-
-      setOfferCanceling(false);
     } catch (error) {
+      setOfferConfirming(false);
       showToast('error', formatError(error.message));
       setOfferCanceling(false);
     }
@@ -2915,7 +2917,13 @@ const NFTItem = () => {
                     : () => setOfferModalVisible(true)
                 }
               >
-                {hasMyOffer ? 'Withdraw Offer' : 'Make Offer'}
+                {offerConfirming ? (
+                  <ClipLoader color="#FFF" size={16} />
+                ) : hasMyOffer ? (
+                  'Withdraw Offer'
+                ) : (
+                  'Make Offer'
+                )}
               </TxButton>
             )}
         </div>
