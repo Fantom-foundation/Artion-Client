@@ -224,15 +224,21 @@ const NFTItem = () => {
 
   const [transferring, setTransferring] = useState(false);
   const [listingItem, setListingItem] = useState(false);
+  const [listingConfirming, setListingConfirming] = useState(false);
   const [cancelingListing, setCancelingListing] = useState(false);
+  const [cancelListingConfirming, setCancelListingConfirming] = useState(false);
   const [priceUpdating, setPriceUpdating] = useState(false);
   const [offerPlacing, setOfferPlacing] = useState(false);
+  const [offerConfirming, setOfferConfirming] = useState(false);
   const [offerCanceling, setOfferCanceling] = useState(false);
   const [offerAccepting, setOfferAccepting] = useState(false);
   const [buyingItem, setBuyingItem] = useState(false);
   const [auctionStarting, setAuctionStarting] = useState(false);
+  const [auctionStartConfirming, setAuctionStartConfirming] = useState(false);
   const [auctionUpdating, setAuctionUpdating] = useState(false);
+  const [auctionUpdateConfirming, setAuctionUpdateConfirming] = useState(false);
   const [auctionCanceling, setAuctionCanceling] = useState(false);
+  const [auctionCancelConfirming, setAuctionCancelConfirming] = useState(false);
   const [bidPlacing, setBidPlacing] = useState(false);
   const [bidWithdrawing, setBidWithdrawing] = useState(false);
   const [resulting, setResulting] = useState(false);
@@ -604,6 +610,9 @@ const NFTItem = () => {
       listings.current = listings.current.sort((a, b) =>
         a.price > b.price ? 1 : -1
       );
+
+      setListingConfirming(false);
+      showToast('success', 'Item listed successfully!');
     }
   };
 
@@ -618,6 +627,9 @@ const NFTItem = () => {
           );
         }
       });
+
+      setListingConfirming(false);
+      showToast('success', 'Price updated successfully!');
     }
   };
 
@@ -626,6 +638,8 @@ const NFTItem = () => {
       listings.current = listings.current.filter(
         listing => listing.owner.toLowerCase() !== owner.toLowerCase()
       );
+      setCancelListingConfirming(false);
+      showToast('success', 'Item unlisted successfully!');
     }
   };
 
@@ -708,6 +722,9 @@ const NFTItem = () => {
         console.log(e);
       }
       tradeHistory.current = [newTradeHistory, ...tradeHistory.current];
+
+      showToast('success', 'You have bought the item!');
+      setBuyingItem(false);
     }
   };
 
@@ -739,6 +756,8 @@ const NFTItem = () => {
         console.log(e);
       }
       offers.current.push(newOffer);
+      setOfferConfirming(false);
+      showToast('success', 'Offer placed successfully!');
     }
   };
 
@@ -748,6 +767,9 @@ const NFTItem = () => {
         offer => offer.creator?.toLowerCase() !== creator?.toLowerCase()
       );
       offers.current = newOffers;
+      setOfferCanceling(false);
+      setOfferConfirming(false);
+      showToast('success', 'You have withdrawn your offer!');
     }
   };
 
@@ -903,7 +925,10 @@ const NFTItem = () => {
 
   const auctionCreatedHandler = (nft, id) => {
     if (eventMatches(nft, id)) {
-      getAuctions();
+      getAuctions().then(() => {
+        setAuctionStartConfirming(false);
+        showToast('success', 'Auction started!');
+      });
     }
   };
 
@@ -911,6 +936,8 @@ const NFTItem = () => {
     if (eventMatches(nft, id)) {
       const endTime = parseFloat(_endTime.toString());
       if (auction.current) {
+        setAuctionUpdateConfirming(false);
+        showToast('success', 'Auction end time updated successfully!');
         const newAuction = { ...auction.current, endTime };
         auction.current = newAuction;
       }
@@ -921,6 +948,8 @@ const NFTItem = () => {
     if (eventMatches(nft, id)) {
       const startTime = parseFloat(_startTime.toString());
       if (auction.current) {
+        setAuctionUpdateConfirming(false);
+        showToast('success', 'Auction start time updated successfully!');
         const newAuction = { ...auction.current, startTime };
         auction.current = newAuction;
       }
@@ -930,6 +959,8 @@ const NFTItem = () => {
   const auctionReservePriceUpdatedHandler = (nft, id, _payToken, _price) => {
     if (eventMatches(nft, id)) {
       if (auction.current) {
+        setAuctionUpdateConfirming(false);
+        showToast('success', 'Auction reserve price updated successfully!');
         const price = ethers.utils.formatUnits(
           _price,
           auction.current.token.decimals
@@ -964,6 +995,8 @@ const NFTItem = () => {
 
   const auctionCancelledHandler = (nft, id) => {
     if (eventMatches(nft, id)) {
+      setAuctionCancelConfirming(false);
+      showToast('success', 'Auction canceled!');
       auction.current = null;
       setBid(null);
     }
@@ -1555,6 +1588,7 @@ const NFTItem = () => {
 
     try {
       setListingItem(true);
+      setListingConfirming(true);
 
       const price = ethers.utils.parseUnits(_price, token.decimals);
       if (bundleID) {
@@ -1588,14 +1622,13 @@ const NFTItem = () => {
           ethers.BigNumber.from(Math.floor(new Date().getTime() / 1000))
         );
         await tx.wait();
-
-        showToast('success', 'Item listed successfully!');
       }
 
       setSellModalVisible(false);
       setListingItem(false);
     } catch (err) {
       showToast('error', formatError(err.message));
+      setListingConfirming(false);
       console.log(err);
       setListingItem(false);
     }
@@ -1657,6 +1690,7 @@ const NFTItem = () => {
 
     try {
       setPriceUpdating(true);
+      setListingConfirming(true);
 
       const price = ethers.utils.parseUnits(_price, token.decimals);
       if (bundleID) {
@@ -1673,11 +1707,10 @@ const NFTItem = () => {
         await tx.wait();
       }
 
-      showToast('success', 'Price updated successfully!');
-
       setPriceUpdating(false);
       setSellModalVisible(false);
     } catch (e) {
+      setListingConfirming(false);
       showToast('error', formatError(e.message));
       setPriceUpdating(false);
     }
@@ -1687,6 +1720,7 @@ const NFTItem = () => {
     if (cancelingListing) return;
 
     setCancelingListing(true);
+    setCancelListingConfirming(true);
     try {
       if (bundleID) {
         await cancelBundleListing(bundleID);
@@ -1694,13 +1728,9 @@ const NFTItem = () => {
         showToast('success', 'Bundle unlisted successfully!');
       } else {
         await cancelListing(address, tokenID);
-        listings.current = listings.current.filter(
-          listing => listing.owner.toLowerCase() !== account.toLowerCase()
-        );
-
-        showToast('success', 'Item unlisted successfully!');
       }
     } catch (e) {
+      setCancelListingConfirming(false);
       showToast('error', formatError(e.message));
       console.log(e);
     }
@@ -1762,9 +1792,6 @@ const NFTItem = () => {
         );
         await tx.wait();
       }
-      setBuyingItem(false);
-
-      showToast('success', 'You have bought the item!');
 
       setOwner(account);
 
@@ -1820,9 +1847,6 @@ const NFTItem = () => {
         const tx = await buyBundleERC20(bundleID, token.address);
         await tx.wait();
       }
-      setBuyingItem(false);
-
-      showToast('success', 'You have bought the bundle!');
 
       setOwner(account);
 
@@ -1839,6 +1863,7 @@ const NFTItem = () => {
 
     try {
       setOfferPlacing(true);
+      setOfferConfirming(true);
       const price = ethers.utils.parseUnits(_price, token.decimals);
       const deadline = Math.floor(endTime.getTime() / 1000);
       const amount = price.mul(quantity);
@@ -1862,6 +1887,7 @@ const NFTItem = () => {
           }
         );
         setOfferPlacing(false);
+        setOfferConfirming(false);
         return;
       }
 
@@ -1911,10 +1937,9 @@ const NFTItem = () => {
         await tx.wait();
       }
 
-      showToast('success', 'Offer placed successfully!');
-
       setOfferModalVisible(false);
     } catch (e) {
+      setOfferConfirming(false);
       showToast('error', formatError(e.message));
       console.log(e);
     } finally {
@@ -1954,6 +1979,7 @@ const NFTItem = () => {
 
     try {
       setOfferCanceling(true);
+      setOfferConfirming(true);
 
       if (bundleID) {
         const tx = await cancelBundleOffer(bundleID);
@@ -1963,12 +1989,9 @@ const NFTItem = () => {
         await tx.wait();
       }
 
-      showToast('success', 'You have withdrawn your offer!');
-
       offerCanceledHandler(account, address, ethers.BigNumber.from(tokenID));
-
-      setOfferCanceling(false);
     } catch (error) {
+      setOfferConfirming(false);
       showToast('error', formatError(error.message));
       setOfferCanceling(false);
     }
@@ -1977,6 +2000,7 @@ const NFTItem = () => {
   const handleStartAuction = async (token, _price, _startTime, _endTime) => {
     try {
       setAuctionStarting(true);
+      setAuctionStartConfirming(true);
 
       const price = ethers.utils.parseUnits(_price, token.decimals);
       const startTime = Math.floor(_startTime.getTime() / 1000);
@@ -1992,11 +2016,10 @@ const NFTItem = () => {
       );
       await tx.wait();
 
-      showToast('success', 'Auction started!');
-
       setAuctionStarting(false);
       setAuctionModalVisible(false);
     } catch (error) {
+      setAuctionStartConfirming(false);
       showToast('error', formatError(error.message));
       setAuctionStarting(false);
     }
@@ -2007,6 +2030,7 @@ const NFTItem = () => {
 
     try {
       setAuctionUpdating(true);
+      setAuctionUpdateConfirming(true);
 
       if (parseFloat(_price) !== auction.current.reservePrice) {
         const price = ethers.utils.parseUnits(_price, token.decimals);
@@ -2015,8 +2039,6 @@ const NFTItem = () => {
           ethers.BigNumber.from(tokenID),
           ethers.BigNumber.from(price)
         );
-
-        showToast('success', 'Auction reserve price updated successfully!');
       }
 
       const startTime = Math.floor(_startTime.getTime() / 1000);
@@ -2026,8 +2048,6 @@ const NFTItem = () => {
           ethers.BigNumber.from(tokenID),
           ethers.BigNumber.from(startTime)
         );
-
-        showToast('success', 'Auction start time updated successfully!');
       }
 
       const endTime = Math.floor(_endTime.getTime() / 1000);
@@ -2037,13 +2057,12 @@ const NFTItem = () => {
           ethers.BigNumber.from(tokenID),
           ethers.BigNumber.from(endTime)
         );
-
-        showToast('success', 'Auction end time updated successfully!');
       }
 
       setAuctionUpdating(false);
       setAuctionModalVisible(false);
     } catch (error) {
+      setAuctionUpdateConfirming(false);
       showToast('error', formatError(error.message));
       setAuctionUpdating(false);
     }
@@ -2054,11 +2073,10 @@ const NFTItem = () => {
 
     try {
       setAuctionCanceling(true);
+      setAuctionCancelConfirming(true);
       await cancelAuction(address, tokenID);
-      auction.current = null;
-
-      showToast('success', 'Auction canceled!');
     } catch (err) {
+      setAuctionCancelConfirming(false);
       showToast('error', formatError(err.message));
       console.log(err);
     } finally {
@@ -2811,7 +2829,11 @@ const NFTItem = () => {
                   )}
                   onClick={cancelCurrentAuction}
                 >
-                  Cancel Auction
+                  {auctionCancelConfirming ? (
+                    <ClipLoader color="#FFF" size={16} />
+                  ) : (
+                    'Cancel Auction'
+                  )}
                 </div>
               ) : null}
               {!bundleID &&
@@ -2828,7 +2850,13 @@ const NFTItem = () => {
                       !auctionEnded && setAuctionModalVisible(true);
                     }}
                   >
-                    {auction.current ? 'Update Auction' : 'Start Auction'}
+                    {auctionStartConfirming || auctionUpdateConfirming ? (
+                      <ClipLoader color="#FFF" size={16} />
+                    ) : auction.current ? (
+                      'Update Auction'
+                    ) : (
+                      'Start Auction'
+                    )}
                   </div>
                 )}
               {(!auction.current || auction.current.resulted) && (
@@ -2841,7 +2869,11 @@ const NFTItem = () => {
                       )}
                       onClick={cancelList}
                     >
-                      Cancel Listing
+                      {cancelListingConfirming ? (
+                        <ClipLoader color="#FFF" size={16} />
+                      ) : (
+                        'Cancel Listing'
+                      )}
                     </div>
                   ) : null}
                   <div
@@ -2855,7 +2887,13 @@ const NFTItem = () => {
                         : null
                     }
                   >
-                    {hasListing ? 'Update Listing' : 'Sell'}
+                    {listingConfirming ? (
+                      <ClipLoader color="#FFF" size={16} />
+                    ) : hasListing ? (
+                      'Update Listing'
+                    ) : (
+                      'Sell'
+                    )}
                   </div>
                 </>
               )}
@@ -2876,7 +2914,13 @@ const NFTItem = () => {
                     : () => setOfferModalVisible(true)
                 }
               >
-                {hasMyOffer ? 'Withdraw Offer' : 'Make Offer'}
+                {offerConfirming ? (
+                  <ClipLoader color="#FFF" size={16} />
+                ) : hasMyOffer ? (
+                  'Withdraw Offer'
+                ) : (
+                  'Make Offer'
+                )}
               </TxButton>
             )}
         </div>
@@ -3106,9 +3150,21 @@ const NFTItem = () => {
                           styles.placeBid,
                           resulting && styles.disabled
                         )}
-                        onClick={handleResultAuction}
+                        onClick={
+                          bid === null ||
+                          bid?.bid < auction.current?.reservePrice
+                            ? cancelCurrentAuction
+                            : handleResultAuction
+                        }
                       >
-                        Accept highest bid
+                        {auctionCancelConfirming ? (
+                          <ClipLoader color="#FFF" size={16} />
+                        ) : bid === null ||
+                          bid?.bid < auction.current.reservePrice ? (
+                          'Reserve Price not met. Cancel Auction'
+                        ) : (
+                          'Accept highest bid'
+                        )}
                       </div>
                     )}
                   </div>

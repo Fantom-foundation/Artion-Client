@@ -79,6 +79,8 @@ const CollectionCreate = ({ isRegister }) => {
   const [descriptionError, setDescriptionError] = useState(null);
   const [royalty, setRoyalty] = useState('');
   const [feeRecipient, setFeeRecipient] = useState('');
+  const [transactionID, setTransactionID] = useState('');
+  const [transactionIDError, setTransactionIDError] = useState(null);
   const [recipientError, setRecipientError] = useState(null);
   const [email, setEmail] = useState('');
   const [emailError, setEmailError] = useState(null);
@@ -149,6 +151,18 @@ const CollectionCreate = ({ isRegister }) => {
       setNameError("This field can't be blank");
     } else {
       setNameError(null);
+    }
+  };
+
+  const validateTransactionID = () => {
+    if (transactionID.length === 0) {
+      setTransactionIDError("This field can't be blank");
+    } else if (transactionID.length > 0) {
+      /^0x([A-Fa-f0-9]{64})$/.test(transactionID)
+        ? setTransactionIDError(null)
+        : setTransactionIDError('Invalid transaction hash');
+    } else {
+      setTransactionIDError(null);
     }
   };
 
@@ -224,6 +238,7 @@ const CollectionCreate = ({ isRegister }) => {
   const isValid = (() => {
     if (!logo) return false;
     if (nameError) return false;
+    if (transactionIDError) return false;
     if (descriptionError) return false;
     if (addressError) return false;
     if (!isRegister && (symbol.length === 0 || symbol.includes(' ')))
@@ -316,6 +331,7 @@ const CollectionCreate = ({ isRegister }) => {
             signature,
             royalty,
             feeRecipient,
+            txid: transactionID,
           };
 
           await axios({
@@ -578,6 +594,35 @@ const CollectionCreate = ({ isRegister }) => {
             {nameError && <div className={styles.error}>{nameError}</div>}
           </div>
         </div>
+
+        {isRegister && (
+          <div className={styles.inputGroup}>
+            <div className={styles.inputTitle}>
+              TXID *&nbsp;
+              <BootstrapTooltip
+                title="The user should sign message from collection owner wallet with the nominated fee recipient address included."
+                placement="top"
+              >
+                <HelpOutlineIcon />
+              </BootstrapTooltip>
+            </div>
+            <div className={styles.inputWrapper}>
+              <input
+                className={cx(
+                  styles.input,
+                  transactionIDError && styles.hasError
+                )}
+                placeholder="Transaction ID"
+                value={transactionID}
+                onChange={e => setTransactionID(e.target.value)}
+                onBlur={validateTransactionID}
+              />
+              {transactionIDError && (
+                <div className={styles.error}>{transactionIDError}</div>
+              )}
+            </div>
+          </div>
+        )}
 
         {!isRegister && (
           <div className={styles.inputGroup}>
