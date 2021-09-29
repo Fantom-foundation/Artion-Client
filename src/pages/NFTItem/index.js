@@ -444,8 +444,9 @@ const NFTItem = () => {
         const response = await axios.get(uri);
         data = response.data;
       }
-
-      data.properties.royalty = parseInt(data.properties.royalty) / 100;
+      if (data.properties?.royalty) {
+        data.properties.royalty = parseInt(data.properties.royalty) / 100;
+      }
 
       setInfo(data);
     } catch {
