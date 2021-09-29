@@ -3106,9 +3106,16 @@ const NFTItem = () => {
                           styles.placeBid,
                           resulting && styles.disabled
                         )}
-                        onClick={handleResultAuction}
+                        onClick={
+                          bid === null ||
+                          bid?.bid < auction.current?.reservePrice
+                            ? cancelCurrentAuction
+                            : handleResultAuction
+                        }
                       >
-                        Accept highest bid
+                        {bid === null || bid?.bid < auction.current.reservePrice
+                          ? 'Reserve Price not met. Cancel Auction'
+                          : 'Accept highest bid'}
                       </div>
                     )}
                   </div>
