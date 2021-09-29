@@ -722,6 +722,9 @@ const NFTItem = () => {
         console.log(e);
       }
       tradeHistory.current = [newTradeHistory, ...tradeHistory.current];
+
+      showToast('success', 'You have bought the item!');
+      setBuyingItem(false);
     }
   };
 
@@ -1789,9 +1792,6 @@ const NFTItem = () => {
         );
         await tx.wait();
       }
-      setBuyingItem(false);
-
-      showToast('success', 'You have bought the item!');
 
       setOwner(account);
 
@@ -1847,9 +1847,6 @@ const NFTItem = () => {
         const tx = await buyBundleERC20(bundleID, token.address);
         await tx.wait();
       }
-      setBuyingItem(false);
-
-      showToast('success', 'You have bought the bundle!');
 
       setOwner(account);
 
