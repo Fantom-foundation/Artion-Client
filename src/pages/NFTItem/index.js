@@ -1190,7 +1190,7 @@ const NFTItem = () => {
   }, [address, tokenID, bundleID]);
 
   useEffect(() => {
-    if (!chainId || !address) {
+    if (!address) {
       setCollectionRoyalty(null);
       return;
     }
@@ -1207,7 +1207,7 @@ const NFTItem = () => {
         }
       })
       .catch(console.log);
-  }, [chainId, address]);
+  }, [address]);
 
   useEffect(() => {
     if (address && tokenID && tokenType.current && filter === 1) {
@@ -1415,11 +1415,11 @@ const NFTItem = () => {
   }, [bundleItems.current, account, chainId]);
 
   useEffect(() => {
-    if (address && chainId) {
+    if (address) {
       addNFTContractEventListeners();
       getCollection();
     }
-  }, [address, chainId]);
+  }, [address]);
 
   const handleApproveSalesContract = async () => {
     setSalesContractApproving(true);
