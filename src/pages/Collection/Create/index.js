@@ -467,7 +467,7 @@ const CollectionCreate = ({ isRegister }) => {
         }
       });
     } catch (err) {
-      showToast('error', formatError(err.message));
+      showToast('error', formatError(err));
       console.log(err);
       setDeploying(false);
     }

@@ -1630,7 +1630,7 @@ const NFTItem = () => {
       setSellModalVisible(false);
       setListingItem(false);
     } catch (err) {
-      showToast('error', formatError(err.message));
+      showToast('error', formatError(err));
       setListingConfirming(false);
       console.log(err);
       setListingItem(false);
@@ -1714,7 +1714,7 @@ const NFTItem = () => {
       setSellModalVisible(false);
     } catch (e) {
       setListingConfirming(false);
-      showToast('error', formatError(e.message));
+      showToast('error', formatError(e));
       setPriceUpdating(false);
     }
   };
@@ -1734,7 +1734,7 @@ const NFTItem = () => {
       }
     } catch (e) {
       setCancelListingConfirming(false);
-      showToast('error', formatError(e.message));
+      showToast('error', formatError(e));
       console.log(e);
     }
     setCancelingListing(false);
@@ -1802,7 +1802,7 @@ const NFTItem = () => {
         _listing => _listing.owner !== listing.owner
       );
     } catch (error) {
-      showToast('error', formatError(error.message));
+      showToast('error', formatError(error));
       setBuyingItem(false);
     }
   };
@@ -1856,7 +1856,7 @@ const NFTItem = () => {
       // eslint-disable-next-line require-atomic-updates
       bundleListing.current = null;
     } catch (error) {
-      showToast('error', formatError(error.message));
+      showToast('error', formatError(error));
       setBuyingItem(false);
     }
   };
@@ -1943,7 +1943,7 @@ const NFTItem = () => {
       setOfferModalVisible(false);
     } catch (e) {
       setOfferConfirming(false);
-      showToast('error', formatError(e.message));
+      showToast('error', formatError(e));
       console.log(e);
     } finally {
       setOfferPlacing(false);
@@ -1972,7 +1972,7 @@ const NFTItem = () => {
         _offer => _offer.creator !== offer.creator
       );
     } catch (error) {
-      showToast('error', formatError(error.message));
+      showToast('error', formatError(error));
       setOfferAccepting(false);
     }
   };
@@ -1995,7 +1995,7 @@ const NFTItem = () => {
       offerCanceledHandler(account, address, ethers.BigNumber.from(tokenID));
     } catch (error) {
       setOfferConfirming(false);
-      showToast('error', formatError(error.message));
+      showToast('error', formatError(error));
       setOfferCanceling(false);
     }
   };
@@ -2023,7 +2023,7 @@ const NFTItem = () => {
       setAuctionModalVisible(false);
     } catch (error) {
       setAuctionStartConfirming(false);
-      showToast('error', formatError(error.message));
+      showToast('error', formatError(error));
       setAuctionStarting(false);
     }
   };
@@ -2066,7 +2066,7 @@ const NFTItem = () => {
       setAuctionModalVisible(false);
     } catch (error) {
       setAuctionUpdateConfirming(false);
-      showToast('error', formatError(error.message));
+      showToast('error', formatError(error));
       setAuctionUpdating(false);
     }
   };
@@ -2080,7 +2080,7 @@ const NFTItem = () => {
       await cancelAuction(address, tokenID);
     } catch (err) {
       setAuctionCancelConfirming(false);
-      showToast('error', formatError(err.message));
+      showToast('error', formatError(err));
       console.log(err);
     } finally {
       setAuctionCanceling(false);
@@ -2105,7 +2105,7 @@ const NFTItem = () => {
 
       setOwner(bid.bidder);
     } catch (error) {
-      showToast('error', formatError(error.message));
+      showToast('error', formatError(error));
       setResulting(false);
     }
   };
@@ -2163,7 +2163,7 @@ const NFTItem = () => {
       setBidPlacing(false);
       setBidModalVisible(false);
     } catch (error) {
-      showToast('error', formatError(error.message));
+      showToast('error', formatError(error));
       setBidPlacing(false);
     }
   };
@@ -2177,7 +2177,7 @@ const NFTItem = () => {
       setBidWithdrawing(false);
       showToast('success', 'You have withdrawn your bid!');
     } catch (error) {
-      showToast('error', formatError(error.message));
+      showToast('error', formatError(error));
       setBidWithdrawing(false);
     }
   };
