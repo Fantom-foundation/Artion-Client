@@ -109,6 +109,12 @@ const LandingPage = () => {
               Artion is an NFT marketplace built on Fantom. Create and trade
               NFTs instantly with low network costs.
             </div>
+            <div className={styles.subtitle}>
+              <strong>
+                Warning: This is a beta version. Use at your own caution.
+              </strong>
+            </div>
+
             <Link to="/explore" className={styles.exploreButton}>
               Explore
             </Link>

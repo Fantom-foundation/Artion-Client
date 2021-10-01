@@ -350,10 +350,11 @@ const CollectionCreate = ({ isRegister }) => {
             'Your collection registration application is successfully submitted for review.\nOnce approved, you will get an email notification.'
           );
 
+          setCreating(false);
+
           history.push('/explore');
         } catch (e) {
-          const { data } = e.response;
-          toast('error', data.data);
+          console.log('Error: ', e);
           setCreating(false);
         }
       });
@@ -467,7 +468,7 @@ const CollectionCreate = ({ isRegister }) => {
         }
       });
     } catch (err) {
-      showToast('error', formatError(err.message));
+      showToast('error', formatError(err));
       console.log(err);
       setDeploying(false);
     }
