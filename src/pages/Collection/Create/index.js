@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unescaped-entities */
 import React, { useRef, useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useHistory } from 'react-router';
@@ -286,11 +287,14 @@ const CollectionCreate = ({ isRegister }) => {
           const { data: nonce } = await getNonce(account, authToken);
 
           let signature;
+          let signatureAddress;
+
           try {
             const signer = await getSigner();
-            signature = await signer.signMessage(
-              `Approve Signature on Artion.io with nonce ${nonce}`
-            );
+            const msg = `Approve Signature on Artion.io with nonce ${nonce}`;
+
+            signature = await signer.signMessage(msg);
+            signatureAddress = ethers.utils.verifyMessage(msg, signature);
           } catch (err) {
             toast(
               'error',
@@ -329,6 +333,7 @@ const CollectionCreate = ({ isRegister }) => {
             mediumHandle,
             telegram,
             signature,
+            signatureAddress,
             royalty,
             feeRecipient,
             txid: transactionID,
@@ -507,6 +512,13 @@ const CollectionCreate = ({ isRegister }) => {
       <div className={styles.inner}>
         <div className={styles.title}>
           {isRegister ? 'Register' : 'Create New'} Collection
+        </div>
+        <br />
+        <div style={{ fontSize: '13px' }}>
+          Please submit using the owner address of the collection. If you cannot
+          use the owner address, please email us on contact@fantom.foundation
+          with the information below (and proof of collection ownership, such as
+          from the collection's official email address).
         </div>
 
         {!isRegister && (
