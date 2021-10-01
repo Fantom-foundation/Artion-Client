@@ -351,7 +351,7 @@ const PaintBoard = () => {
           history.push(`/explore/${nft}/${mintedTkId.toNumber()}`);
         }, 1000 + Math.random() * 2000);
       } catch (error) {
-        showToast('error', formatError(error.message));
+        showToast('error', formatError(error));
       }
     } catch (error) {
       showToast('error', error.message);
