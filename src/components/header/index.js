@@ -19,6 +19,7 @@ import WFTMModal from 'components/WFTMModal';
 import ModModal from 'components/ModModal';
 import BanCollectionModal from 'components/BanCollectionModal';
 import BanItemModal from 'components/BanItemModal';
+import BanUserModal from 'components/BanUserModal';
 import BoostCollectionModal from 'components/BoostCollectionModal';
 import ConnectWalletModal from 'components/ConnectWalletModal';
 import Identicon from 'components/Identicon';
@@ -62,6 +63,7 @@ const Header = ({ border }) => {
     false
   );
   const [banItemModalVisible, setBanItemModalVisible] = useState(false);
+  const [banUserModalVisible, setBanUserModalVisible] = useState(false);
   const [
     boostCollectionModalVisible,
     setBoostCollectionModalVisible,
@@ -251,6 +253,11 @@ const Header = ({ border }) => {
     handleMenuClose();
   };
 
+  const banUser = () => {
+    setBanUserModalVisible(true);
+    handleMenuClose();
+  };
+
   const boostCollection = () => {
     setBoostCollectionModalVisible(true);
     handleMenuClose();
@@ -294,6 +301,7 @@ const Header = ({ border }) => {
         <img src={iconSwap} className={styles.menuIcon} />
         FTM / WFTM Station
       </div>
+
       <div className={styles.menuSeparator} />
       {account?.toLowerCase() === ADMIN_ADDRESS.toLowerCase()
         ? [
@@ -319,10 +327,13 @@ const Header = ({ border }) => {
             <div key={5} className={styles.menuItem} onClick={banItems}>
               Ban Items
             </div>,
-            <div key={6} className={styles.menuItem} onClick={boostCollection}>
+            <div key={6} className={styles.menuItem} onClick={banUser}>
+              Ban a user
+            </div>,
+            <div key={7} className={styles.menuItem} onClick={boostCollection}>
               Boost Collection
             </div>,
-            <div key={7} className={styles.menuSeparator} />,
+            <div key={8} className={styles.menuSeparator} />,
           ]
         : isModerator
         ? [
@@ -332,7 +343,10 @@ const Header = ({ border }) => {
             <div key={2} className={styles.menuItem} onClick={banItems}>
               Ban Items
             </div>,
-            <div key={3} className={styles.menuSeparator} />,
+            <div key={3} className={styles.menuItem} onClick={banUser}>
+              Ban a user
+            </div>,
+            <div key={4} className={styles.menuSeparator} />,
           ]
         : null}
       <div className={styles.signOut} onClick={handleSignOut}>
@@ -571,6 +585,10 @@ const Header = ({ border }) => {
       <BanItemModal
         visible={banItemModalVisible}
         onClose={() => setBanItemModalVisible(false)}
+      />
+      <BanUserModal
+        visible={banUserModalVisible}
+        onClose={() => setBanUserModalVisible(false)}
       />
       <BoostCollectionModal
         visible={boostCollectionModalVisible}
