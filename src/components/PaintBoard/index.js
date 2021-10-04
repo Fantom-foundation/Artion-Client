@@ -99,7 +99,9 @@ const PaintBoard = () => {
     fetchMintableCollections,
     getNonce,
     addUnlockableContent,
+    isBanned,
   } = useApi();
+
   const { registerRoyalty } = useSalesContract();
   const { loadContract } = useContract();
 
@@ -228,6 +230,11 @@ const PaintBoard = () => {
         'custom',
         `Your balance should be at least ${fee} FTM to mint an NFT`
       );
+      return;
+    }
+
+    if (isBanned) {
+      showToast('error', 'You are banned from minting');
       return;
     }
 
