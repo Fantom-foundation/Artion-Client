@@ -233,10 +233,10 @@ const PaintBoard = () => {
       return;
     }
 
-    if (isBanned) {
-      showToast('error', 'You are banned from minting');
-      return;
-    }
+    // if (isBanned) {
+    //   showToast('error', 'You are banned from minting');
+    //   return;
+    // }
 
     setLastMintedTnxId('');
     // show stepper
