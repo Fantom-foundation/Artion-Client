@@ -494,6 +494,20 @@ export const useApi = () => {
     return res.data;
   };
 
+  const unbanUser = async (address, authToken, signature, signatureAddress) => {
+    const data = { address, signature, signatureAddress };
+    const res = await axios({
+      method: 'post',
+      url: `${apiUrl}/ban/removeBan`,
+      data: JSON.stringify(data),
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${authToken}`,
+      },
+    });
+    return res.data;
+  };
+
   const banItems = async (
     address,
     tokenIDs,
@@ -844,6 +858,7 @@ export const useApi = () => {
     unbanCollection,
     banItems,
     banUser,
+    unbanUser,
     isBanned,
     boostCollection,
     createBundle,
