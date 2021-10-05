@@ -463,8 +463,8 @@ export const useApi = () => {
     return res.data;
   };
 
-  const isBanned = async (address, authToken, signature, signatureAddress) => {
-    const data = { address, signature, signatureAddress };
+  const checkBan = async (address, authToken) => {
+    const data = { address };
     const res = await axios({
       method: 'get',
       url: `${apiUrl}/ban/banUser`,
@@ -859,7 +859,7 @@ export const useApi = () => {
     banItems,
     banUser,
     unbanUser,
-    isBanned,
+    checkBan,
     boostCollection,
     createBundle,
     deleteBundle,
