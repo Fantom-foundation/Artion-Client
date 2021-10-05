@@ -11,8 +11,8 @@ import { getSigner } from 'contracts';
 import Modal from '../Modal';
 import styles from '../Modal/common.module.scss';
 
-const BanUserModal = ({ visible, onClose }) => {
-  const { getNonce, banUser } = useApi();
+const BanUserModal = ({ visible, onClose, isForBanning }) => {
+  const { getNonce, banUser, unbanUser } = useApi(); //unban user
   const { account } = useWeb3React();
 
   const { authToken } = useSelector(state => state.ConnectWallet);
@@ -42,21 +42,31 @@ const BanUserModal = ({ visible, onClose }) => {
         signature = await signer.signMessage(msg);
         addr = ethers.utils.verifyMessage(msg, signature);
       } catch (err) {
-        toast('error', 'You need to sign the message to be able to ban user.');
+        toast(
+          'error',
+          'You need to sign the message to be able to ban/unban user.'
+        );
         setBanning(false);
         return;
       }
 
-      let response = await banUser(address, authToken, signature, addr);
+      let response = isForBanning
+        ? await banUser(address, authToken, signature, addr)
+        : await unbanUser(address, authToken, signature, addr);
 
       response.status == 'success'
-        ? toast('success', 'User banned successfully!')
-        : toast('error', 'User already banned');
+        ? isForBanning
+          ? toast('success', 'User banned successfully!')
+          : toast('success', 'User unbanned successfully!')
+        : isForBanning
+        ? toast('error', response.data)
+        : toast('error', response.data);
 
+      setAddress('');
       setBanning(false);
     } catch (e) {
       console.log(e);
-      toast('error', 'Error occured while banning a user!');
+      toast('error', 'Error occured while banning/unbanning a user!');
     }
     setBanning(false);
   };
@@ -64,10 +74,18 @@ const BanUserModal = ({ visible, onClose }) => {
   return (
     <Modal
       visible={visible}
-      title="Ban User"
+      title={isForBanning ? 'Ban User' : 'Unban User'}
       onClose={onClose}
       submitDisabled={banning}
-      submitLabel={banning ? <ClipLoader color="#FFF" size={16} /> : 'Ban'}
+      submitLabel={
+        banning ? (
+          <ClipLoader color="#FFF" size={16} />
+        ) : isForBanning ? (
+          'Ban User'
+        ) : (
+          'Unban User'
+        )
+      }
       onSubmit={!banning ? () => handleBanUser() : null}
     >
       <div className={styles.formGroup}>

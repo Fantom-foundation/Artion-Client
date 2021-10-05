@@ -99,7 +99,7 @@ const PaintBoard = () => {
     fetchMintableCollections,
     getNonce,
     addUnlockableContent,
-    isBanned,
+    checkBan,
   } = useApi();
 
   const { registerRoyalty } = useSalesContract();
@@ -232,6 +232,8 @@ const PaintBoard = () => {
       );
       return;
     }
+
+    let isBanned = await checkBan(account, authToken);
 
     if (isBanned) {
       showToast('error', 'You are banned from minting');

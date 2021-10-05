@@ -64,6 +64,7 @@ const Header = ({ border }) => {
   );
   const [banItemModalVisible, setBanItemModalVisible] = useState(false);
   const [banUserModalVisible, setBanUserModalVisible] = useState(false);
+  const [unbanUserModalVisible, setUnbanUserModalVisible] = useState(false);
   const [
     boostCollectionModalVisible,
     setBoostCollectionModalVisible,
@@ -258,6 +259,11 @@ const Header = ({ border }) => {
     handleMenuClose();
   };
 
+  const unbanUser = () => {
+    setUnbanUserModalVisible(true);
+    handleMenuClose();
+  };
+
   const boostCollection = () => {
     setBoostCollectionModalVisible(true);
     handleMenuClose();
@@ -330,6 +336,9 @@ const Header = ({ border }) => {
             <div key={6} className={styles.menuItem} onClick={banUser}>
               Ban a user
             </div>,
+            <div key={6} className={styles.menuItem} onClick={unbanUser}>
+              Unban a user
+            </div>,
             <div key={7} className={styles.menuItem} onClick={boostCollection}>
               Boost Collection
             </div>,
@@ -345,6 +354,9 @@ const Header = ({ border }) => {
             </div>,
             <div key={3} className={styles.menuItem} onClick={banUser}>
               Ban a user
+            </div>,
+            <div key={6} className={styles.menuItem} onClick={unbanUser}>
+              Unban a user
             </div>,
             <div key={4} className={styles.menuSeparator} />,
           ]
@@ -589,6 +601,12 @@ const Header = ({ border }) => {
       <BanUserModal
         visible={banUserModalVisible}
         onClose={() => setBanUserModalVisible(false)}
+        isForBanning={true}
+      />
+      <BanUserModal
+        visible={unbanUserModalVisible}
+        onClose={() => setUnbanUserModalVisible(false)}
+        isForBanning={false}
       />
       <BoostCollectionModal
         visible={boostCollectionModalVisible}
