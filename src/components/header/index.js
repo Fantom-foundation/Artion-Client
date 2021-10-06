@@ -159,6 +159,26 @@ const Header = ({ border }) => {
         cancelToken: cancelTokenSource.token,
       });
 
+      Promise.all(
+        tokens.map(async token => {
+          if (token.imageURL && token.imageURL.includes('ipfs://')) {
+            let image = token.imageURL.split('//')[1];
+            token.imageURL = `https://cloudflare-ipfs.com/ipfs/${image}`;
+          }
+
+          if (token.imageURL === '-') {
+            const {
+              data: { image },
+            } = await axios.get(token.tokenURI);
+
+            if (image) {
+              // eslint-disable-next-line require-atomic-updates
+              token.imageURL = image;
+            }
+          }
+        })
+      );
+
       setAccounts(accounts);
       setCollections(collections);
       setTokenDetailsLoading(true);

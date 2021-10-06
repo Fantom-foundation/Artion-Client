@@ -85,6 +85,11 @@ const BaseCard = ({ item, loading, style, create, onCreate, onLike }) => {
       getTokenURI(item.tokenURI);
     }
     if (item) {
+      if (item.imageURL && item.imageURL.includes('ipfs://')) {
+        let image = item.imageURL.split('//')[1];
+        item.imageURL = `https://cloudflare-ipfs.com/ipfs/${image}`;
+      }
+
       setLiked(item.liked);
       if (item.items) {
         setAuction(null);

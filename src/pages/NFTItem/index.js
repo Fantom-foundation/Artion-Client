@@ -454,6 +454,11 @@ const NFTItem = () => {
         data.properties.royalty = parseInt(data.properties.royalty) / 100;
       }
 
+      if (data.image && data.image.includes('ipfs://')) {
+        let image = data.image.split('//')[1];
+        data.image = `https://cloudflare-ipfs.com/ipfs/${image}`;
+      }
+
       setInfo(data);
     } catch {
       try {
@@ -463,6 +468,11 @@ const NFTItem = () => {
         const contract = await getERC721Contract(address);
         const tokenURI = await contract.tokenURI(tokenID);
         const { data } = await axios.get(tokenURI);
+
+        if (data.image && data.image.includes('ipfs://')) {
+          let image = data.image.split('//')[1];
+          data.image = `https://cloudflare-ipfs.com/ipfs/${image}`;
+        }
 
         setInfo(data);
       } catch {
