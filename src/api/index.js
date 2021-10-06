@@ -8,18 +8,18 @@ export const useApi = () => {
     ? 'https://ftmscan.com'
     : 'https://testnet.ftmscan.com';
 
-  // const apiUrl = isMainnet
-  //   ? 'https://api.artion.io'
-  //   : 'https://api.testnet.artion.io';
+  const apiUrl = isMainnet
+    ? 'https://api.artion.io'
+    : 'https://api.testnet.artion.io';
 
   // eslint-disable-next-line no-undef
-  const apiUrl = process.env.REACT_APP_API_URI;
+  // const apiUrl = process.env.REACT_APP_API_URI;
   const storageUrl = isMainnet
     ? 'https://storage.artion.io'
     : 'https://storage.testnet.artion.io';
 
   // const tokenURL = 'https://fetch-tokens.vercel.app/api';
-  const tokenURL = `${process.env.REACT_APP_API_URI}/nftitems/fetchTokens`;
+  // const tokenURL = 'https://api.artion.io/nftitems/fetchTokens';
 
   const getNonce = async (address, authToken) => {
     const res = await axios({
@@ -254,7 +254,7 @@ export const useApi = () => {
     data.sortby = sortBy;
     const res = await axios({
       method: 'post',
-      url: `${tokenURL}`,
+      url: `${apiUrl}/nftitems/fetchTokens`,
       data: JSON.stringify(data),
       headers: {
         'Content-Type': 'application/json',
