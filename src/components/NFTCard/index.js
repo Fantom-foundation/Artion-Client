@@ -57,6 +57,11 @@ const BaseCard = ({ item, loading, style, create, onCreate, onLike }) => {
     setFetching(true);
     try {
       const { data } = await axios.get(tokenURI);
+
+      if (data.properties && data.properties.image) {
+        data.image = data.properties.image.description;
+      }
+
       setInfo(data);
     } catch {
       setInfo(null);
