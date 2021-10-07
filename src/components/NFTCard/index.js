@@ -86,22 +86,26 @@ const BaseCard = ({ item, loading, style, create, onCreate, onLike }) => {
   };
 
   useEffect(() => {
-    if (item && !item.name) {
-      getTokenURI(item.tokenURI);
-    }
-    if (item) {
-      if (item.imageURL && item.imageURL.includes('ipfs://')) {
-        let image = item.imageURL.split('//')[1];
-        item.imageURL = `https://cloudflare-ipfs.com/ipfs/${image}`;
+    async function fetchMyAPI() {
+      if (item && !item.name) {
+        await getTokenURI(item.tokenURI);
       }
+      if (item) {
+        if (item.imageURL && item.imageURL.includes('ipfs://')) {
+          let image = item.imageURL.split('//')[1];
+          // eslint-disable-next-line require-atomic-updates
+          item.imageURL = `https://cloudflare-ipfs.com/ipfs/${image}`;
+        }
 
-      setLiked(item.liked);
-      if (item.items) {
-        setAuction(null);
-      } else {
-        getCurrentAuction();
+        setLiked(item.liked);
+        if (item.items) {
+          setAuction(null);
+        } else {
+          getCurrentAuction();
+        }
       }
     }
+    fetchMyAPI();
   }, [item]);
 
   useEffect(() => {
