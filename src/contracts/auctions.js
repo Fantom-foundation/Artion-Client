@@ -50,7 +50,8 @@ export const useAuctionContract = () => {
     payToken,
     reservePrice,
     startTimestamp,
-    endTimestamp
+    endTimestamp,
+    minBidReserve
   ) => {
     const contract = await getAuctionContract();
     const options = {
@@ -63,6 +64,7 @@ export const useAuctionContract = () => {
       payToken,
       reservePrice,
       startTimestamp,
+      minBidReserve,
       endTimestamp,
       options
     );

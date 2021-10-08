@@ -2010,7 +2010,13 @@ const NFTItem = () => {
     }
   };
 
-  const handleStartAuction = async (token, _price, _startTime, _endTime) => {
+  const handleStartAuction = async (
+    token,
+    _price,
+    _startTime,
+    _endTime,
+    minBidReserve
+  ) => {
     try {
       setAuctionStarting(true);
       setAuctionStartConfirming(true);
@@ -2025,7 +2031,8 @@ const NFTItem = () => {
         token.address === '' ? ethers.constants.AddressZero : token.address,
         price,
         ethers.BigNumber.from(startTime),
-        ethers.BigNumber.from(endTime)
+        ethers.BigNumber.from(endTime),
+        minBidReserve
       );
       await tx.wait();
 
