@@ -7,6 +7,9 @@ import { ClipLoader } from 'react-spinners';
 import Select from 'react-dropdown-select';
 import Skeleton from 'react-loading-skeleton';
 import { ethers } from 'ethers';
+import { withStyles } from '@material-ui/core/styles';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Checkbox from '@material-ui/core/Checkbox';
 import HelpOutlineIcon from '@material-ui/icons/HelpOutline';
 
 import BootstrapTooltip from 'components/BootstrapTooltip';
@@ -42,6 +45,7 @@ const AuctionModal = ({
     new Date(new Date().getTime() + 24 * 60 * 60 * 1000)
   );
   const [focused, setFocused] = useState(false);
+  const [minBidReserve, setMinBidReserve] = useState(false);
   const [options, setOptions] = useState([]);
   const [selected, setSelected] = useState([]);
   const [tokenPrice, setTokenPrice] = useState();
@@ -77,6 +81,15 @@ const AuctionModal = ({
       setSelected([auction ? auction.token : tokens[0]]);
     }
   }, [visible, auction]);
+
+  const CustomCheckbox = withStyles({
+    root: {
+      '&$checked': {
+        color: '#1969FF',
+      },
+    },
+    checked: {},
+  })(props => <Checkbox color="default" {...props} />);
 
   const getTokenPrice = () => {
     if (tokenPriceInterval) clearInterval(tokenPriceInterval);
@@ -139,7 +152,13 @@ const AuctionModal = ({
       onSubmit={() =>
         contractApproved
           ? !confirming && validateInput
-            ? onStartAuction(selected[0], reservePrice, startTime, endTime)
+            ? onStartAuction(
+                selected[0],
+                reservePrice,
+                startTime,
+                endTime,
+                minBidReserve
+              )
             : null
           : approveContract()
       }
@@ -251,6 +270,17 @@ const AuctionModal = ({
           </div>
         </div>
       </div>
+      <FormControlLabel
+        className={cx(styles.formControl, styles.selected)}
+        classes={{ label: styles.groupTitle }}
+        control={
+          <CustomCheckbox
+            checked={minBidReserve}
+            onChange={() => setMinBidReserve(prevState => !prevState)}
+          />
+        }
+        label="Minimum bid should be equal or greater than reserve price"
+      />
     </Modal>
   );
 };
