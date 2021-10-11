@@ -25,6 +25,7 @@ export const useAuctionContract = () => {
     const startTime = parseFloat(res[3].toString());
     const endTime = parseFloat(res[4].toString());
     const resulted = res[5];
+    const minBid = res[6];
     return {
       owner,
       payToken,
@@ -32,6 +33,7 @@ export const useAuctionContract = () => {
       startTime,
       endTime,
       resulted,
+      minBid,
     };
   };
 
@@ -50,7 +52,8 @@ export const useAuctionContract = () => {
     payToken,
     reservePrice,
     startTimestamp,
-    endTimestamp
+    endTimestamp,
+    minBidReserve
   ) => {
     const contract = await getAuctionContract();
     const options = {
@@ -63,6 +66,7 @@ export const useAuctionContract = () => {
       payToken,
       reservePrice,
       startTimestamp,
+      minBidReserve,
       endTimestamp,
       options
     );

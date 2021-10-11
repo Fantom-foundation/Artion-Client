@@ -57,6 +57,11 @@ const BaseCard = ({ item, loading, style, create, onCreate, onLike }) => {
     setFetching(true);
     try {
       const { data } = await axios.get(tokenURI);
+
+      if (data.properties && data.properties.image) {
+        data.image = data.properties.image.description;
+      }
+
       setInfo(data);
     } catch {
       setInfo(null);
@@ -81,17 +86,26 @@ const BaseCard = ({ item, loading, style, create, onCreate, onLike }) => {
   };
 
   useEffect(() => {
-    if (item && !item.name) {
-      getTokenURI(item.tokenURI);
-    }
-    if (item) {
-      setLiked(item.liked);
-      if (item.items) {
-        setAuction(null);
-      } else {
-        getCurrentAuction();
+    async function fetchMyAPI() {
+      if (item && !item.name) {
+        await getTokenURI(item.tokenURI);
+      }
+      if (item) {
+        if (item.imageURL && item.imageURL.includes('ipfs://')) {
+          let image = item.imageURL.split('//')[1];
+          // eslint-disable-next-line require-atomic-updates
+          item.imageURL = `https://cloudflare-ipfs.com/ipfs/${image}`;
+        }
+
+        setLiked(item.liked);
+        if (item.items) {
+          setAuction(null);
+        } else {
+          getCurrentAuction();
+        }
       }
     }
+    fetchMyAPI();
   }, [item]);
 
   useEffect(() => {

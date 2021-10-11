@@ -193,7 +193,7 @@ const NFTItem = () => {
   );
 
   const [previewIndex, setPreviewIndex] = useState(0);
-  const [minBidIncrement, setMinBidIncrement] = useState(0);
+  const [minBid, setMinBid] = useState(0);
   const [bundleInfo, setBundleInfo] = useState();
   const [creator, setCreator] = useState();
   const [creatorInfo, setCreatorInfo] = useState();
@@ -454,6 +454,11 @@ const NFTItem = () => {
         data.properties.royalty = parseInt(data.properties.royalty) / 100;
       }
 
+      if (data.image && data.image.includes('ipfs://')) {
+        let image = data.image.split('//')[1];
+        data.image = `https://cloudflare-ipfs.com/ipfs/${image}`;
+      }
+
       setInfo(data);
     } catch {
       try {
@@ -463,6 +468,11 @@ const NFTItem = () => {
         const contract = await getERC721Contract(address);
         const tokenURI = await contract.tokenURI(tokenID);
         const { data } = await axios.get(tokenURI);
+
+        if (data.image && data.image.includes('ipfs://')) {
+          let image = data.image.split('//')[1];
+          data.image = `https://cloudflare-ipfs.com/ipfs/${image}`;
+        }
 
         setInfo(data);
       } catch {
@@ -547,6 +557,12 @@ const NFTItem = () => {
       const _auction = await getAuction(address, tokenID);
       if (_auction.endTime !== 0) {
         const token = getTokenByAddress(_auction.payToken);
+
+        let _minBid = parseFloat(
+          ethers.utils.formatUnits(_auction.minBid, token.decimals)
+        );
+        setMinBid(_minBid);
+
         const reservePrice = parseFloat(
           ethers.utils.formatUnits(_auction.reservePrice, token.decimals)
         );
@@ -974,11 +990,6 @@ const NFTItem = () => {
     }
   };
 
-  const minBidIncrementUpdatedHandler = _minBidIncrement => {
-    const minBidIncrement = parseFloat(_minBidIncrement.toString());
-    setMinBidIncrement(minBidIncrement);
-  };
-
   const bidPlacedHandler = (nft, id, bidder, _bid) => {
     if (eventMatches(nft, id)) {
       const bid = parseFloat(_bid.toString()) / 10 ** 18;
@@ -1048,7 +1059,6 @@ const NFTItem = () => {
       'UpdateAuctionReservePrice',
       auctionReservePriceUpdatedHandler
     );
-    auctionContract.on('UpdateMinBidIncrement', minBidIncrementUpdatedHandler);
     auctionContract.on('BidPlaced', bidPlacedHandler);
     auctionContract.on('BidWithdrawn', bidWithdrawnHandler);
     auctionContract.on('AuctionCancelled', auctionCancelledHandler);
@@ -1080,14 +1090,6 @@ const NFTItem = () => {
     bundleSalesContract.off('ItemSold', bundleSoldHandler);
     bundleSalesContract.off('OfferCreated', bundleOfferCreatedHandler);
     bundleSalesContract.off('OfferCanceled', bundleOfferCanceledHandler);
-  };
-
-  const getAuctionConfiguration = async () => {
-    const contract = await getAuctionContract();
-
-    const _minBidIncrement = await contract.minBidIncrement();
-    const minBidIncrement = parseFloat(_minBidIncrement.toString()) / 10 ** 18;
-    setMinBidIncrement(minBidIncrement);
   };
 
   const getCollection = async () => {
@@ -1122,7 +1124,6 @@ const NFTItem = () => {
   useEffect(() => {
     if (address && tokenID) {
       addEventListeners();
-      getAuctionConfiguration();
 
       if (fetchInterval) {
         clearInterval(fetchInterval);
@@ -2000,7 +2001,13 @@ const NFTItem = () => {
     }
   };
 
-  const handleStartAuction = async (token, _price, _startTime, _endTime) => {
+  const handleStartAuction = async (
+    token,
+    _price,
+    _startTime,
+    _endTime,
+    minBidReserve
+  ) => {
     try {
       setAuctionStarting(true);
       setAuctionStartConfirming(true);
@@ -2015,7 +2022,8 @@ const NFTItem = () => {
         token.address === '' ? ethers.constants.AddressZero : token.address,
         price,
         ethers.BigNumber.from(startTime),
-        ethers.BigNumber.from(endTime)
+        ethers.BigNumber.from(endTime),
+        minBidReserve
       );
       await tx.wait();
 
@@ -3107,12 +3115,16 @@ const NFTItem = () => {
                       </div>
                     ) : (
                       <div className={styles.bidtitle}>
-                        No bids yet ( Reserve Price :&nbsp;
+                        No bids yet (Reserve Price :&nbsp;
                         <img
                           src={auction.current.token?.icon}
                           className={styles.tokenIcon}
                         />
-                        {formatNumber(auction.current.reservePrice)} )
+                        {formatNumber(auction.current.reservePrice)}
+                        {minBid > 0 &&
+                          ` | First Bid
+                        should match reserve price`}
+                        )
                       </div>
                     )}
                     {!isMine &&
@@ -3737,9 +3749,10 @@ const NFTItem = () => {
         visible={bidModalVisible}
         onClose={() => setBidModalVisible(false)}
         onPlaceBid={handlePlaceBid}
-        minBidAmount={(bid?.bid || 0) + minBidIncrement}
+        minBidAmount={bid?.bid ? bid?.bid : minBid}
         confirming={bidPlacing}
         token={auction.current?.token}
+        firstBid={bid?.bid ? false : minBid > 0 ? true : false}
       />
       <OwnersModal
         visible={ownersModalVisible}
