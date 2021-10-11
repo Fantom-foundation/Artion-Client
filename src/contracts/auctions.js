@@ -25,6 +25,7 @@ export const useAuctionContract = () => {
     const startTime = parseFloat(res[3].toString());
     const endTime = parseFloat(res[4].toString());
     const resulted = res[5];
+    const minBid = res[6];
     return {
       owner,
       payToken,
@@ -32,6 +33,7 @@ export const useAuctionContract = () => {
       startTime,
       endTime,
       resulted,
+      minBid,
     };
   };
 

@@ -2117,6 +2117,11 @@ export const AUCTION_CONTRACT_ABI = [
         name: '_resulted',
         type: 'bool',
       },
+      {
+        internalType: 'uint256',
+        name: 'minBid',
+        type: 'uint256',
+      },
     ],
     stateMutability: 'view',
     type: 'function',

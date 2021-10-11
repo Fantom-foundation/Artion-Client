@@ -21,6 +21,7 @@ const BidModal = ({
   minBidAmount,
   confirming,
   token,
+  firstBid,
 }) => {
   const { tokens } = useTokens();
   const { getSalesContract } = useSalesContract();
@@ -69,7 +70,9 @@ const BidModal = ({
     return (
       price.length > 0 &&
       parseFloat(price) > 0 &&
-      parseFloat(price) > currentBid
+      (firstBid
+        ? parseFloat(price) >= currentBid
+        : parseFloat(price) > currentBid)
     );
   };
 
