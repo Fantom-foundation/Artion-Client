@@ -1511,7 +1511,7 @@ const NFTItem = () => {
     if (bundleID) return;
 
     if (!ethers.utils.isAddress(to)) {
-      showToast('error', 'Invalid Aaddress!');
+      showToast('error', 'Invalid Address!');
       return;
     }
 
@@ -2585,13 +2585,17 @@ const NFTItem = () => {
             <div className={styles.tokenLogo}>
               <img src={bestListing.token?.icon} />
             </div>
-            <div className={styles.currentPrice}>{bestListing.price}</div>
+            <div className={styles.currentPrice}>
+              {formatNumber(bestListing.price)}
+            </div>
             <div className={styles.currentPriceUSD}>
               (
               {prices[bestListing.token?.address] ? (
-                `$${(
-                  bestListing.price * prices[bestListing.token?.address]
-                ).toFixed(3)}`
+                `$${formatNumber(
+                  (
+                    bestListing.price * prices[bestListing.token?.address]
+                  ).toFixed(3)
+                )}`
               ) : (
                 <Skeleton width={80} height={24} />
               )}
