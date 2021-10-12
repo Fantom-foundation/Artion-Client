@@ -439,15 +439,18 @@ const NFTItem = () => {
       } catch {
         setOwner(null);
       }
-
       let data;
       const base64regex = /^([0-9a-zA-Z+/]{4})*(([0-9a-zA-Z+/]{2}==)|([0-9a-zA-Z+/]{3}=))?$/;
       if (base64regex.test(uri)) {
         const string = atob(uri);
         data = JSON.parse(string);
       } else {
-        new URL(uri);
-        const response = await axios.get(uri);
+        const realUri = uri.includes('ipfs://')
+          ? `https://cloudflare-ipfs.com/ipfs/${uri.split('//')[1]}`
+          : uri;
+
+        new URL(realUri);
+        const response = await axios.get(realUri);
         data = response.data;
       }
       if (data.properties?.royalty) {
@@ -460,14 +463,17 @@ const NFTItem = () => {
       }
 
       setInfo(data);
-    } catch {
+    } catch (err) {
       try {
         console.warn(
           'Failed to retrieve Item data, fallback to fetching from contract'
         );
         const contract = await getERC721Contract(address);
         const tokenURI = await contract.tokenURI(tokenID);
-        const { data } = await axios.get(tokenURI);
+        const realUri = tokenURI.includes('ipfs://')
+          ? `https://cloudflare-ipfs.com/ipfs/${tokenURI.split('//')[1]}`
+          : tokenURI;
+        const { data } = await axios.get(realUri);
 
         if (data.image && data.image.includes('ipfs://')) {
           let image = data.image.split('//')[1];
