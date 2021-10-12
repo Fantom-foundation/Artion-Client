@@ -99,6 +99,9 @@ const ONE_MONTH = ONE_DAY * 30;
 
 const filters = ['Trade History', 'Transfer History'];
 
+import ipfsConstants from '../../constants/ipfs.constants';
+const ipfsUris = ipfsConstants.ipfsUris;
+
 // eslint-disable-next-line no-undef
 const ENV = process.env.REACT_APP_ENV;
 const CHAIN = ENV === 'MAINNET' ? ChainId.FANTOM : ChainId.FANTOM_TESTNET;
@@ -446,7 +449,9 @@ const NFTItem = () => {
         data = JSON.parse(string);
       } else {
         const realUri = uri.includes('ipfs://')
-          ? `https://cloudflare-ipfs.com/ipfs/${uri.split('//')[1]}`
+          ? `${ipfsUris[Math.floor(Math.random() * ipfsUris.length)]}${
+              uri.split('//')[1]
+            }`
           : uri;
 
         new URL(realUri);
@@ -459,7 +464,9 @@ const NFTItem = () => {
 
       if (data.image && data.image.includes('ipfs://')) {
         let image = data.image.split('//')[1];
-        data.image = `https://cloudflare-ipfs.com/ipfs/${image}`;
+        data.image = `${
+          ipfsUris[Math.floor(Math.random() * ipfsUris.length)]
+        }${image}`;
       }
 
       setInfo(data);
@@ -471,13 +478,17 @@ const NFTItem = () => {
         const contract = await getERC721Contract(address);
         const tokenURI = await contract.tokenURI(tokenID);
         const realUri = tokenURI.includes('ipfs://')
-          ? `https://cloudflare-ipfs.com/ipfs/${tokenURI.split('//')[1]}`
+          ? `${ipfsUris[Math.floor(Math.random() * ipfsUris.length)]}${
+              tokenURI.split('//')[1]
+            }`
           : tokenURI;
         const { data } = await axios.get(realUri);
 
         if (data.image && data.image.includes('ipfs://')) {
           let image = data.image.split('//')[1];
-          data.image = `https://cloudflare-ipfs.com/ipfs/${image}`;
+          data.image = `${
+            ipfsUris[Math.floor(Math.random() * ipfsUris.length)]
+          }${image}`;
         }
 
         setInfo(data);

@@ -32,6 +32,9 @@ const ONE_HOUR = ONE_MIN * 60;
 const ONE_DAY = ONE_HOUR * 24;
 const ONE_MONTH = ONE_DAY * 30;
 
+import ipfsConstants from '../../constants/ipfs.constants';
+const ipfsUris = ipfsConstants.ipfsUris;
+
 const BaseCard = ({ item, loading, style, create, onCreate, onLike }) => {
   const { storageUrl, likeItem, likeBundle } = useApi();
   const { getAuction } = useAuctionContract();
@@ -94,7 +97,9 @@ const BaseCard = ({ item, loading, style, create, onCreate, onLike }) => {
         if (item.imageURL && item.imageURL.includes('ipfs://')) {
           let image = item.imageURL.split('//')[1];
           // eslint-disable-next-line require-atomic-updates
-          item.imageURL = `https://cloudflare-ipfs.com/ipfs/${image}`;
+          item.imageURL = `${
+            ipfsUris[Math.floor(Math.random() * ipfsUris.length)]
+          }${image}`;
         }
 
         setLiked(item.liked);
