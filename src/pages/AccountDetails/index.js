@@ -474,6 +474,13 @@ const AccountDetails = () => {
           to: owner,
         })
       );
+      data.sold.map(({ owner, ...rest }) =>
+        _activities.push({
+          event: 'Sold',
+          ...rest,
+          to: owner,
+        })
+      );
       _activities.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
       _activities.map(item => {
         item.token = getTokenByAddress(item.paymentToken);
