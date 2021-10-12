@@ -76,10 +76,10 @@ export const SortByOptions = [
     id: 'soldAt',
     label: 'Recently Sold',
   },
-  // {
-  //   id: 'saleEndsAt',
-  //   label: 'Ending Soon',
-  // },
+  {
+    id: 'saleEndsAt',
+    label: 'Ending Soon',
+  },
   {
     id: 'price',
     label: 'Highest Price',
