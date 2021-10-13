@@ -7,6 +7,7 @@ import { useWeb3React } from '@web3-react/core';
 import Skeleton from 'react-loading-skeleton';
 import SwapVertIcon from '@material-ui/icons/SwapVert';
 import toast from 'react-hot-toast';
+import InputError from '../InputError';
 
 import { useWFTMContract } from 'contracts';
 import PriceInput from 'components/PriceInput';
@@ -28,6 +29,7 @@ const WFTMModal = ({ visible, onClose }) => {
   const [confirming, setConfirming] = useState(false);
   const [wrap, setWrap] = useState(true);
   const [amount, setAmount] = useState('');
+  const [inputError, setInputError] = useState(null);
 
   const { price } = useSelector(state => state.Price);
 
@@ -125,6 +127,7 @@ const WFTMModal = ({ visible, onClose }) => {
       submitDisabled={
         confirming ||
         loading ||
+        inputError ||
         amount.length === 0 ||
         parseFloat(amount) === 0 ||
         parseFloat(amount) > (wrap ? balance - 0.01 : wrappedBalance)
@@ -169,6 +172,7 @@ const WFTMModal = ({ visible, onClose }) => {
                 decimals={18}
                 value={'' + amount}
                 onChange={setAmount}
+                onInputError={setInputError}
               />
               <div className={styles.usdVal}>
                 ${formatNumber(((parseFloat(amount) || 0) * price).toFixed(2))}
@@ -202,6 +206,7 @@ const WFTMModal = ({ visible, onClose }) => {
                 decimals={18}
                 value={'' + amount}
                 onChange={setAmount}
+                onInputError={setInputError}
               />
               <div className={styles.usdVal}>
                 ${formatNumber(((parseFloat(amount) || 0) * price).toFixed(2))}
@@ -210,6 +215,7 @@ const WFTMModal = ({ visible, onClose }) => {
           </div>
         </div>
       </div>
+      <InputError text={inputError} />
     </Modal>
   );
 };
