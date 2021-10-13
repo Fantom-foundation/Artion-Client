@@ -453,34 +453,12 @@ const AccountDetails = () => {
       setActivityLoading(true);
       const { data } = await getAccountActivity(uid);
       const _activities = [];
-      data.bids.map(({ owner, ...rest }) =>
-        _activities.push({
-          event: 'Bid',
-          ...rest,
-          quantity: 1,
-          to: owner,
-        })
-      );
-      data.listings.map(listing =>
-        _activities.push({
-          event: 'Listing',
-          ...listing,
-        })
-      );
-      data.offers.map(({ owner, ...rest }) =>
-        _activities.push({
-          event: 'Offer',
-          ...rest,
-          to: owner,
-        })
-      );
-      data.sold.map(({ owner, ...rest }) =>
-        _activities.push({
-          event: 'Sold',
-          ...rest,
-          to: owner,
-        })
-      );
+
+      data.bids.map(bActivity => _activities.push(bActivity));
+      data.listings.map(lActivity => _activities.push(lActivity));
+      data.offers.map(oActivity => _activities.push(oActivity));
+      data.sold.map(sActivity => _activities.push(sActivity));
+
       _activities.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
       _activities.map(item => {
         item.token = getTokenByAddress(item.paymentToken);
