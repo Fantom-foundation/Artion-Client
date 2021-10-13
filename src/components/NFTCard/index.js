@@ -17,7 +17,7 @@ import ReactPlayer from 'react-player';
 
 import SuspenseImg from 'components/SuspenseImg';
 import BootstrapTooltip from 'components/BootstrapTooltip';
-import { formatNumber } from 'utils';
+import { formatNumber, getRandomIPFS } from 'utils';
 import { useApi } from 'api';
 import { useAuctionContract } from 'contracts';
 import useTokens from 'hooks/useTokens';
@@ -56,6 +56,8 @@ const BaseCard = ({ item, loading, style, create, onCreate, onLike }) => {
   const getTokenURI = async tokenURI => {
     setFetching(true);
     try {
+      tokenURI = getRandomIPFS(tokenURI);
+
       const { data } = await axios.get(tokenURI);
 
       if (data.properties && data.properties.image) {
@@ -91,10 +93,9 @@ const BaseCard = ({ item, loading, style, create, onCreate, onLike }) => {
         await getTokenURI(item.tokenURI);
       }
       if (item) {
-        if (item.imageURL && item.imageURL.includes('ipfs://')) {
-          let image = item.imageURL.split('//')[1];
+        if (item.imageURL) {
           // eslint-disable-next-line require-atomic-updates
-          item.imageURL = `https://cloudflare-ipfs.com/ipfs/${image}`;
+          item.imageURL = getRandomIPFS(item.imageURL);
         }
 
         setLiked(item.liked);

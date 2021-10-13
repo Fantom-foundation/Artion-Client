@@ -58,7 +58,12 @@ import {
   useBundleSalesContract,
   getSigner,
 } from 'contracts';
-import { shortenAddress, formatNumber, formatError } from 'utils';
+import {
+  shortenAddress,
+  formatNumber,
+  formatError,
+  getRandomIPFS,
+} from 'utils';
 import { Contracts } from 'constants/networks';
 import showToast from 'utils/toast';
 import NFTCard from 'components/NFTCard';
@@ -445,9 +450,7 @@ const NFTItem = () => {
         const string = atob(uri);
         data = JSON.parse(string);
       } else {
-        const realUri = uri.includes('ipfs://')
-          ? `https://cloudflare-ipfs.com/ipfs/${uri.split('//')[1]}`
-          : uri;
+        const realUri = getRandomIPFS(uri);
 
         new URL(realUri);
         const response = await axios.get(realUri);
@@ -457,9 +460,8 @@ const NFTItem = () => {
         data.properties.royalty = parseInt(data.properties.royalty) / 100;
       }
 
-      if (data.image && data.image.includes('ipfs://')) {
-        let image = data.image.split('//')[1];
-        data.image = `https://cloudflare-ipfs.com/ipfs/${image}`;
+      if (data.image) {
+        data.image = getRandomIPFS(data.image);
       }
 
       setInfo(data);
@@ -470,14 +472,12 @@ const NFTItem = () => {
         );
         const contract = await getERC721Contract(address);
         const tokenURI = await contract.tokenURI(tokenID);
-        const realUri = tokenURI.includes('ipfs://')
-          ? `https://cloudflare-ipfs.com/ipfs/${tokenURI.split('//')[1]}`
-          : tokenURI;
+        const realUri = getRandomIPFS(tokenURI);
+
         const { data } = await axios.get(realUri);
 
-        if (data.image && data.image.includes('ipfs://')) {
-          let image = data.image.split('//')[1];
-          data.image = `https://cloudflare-ipfs.com/ipfs/${image}`;
+        if (data.image) {
+          data.image = getRandomIPFS(data.image);
         }
 
         setInfo(data);
