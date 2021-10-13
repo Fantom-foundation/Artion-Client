@@ -172,7 +172,7 @@ const Header = ({ border }) => {
 
             if (image) {
               // eslint-disable-next-line require-atomic-updates
-              token.imageURL = image;
+              token.imageURL = getRandomIPFS(token.imageURL);
             }
           }
         })
