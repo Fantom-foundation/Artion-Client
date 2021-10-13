@@ -2,6 +2,7 @@ import { ethers } from 'ethers';
 import { getAddress } from '@ethersproject/address';
 
 import { Categories } from 'constants/filter.constants';
+import { IPFSUris } from 'constants/ipfs.constants';
 import MetamaskErrors from 'constants/errors';
 
 export function isAddress(value) {
@@ -31,6 +32,23 @@ export const getHigherGWEI = async () => {
   const price = (await provider.getGasPrice()) * 2;
 
   return price;
+};
+
+export const getRandomIPFS = tokenURI => {
+  let random = Math.floor(Math.random() * IPFSUris.length);
+
+  if (
+    tokenURI.includes('gateway.pinata.cloud') ||
+    tokenURI.includes('cloudflare') ||
+    tokenURI.includes('ipfs.io') ||
+    tokenURI.includes('ipfs.infura.io')
+  ) {
+    return `${IPFSUris[random]}${tokenURI.split('ipfs/')[1]}`;
+  } else if (tokenURI.includes('ipfs://')) {
+    return `${IPFSUris[random]}${tokenURI.split('ipfs://')[1]}`;
+  }
+
+  return tokenURI;
 };
 
 export const formatNumber = num => {

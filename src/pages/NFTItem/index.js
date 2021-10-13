@@ -58,7 +58,12 @@ import {
   useBundleSalesContract,
   getSigner,
 } from 'contracts';
-import { shortenAddress, formatNumber, formatError } from 'utils';
+import {
+  shortenAddress,
+  formatNumber,
+  formatError,
+  getRandomIPFS,
+} from 'utils';
 import { Contracts } from 'constants/networks';
 import showToast from 'utils/toast';
 import NFTCard from 'components/NFTCard';
@@ -439,39 +444,40 @@ const NFTItem = () => {
       } catch {
         setOwner(null);
       }
-
       let data;
       const base64regex = /^([0-9a-zA-Z+/]{4})*(([0-9a-zA-Z+/]{2}==)|([0-9a-zA-Z+/]{3}=))?$/;
       if (base64regex.test(uri)) {
         const string = atob(uri);
         data = JSON.parse(string);
       } else {
-        new URL(uri);
-        const response = await axios.get(uri);
+        const realUri = getRandomIPFS(uri);
+
+        new URL(realUri);
+        const response = await axios.get(realUri);
         data = response.data;
       }
       if (data.properties?.royalty) {
         data.properties.royalty = parseInt(data.properties.royalty) / 100;
       }
 
-      if (data.image && data.image.includes('ipfs://')) {
-        let image = data.image.split('//')[1];
-        data.image = `https://cloudflare-ipfs.com/ipfs/${image}`;
+      if (data.image) {
+        data.image = getRandomIPFS(data.image);
       }
 
       setInfo(data);
-    } catch {
+    } catch (err) {
       try {
         console.warn(
           'Failed to retrieve Item data, fallback to fetching from contract'
         );
         const contract = await getERC721Contract(address);
         const tokenURI = await contract.tokenURI(tokenID);
-        const { data } = await axios.get(tokenURI);
+        const realUri = getRandomIPFS(tokenURI);
 
-        if (data.image && data.image.includes('ipfs://')) {
-          let image = data.image.split('//')[1];
-          data.image = `https://cloudflare-ipfs.com/ipfs/${image}`;
+        const { data } = await axios.get(realUri);
+
+        if (data.image) {
+          data.image = getRandomIPFS(data.image);
         }
 
         setInfo(data);
