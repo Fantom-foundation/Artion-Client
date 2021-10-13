@@ -11,7 +11,7 @@ import axios from 'axios';
 import WalletConnectActions from 'actions/walletconnect.actions';
 import AuthActions from 'actions/auth.actions';
 import ModalActions from 'actions/modal.actions';
-import { shortenAddress } from 'utils';
+import { shortenAddress, getRandomIPFS } from 'utils';
 import { useApi } from 'api';
 import { NETWORK_LABEL } from 'constants/networks';
 import { ADMIN_ADDRESS } from 'constants/index';
@@ -161,9 +161,8 @@ const Header = ({ border }) => {
 
       Promise.all(
         tokens.map(async token => {
-          if (token.imageURL && token.imageURL.includes('ipfs://')) {
-            let image = token.imageURL.split('//')[1];
-            token.imageURL = `https://cloudflare-ipfs.com/ipfs/${image}`;
+          if (token.imageURL) {
+            token.imageURL = getRandomIPFS(token.imageURL);
           }
 
           if (token.imageURL === '-') {
