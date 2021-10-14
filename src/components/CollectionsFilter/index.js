@@ -9,6 +9,8 @@ import {
   CheckCircle as CheckCircleIcon,
 } from '@material-ui/icons';
 
+import { getRandomIPFS } from 'utils';
+
 import FilterWrapper from 'components/FilterWrapper';
 import BootstrapTooltip from 'components/BootstrapTooltip';
 import FilterActions from 'actions/filter.actions';
@@ -173,8 +175,8 @@ const ExploreCollections = () => {
                 <img
                   className={classes.logo}
                   src={
-                    item.isVerified
-                      ? `https://cloudflare-ipfs.com/ipfs/${item.logoImageHash}`
+                    item.logoImageHash
+                      ? `${getRandomIPFS('', true)}${item.logoImageHash}`
                       : collections.includes(item.address)
                       ? nftActiveIcon
                       : nftIcon

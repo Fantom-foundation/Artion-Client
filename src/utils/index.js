@@ -34,8 +34,12 @@ export const getHigherGWEI = async () => {
   return price;
 };
 
-export const getRandomIPFS = tokenURI => {
+export const getRandomIPFS = (tokenURI, justURL = false) => {
   let random = Math.floor(Math.random() * IPFSUris.length);
+
+  if (justURL) {
+    return `${IPFSUris[random]}`;
+  }
 
   if (
     tokenURI.includes('gateway.pinata.cloud') ||
