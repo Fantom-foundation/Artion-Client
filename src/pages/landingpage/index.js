@@ -178,7 +178,14 @@ const LandingPage = () => {
           >
             Terms of Service
           </a>
-          <img src={fantomLogo} alt="fantom-logo" className={styles.logo} />
+          <a
+            href="https://fantom.foundation/"
+            target="_blank"
+            rel="noopener noreferrer
+            noreferrer"
+          >
+            <img src={fantomLogo} alt="fantom-logo" className={styles.logo} />
+          </a>
         </div>
       </div>
     </div>
