@@ -15,7 +15,6 @@ import { Client } from '@bandprotocol/bandchain.js';
 import ProtectedRoute from './ProtectedRoute';
 import AccountModal from './AccountModal';
 import WFTMModal from './WFTMModal';
-import GaslyHomePage from './Gasly/Home';
 import NotFound from './NotFound';
 import PaintBoard from './PaintBoard';
 import LandingPage from '../pages/landingpage';
@@ -99,9 +98,6 @@ const App = () => {
             path="/settings/notification"
             component={NotificationSetting}
           />
-          {/* Gasly Pages Start */}
-          <Route path="/gasly" component={GaslyHomePage} />
-          {/* Gasly Pages End */}
           <Route path="/404" component={NotFound} />
           <Route path="*">
             <Redirect to="/404" />
