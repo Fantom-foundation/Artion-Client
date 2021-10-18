@@ -456,6 +456,13 @@ const NFTItem = () => {
         const response = await axios.get(realUri);
         data = response.data;
       }
+
+      if (data[Object.keys(data)[0]].image) {
+        data.image = getRandomIPFS(data[Object.keys(data)[0]].image);
+        data.name = data[Object.keys(data)[0]].name;
+        data.description = data[Object.keys(data)[0]].description;
+      }
+
       if (data.properties?.royalty) {
         data.properties.royalty = parseInt(data.properties.royalty) / 100;
       }

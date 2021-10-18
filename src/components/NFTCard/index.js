@@ -60,6 +60,11 @@ const BaseCard = ({ item, loading, style, create, onCreate, onLike }) => {
 
       const { data } = await axios.get(tokenURI);
 
+      if (data[Object.keys(data)[0]].image) {
+        data.image = getRandomIPFS(data[Object.keys(data)[0]].image);
+        data.name = data[Object.keys(data)[0]].name;
+      }
+
       if (data.properties && data.properties.image) {
         data.image = getRandomIPFS(data.properties.image.description);
       }
