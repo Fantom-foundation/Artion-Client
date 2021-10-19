@@ -32,6 +32,7 @@ import iconEdit from 'assets/svgs/edit.svg';
 import iconSwap from 'assets/svgs/swap.svg';
 
 import styles from './styles.module.scss';
+import FilterActions from '../../actions/filter.actions';
 
 const Header = ({ border }) => {
   const history = useHistory();
@@ -189,6 +190,10 @@ const Header = ({ border }) => {
     } finally {
       setCancelSource(null);
     }
+  };
+
+  const handleSelectCollection = addr => {
+    dispatch(FilterActions.updateCollectionsFilter([addr]));
   };
 
   const handleSearch = word => {
@@ -407,7 +412,13 @@ const Header = ({ border }) => {
                 <div className={styles.separator} />
                 <div className={styles.resultlist}>
                   {collections.map((collection, idx) => (
-                    <div key={idx} className={styles.result}>
+                    <div
+                      key={idx}
+                      className={styles.result}
+                      onClick={() =>
+                        handleSelectCollection(collection.erc721Address)
+                      }
+                    >
                       <img
                         className={styles.resultimg}
                         src={`https://cloudflare-ipfs.com/ipfs/${collection.logoImageHash}`}

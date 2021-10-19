@@ -96,6 +96,7 @@ import iconFacebook from 'assets/imgs/facebook.png';
 import iconTwitter from 'assets/svgs/twitter_blue.svg';
 
 import styles from './styles.module.scss';
+import FilterActions from '../../actions/filter.actions';
 
 const ONE_MIN = 60;
 const ONE_HOUR = ONE_MIN * 60;
@@ -2462,7 +2463,17 @@ const NFTItem = () => {
           <img src={shareIcon} className={styles.itemMenuIcon} />
         </div>
       </div>
-      <div className={styles.itemCategory}>
+      <div
+        className={styles.itemCategory}
+        style={{ cursor: 'pointer' }}
+        onClick={() => {
+          history.push('/explore');
+          collection?.erc721Address &&
+            dispatch(
+              FilterActions.updateCollectionsFilter([collection.erc721Address])
+            );
+        }}
+      >
         {collection?.collectionName || collection?.name || ''}
       </div>
       <div className={styles.itemName}>
