@@ -11,7 +11,7 @@ import {
 
 import { GroupFilters, SortByOptions } from 'constants/filter.constants';
 import FilterActions from 'actions/filter.actions';
-import { formatNumber, formatCategory } from 'utils';
+import { formatNumber, formatCategory, getRandomIPFS } from 'utils';
 import nftActiveIcon from 'assets/svgs/nft_active.svg';
 
 import './styles.css';
@@ -71,7 +71,7 @@ const ExploreFilterHeader = ({ loading, category }) => {
               className="filterCollectionItemLogo"
               src={
                 item.isVerified
-                  ? `https://cloudflare-ipfs.com/ipfs/${item.logoImageHash}`
+                  ? `${getRandomIPFS('', true)}${item.logoImageHash}`
                   : nftActiveIcon
               }
             />

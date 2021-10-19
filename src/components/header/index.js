@@ -421,7 +421,9 @@ const Header = ({ border }) => {
                     >
                       <img
                         className={styles.resultimg}
-                        src={`https://cloudflare-ipfs.com/ipfs/${collection.logoImageHash}`}
+                        src={`${getRandomIPFS('', true)}${
+                          collection.logoImageHash
+                        }`}
                       />
                       <div className={styles.resulttitle}>
                         {collection.collectionName}
