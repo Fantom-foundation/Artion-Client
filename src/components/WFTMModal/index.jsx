@@ -33,8 +33,10 @@ const WFTMModal = ({ visible, onClose }) => {
 
   const { price } = useSelector(state => state.Price);
 
-  const getBalances = async () => {
-    setLoading(true);
+  const getBalances = async (overrideLoading = false) => {
+    if (!overrideLoading) {
+      setLoading(true);
+    }
 
     await window.ethereum.enable();
     const provider = new ethers.providers.Web3Provider(window.ethereum);
@@ -43,10 +45,45 @@ const WFTMModal = ({ visible, onClose }) => {
       await provider.getBalance(account),
       await getWFTMBalance(account),
     ]);
+
     setBalance(parseFloat(ftmBal.toString()) / 10 ** 18);
     setWrappedBalance(parseFloat(wftmBal.toString()) / 10 ** 18);
 
-    setLoading(false);
+    if (!overrideLoading) {
+      setLoading(false);
+    }
+
+    return [
+      parseFloat(ftmBal.toString()) / 10 ** 18,
+      parseFloat(wftmBal.toString()) / 10 ** 18,
+    ];
+  };
+
+  const pollBalanceChange = async (initialFtmBal, initialWftmBal) => {
+    setLoading(true);
+    let timeout;
+    let updated = false;
+
+    await new Promise(
+      resolve =>
+        (timeout = setTimeout(
+          () =>
+            getBalances(true).then(([ftmBal, wftmBal]) => {
+              if (ftmBal !== initialFtmBal || wftmBal !== initialWftmBal) {
+                updated = true;
+              }
+              resolve();
+            }),
+          200
+        ))
+    );
+
+    if (!updated) {
+      await pollBalanceChange(initialFtmBal, initialWftmBal);
+    }
+
+    clearTimeout(timeout);
+    return setLoading(false);
   };
 
   useEffect(() => {
@@ -87,6 +124,7 @@ const WFTMModal = ({ visible, onClose }) => {
       if (wrap) {
         const tx = await wrapFTM(price, account);
         await tx.wait();
+        await pollBalanceChange(balance, wrappedBalance);
         const toastId = showToast(
           'success',
           'Wrapped FTM successfully!',
@@ -99,6 +137,7 @@ const WFTMModal = ({ visible, onClose }) => {
       } else {
         const tx = await unwrapFTM(price);
         await tx.wait();
+        await pollBalanceChange(balance, wrappedBalance);
         const toastId = showToast(
           'success',
           'Unwrap W-FTM successfully!',
