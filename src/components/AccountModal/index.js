@@ -85,6 +85,7 @@ const AccountModal = () => {
     canvas.width = CANVAS_SIZE;
     canvas.height = CANVAS_SIZE;
     const ctx = canvas.getContext('2d');
+    ctx.imageSmoothingQuality = 'high';
     ctx.drawImage(
       image,
       clipX,
