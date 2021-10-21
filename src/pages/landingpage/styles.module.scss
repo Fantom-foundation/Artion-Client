@@ -83,21 +83,21 @@
 }
 
 .cardMedia {
-  padding-top: 100%;
   position: relative;
 
   .player {
-    position: absolute;
     top: 0;
     left: 0;
-    width: 65%;
-    height: 100%;
+    width: 100%!important;
+    height: 580px!important;
   }
 }
 
 .cardInfo {
-  padding: 24px 30px;
+  padding: 6px 30px 24px 30px;
   display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .cardCategory {

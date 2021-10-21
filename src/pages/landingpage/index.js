@@ -132,6 +132,7 @@ const LandingPage = () => {
               <div className={styles.cardName}>{'Pierre Gasly NFT Drop'}</div>
               <a
                 className={styles.exploreButton}
+                style={{ marginTop: 0, marginBottom: 0 }}
                 target="_blank"
                 rel="noopener noreferrer"
                 href="https://gasly.artion.io/#nfts"
