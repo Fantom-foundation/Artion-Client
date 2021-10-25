@@ -135,7 +135,7 @@ const LandingPage = () => {
                 style={{ marginTop: 0, marginBottom: 0 }}
                 target="_blank"
                 rel="noopener noreferrer"
-                href="https://gasly.artion.io/#nfts"
+                href="https://gasly.artion.io/#/#nfts"
               >
                 View Live NFTs
               </a>
