@@ -123,9 +123,25 @@ const LandingPage = () => {
             <div className={styles.cardMedia}>
               <img src={umansExample} />
             </div>
-            <div className={styles.cardInfo}>
-              <div className={styles.cardCategory}>Ancestral Uman</div>
-              <div className={styles.cardName}>{'World of Umans'}</div>
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}
+            >
+              <div className={styles.cardInfo}>
+                <div className={styles.cardCategory}>Shamanka: The Healer</div>
+                <div className={styles.cardName}>{'World of Umans'}</div>
+              </div>
+              <Link
+                to="/explore/0x972dd206a7c2d4ae46db1db700bc79de1bc59960/0"
+                className={styles.exploreButton}
+                style={{ margin: '0 24px' }}
+              >
+                Go to auction
+              </Link>
             </div>
           </div>
         </div>
