@@ -4,13 +4,13 @@ import { NavLink, useHistory } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import cx from 'classnames';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
+import ReactPlayer from 'react-player';
 
 import { Categories } from 'constants/filter.constants';
 import HeaderActions from 'actions/header.actions';
 import FilterActions from 'actions/filter.actions';
 import Header from 'components/header';
 
-import umansExample from 'assets/imgs/umans_example.png';
 import logo from 'assets/svgs/logo_white.svg';
 import fantomLogo from 'assets/svgs/fantom_logo_white.svg';
 import card1 from 'assets/svgs/card1.svg';
@@ -104,6 +104,7 @@ const LandingPage = () => {
           <div className={styles.mainLeft}>
             <div
               className={styles.title}
+              style={{ color: '#FFF' }}
             >{`Trade without platform fees on Artion`}</div>
             <div className={styles.subtitle}>
               Artion is an NFT marketplace built on Fantom. Create and trade
@@ -121,7 +122,11 @@ const LandingPage = () => {
           </div>
           <div className={styles.card}>
             <div className={styles.cardMedia}>
-              <img src={umansExample} />
+              <ReactPlayer
+                className={styles.player}
+                url={`https://artion.mypinata.cloud/ipfs/QmNjxsiHzRVhbL1WYhxXhJsHCRgCA2bx6LtUJHVmAd3Kir`}
+                controls={true}
+              />
             </div>
             <div
               style={{
@@ -145,64 +150,64 @@ const LandingPage = () => {
             </div>
           </div>
         </div>
-        <div className={styles.about}>
-          <div className={styles.aboutInner}>
-            <div className={styles.aboutTitle}>Why Artion</div>
-            <div className={styles.aboutCards}>
-              {cards.map((card, key) =>
-                renderAboutCard(
-                  key,
-                  card.icon,
-                  card.title,
-                  card.description,
-                  card.path
-                )
-              )}
-            </div>
-            <div className={styles.aboutTitle}>Browse by category</div>
-            <div className={styles.categories}>
-              {Categories.map(cat =>
-                renderCategoryCard(cat.id, cat.icon, cat.label)
-              )}
-              {renderCategoryCard('all', search, 'Explore All NFTs', true)}
-            </div>
+      </div>
+      <div className={styles.about}>
+        <div className={styles.aboutInner}>
+          <div className={styles.aboutTitle}>Why Artion</div>
+          <div className={styles.aboutCards}>
+            {cards.map((card, key) =>
+              renderAboutCard(
+                key,
+                card.icon,
+                card.title,
+                card.description,
+                card.path
+              )
+            )}
+          </div>
+          <div className={styles.aboutTitle}>Browse by category</div>
+          <div className={styles.categories}>
+            {Categories.map(cat =>
+              renderCategoryCard(cat.id, cat.icon, cat.label)
+            )}
+            {renderCategoryCard('all', search, 'Explore All NFTs', true)}
           </div>
         </div>
-        <div className={styles.footer}>
-          <img src={logo} alt="logo" className={styles.logo} />
-          <a
-            style={{ textDecoration: 'none', color: '#FFFFFF' }}
-            target="_blank"
-            rel="noopener noreferrer"
-            href="https://app.termly.io/document/privacy-policy/7db4b9fc-aa5d-4f80-bfa1-27120ff982ba"
-          >
-            Privacy Policy
-          </a>
-          <a
-            style={{ textDecoration: 'none', color: '#FFFFFF' }}
-            target="_blank"
-            rel="noopener noreferrer"
-            href="https://app.termly.io/document/cookie-policy/c79f1a78-08a2-4da2-85f0-846a461cde81"
-          >
-            Cookie Policy
-          </a>
-          <a
-            style={{ textDecoration: 'none', color: '#FFFFFF' }}
-            target="_blank"
-            rel="noopener noreferrer"
-            href="https://app.termly.io/document/terms-of-use-for-online-marketplace/1f69b33f-65ba-40d9-bf63-b28e357f7c34"
-          >
-            Terms of Service
-          </a>
-          <a
-            href="https://fantom.foundation/"
-            target="_blank"
-            rel="noopener noreferrer
+      </div>
+      <div className={styles.footer}>
+        <img src={logo} alt="logo" className={styles.logo} />
+        <a
+          style={{ textDecoration: 'none', color: '#FFFFFF' }}
+          target="_blank"
+          rel="noopener noreferrer"
+          href="https://app.termly.io/document/privacy-policy/7db4b9fc-aa5d-4f80-bfa1-27120ff982ba"
+        >
+          Privacy Policy
+        </a>
+        <a
+          style={{ textDecoration: 'none', color: '#FFFFFF' }}
+          target="_blank"
+          rel="noopener noreferrer"
+          href="https://app.termly.io/document/cookie-policy/c79f1a78-08a2-4da2-85f0-846a461cde81"
+        >
+          Cookie Policy
+        </a>
+        <a
+          style={{ textDecoration: 'none', color: '#FFFFFF' }}
+          target="_blank"
+          rel="noopener noreferrer"
+          href="https://app.termly.io/document/terms-of-use-for-online-marketplace/1f69b33f-65ba-40d9-bf63-b28e357f7c34"
+        >
+          Terms of Service
+        </a>
+        <a
+          href="https://fantom.foundation/"
+          target="_blank"
+          rel="noopener noreferrer
             noreferrer"
-          >
-            <img src={fantomLogo} alt="fantom-logo" className={styles.logo} />
-          </a>
-        </div>
+        >
+          <img src={fantomLogo} alt="fantom-logo" className={styles.logo} />
+        </a>
       </div>
     </div>
   );
