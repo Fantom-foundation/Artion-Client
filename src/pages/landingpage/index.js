@@ -128,17 +128,25 @@ const LandingPage = () => {
                 controls={true}
               />
             </div>
-            <div className={styles.cardInfo}>
-              <div className={styles.cardName}>{'Pierre Gasly NFT Drop'}</div>
-              <a
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}
+            >
+              <div className={styles.cardInfo}>
+                <div className={styles.cardCategory}>Shamanka: The Healer</div>
+                <div className={styles.cardName}>{'World of Umans'}</div>
+              </div>
+              <Link
+                to="/explore/0x972dd206a7c2d4ae46db1db700bc79de1bc59960/0"
                 className={styles.exploreButton}
-                style={{ marginTop: 0, marginBottom: 0 }}
-                target="_blank"
-                rel="noopener noreferrer"
-                href="https://gasly.artion.io/#nfts"
+                style={{ margin: '0 24px' }}
               >
-                View Live NFTs
-              </a>
+                Go to auction
+              </Link>
             </div>
           </div>
         </div>
