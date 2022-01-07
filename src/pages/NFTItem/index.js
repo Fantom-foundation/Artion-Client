@@ -3158,8 +3158,10 @@ const NFTItem = () => {
                     {!isMine &&
                       (!auctionActive() &&
                       bid?.bidder?.toLowerCase() === account?.toLowerCase()
-                        ? now.getTime() / 1000 >=
-                            auction?.current?.endTime + 43200 && (
+                        ? (now.getTime() / 1000 >=
+                            auction?.current?.startTime + 5184000 ||
+                            now.getTime() / 1000 >=
+                              auction?.current?.endTime + 43200) && (
                             <div
                               className={cx(
                                 styles.withdrawBid,
