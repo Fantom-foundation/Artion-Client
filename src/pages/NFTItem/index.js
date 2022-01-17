@@ -3155,13 +3155,30 @@ const NFTItem = () => {
                         )
                       </div>
                     )}
+
+                    {!isMine &&
+                      auctionActive() &&
+                      bid?.bidder?.toLowerCase() === account?.toLowerCase() &&
+                      now.getTime() / 1000 >=
+                        auction?.current?.startTime + 5184000 && (
+                        <div
+                          className={cx(
+                            styles.withdrawBid,
+                            bidWithdrawing && styles.disabled
+                          )}
+                          onClick={() => handleWithdrawBid()}
+                        >
+                          {bidWithdrawing
+                            ? 'Withdrawing Bid...'
+                            : 'Withdraw Bid'}
+                        </div>
+                      )}
+
                     {!isMine &&
                       (!auctionActive() &&
                       bid?.bidder?.toLowerCase() === account?.toLowerCase()
-                        ? (now.getTime() / 1000 >=
-                            auction?.current?.startTime + 5184000 ||
-                            now.getTime() / 1000 >=
-                              auction?.current?.endTime + 43200) && (
+                        ? now.getTime() / 1000 >=
+                            auction?.current?.endTime + 43200 && (
                             <div
                               className={cx(
                                 styles.withdrawBid,
